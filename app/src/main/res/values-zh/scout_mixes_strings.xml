@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">混合</string>
+    <string name="scout_mixes_add">添加到混合</string>
+    <string name="scout_mixes_add_title">将 %1$s 添加到混合</string>
+    <string name="scout_mixes_already_in">已在此混合中</string>
+    <string name="scout_mixes_new">新建混合</string>
+    <string name="scout_mixes_name_title">为此混合命名</string>
+    <string name="scout_mixes_name_label">混合名称</string>
+    <string name="scout_mixes_name_default">%1$s 混合</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="other">%1$s、%2$s 等另外 %3$d 部</item>
+    </plurals>
+    <string name="scout_mixes_save">保存</string>
+    <string name="scout_mixes_cancel">取消</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="other">%1$d 部剧集</item>
+    </plurals>
+    <string name="scout_mixes_kind">混合</string>
+    <string name="scout_mixes_about">随机播放 %1$s 的剧集，一集接一集。</string>
+    <string name="scout_mixes_fits">适合这个混合的剧集</string>
+    <string name="scout_mixes_add_show">添加</string>
+    <string name="scout_mixes_watch_again">重新观看</string>
+    <string name="scout_mixes_find_show">查找剧集</string>
+    <string name="scout_mixes_up_next">接下来</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">正在选择一集…</string>
+    <string name="scout_mixes_play">播放</string>
+    <string name="scout_mixes_remix">重新混合</string>
+    <string name="scout_mixes_unwatched_only">仅未观看</string>
+    <string name="scout_mixes_keep_playing">继续播放</string>
+    <string name="scout_mixes_edit">编辑混合</string>
+    <string name="scout_mixes_in_this_mix">此混合中</string>
+    <string name="scout_mixes_next_in">%1$s 的下一集</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="other">%1$d 秒后开始</item>
+    </plurals>
+    <string name="scout_mixes_play_now">立即播放</string>
+    <string name="scout_mixes_stop">停止</string>
+    <string name="scout_mixes_all_seen">你已看完此混合中的所有集</string>
+    <string name="scout_mixes_all_seen_hint">添加一部剧集继续播放，或重温你喜欢的内容。</string>
+    <string name="scout_mixes_no_shows">此混合还没有剧集</string>
+    <string name="scout_mixes_add_hint">从长按菜单添加更多剧集</string>
+    <string name="scout_mixes_unavailable">无法加载任何剧集</string>
+    <string name="scout_mixes_unavailable_hint">你的插件没有回应这些剧集。按重新混合重试。</string>
+    <string name="scout_mixes_edit_title">编辑 %1$s</string>
+    <string name="scout_mixes_rename">重命名</string>
+    <string name="scout_mixes_remove">移除 %1$s</string>
+    <string name="scout_mixes_delete">删除此混合</string>
+    <string name="scout_mixes_delete_title">删除 %1$s？</string>
+    <string name="scout_mixes_delete_detail">你的剧集和观看记录保持不变</string>
+    <string name="scout_mixes_delete_confirm">删除</string>
+</resources>

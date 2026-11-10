@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Pentru că adori %1$s și %2$s</string>
+    <string name="scout_picks_why_person_loved">Pentru că adori %1$s</string>
+    <string name="scout_picks_why_person">Te uiți des la %1$s</string>
+    <string name="scout_picks_why_keyword">Pentru că îți place %1$s</string>
+    <string name="scout_picks_why_stretch">Ceva puțin diferit</string>
+    <string name="scout_picks_row_genre_language">%1$s în %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Mai mult %1$s</string>
+    <string name="scout_picks_row_new">Noutăți pentru tine</string>
+    <string name="scout_picks_row_trending">În trend pentru tine</string>
+    <string name="scout_picks_quick_title">Alege cinci pe care le adori</string>
+    <string name="scout_picks_quick_sub">Așa Scout pornește cu avans. Le poți schimba oricând în Gusturile tale.</string>
+    <string name="scout_picks_quick_row_sub">O cale rapidă să-i arăți lui Scout ce îți place</string>
+    <string name="scout_picks_quick_count">%1$d din %2$d</string>
+    <string name="scout_picks_quick_done">Gata</string>
+    <string name="scout_picks_quick_skip">Omite</string>
+    <string name="scout_picks_words_title">Gusturile tale în cuvinte</string>
+    <string name="scout_picks_words_row_sub">Cu o cheie AI: o descriere editabilă și sortare AI</string>
+    <string name="scout_picks_words_sub">Scrisă de AI-ul tău după titlurile pe care le-ai evaluat. O poți edita. O folosesc Întreabă și sortarea AI.</string>
+    <string name="scout_picks_words_empty">Nimic încă. Scrie-o tu sau lasă AI-ul să o scrie după titlurile evaluate.</string>
+    <string name="scout_picks_words_edit">Editează</string>
+    <string name="scout_picks_words_write">Scrie din nou</string>
+    <string name="scout_picks_words_writing">Se scrie…</string>
+    <string name="scout_picks_words_remove">Elimină</string>
+    <string name="scout_picks_sort_title">Lasă AI-ul să-mi sorteze sugestiile</string>
+    <string name="scout_picks_sort_sub">Cam o dată pe săptămână, cu cheia ta. Sugestiile proprii Scout nu au nevoie de AI.</string>
+    <string name="scout_picks_on">Pornit</string>
+    <string name="scout_picks_off">Oprit</string>
+    <string name="scout_picks_sent">Merge la serviciul tău AI cu cheia ta: circa 100 de titluri găsite de Scout pentru tine, gusturile tale în cuvinte, titlurile care ți-au plăcut și cele care nu, și genurile pe care le lași deoparte. Nu primește tot istoricul tău.</string>
+    <string name="scout_picks_refine_violent">Mai puțin violent</string>
+    <string name="scout_picks_refine_older">Mai vechi</string>
+    <string name="scout_picks_refine_newer">Mai nou</string>
+    <string name="scout_picks_refine_lighter">Ceva mai ușor</string>
+</resources>

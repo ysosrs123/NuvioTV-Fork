@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Επειδή αγαπάτε %1$s και %2$s</string>
+    <string name="scout_picks_why_person_loved">Επειδή αγαπάτε %1$s</string>
+    <string name="scout_picks_why_person">Βλέπετε συχνά %1$s</string>
+    <string name="scout_picks_why_keyword">Επειδή σας αρέσει %1$s</string>
+    <string name="scout_picks_why_stretch">Κάτι λίγο διαφορετικό</string>
+    <string name="scout_picks_row_genre_language">%1$s στα %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Πιο πολύ %1$s</string>
+    <string name="scout_picks_row_new">Νέα για εσάς</string>
+    <string name="scout_picks_row_trending">Τάσεις για εσάς</string>
+    <string name="scout_picks_quick_title">Επιλέξτε πέντε αγαπημένα</string>
+    <string name="scout_picks_quick_sub">Έτσι το Scout ξεκινά με προβάδισμα. Αλλάξτε τα όποτε θέλετε στη σελίδα Το γούστο σας.</string>
+    <string name="scout_picks_quick_row_sub">Γρήγορος τρόπος να μάθει το Scout τι σας αρέσει</string>
+    <string name="scout_picks_quick_count">%1$d από %2$d</string>
+    <string name="scout_picks_quick_done">Τέλος</string>
+    <string name="scout_picks_quick_skip">Παράλειψη</string>
+    <string name="scout_picks_words_title">Το γούστο σας με λόγια</string>
+    <string name="scout_picks_words_row_sub">Με κλειδί AI: περιγραφή που μπορείτε να επεξεργαστείτε και ταξινόμηση με AI</string>
+    <string name="scout_picks_words_sub">Το έγραψε το AI σας από όσα βαθμολογήσατε. Μπορείτε να το αλλάξετε. Το χρησιμοποιούν η Ερώτηση και η ταξινόμηση AI.</string>
+    <string name="scout_picks_words_empty">Τίποτα ακόμα. Γράψτε το δικό σας ή αφήστε το AI να το γράψει από τους τίτλους που βαθμολογήσατε.</string>
+    <string name="scout_picks_words_edit">Επεξεργασία</string>
+    <string name="scout_picks_words_write">Γράψτε το ξανά</string>
+    <string name="scout_picks_words_writing">Γράφεται…</string>
+    <string name="scout_picks_words_remove">Αφαίρεση</string>
+    <string name="scout_picks_sort_title">Το AI να ταξινομεί τις προτάσεις μου</string>
+    <string name="scout_picks_sort_sub">Περίπου μία φορά την εβδομάδα, με το κλειδί σας. Οι προτάσεις του Scout δεν χρειάζονται AI.</string>
+    <string name="scout_picks_on">Ενεργό</string>
+    <string name="scout_picks_off">Ανενεργό</string>
+    <string name="scout_picks_sent">Στέλνονται στην υπηρεσία AI που επιλέξατε, με το κλειδί σας: περίπου 100 τίτλοι που βρήκε το Scout για εσάς, το γούστο σας με λόγια, τίτλοι που σας άρεσαν και δεν σας άρεσαν, και είδη που εξαιρείτε. Δεν παίρνει όλο το ιστορικό σας.</string>
+    <string name="scout_picks_refine_violent">Λιγότερη βία</string>
+    <string name="scout_picks_refine_older">Παλαιότερο</string>
+    <string name="scout_picks_refine_newer">Νεότερο</string>
+    <string name="scout_picks_refine_lighter">Κάτι πιο ελαφρύ</string>
+</resources>

@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Medya sunucuları</string>
-    <string name="settings_media_servers_subtitle">Kendi kütüphanenize göz atıp oynatmak için Jellyfin, Emby veya Silo bağlayın.</string>
+    <string name="settings_media_servers_subtitle">Kendi kütüphanenize göz atıp oynatmak için Jellyfin, Emby, Silo veya Plex bağlayın.</string>
     <string name="servers_section_connected">Sunucular</string>
     <string name="servers_section_add">Sunucu ekle</string>
     <string name="servers_section_account">Nuvio hesabı</string>
     <string name="servers_source_details">Kaynak detayları</string>
-    <string name="servers_source_details_description">Tam, sunucu kaynaklarında dosya adını ve simgeleri gösterir. Sade yalnızca video, ses ve boyutu gösterir.</string>
+    <string name="servers_source_details_description">Tam, sunucu kaynaklarında dosya adını ve daha fazla ayrıntıyı gösterir. Sade yalnızca video, ses ve boyutu gösterir.</string>
     <string name="servers_source_details_full">Tam</string>
     <string name="servers_source_details_clean">Sade</string>
     <string name="servers_show_logos">Sunucu logolarını göster</string>
-    <string name="servers_show_logos_description">Sunucu kaynaklarının yanında ve oynatıcıda Jellyfin, Emby veya Silo logosunu göster.</string>
+    <string name="servers_show_logos_description">Sunucu kaynaklarının yanında ve oynatıcıda Jellyfin, Emby, Silo veya Plex logosunu göster.</string>
     <string name="servers_account_sync">Medya sunucularını Nuvio hesabımla senkronize et</string>
     <string name="servers_account_sync_description">Kapalı: sunucularınız ve giriş bilgileri bu cihazda kalır. Açık: sunucu listesi, giriş bilgileriyle birlikte Nuvio hesabınıza kaydedilir ve diğer cihazlarınızla paylaşılır.</string>
     <string name="servers_account_remove">Sunucularımı Nuvio hesabımdan kaldır</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Etkin</string>
     <string name="servers_enabled_description">Bu sunucuyu Ana Sayfa, arama ve yayın sonuçlarında göster.</string>
     <string name="servers_catalog_metadata">Eklenti bilgilerini kullan</string>
-    <string name="servers_catalog_metadata_description">İçerikler eklentilerinizin detaylarıyla açılır ve diğer katalog içerikleri gibi senkronize edilir; oynatma ve izlendi işaretleri yine %1$s sunucusuna gönderilir. Eklentileriniz farklı numaralandırıyor veya tanımlıyorsa bazı içerikler eşleşmeyebilir veya oynatılamayabilir.</string>
+    <string name="servers_catalog_metadata_description">İçerikler eklentilerinizin detaylarıyla açılır ve diğer katalog içerikleri gibi senkronize edilir; oynatma ve izlendi işaretleri yine %1$s sunucusuna gönderilir. Eklentileriniz farklı numaralandırıyor veya tanımlıyorsa bazı içerikler eşleşmeyebilir veya oynatılamayabilir. Kapatırsanız yalnızca %1$s kullanılır, eklentilerde arama yapılmaz.</string>
     <string name="servers_import_continue_watching">İzlemeye Devam Et\'i içe aktar</string>
     <string name="servers_import_continue_watching_description">%1$s sunucusunda başladığınız içerikler Ana Sayfa\'daki İzlemeye Devam Et\'te görünür. İzlendi işaretleri her iki durumda da eşitlenir.</string>
     <string name="servers_import_watch_state">İzleme ilerlemesini içe aktar</string>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Mikser</string>
+    <string name="scout_mixes_add">Legg til i miks</string>
+    <string name="scout_mixes_add_title">Legg til %1$s i en miks</string>
+    <string name="scout_mixes_already_in">Allerede i denne miksen</string>
+    <string name="scout_mixes_new">Ny miks</string>
+    <string name="scout_mixes_name_title">Gi denne miksen navn</string>
+    <string name="scout_mixes_name_label">Navn på miksen</string>
+    <string name="scout_mixes_name_default">%1$s-miks</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s og %3$d til</item>
+        <item quantity="other">%1$s, %2$s og %3$d til</item>
+    </plurals>
+    <string name="scout_mixes_save">Lagre</string>
+    <string name="scout_mixes_cancel">Avbryt</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d serie</item>
+        <item quantity="other">%1$d serier</item>
+    </plurals>
+    <string name="scout_mixes_kind">Miks</string>
+    <string name="scout_mixes_about">Tilfeldige episoder fra %1$s, den ene etter den andre.</string>
+    <string name="scout_mixes_fits">Serier som passer til denne miksen</string>
+    <string name="scout_mixes_add_show">Legg til</string>
+    <string name="scout_mixes_watch_again">Se dem igjen</string>
+    <string name="scout_mixes_find_show">Finn en serie</string>
+    <string name="scout_mixes_up_next">Neste</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Velger en episode…</string>
+    <string name="scout_mixes_play">Spill av</string>
+    <string name="scout_mixes_remix">Miks på nytt</string>
+    <string name="scout_mixes_unwatched_only">Bare usette</string>
+    <string name="scout_mixes_keep_playing">Fortsett avspilling</string>
+    <string name="scout_mixes_edit">Rediger miks</string>
+    <string name="scout_mixes_in_this_mix">I denne miksen</string>
+    <string name="scout_mixes_next_in">Neste i %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Starter om %1$d sekund</item>
+        <item quantity="other">Starter om %1$d sekunder</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Spill av nå</string>
+    <string name="scout_mixes_stop">Stopp</string>
+    <string name="scout_mixes_all_seen">Du har sett alle episodene i denne miksen</string>
+    <string name="scout_mixes_all_seen_hint">Legg til en serie for å fortsette, eller se favorittene dine igjen.</string>
+    <string name="scout_mixes_no_shows">Denne miksen har ingen serier ennå</string>
+    <string name="scout_mixes_add_hint">Legg til flere serier fra langtrykkmenyen deres</string>
+    <string name="scout_mixes_unavailable">Kunne ikke laste inn episoder</string>
+    <string name="scout_mixes_unavailable_hint">Tilleggene dine svarte ikke for disse seriene. Trykk Miks på nytt for å prøve igjen.</string>
+    <string name="scout_mixes_edit_title">Rediger %1$s</string>
+    <string name="scout_mixes_rename">Gi nytt navn</string>
+    <string name="scout_mixes_remove">Fjern %1$s</string>
+    <string name="scout_mixes_delete">Slett denne miksen</string>
+    <string name="scout_mixes_delete_title">Slette %1$s?</string>
+    <string name="scout_mixes_delete_detail">Seriene og loggen din forblir som de er</string>
+    <string name="scout_mixes_delete_confirm">Slett</string>
+</resources>

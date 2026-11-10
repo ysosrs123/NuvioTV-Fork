@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Busca</string>
+    <string name="settings_search_title">Buscar nas configurações</string>
+    <string name="settings_search_subtitle">Encontre qualquer configuração pelo nome ou pelo que ela faz.</string>
+    <string name="settings_search_try">Experimente: modo noturno, legendas, passthrough ou buffer.</string>
+    <string name="settings_search_none">Nada encontrado para \"%1$s\"</string>
+    <string name="settings_search_none_tip">Experimente uma palavra mais curta ou descreva o que a configuração faz.</string>
+    <string name="settings_search_results">Resultados: %1$d</string>
+    <string name="settings_search_more_advanced">Mais %1$d no modo Avançado</string>
+    <string name="settings_search_unavailable">Esta configuração não está disponível agora. Talvez outra configuração precise estar ativada primeiro.</string>
+</resources>

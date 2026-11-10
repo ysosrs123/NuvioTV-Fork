@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Απόκρυψη και του «Σχεδιάζω να παρακολουθήσω»</string>
+    <string name="layout_hide_plan_to_watch_sub">Οι τίτλοι της λίστας «Σχεδιάζω να παρακολουθήσω» δεν εμφανίζονται στις γραμμές της Αρχικής και στο banner.</string>
+    <string name="layout_hide_watching">Απόκρυψη και του «Παρακολουθώ»</string>
+    <string name="layout_hide_watching_sub">Οι σειρές και οι ταινίες που έχετε αρχίσει δεν εμφανίζονται στις γραμμές της Αρχικής και στο banner. Παραμένουν στη Συνέχεια παρακολούθησης.</string>
+</resources>

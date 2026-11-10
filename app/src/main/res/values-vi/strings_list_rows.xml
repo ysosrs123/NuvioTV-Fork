@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Ẩn cả “Xem sau”</string>
+    <string name="layout_hide_plan_to_watch_sub">Nội dung trong danh sách “Xem sau” sẽ không hiện trong các hàng ở Trang chủ và banner.</string>
+    <string name="layout_hide_watching">Ẩn cả “Đang xem”</string>
+    <string name="layout_hide_watching_sub">Chương trình và phim đang xem dở sẽ không hiện trong các hàng ở Trang chủ và banner. Chúng vẫn nằm trong Tiếp tục xem.</string>
+</resources>

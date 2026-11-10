@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Søk</string>
+    <string name="settings_search_title">Søk i innstillinger</string>
+    <string name="settings_search_subtitle">Finn enhver innstilling etter navn eller hva den gjør.</string>
+    <string name="settings_search_try">Prøv nattmodus, undertekster, gjennomgang eller buffer.</string>
+    <string name="settings_search_none">Fant ingenting for \"%1$s\"</string>
+    <string name="settings_search_none_tip">Prøv et kortere ord, eller beskriv hva innstillingen gjør.</string>
+    <string name="settings_search_results">Resultater: %1$d</string>
+    <string name="settings_search_more_advanced">%1$d til i avansert modus</string>
+    <string name="settings_search_unavailable">Denne innstillingen er ikke tilgjengelig nå. En annen innstilling må kanskje være på først.</string>
+</resources>

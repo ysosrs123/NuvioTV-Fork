@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Ker obožujete %1$s in %2$s</string>
+    <string name="scout_picks_why_person_loved">Ker obožujete %1$s</string>
+    <string name="scout_picks_why_person">Pogosto gledate %1$s</string>
+    <string name="scout_picks_why_keyword">Ker vam je všeč %1$s</string>
+    <string name="scout_picks_why_stretch">Nekaj malo drugačnega</string>
+    <string name="scout_picks_row_genre_language">%1$s v jeziku %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Več: %1$s</string>
+    <string name="scout_picks_row_new">Novo za vas</string>
+    <string name="scout_picks_row_trending">V trendu za vas</string>
+    <string name="scout_picks_quick_title">Izberite pet priljubljenih</string>
+    <string name="scout_picks_quick_sub">Tako ima Scout prednost. Spremenite jih lahko kadar koli v razdelku Vaš okus.</string>
+    <string name="scout_picks_quick_row_sub">Hiter način, da Scoutu pokažete, kaj vam je všeč</string>
+    <string name="scout_picks_quick_count">%1$d od %2$d</string>
+    <string name="scout_picks_quick_done">Končano</string>
+    <string name="scout_picks_quick_skip">Preskoči</string>
+    <string name="scout_picks_words_title">Vaš okus z besedami</string>
+    <string name="scout_picks_words_row_sub">S ključem UI: opis, ki ga lahko urejate, in razvrščanje z UI</string>
+    <string name="scout_picks_words_sub">Napisala ga je vaša UI po naslovih, ki ste jih ocenili. Lahko ga urejate. Uporabljata ga funkcija Vprašaj in razvrščanje z UI.</string>
+    <string name="scout_picks_words_empty">Še nič. Napišite svojega ali naj ga napiše UI po naslovih, ki ste jih ocenili.</string>
+    <string name="scout_picks_words_edit">Uredi</string>
+    <string name="scout_picks_words_write">Napiši znova</string>
+    <string name="scout_picks_words_writing">Pisanje…</string>
+    <string name="scout_picks_words_remove">Odstrani</string>
+    <string name="scout_picks_sort_title">Naj UI razvršča moje predloge</string>
+    <string name="scout_picks_sort_sub">Približno enkrat na teden, z vašim ključem. Scoutovi lastni predlogi ne potrebujejo UI.</string>
+    <string name="scout_picks_on">Vklopljeno</string>
+    <string name="scout_picks_off">Izklopljeno</string>
+    <string name="scout_picks_sent">Pošlje se vaši storitvi UI z vašim ključem: približno 100 naslovov, ki jih je Scout našel za vas, vaš okus z besedami, naslovi, ki so vam bili všeč in niso, ter zvrsti, ki jih izpuščate. Vaše celotne zgodovine ne dobi.</string>
+    <string name="scout_picks_refine_violent">Manj nasilno</string>
+    <string name="scout_picks_refine_older">Starejše</string>
+    <string name="scout_picks_refine_newer">Novejše</string>
+    <string name="scout_picks_refine_lighter">Nekaj lažjega</string>
+</resources>

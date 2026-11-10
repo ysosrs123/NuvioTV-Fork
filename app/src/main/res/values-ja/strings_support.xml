@@ -33,7 +33,7 @@
     <string name="support_nuvio_thanks_subtitle">特典はNuvioアカウントに紐づくため、このNuvio Arcでも公式アプリでも使えます。</string>
     <string name="support_nuvio_gentle_eyebrow">Nuvioサポーター</string>
     <string name="support_nuvio_gentle_title">Nuvio Arcはメンバーシップなしですべて使えます</string>
-    <string name="support_nuvio_gentle_body">このアカウントにはNuvioサポーターのメンバーシップがありませんが、まったく問題ありません。Nuvioチームを支援したくなったときは、メンバーシップでいくつかの特典が加わります：</string>
+    <string name="support_nuvio_gentle_body">このアカウントにはNuvio Supporterのメンバーシップがありません。Nuvioチームを支援したくなったときは、メンバーシップでいくつかの特典が加わります：</string>
     <string name="support_nuvio_gentle_unavailable">現在メンバーシップを確認できませんでした。Nuvio Arcはメンバーシップなしでもすべて使えます。Nuvioチームを支援したい場合は、メンバーシップでいくつかの特典が加わります：</string>
     <string name="support_nuvio_gentle_scan">スマートフォンでプランを見る</string>
     <string name="support_nuvio_paid_check_again">お支払い済みですか？再確認</string>

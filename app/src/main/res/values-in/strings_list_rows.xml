@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Sembunyikan juga “Akan Ditonton”</string>
+    <string name="layout_hide_plan_to_watch_sub">Judul di daftar “Akan Ditonton” tidak ditampilkan di baris Beranda dan banner.</string>
+    <string name="layout_hide_watching">Sembunyikan juga “Sedang Ditonton”</string>
+    <string name="layout_hide_watching_sub">Serial dan film yang belum selesai ditonton tidak ditampilkan di baris Beranda dan banner. Lanjutkan Menonton tetap menampilkannya.</string>
+</resources>

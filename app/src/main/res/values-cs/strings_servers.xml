@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Mediální servery</string>
-    <string name="settings_media_servers_subtitle">Připojte Jellyfin, Emby nebo Silo a procházejte a přehrávejte vlastní knihovnu.</string>
+    <string name="settings_media_servers_subtitle">Připojte Jellyfin, Emby, Silo nebo Plex a procházejte a přehrávejte vlastní knihovnu.</string>
     <string name="servers_section_connected">Servery</string>
     <string name="servers_section_add">Přidat server</string>
     <string name="servers_section_account">Účet Nuvio</string>
     <string name="servers_source_details">Podrobnosti zdroje</string>
-    <string name="servers_source_details_description">Úplné zobrazí název souboru a ikony u zdrojů ze serveru. Přehledné zobrazí jen video, audio a velikost.</string>
+    <string name="servers_source_details_description">Úplné zobrazí název souboru a více podrobností u zdrojů ze serveru. Přehledné zobrazí jen video, audio a velikost.</string>
     <string name="servers_source_details_full">Úplné</string>
     <string name="servers_source_details_clean">Přehledné</string>
     <string name="servers_show_logos">Zobrazit loga serverů</string>
-    <string name="servers_show_logos_description">Zobrazit logo Jellyfin, Emby nebo Silo u zdrojů ze serveru a v přehrávači.</string>
+    <string name="servers_show_logos_description">Zobrazit logo Jellyfin, Emby, Silo nebo Plex u zdrojů ze serveru a v přehrávači.</string>
     <string name="servers_account_sync">Synchronizovat mediální servery s mým účtem Nuvio</string>
     <string name="servers_account_sync_description">Vypnuto: vaše servery a jejich přihlášení zůstávají na tomto zařízení. Zapnuto: seznam serverů včetně přihlášení se uloží do vašeho účtu Nuvio a sdílí s vašimi dalšími zařízeními.</string>
     <string name="servers_account_remove">Odebrat mé servery z účtu Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Povoleno</string>
     <string name="servers_enabled_description">Zobrazit tento server na domovské obrazovce, ve vyhledávání a ve výsledcích streamů.</string>
     <string name="servers_catalog_metadata">Použít metadata doplňků</string>
-    <string name="servers_catalog_metadata_description">Tituly se otevírají s podrobnostmi z vašich doplňků a synchronizují se jako každý jiný titul z katalogu, přehrávání a označení zhlédnutí se dál odesílají do %1$s. Některé tituly se nemusí spárovat nebo přehrát, pokud je vaše doplňky číslují nebo identifikují jinak.</string>
+    <string name="servers_catalog_metadata_description">Tituly se otevírají s podrobnostmi z vašich doplňků a synchronizují se jako každý jiný titul z katalogu, přehrávání a označení zhlédnutí se dál odesílají do %1$s. Některé tituly se nemusí spárovat nebo přehrát, pokud je vaše doplňky číslují nebo identifikují jinak. Vypněte to, chcete-li přehrávat jen z %1$s, bez hledání v doplňcích.</string>
     <string name="servers_import_continue_watching">Importovat Pokračovat ve sledování</string>
     <string name="servers_import_continue_watching_description">Tituly rozkoukané na %1$s se zobrazí v Pokračovat ve sledování na domovské obrazovce. Označení zhlédnutí se sladí v obou případech.</string>
     <string name="servers_import_watch_state">Importovat průběh sledování</string>

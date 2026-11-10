@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Slėpti ir „Planuoju žiūrėti“</string>
+    <string name="layout_hide_plan_to_watch_sub">Sąrašo „Planuoju žiūrėti“ pavadinimai nerodomi pradinio ekrano eilutėse ir baneryje.</string>
+    <string name="layout_hide_watching">Slėpti ir „Žiūriu“</string>
+    <string name="layout_hide_watching_sub">Pradėti žiūrėti serialai ir filmai nerodomi pradinio ekrano eilutėse ir baneryje. Jie lieka skiltyje „Tęsti žiūrėjimą“.</string>
+</resources>

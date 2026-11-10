@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Bo kochasz %1$s i %2$s</string>
+    <string name="scout_picks_why_person_loved">Bo kochasz %1$s</string>
+    <string name="scout_picks_why_person">Często oglądasz %1$s</string>
+    <string name="scout_picks_why_keyword">Bo lubisz %1$s</string>
+    <string name="scout_picks_why_stretch">Coś trochę innego</string>
+    <string name="scout_picks_row_genre_language">%1$s, język: %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Więcej: %1$s</string>
+    <string name="scout_picks_row_new">Nowości dla Ciebie</string>
+    <string name="scout_picks_row_trending">Na czasie dla Ciebie</string>
+    <string name="scout_picks_quick_title">Wybierz pięć ulubionych</string>
+    <string name="scout_picks_quick_sub">Dzięki temu Scout szybciej ruszy. Zmienisz je w dowolnej chwili w sekcji Twój gust.</string>
+    <string name="scout_picks_quick_row_sub">Szybki sposób, by pokazać Scoutowi, co lubisz</string>
+    <string name="scout_picks_quick_count">%1$d z %2$d</string>
+    <string name="scout_picks_quick_done">Gotowe</string>
+    <string name="scout_picks_quick_skip">Pomiń</string>
+    <string name="scout_picks_words_title">Twój gust w słowach</string>
+    <string name="scout_picks_words_row_sub">Z kluczem AI: opis do edycji i sortowanie AI</string>
+    <string name="scout_picks_words_sub">Napisany przez Twoją AI na podstawie ocenionych tytułów. Możesz go edytować. Używają go funkcja Zapytaj i sortowanie AI.</string>
+    <string name="scout_picks_words_empty">Jeszcze nic. Napisz własny albo pozwól AI napisać go na podstawie ocenionych tytułów.</string>
+    <string name="scout_picks_words_edit">Edytuj</string>
+    <string name="scout_picks_words_write">Napisz ponownie</string>
+    <string name="scout_picks_words_writing">Pisanie…</string>
+    <string name="scout_picks_words_remove">Usuń</string>
+    <string name="scout_picks_sort_title">Pozwól AI sortować moje propozycje</string>
+    <string name="scout_picks_sort_sub">Mniej więcej raz w tygodniu, Twoim kluczem. Własne propozycje Scouta nie potrzebują AI.</string>
+    <string name="scout_picks_on">Wł.</string>
+    <string name="scout_picks_off">Wył.</string>
+    <string name="scout_picks_sent">Trafia do Twojej usługi AI z Twoim kluczem: około 100 tytułów znalezionych przez Scouta, Twój gust opisany słowami, tytuły, które Ci się podobały i nie, oraz gatunki, które pomijasz. Nie dostaje całej Twojej historii.</string>
+    <string name="scout_picks_refine_violent">Mniej przemocy</string>
+    <string name="scout_picks_refine_older">Starsze</string>
+    <string name="scout_picks_refine_newer">Nowsze</string>
+    <string name="scout_picks_refine_lighter">Coś lżejszego</string>
+</resources>

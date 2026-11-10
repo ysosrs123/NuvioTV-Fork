@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Ocultar también “Por ver”</string>
+    <string name="layout_hide_plan_to_watch_sub">Los títulos de la lista “Por ver” no aparecen en las filas de Inicio ni en el banner.</string>
+    <string name="layout_hide_watching">Ocultar también “Viendo”</string>
+    <string name="layout_hide_watching_sub">Las series y películas a medio ver no aparecen en las filas de Inicio ni en el banner. Siguen en Seguir Viendo.</string>
+</resources>

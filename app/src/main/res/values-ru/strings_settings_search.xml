@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Поиск</string>
+    <string name="settings_search_title">Поиск в настройках</string>
+    <string name="settings_search_subtitle">Найдите любую настройку по названию или по тому, что она делает.</string>
+    <string name="settings_search_try">Попробуйте: ночной режим, субтитры, проброс или буфер.</string>
+    <string name="settings_search_none">Ничего не найдено по запросу \"%1$s\"</string>
+    <string name="settings_search_none_tip">Попробуйте слово короче или опишите, что делает настройка.</string>
+    <string name="settings_search_results">Результаты: %1$d</string>
+    <string name="settings_search_more_advanced">Ещё %1$d в расширенном режиме</string>
+    <string name="settings_search_unavailable">Эта настройка сейчас недоступна. Возможно, сначала нужно включить другую настройку.</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Также скрывать «Буду смотреть»</string>
+    <string name="layout_hide_plan_to_watch_sub">Тайтлы из списка «Буду смотреть» не показываются в рядах главного экрана и в баннере.</string>
+    <string name="layout_hide_watching">Также скрывать «Смотрю»</string>
+    <string name="layout_hide_watching_sub">Начатые сериалы и фильмы не показываются в рядах главного экрана и в баннере. Они остаются в «Продолжить просмотр».</string>
+</resources>

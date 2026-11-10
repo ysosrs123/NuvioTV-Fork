@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Bản trộn</string>
+    <string name="scout_mixes_add">Thêm vào bản trộn</string>
+    <string name="scout_mixes_add_title">Thêm %1$s vào bản trộn</string>
+    <string name="scout_mixes_already_in">Đã có trong bản trộn này</string>
+    <string name="scout_mixes_new">Bản trộn mới</string>
+    <string name="scout_mixes_name_title">Đặt tên bản trộn này</string>
+    <string name="scout_mixes_name_label">Tên bản trộn</string>
+    <string name="scout_mixes_name_default">Bản trộn %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="other">%1$s, %2$s và %3$d phim khác</item>
+    </plurals>
+    <string name="scout_mixes_save">Lưu</string>
+    <string name="scout_mixes_cancel">Huỷ</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="other">%1$d loạt phim</item>
+    </plurals>
+    <string name="scout_mixes_kind">Bản trộn</string>
+    <string name="scout_mixes_about">Các tập ngẫu nhiên từ %1$s, nối tiếp nhau.</string>
+    <string name="scout_mixes_fits">Các chương trình hợp với bản trộn này</string>
+    <string name="scout_mixes_add_show">Thêm</string>
+    <string name="scout_mixes_watch_again">Xem lại</string>
+    <string name="scout_mixes_find_show">Tìm chương trình</string>
+    <string name="scout_mixes_up_next">Tiếp theo</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Đang chọn một tập…</string>
+    <string name="scout_mixes_play">Xem</string>
+    <string name="scout_mixes_remix">Trộn lại</string>
+    <string name="scout_mixes_unwatched_only">Chỉ chưa xem</string>
+    <string name="scout_mixes_keep_playing">Tiếp tục phát</string>
+    <string name="scout_mixes_edit">Sửa bản trộn</string>
+    <string name="scout_mixes_in_this_mix">Trong bản trộn này</string>
+    <string name="scout_mixes_next_in">Tiếp theo trong %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="other">Bắt đầu sau %1$d giây</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Xem ngay</string>
+    <string name="scout_mixes_stop">Dừng</string>
+    <string name="scout_mixes_all_seen">Bạn đã xem mọi tập trong bản trộn này</string>
+    <string name="scout_mixes_all_seen_hint">Thêm một chương trình để tiếp tục, hoặc xem lại các phim yêu thích.</string>
+    <string name="scout_mixes_no_shows">Bản trộn này chưa có loạt phim nào</string>
+    <string name="scout_mixes_add_hint">Thêm loạt phim từ menu nhấn giữ của chúng</string>
+    <string name="scout_mixes_unavailable">Không thể tải tập phim</string>
+    <string name="scout_mixes_unavailable_hint">Các add-on của bạn không phản hồi cho những loạt phim này. Nhấn Trộn lại để thử lại.</string>
+    <string name="scout_mixes_edit_title">Sửa %1$s</string>
+    <string name="scout_mixes_rename">Đổi tên</string>
+    <string name="scout_mixes_remove">Xóa %1$s</string>
+    <string name="scout_mixes_delete">Xóa bản trộn này</string>
+    <string name="scout_mixes_delete_title">Xóa %1$s?</string>
+    <string name="scout_mixes_delete_detail">Loạt phim và lịch sử xem của bạn vẫn giữ nguyên</string>
+    <string name="scout_mixes_delete_confirm">Xóa</string>
+</resources>

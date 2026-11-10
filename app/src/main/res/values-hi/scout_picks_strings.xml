@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">क्योंकि आपको %1$s और %2$s बहुत पसंद हैं</string>
+    <string name="scout_picks_why_person_loved">क्योंकि आपको %1$s बहुत पसंद है</string>
+    <string name="scout_picks_why_person">आप अक्सर %1$s देखते हैं</string>
+    <string name="scout_picks_why_keyword">क्योंकि आपको %1$s पसंद है</string>
+    <string name="scout_picks_why_stretch">कुछ थोड़ा अलग</string>
+    <string name="scout_picks_row_genre_language">%2$s में %1$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">और %1$s</string>
+    <string name="scout_picks_row_new">आपके लिए नया</string>
+    <string name="scout_picks_row_trending">आपके लिए ट्रेंडिंग</string>
+    <string name="scout_picks_quick_title">अपने पसंदीदा पाँच चुनें</string>
+    <string name="scout_picks_quick_sub">इससे Scout को अच्छी शुरुआत मिलती है। इन्हें कभी भी आपकी पसंद में बदलें।</string>
+    <string name="scout_picks_quick_row_sub">Scout को अपनी पसंद सिखाने का तेज़ तरीका</string>
+    <string name="scout_picks_quick_count">%2$d में से %1$d</string>
+    <string name="scout_picks_quick_done">हो गया</string>
+    <string name="scout_picks_quick_skip">छोड़ें</string>
+    <string name="scout_picks_words_title">शब्दों में आपकी पसंद</string>
+    <string name="scout_picks_words_row_sub">AI कुंजी के साथ: बदला जा सकने वाला विवरण और AI क्रम</string>
+    <string name="scout_picks_words_sub">आपके AI ने आपके रेट किए टाइटल से लिखा। आप इसे बदल सकते हैं। पूछें और AI क्रम दोनों इसका इस्तेमाल करते हैं।</string>
+    <string name="scout_picks_words_empty">अभी कुछ नहीं। अपना लिखें या अपने AI से रेट किए टाइटल के आधार पर लिखवाएँ।</string>
+    <string name="scout_picks_words_edit">बदलें</string>
+    <string name="scout_picks_words_write">फिर से लिखें</string>
+    <string name="scout_picks_words_writing">लिखा जा रहा है…</string>
+    <string name="scout_picks_words_remove">हटाएँ</string>
+    <string name="scout_picks_sort_title">AI को मेरे सुझाव क्रम में लगाने दें</string>
+    <string name="scout_picks_sort_sub">लगभग हफ़्ते में एक बार, आपकी कुंजी से। Scout के अपने सुझावों को AI की ज़रूरत नहीं।</string>
+    <string name="scout_picks_on">चालू</string>
+    <string name="scout_picks_off">बंद</string>
+    <string name="scout_picks_sent">आपकी कुंजी से आपकी चुनी हुई AI सेवा को भेजा जाता है: Scout के ढूँढे लगभग 100 टाइटल, शब्दों में आपकी पसंद, आपको पसंद आए और न आए टाइटल, और जो शैलियाँ आप छोड़ते हैं। आपका पूरा इतिहास नहीं भेजा जाता।</string>
+    <string name="scout_picks_refine_violent">कम हिंसक</string>
+    <string name="scout_picks_refine_older">पुराना</string>
+    <string name="scout_picks_refine_newer">नया</string>
+    <string name="scout_picks_refine_lighter">कुछ हल्का</string>
+</resources>

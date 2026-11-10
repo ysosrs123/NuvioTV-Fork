@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Миксы</string>
+    <string name="scout_mixes_add">Добавить в микс</string>
+    <string name="scout_mixes_add_title">Добавить %1$s в микс</string>
+    <string name="scout_mixes_already_in">Уже в этом миксе</string>
+    <string name="scout_mixes_new">Новый микс</string>
+    <string name="scout_mixes_name_title">Назовите этот микс</string>
+    <string name="scout_mixes_name_label">Название микса</string>
+    <string name="scout_mixes_name_default">Микс %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s и ещё %3$d</item>
+        <item quantity="few">%1$s, %2$s и ещё %3$d</item>
+        <item quantity="many">%1$s, %2$s и ещё %3$d</item>
+        <item quantity="other">%1$s, %2$s и ещё %3$d</item>
+    </plurals>
+    <string name="scout_mixes_save">Сохранить</string>
+    <string name="scout_mixes_cancel">Отмена</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d сериал</item>
+        <item quantity="few">%1$d сериала</item>
+        <item quantity="many">%1$d сериалов</item>
+        <item quantity="other">%1$d сериала</item>
+    </plurals>
+    <string name="scout_mixes_kind">Микс</string>
+    <string name="scout_mixes_about">Случайные серии из %1$s, одна за другой.</string>
+    <string name="scout_mixes_fits">Сериалы, подходящие для этого микса</string>
+    <string name="scout_mixes_add_show">Добавить</string>
+    <string name="scout_mixes_watch_again">Посмотреть снова</string>
+    <string name="scout_mixes_find_show">Найти сериал</string>
+    <string name="scout_mixes_up_next">Далее</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Выбираем эпизод…</string>
+    <string name="scout_mixes_play">Смотреть</string>
+    <string name="scout_mixes_remix">Перемешать</string>
+    <string name="scout_mixes_unwatched_only">Только непросмотренные</string>
+    <string name="scout_mixes_keep_playing">Продолжать показ</string>
+    <string name="scout_mixes_edit">Изменить микс</string>
+    <string name="scout_mixes_in_this_mix">В этом миксе</string>
+    <string name="scout_mixes_next_in">Далее в миксе %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Начало через %1$d секунду</item>
+        <item quantity="few">Начало через %1$d секунды</item>
+        <item quantity="many">Начало через %1$d секунд</item>
+        <item quantity="other">Начало через %1$d секунды</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Смотреть сейчас</string>
+    <string name="scout_mixes_stop">Стоп</string>
+    <string name="scout_mixes_all_seen">Вы посмотрели все эпизоды этого микса</string>
+    <string name="scout_mixes_all_seen_hint">Добавьте сериал, чтобы продолжить, или пересмотрите любимые.</string>
+    <string name="scout_mixes_no_shows">В этом миксе пока нет сериалов</string>
+    <string name="scout_mixes_add_hint">Добавляйте сериалы из их меню долгого нажатия</string>
+    <string name="scout_mixes_unavailable">Не удалось загрузить эпизоды</string>
+    <string name="scout_mixes_unavailable_hint">Ваши аддоны не ответили по этим сериалам. Нажмите Перемешать, чтобы попробовать снова.</string>
+    <string name="scout_mixes_edit_title">Изменить %1$s</string>
+    <string name="scout_mixes_rename">Переименовать</string>
+    <string name="scout_mixes_remove">Удалить %1$s</string>
+    <string name="scout_mixes_delete">Удалить этот микс</string>
+    <string name="scout_mixes_delete_title">Удалить %1$s?</string>
+    <string name="scout_mixes_delete_detail">Ваши сериалы и история просмотра останутся без изменений</string>
+    <string name="scout_mixes_delete_confirm">Удалить</string>
+</resources>

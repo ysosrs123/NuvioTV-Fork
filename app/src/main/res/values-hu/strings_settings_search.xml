@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Keresés</string>
+    <string name="settings_search_title">Keresés a beállításokban</string>
+    <string name="settings_search_subtitle">Bármelyik beállítást megtalálhatod a neve vagy a működése alapján.</string>
+    <string name="settings_search_try">Próbáld: éjszakai mód, feliratok, passthrough vagy puffer.</string>
+    <string name="settings_search_none">Nincs találat erre: \"%1$s\"</string>
+    <string name="settings_search_none_tip">Próbálj rövidebb szót, vagy írd le, mit csinál.</string>
+    <string name="settings_search_results">Találatok: %1$d</string>
+    <string name="settings_search_more_advanced">További %1$d a Haladó módban</string>
+    <string name="settings_search_unavailable">Ez a beállítás most nem érhető el. Lehet, hogy előbb egy másik beállítást kell bekapcsolni.</string>
+</resources>

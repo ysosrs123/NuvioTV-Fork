@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Servidores multimédia</string>
-    <string name="settings_media_servers_subtitle">Liga o Jellyfin, o Emby ou o Silo para explorar e reproduzir a tua própria biblioteca.</string>
+    <string name="settings_media_servers_subtitle">Liga o Jellyfin, o Emby, o Silo ou o Plex para explorar e reproduzir a tua própria biblioteca.</string>
     <string name="servers_section_connected">Servidores</string>
     <string name="servers_section_add">Adicionar servidor</string>
     <string name="servers_section_account">Conta Nuvio</string>
     <string name="servers_source_details">Detalhes da fonte</string>
-    <string name="servers_source_details_description">Completo mostra o nome do ficheiro e os ícones nas fontes do servidor. Simples mostra apenas vídeo, áudio e tamanho.</string>
+    <string name="servers_source_details_description">Completo mostra o nome do ficheiro e mais detalhes nas fontes do servidor. Simples mostra apenas vídeo, áudio e tamanho.</string>
     <string name="servers_source_details_full">Completo</string>
     <string name="servers_source_details_clean">Simples</string>
     <string name="servers_show_logos">Mostrar logótipos dos servidores</string>
-    <string name="servers_show_logos_description">Mostra o logótipo do Jellyfin, Emby ou Silo junto às fontes do servidor e no leitor.</string>
+    <string name="servers_show_logos_description">Mostra o logótipo do Jellyfin, Emby, Silo ou Plex junto às fontes do servidor e no leitor.</string>
     <string name="servers_account_sync">Sincronizar servidores multimédia com a minha conta Nuvio</string>
     <string name="servers_account_sync_description">Desligado: os teus servidores e os respetivos inícios de sessão ficam neste dispositivo. Ligado: a lista de servidores, incluindo os inícios de sessão, é guardada na tua conta Nuvio e partilhada com os teus outros dispositivos.</string>
     <string name="servers_account_remove">Remover os meus servidores da minha conta Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Ativado</string>
     <string name="servers_enabled_description">Mostra este servidor no Início, na pesquisa e nos resultados de streams.</string>
     <string name="servers_catalog_metadata">Utilizar metadados dos addons</string>
-    <string name="servers_catalog_metadata_description">Os títulos abrem com os detalhes dos teus addons e sincronizam como qualquer outro título de catálogo; a reprodução e as marcas de visto continuam a ser enviadas para o %1$s. Alguns títulos podem não corresponder ou não reproduzir se os teus addons os numerarem ou identificarem de outra forma.</string>
+    <string name="servers_catalog_metadata_description">Os títulos abrem com os detalhes dos teus addons e sincronizam como qualquer outro título de catálogo; a reprodução e as marcas de visto continuam a ser enviadas para o %1$s. Alguns títulos podem não corresponder ou não reproduzir se os teus addons os numerarem ou identificarem de outra forma. Desative para reproduzir apenas a partir de %1$s, sem pesquisar nos addons.</string>
     <string name="servers_import_continue_watching">Importar Continuar a ver</string>
     <string name="servers_import_continue_watching_description">Os títulos que começaste no %1$s aparecem em Continuar a ver no Início. As marcas de visto mantêm-se em sincronia nos dois sentidos.</string>
     <string name="servers_import_watch_state">Importar progresso</string>

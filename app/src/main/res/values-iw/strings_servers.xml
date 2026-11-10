@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">שרתי מדיה</string>
-    <string name="settings_media_servers_subtitle">חיבור Jellyfin, Emby או Silo כדי לעיין בספרייה שלך ולהפעיל ממנה.</string>
+    <string name="settings_media_servers_subtitle">חיבור Jellyfin, Emby, Silo או Plex כדי לעיין בספרייה שלך ולהפעיל ממנה.</string>
     <string name="servers_section_connected">שרתים</string>
     <string name="servers_section_add">הוספת שרת</string>
     <string name="servers_section_account">חשבון Nuvio</string>
     <string name="servers_source_details">פרטי מקור</string>
-    <string name="servers_source_details_description">מלא מציג את שם הקובץ וסמלים במקורות השרת. נקי מציג רק וידאו, שמע וגודל.</string>
+    <string name="servers_source_details_description">מלא מציג את שם הקובץ ועוד פרטים במקורות השרת. נקי מציג רק וידאו, שמע וגודל.</string>
     <string name="servers_source_details_full">מלא</string>
     <string name="servers_source_details_clean">נקי</string>
     <string name="servers_show_logos">הצגת הלוגו של השרתים</string>
-    <string name="servers_show_logos_description">הצגת הלוגו של Jellyfin, Emby או Silo ליד מקורות השרת ובנגן.</string>
+    <string name="servers_show_logos_description">הצגת הלוגו של Jellyfin, Emby, Silo או Plex ליד מקורות השרת ובנגן.</string>
     <string name="servers_account_sync">סנכרון שרתי המדיה לחשבון ה-Nuvio שלי</string>
     <string name="servers_account_sync_description">כבוי: השרתים ופרטי ההתחברות שלהם נשארים במכשיר הזה. פועל: רשימת השרתים, כולל פרטי ההתחברות, נשמרת בחשבון ה-Nuvio ומשותפת עם שאר המכשירים שלך.</string>
     <string name="servers_account_remove">הסרת השרתים שלי מחשבון ה-Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">מופעל</string>
     <string name="servers_enabled_description">הצגת השרת הזה במסך הבית, בחיפוש ובתוצאות הסטרימים.</string>
     <string name="servers_catalog_metadata">שימוש במטא-דאטה של תוספים</string>
-    <string name="servers_catalog_metadata_description">כותרים נפתחים עם הפרטים מהתוספים ומסתנכרנים כמו כל כותר מקטלוג, וההפעלה וסימוני הצפייה עדיין נשלחים אל %1$s. ייתכן שכותרים מסוימים לא יותאמו או לא יופעלו אם התוספים ממספרים או מזהים אותם אחרת.</string>
+    <string name="servers_catalog_metadata_description">כותרים נפתחים עם הפרטים מהתוספים ומסתנכרנים כמו כל כותר מקטלוג, וההפעלה וסימוני הצפייה עדיין נשלחים אל %1$s. ייתכן שכותרים מסוימים לא יותאמו או לא יופעלו אם התוספים ממספרים או מזהים אותם אחרת. כבו זאת כדי לנגן רק מ-%1$s, ללא חיפוש בתוספים.</string>
     <string name="servers_import_continue_watching">ייבוא \"המשך צפייה\"</string>
     <string name="servers_import_continue_watching_description">כותרים שהתחלת ב-%1$s מופיעים ב\"המשך צפייה\" במסך הבית. סימוני הצפייה מסונכרנים בשני הכיוונים.</string>
     <string name="servers_import_watch_state">ייבוא התקדמות צפייה</string>

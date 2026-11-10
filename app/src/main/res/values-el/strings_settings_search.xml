@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Αναζήτηση</string>
+    <string name="settings_search_title">Αναζήτηση στις ρυθμίσεις</string>
+    <string name="settings_search_subtitle">Βρείτε οποιαδήποτε ρύθμιση από το όνομά της ή από αυτό που κάνει.</string>
+    <string name="settings_search_try">Δοκιμάστε: νυχτερινή λειτουργία, υπότιτλοι, passthrough ή buffer.</string>
+    <string name="settings_search_none">Δεν βρέθηκε τίποτα για \"%1$s\"</string>
+    <string name="settings_search_none_tip">Δοκιμάστε μια πιο σύντομη λέξη ή περιγράψτε τι κάνει.</string>
+    <string name="settings_search_results">Αποτελέσματα: %1$d</string>
+    <string name="settings_search_more_advanced">%1$d ακόμη στην Προχωρημένη λειτουργία</string>
+    <string name="settings_search_unavailable">Αυτή η ρύθμιση δεν είναι διαθέσιμη τώρα. Ίσως πρέπει πρώτα να ενεργοποιηθεί άλλη ρύθμιση.</string>
+</resources>

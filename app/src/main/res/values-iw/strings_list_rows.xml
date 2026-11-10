@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">הסתרה גם של \"מתוכנן לצפייה\"</string>
+    <string name="layout_hide_plan_to_watch_sub">כותרים ברשימה \"מתוכנן לצפייה\" לא מופיעים בשורות מסך הבית ובבאנר.</string>
+    <string name="layout_hide_watching">הסתרה גם של \"בצפייה\"</string>
+    <string name="layout_hide_watching_sub">סדרות וסרטים בצפייה חלקית לא מופיעים בשורות מסך הבית ובבאנר. הם נשארים ב\"המשך בצפייה\".</string>
+</resources>

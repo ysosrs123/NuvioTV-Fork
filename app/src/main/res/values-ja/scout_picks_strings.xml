@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">%1$sと%2$sが大好きだから</string>
+    <string name="scout_picks_why_person_loved">%1$sが大好きだから</string>
+    <string name="scout_picks_why_person">%1$sをよく見ています</string>
+    <string name="scout_picks_why_keyword">%1$sが好きだから</string>
+    <string name="scout_picks_why_stretch">少し違うものを</string>
+    <string name="scout_picks_row_genre_language">%2$sの%1$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">もっと%1$s</string>
+    <string name="scout_picks_row_new">あなたへの新着</string>
+    <string name="scout_picks_row_trending">あなたへのトレンド</string>
+    <string name="scout_picks_quick_title">大好きな作品を5つ選択</string>
+    <string name="scout_picks_quick_sub">Scoutが早く好みをつかめます。「あなたの好み」でいつでも変更できます。</string>
+    <string name="scout_picks_quick_row_sub">好きなものをScoutにすばやく教える方法</string>
+    <string name="scout_picks_quick_count">%1$d/%2$d</string>
+    <string name="scout_picks_quick_done">完了</string>
+    <string name="scout_picks_quick_skip">スキップ</string>
+    <string name="scout_picks_words_title">言葉で表すあなたの好み</string>
+    <string name="scout_picks_words_row_sub">AIキーがあれば: 編集できる説明文とAI並べ替え</string>
+    <string name="scout_picks_words_sub">評価した作品からAIが作成しました。編集できます。質問とAI並べ替えで使われます。</string>
+    <string name="scout_picks_words_empty">まだありません。自分で書くか、評価した作品からAIに書いてもらいましょう。</string>
+    <string name="scout_picks_words_edit">編集</string>
+    <string name="scout_picks_words_write">書き直す</string>
+    <string name="scout_picks_words_writing">作成中…</string>
+    <string name="scout_picks_words_remove">削除</string>
+    <string name="scout_picks_sort_title">AIにおすすめを並べ替えてもらう</string>
+    <string name="scout_picks_sort_sub">週1回程度、あなたのキーで。Scout自身のおすすめにAIは不要です。</string>
+    <string name="scout_picks_on">オン</string>
+    <string name="scout_picks_off">オフ</string>
+    <string name="scout_picks_sent">あなたのキーで、選んだAIサービスに送られます: Scoutが見つけた約100作品、言葉で表した好み、好きな作品と好きでない作品、除外したジャンル。視聴履歴の全体は送られません。</string>
+    <string name="scout_picks_refine_violent">暴力控えめ</string>
+    <string name="scout_picks_refine_older">古め</string>
+    <string name="scout_picks_refine_newer">新しめ</string>
+    <string name="scout_picks_refine_lighter">軽めのもの</string>
+</resources>

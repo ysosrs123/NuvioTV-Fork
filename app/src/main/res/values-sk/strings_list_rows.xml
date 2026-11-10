@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Skryť aj „Chystám sa pozerať“</string>
+    <string name="layout_hide_plan_to_watch_sub">Tituly zo zoznamu „Chystám sa pozerať“ sa nezobrazia v riadkoch na domovskej obrazovke ani v banneri.</string>
+    <string name="layout_hide_watching">Skryť aj „Sledujem“</string>
+    <string name="layout_hide_watching_sub">Rozpozerané seriály a filmy sa nezobrazia v riadkoch na domovskej obrazovke ani v banneri. Zostanú v riadku Pokračovať v sledovaní.</string>
+</resources>

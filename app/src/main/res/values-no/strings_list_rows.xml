@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Skjul også «Skal se»</string>
+    <string name="layout_hide_plan_to_watch_sub">Titler på listen «Skal se» utelates fra radene på Hjem og banneret.</string>
+    <string name="layout_hide_watching">Skjul også «Ser nå»</string>
+    <string name="layout_hide_watching_sub">Påbegynte serier og filmer utelates fra radene på Hjem og banneret. De blir værende i Fortsett å se.</string>
+</resources>

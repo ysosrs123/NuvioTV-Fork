@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Mixar</string>
+    <string name="scout_mixes_add">Lägg till i mix</string>
+    <string name="scout_mixes_add_title">Lägg till %1$s i en mix</string>
+    <string name="scout_mixes_already_in">Finns redan i den här mixen</string>
+    <string name="scout_mixes_new">Ny mix</string>
+    <string name="scout_mixes_name_title">Namnge den här mixen</string>
+    <string name="scout_mixes_name_label">Mixens namn</string>
+    <string name="scout_mixes_name_default">%1$s-mix</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s och %3$d till</item>
+        <item quantity="other">%1$s, %2$s och %3$d till</item>
+    </plurals>
+    <string name="scout_mixes_save">Spara</string>
+    <string name="scout_mixes_cancel">Avbryt</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d serie</item>
+        <item quantity="other">%1$d serier</item>
+    </plurals>
+    <string name="scout_mixes_kind">Mix</string>
+    <string name="scout_mixes_about">Slumpade avsnitt från %1$s, det ena efter det andra.</string>
+    <string name="scout_mixes_fits">Serier som passar den här mixen</string>
+    <string name="scout_mixes_add_show">Lägg till</string>
+    <string name="scout_mixes_watch_again">Se dem igen</string>
+    <string name="scout_mixes_find_show">Hitta en serie</string>
+    <string name="scout_mixes_up_next">Näst på tur</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Väljer ett avsnitt…</string>
+    <string name="scout_mixes_play">Spela</string>
+    <string name="scout_mixes_remix">Mixa om</string>
+    <string name="scout_mixes_unwatched_only">Bara osedda</string>
+    <string name="scout_mixes_keep_playing">Fortsätt spela</string>
+    <string name="scout_mixes_edit">Redigera mix</string>
+    <string name="scout_mixes_in_this_mix">I den här mixen</string>
+    <string name="scout_mixes_next_in">Nästa i %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Startar om %1$d sekund</item>
+        <item quantity="other">Startar om %1$d sekunder</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Spela nu</string>
+    <string name="scout_mixes_stop">Stoppa</string>
+    <string name="scout_mixes_all_seen">Du har sett alla avsnitt i den här mixen</string>
+    <string name="scout_mixes_all_seen_hint">Lägg till en serie för att fortsätta, eller se dina favoriter igen.</string>
+    <string name="scout_mixes_no_shows">Den här mixen har inga serier än</string>
+    <string name="scout_mixes_add_hint">Lägg till fler serier från deras långtrycksmeny</string>
+    <string name="scout_mixes_unavailable">Det gick inte att ladda några avsnitt</string>
+    <string name="scout_mixes_unavailable_hint">Dina tillägg svarade inte för de här serierna. Tryck på Mixa om för att försöka igen.</string>
+    <string name="scout_mixes_edit_title">Redigera %1$s</string>
+    <string name="scout_mixes_rename">Byt namn</string>
+    <string name="scout_mixes_remove">Ta bort %1$s</string>
+    <string name="scout_mixes_delete">Radera den här mixen</string>
+    <string name="scout_mixes_delete_title">Radera %1$s?</string>
+    <string name="scout_mixes_delete_detail">Dina serier och din historik förblir som de är</string>
+    <string name="scout_mixes_delete_confirm">Radera</string>
+</resources>

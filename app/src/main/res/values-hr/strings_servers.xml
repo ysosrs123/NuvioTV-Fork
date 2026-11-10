@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Medijski poslužitelji</string>
-    <string name="settings_media_servers_subtitle">Poveži Jellyfin, Emby ili Silo za pregledavanje i reprodukciju vlastite biblioteke.</string>
+    <string name="settings_media_servers_subtitle">Poveži Jellyfin, Emby, Silo ili Plex za pregledavanje i reprodukciju vlastite biblioteke.</string>
     <string name="servers_section_connected">Poslužitelji</string>
     <string name="servers_section_add">Dodaj poslužitelj</string>
     <string name="servers_section_account">Nuvio račun</string>
     <string name="servers_source_details">Detalji izvora</string>
-    <string name="servers_source_details_description">Detaljno prikazuje naziv datoteke i ikone na izvorima s poslužitelja. Jednostavno prikazuje samo video, zvuk i veličinu.</string>
+    <string name="servers_source_details_description">Detaljno prikazuje naziv datoteke i više detalja na izvorima s poslužitelja. Jednostavno prikazuje samo video, zvuk i veličinu.</string>
     <string name="servers_source_details_full">Detaljno</string>
     <string name="servers_source_details_clean">Jednostavno</string>
     <string name="servers_show_logos">Prikaži logotipe poslužitelja</string>
-    <string name="servers_show_logos_description">Prikaži logo Jellyfin, Emby ili Silo uz izvore s poslužitelja i u playeru.</string>
+    <string name="servers_show_logos_description">Prikaži logo Jellyfin, Emby, Silo ili Plex uz izvore s poslužitelja i u playeru.</string>
     <string name="servers_account_sync">Sinkroniziraj medijske poslužitelje s mojim Nuvio računom</string>
     <string name="servers_account_sync_description">Isključeno: poslužitelji i njihove prijave ostaju na ovom uređaju. Uključeno: popis poslužitelja, zajedno s prijavama, sprema se u tvoj Nuvio račun i dijeli s tvojim drugim uređajima.</string>
     <string name="servers_account_remove">Ukloni moje poslužitelje iz mog Nuvio računa</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Omogućeno</string>
     <string name="servers_enabled_description">Prikaži ovaj poslužitelj na početnoj, u pretraživanju i među streamovima.</string>
     <string name="servers_catalog_metadata">Koristi metapodatke dodataka</string>
-    <string name="servers_catalog_metadata_description">Naslovi se otvaraju s detaljima tvojih dodataka i sinkroniziraju se kao svaki drugi naslov iz kataloga, a reprodukcija i oznake pogledanog i dalje se šalju na %1$s. Neki se naslovi možda neće podudarati ili reproducirati ako ih tvoji dodaci drukčije numeriraju ili prepoznaju.</string>
+    <string name="servers_catalog_metadata_description">Naslovi se otvaraju s detaljima tvojih dodataka i sinkroniziraju se kao svaki drugi naslov iz kataloga, a reprodukcija i oznake pogledanog i dalje se šalju na %1$s. Neki se naslovi možda neće podudarati ili reproducirati ako ih tvoji dodaci drukčije numeriraju ili prepoznaju. Isključite ovo za reprodukciju samo s %1$s, bez pretrage dodataka.</string>
     <string name="servers_import_continue_watching">Uvezi Nastavi gledati</string>
     <string name="servers_import_continue_watching_description">Naslovi započeti na %1$s prikazuju se u Nastavi gledati na početnoj. Oznake pogledanog usklađuju se u oba smjera.</string>
     <string name="servers_import_watch_state">Uvezi napredak gledanja</string>

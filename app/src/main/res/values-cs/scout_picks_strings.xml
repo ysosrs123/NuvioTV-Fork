@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Protože milujete %1$s a %2$s</string>
+    <string name="scout_picks_why_person_loved">Protože milujete %1$s</string>
+    <string name="scout_picks_why_person">Často sledujete %1$s</string>
+    <string name="scout_picks_why_keyword">Protože máte rádi %1$s</string>
+    <string name="scout_picks_why_stretch">Něco trochu jiného</string>
+    <string name="scout_picks_row_genre_language">%1$s v jazyce %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Více: %1$s</string>
+    <string name="scout_picks_row_new">Novinky pro vás</string>
+    <string name="scout_picks_row_trending">Trendy pro vás</string>
+    <string name="scout_picks_quick_title">Vyberte pět oblíbených</string>
+    <string name="scout_picks_quick_sub">Scout tak bude mít náskok. Kdykoli je můžete změnit v části Váš vkus.</string>
+    <string name="scout_picks_quick_row_sub">Rychlý způsob, jak Scout naučit, co vás baví</string>
+    <string name="scout_picks_quick_count">%1$d z %2$d</string>
+    <string name="scout_picks_quick_done">Hotovo</string>
+    <string name="scout_picks_quick_skip">Přeskočit</string>
+    <string name="scout_picks_words_title">Váš vkus slovy</string>
+    <string name="scout_picks_words_row_sub">S klíčem AI: popis, který můžete upravit, a řazení pomocí AI</string>
+    <string name="scout_picks_words_sub">Napsala vaše AI podle titulů, které jste hodnotili. Můžete ho upravit. Používá se v části Zeptat se i při řazení AI.</string>
+    <string name="scout_picks_words_empty">Zatím nic. Napište vlastní nebo ho nechte napsat AI podle titulů, které jste hodnotili.</string>
+    <string name="scout_picks_words_edit">Upravit</string>
+    <string name="scout_picks_words_write">Napsat znovu</string>
+    <string name="scout_picks_words_writing">Píše se…</string>
+    <string name="scout_picks_words_remove">Odebrat</string>
+    <string name="scout_picks_sort_title">Nechat AI řadit moje tipy</string>
+    <string name="scout_picks_sort_sub">Zhruba jednou týdně, s vaším klíčem. Vlastní tipy Scoutu AI nepotřebují.</string>
+    <string name="scout_picks_on">Zapnuto</string>
+    <string name="scout_picks_off">Vypnuto</string>
+    <string name="scout_picks_sent">Odesílá se vaší službě AI s vaším klíčem: asi 100 titulů, které pro vás Scout našel, váš vkus slovy, tituly, které se vám líbily a nelíbily, a žánry, které vynecháváte. Celou vaši historii nedostane.</string>
+    <string name="scout_picks_refine_violent">Méně násilí</string>
+    <string name="scout_picks_refine_older">Starší</string>
+    <string name="scout_picks_refine_newer">Novější</string>
+    <string name="scout_picks_refine_lighter">Něco lehčího</string>
+</resources>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Mixuri</string>
+    <string name="scout_mixes_add">Adaugă la mix</string>
+    <string name="scout_mixes_add_title">Adaugă %1$s la un mix</string>
+    <string name="scout_mixes_already_in">Deja în acest mix</string>
+    <string name="scout_mixes_new">Mix nou</string>
+    <string name="scout_mixes_name_title">Denumește acest mix</string>
+    <string name="scout_mixes_name_label">Numele mixului</string>
+    <string name="scout_mixes_name_default">Mix %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s și încă %3$d</item>
+        <item quantity="few">%1$s, %2$s și încă %3$d</item>
+        <item quantity="other">%1$s, %2$s și încă %3$d</item>
+    </plurals>
+    <string name="scout_mixes_save">Salvează</string>
+    <string name="scout_mixes_cancel">Anulează</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d serial</item>
+        <item quantity="few">%1$d seriale</item>
+        <item quantity="other">%1$d de seriale</item>
+    </plurals>
+    <string name="scout_mixes_kind">Mix</string>
+    <string name="scout_mixes_about">Episoade la întâmplare din %1$s, unul după altul.</string>
+    <string name="scout_mixes_fits">Seriale potrivite pentru acest mix</string>
+    <string name="scout_mixes_add_show">Adaugă</string>
+    <string name="scout_mixes_watch_again">Revezi-le</string>
+    <string name="scout_mixes_find_show">Găsește un serial</string>
+    <string name="scout_mixes_up_next">Urmează</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Se alege un episod…</string>
+    <string name="scout_mixes_play">Redă</string>
+    <string name="scout_mixes_remix">Remixează</string>
+    <string name="scout_mixes_unwatched_only">Doar nevizionate</string>
+    <string name="scout_mixes_keep_playing">Continuă redarea</string>
+    <string name="scout_mixes_edit">Editează mixul</string>
+    <string name="scout_mixes_in_this_mix">În acest mix</string>
+    <string name="scout_mixes_next_in">Urmează în %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Începe în %1$d secundă</item>
+        <item quantity="few">Începe în %1$d secunde</item>
+        <item quantity="other">Începe în %1$d de secunde</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Redă acum</string>
+    <string name="scout_mixes_stop">Oprește</string>
+    <string name="scout_mixes_all_seen">Ai văzut toate episoadele din acest mix</string>
+    <string name="scout_mixes_all_seen_hint">Adaugă un serial pentru a continua sau revezi-le pe cele preferate.</string>
+    <string name="scout_mixes_no_shows">Acest mix nu are încă seriale</string>
+    <string name="scout_mixes_add_hint">Adaugă alte seriale din meniul lor de apăsare lungă</string>
+    <string name="scout_mixes_unavailable">Nu s-au putut încărca episoade</string>
+    <string name="scout_mixes_unavailable_hint">Add-on-urile tale nu au răspuns pentru aceste seriale. Apasă Remixează pentru a încerca din nou.</string>
+    <string name="scout_mixes_edit_title">Editează %1$s</string>
+    <string name="scout_mixes_rename">Redenumește</string>
+    <string name="scout_mixes_remove">Elimină %1$s</string>
+    <string name="scout_mixes_delete">Șterge acest mix</string>
+    <string name="scout_mixes_delete_title">Ștergi %1$s?</string>
+    <string name="scout_mixes_delete_detail">Serialele și istoricul tău rămân la fel</string>
+    <string name="scout_mixes_delete_confirm">Șterge</string>
+</resources>

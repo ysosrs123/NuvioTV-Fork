@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">البحث</string>
+    <string name="settings_search_title">البحث في الإعدادات</string>
+    <string name="settings_search_subtitle">اعثر على أي إعداد من خلال اسمه أو وظيفته.</string>
+    <string name="settings_search_try">جرّب مثلاً: وضع الليل، الترجمة، تمرير الصوت أو المخزون المؤقت.</string>
+    <string name="settings_search_none">لا توجد نتائج للبحث عن \"%1$s\"</string>
+    <string name="settings_search_none_tip">جرّب كلمة أقصر، أو صِف وظيفة الإعداد.</string>
+    <string name="settings_search_results">النتائج: %1$d</string>
+    <string name="settings_search_more_advanced">نتائج أخرى في الإعدادات المتقدمة: %1$d</string>
+    <string name="settings_search_unavailable">هذا الإعداد غير متاح الآن. قد يلزم تفعيل إعداد آخر أولاً.</string>
+</resources>

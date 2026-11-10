@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">媒体服务器</string>
-    <string name="settings_media_servers_subtitle">连接 Jellyfin、Emby 或 Silo，浏览并播放您自己的媒体库。</string>
+    <string name="settings_media_servers_subtitle">连接 Jellyfin、Emby、Silo 或 Plex，浏览并播放您自己的媒体库。</string>
     <string name="servers_section_connected">服务器</string>
     <string name="servers_section_add">添加服务器</string>
     <string name="servers_section_account">Nuvio 账户</string>
     <string name="servers_source_details">来源详情</string>
-    <string name="servers_source_details_description">完整会显示服务器来源的文件名和图标。简洁只显示视频、音频和大小。</string>
+    <string name="servers_source_details_description">完整会显示服务器来源的文件名和更多详情。简洁只显示视频、音频和大小。</string>
     <string name="servers_source_details_full">完整</string>
     <string name="servers_source_details_clean">简洁</string>
     <string name="servers_show_logos">显示服务器标志</string>
-    <string name="servers_show_logos_description">在服务器来源旁边和播放器中显示 Jellyfin、Emby 或 Silo 标志。</string>
+    <string name="servers_show_logos_description">在服务器来源旁边和播放器中显示 Jellyfin、Emby、Silo 或 Plex 标志。</string>
     <string name="servers_account_sync">将媒体服务器同步到我的 Nuvio 账户</string>
     <string name="servers_account_sync_description">关闭：您的服务器及其登录信息保留在此设备上。开启：服务器列表 (包括登录信息) 会保存到您的 Nuvio 账户，并与您的其他设备共享。</string>
     <string name="servers_account_remove">从我的 Nuvio 账户中移除服务器</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">已启用</string>
     <string name="servers_enabled_description">在首页、搜索和流结果中显示此服务器。</string>
     <string name="servers_catalog_metadata">使用扩展元数据</string>
-    <string name="servers_catalog_metadata_description">标题会以扩展提供的详情打开，并像其他目录标题一样同步，播放和已观看标记仍会发送到 %1$s。如果您的扩展对标题的编号或识别方式不同，部分标题可能无法匹配或播放。</string>
+    <string name="servers_catalog_metadata_description">标题会以扩展提供的详情打开，并像其他目录标题一样同步，播放和已观看标记仍会发送到 %1$s。如果您的扩展对标题的编号或识别方式不同，部分标题可能无法匹配或播放。关闭后只从 %1$s 播放，不搜索插件。</string>
     <string name="servers_import_continue_watching">导入继续观看</string>
     <string name="servers_import_continue_watching_description">您在 %1$s 上开始观看的标题会显示在首页的继续观看中。无论开启与否，已观看标记都会保持同步。</string>
     <string name="servers_import_watch_state">导入观看进度</string>

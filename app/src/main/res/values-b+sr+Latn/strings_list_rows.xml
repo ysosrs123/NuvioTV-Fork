@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Sakrij i „Planiram da gledam“</string>
+    <string name="layout_hide_plan_to_watch_sub">Naslovi sa liste „Planiram da gledam“ izostavljaju se iz redova Početne i banera.</string>
+    <string name="layout_hide_watching">Sakrij i „Gledam“</string>
+    <string name="layout_hide_watching_sub">Započete serije i filmovi izostavljaju se iz redova Početne i banera. Ostaju u Nastavi gledanje.</string>
+</resources>

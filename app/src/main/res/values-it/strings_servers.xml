@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Server multimediali</string>
-    <string name="settings_media_servers_subtitle">Collega Jellyfin, Emby o Silo per sfogliare e riprodurre la tua libreria.</string>
+    <string name="settings_media_servers_subtitle">Collega Jellyfin, Emby, o Silo o Plex per sfogliare e riprodurre la tua libreria.</string>
     <string name="servers_section_connected">Server</string>
     <string name="servers_section_add">Aggiungi server</string>
     <string name="servers_section_account">Account Nuvio</string>
     <string name="servers_source_details">Dettagli sorgente</string>
-    <string name="servers_source_details_description">Completo mostra il nome file e le icone sulle sorgenti del server. Essenziale mostra solo video, audio e dimensione.</string>
+    <string name="servers_source_details_description">Completo mostra il nome file e più dettagli sulle sorgenti del server. Essenziale mostra solo video, audio e dimensione.</string>
     <string name="servers_source_details_full">Completo</string>
     <string name="servers_source_details_clean">Essenziale</string>
     <string name="servers_show_logos">Mostra i loghi dei server</string>
-    <string name="servers_show_logos_description">Mostra il logo di Jellyfin, Emby o Silo accanto alle sorgenti del server e nel player.</string>
+    <string name="servers_show_logos_description">Mostra il logo di Jellyfin, Emby, o Silo o Plex accanto alle sorgenti del server e nel player.</string>
     <string name="servers_account_sync">Sincronizza i server multimediali con il mio account Nuvio</string>
     <string name="servers_account_sync_description">Disattivato: i server e le relative credenziali restano su questo dispositivo. Attivo: l\'elenco dei server, credenziali comprese, viene salvato nel tuo account Nuvio e condiviso con gli altri tuoi dispositivi.</string>
     <string name="servers_account_remove">Rimuovi i miei server dal mio account Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Attivo</string>
     <string name="servers_enabled_description">Mostra questo server nella Home, nella ricerca e nei risultati degli stream.</string>
     <string name="servers_catalog_metadata">Usa i metadati degli addon</string>
-    <string name="servers_catalog_metadata_description">I titoli si aprono con i dettagli dei tuoi addon e si sincronizzano come ogni altro titolo di catalogo; riproduzione e stato di visione vengono comunque inviati a %1$s. Alcuni titoli potrebbero non corrispondere o non partire se i tuoi addon li numerano o li identificano in modo diverso.</string>
+    <string name="servers_catalog_metadata_description">I titoli si aprono con i dettagli dei tuoi addon e si sincronizzano come ogni altro titolo di catalogo; riproduzione e stato di visione vengono comunque inviati a %1$s. Alcuni titoli potrebbero non corrispondere o non partire se i tuoi addon li numerano o li identificano in modo diverso. Disattivalo per riprodurre solo da %1$s, senza cercare negli addon.</string>
     <string name="servers_import_continue_watching">Importa Continua a guardare</string>
     <string name="servers_import_continue_watching_description">I titoli iniziati su %1$s compaiono in Continua a guardare nella Home. Lo stato di visione resta allineato in ogni caso.</string>
     <string name="servers_import_watch_state">Importa progressi di visione</string>

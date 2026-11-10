@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Máy chủ đa phương tiện</string>
-    <string name="settings_media_servers_subtitle">Kết nối Jellyfin, Emby hoặc Silo để duyệt và phát thư viện của riêng bạn.</string>
+    <string name="settings_media_servers_subtitle">Kết nối Jellyfin, Emby, Silo hoặc Plex để duyệt và phát thư viện của riêng bạn.</string>
     <string name="servers_section_connected">Máy chủ</string>
     <string name="servers_section_add">Thêm máy chủ</string>
     <string name="servers_section_account">Tài khoản Nuvio</string>
     <string name="servers_source_details">Chi tiết nguồn</string>
-    <string name="servers_source_details_description">Đầy đủ hiển thị tên tệp và biểu tượng trên các nguồn máy chủ. Gọn chỉ hiển thị video, âm thanh và dung lượng.</string>
+    <string name="servers_source_details_description">Đầy đủ hiển thị tên tệp và nhiều chi tiết hơn trên các nguồn máy chủ. Gọn chỉ hiển thị video, âm thanh và dung lượng.</string>
     <string name="servers_source_details_full">Đầy đủ</string>
     <string name="servers_source_details_clean">Gọn</string>
     <string name="servers_show_logos">Hiển thị logo máy chủ</string>
-    <string name="servers_show_logos_description">Hiển thị logo Jellyfin, Emby hoặc Silo bên cạnh nguồn máy chủ và trong trình phát.</string>
+    <string name="servers_show_logos_description">Hiển thị logo Jellyfin, Emby, Silo hoặc Plex bên cạnh nguồn máy chủ và trong trình phát.</string>
     <string name="servers_account_sync">Đồng bộ máy chủ đa phương tiện với tài khoản Nuvio của tôi</string>
     <string name="servers_account_sync_description">Tắt: máy chủ và thông tin đăng nhập của chúng chỉ nằm trên thiết bị này. Bật: danh sách máy chủ, kể cả thông tin đăng nhập, được lưu vào tài khoản Nuvio và chia sẻ với các thiết bị khác của bạn.</string>
     <string name="servers_account_remove">Xóa máy chủ của tôi khỏi tài khoản Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Đã bật</string>
     <string name="servers_enabled_description">Hiển thị máy chủ này trong Trang chủ, tìm kiếm và kết quả luồng.</string>
     <string name="servers_catalog_metadata">Dùng siêu dữ liệu từ tiện ích</string>
-    <string name="servers_catalog_metadata_description">Nội dung mở với thông tin chi tiết từ tiện ích của bạn và đồng bộ như mọi nội dung danh mục khác, còn việc phát và đánh dấu đã xem vẫn được gửi tới %1$s. Một số nội dung có thể không khớp hoặc không phát được nếu tiện ích đánh số hay nhận diện chúng theo cách khác.</string>
+    <string name="servers_catalog_metadata_description">Nội dung mở với thông tin chi tiết từ tiện ích của bạn và đồng bộ như mọi nội dung danh mục khác, còn việc phát và đánh dấu đã xem vẫn được gửi tới %1$s. Một số nội dung có thể không khớp hoặc không phát được nếu tiện ích đánh số hay nhận diện chúng theo cách khác. Tắt mục này để chỉ phát từ %1$s, không tìm trong tiện ích bổ sung.</string>
     <string name="servers_import_continue_watching">Nhập Tiếp tục xem</string>
     <string name="servers_import_continue_watching_description">Nội dung bạn đã bắt đầu xem trên %1$s xuất hiện trong Tiếp tục xem ở Trang chủ. Đánh dấu đã xem luôn được giữ khớp ở cả hai trường hợp.</string>
     <string name="servers_import_watch_state">Nhập tiến trình xem</string>

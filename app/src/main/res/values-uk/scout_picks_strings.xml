@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Бо ви любите %1$s і %2$s</string>
+    <string name="scout_picks_why_person_loved">Бо ви любите %1$s</string>
+    <string name="scout_picks_why_person">Ви часто дивитеся %1$s</string>
+    <string name="scout_picks_why_keyword">Бо вам подобається %1$s</string>
+    <string name="scout_picks_why_stretch">Щось трохи інше</string>
+    <string name="scout_picks_row_genre_language">%1$s мовою %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Ще %1$s</string>
+    <string name="scout_picks_row_new">Нове для вас</string>
+    <string name="scout_picks_row_trending">У тренді для вас</string>
+    <string name="scout_picks_quick_title">Виберіть п\'ять улюблених</string>
+    <string name="scout_picks_quick_sub">Так Scout почне швидше. Змінити їх можна будь-коли в розділі Ваш смак.</string>
+    <string name="scout_picks_quick_row_sub">Швидкий спосіб показати Scout, що вам подобається</string>
+    <string name="scout_picks_quick_count">%1$d з %2$d</string>
+    <string name="scout_picks_quick_done">Готово</string>
+    <string name="scout_picks_quick_skip">Пропустити</string>
+    <string name="scout_picks_words_title">Ваш смак словами</string>
+    <string name="scout_picks_words_row_sub">З ключем ШІ: опис, який можна редагувати, і сортування ШІ</string>
+    <string name="scout_picks_words_sub">Написано вашим ШІ за оціненими вами назвами. Можна редагувати. Використовується в розділі «Запитати» й під час сортування ШІ.</string>
+    <string name="scout_picks_words_empty">Поки нічого. Напишіть самі або дозвольте ШІ написати за оціненими назвами.</string>
+    <string name="scout_picks_words_edit">Редагувати</string>
+    <string name="scout_picks_words_write">Написати знову</string>
+    <string name="scout_picks_words_writing">Пишеться…</string>
+    <string name="scout_picks_words_remove">Вилучити</string>
+    <string name="scout_picks_sort_title">Хай ШІ сортує мої добірки</string>
+    <string name="scout_picks_sort_sub">Приблизно раз на тиждень, вашим ключем. Власним добіркам Scout ШІ не потрібен.</string>
+    <string name="scout_picks_on">Увімк.</string>
+    <string name="scout_picks_off">Вимк.</string>
+    <string name="scout_picks_sent">Надсилається вашому сервісу ШІ з вашим ключем: близько 100 назв, які Scout знайшов для вас, ваш смак словами, назви, що вам сподобалися й не сподобалися, та жанри, які ви виключили. Уся ваша історія не надсилається.</string>
+    <string name="scout_picks_refine_violent">Менше насильства</string>
+    <string name="scout_picks_refine_older">Старіше</string>
+    <string name="scout_picks_refine_newer">Новіше</string>
+    <string name="scout_picks_refine_lighter">Щось легше</string>
+</resources>

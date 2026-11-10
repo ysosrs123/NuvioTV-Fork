@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Fordi du elsker %1$s og %2$s</string>
+    <string name="scout_picks_why_person_loved">Fordi du elsker %1$s</string>
+    <string name="scout_picks_why_person">Du ser ofte %1$s</string>
+    <string name="scout_picks_why_keyword">Fordi du kan lide %1$s</string>
+    <string name="scout_picks_why_stretch">Noget lidt andet</string>
+    <string name="scout_picks_row_genre_language">%1$s på %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Mere %1$s</string>
+    <string name="scout_picks_row_new">Nyt til dig</string>
+    <string name="scout_picks_row_trending">Populært til dig</string>
+    <string name="scout_picks_quick_title">Vælg fem, du elsker</string>
+    <string name="scout_picks_quick_sub">Det giver Scout et forspring. Du kan altid ændre dem under Din smag.</string>
+    <string name="scout_picks_quick_row_sub">En hurtig måde at lære Scout, hvad du kan lide</string>
+    <string name="scout_picks_quick_count">%1$d af %2$d</string>
+    <string name="scout_picks_quick_done">Færdig</string>
+    <string name="scout_picks_quick_skip">Spring over</string>
+    <string name="scout_picks_words_title">Din smag i ord</string>
+    <string name="scout_picks_words_row_sub">Med en AI-nøgle: en beskrivelse, du kan redigere, og AI-sortering</string>
+    <string name="scout_picks_words_sub">Skrevet af din AI ud fra de titler, du har bedømt. Du kan redigere teksten. Både Spørg og AI-sortering bruger den.</string>
+    <string name="scout_picks_words_empty">Intet endnu. Skriv din egen, eller lad din AI skrive den ud fra de titler, du har bedømt.</string>
+    <string name="scout_picks_words_edit">Rediger</string>
+    <string name="scout_picks_words_write">Skriv igen</string>
+    <string name="scout_picks_words_writing">Skriver…</string>
+    <string name="scout_picks_words_remove">Fjern</string>
+    <string name="scout_picks_sort_title">Lad AI sortere mine forslag</string>
+    <string name="scout_picks_sort_sub">Cirka en gang om ugen med din nøgle. Scouts egne forslag kræver ingen AI.</string>
+    <string name="scout_picks_on">Til</string>
+    <string name="scout_picks_off">Fra</string>
+    <string name="scout_picks_sent">Sendes til din AI-tjeneste med din egen nøgle: omkring 100 titler, Scout har fundet til dig, din smag i ord, titler du kunne og ikke kunne lide, og genrer, du fravælger. Din fulde historik får den ikke.</string>
+    <string name="scout_picks_refine_violent">Mindre voldeligt</string>
+    <string name="scout_picks_refine_older">Ældre</string>
+    <string name="scout_picks_refine_newer">Nyere</string>
+    <string name="scout_picks_refine_lighter">Noget lettere</string>
+</resources>

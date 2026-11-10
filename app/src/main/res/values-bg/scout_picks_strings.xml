@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Защото обичате %1$s и %2$s</string>
+    <string name="scout_picks_why_person_loved">Защото обичате %1$s</string>
+    <string name="scout_picks_why_person">Често гледате %1$s</string>
+    <string name="scout_picks_why_keyword">Защото харесвате %1$s</string>
+    <string name="scout_picks_why_stretch">Нещо малко по-различно</string>
+    <string name="scout_picks_row_genre_language">%1$s на %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Още %1$s</string>
+    <string name="scout_picks_row_new">Ново за вас</string>
+    <string name="scout_picks_row_trending">Популярно за вас</string>
+    <string name="scout_picks_quick_title">Изберете пет любими</string>
+    <string name="scout_picks_quick_sub">Така Scout започва с предимство. Променете ги по всяко време от Вашият вкус.</string>
+    <string name="scout_picks_quick_row_sub">Бърз начин да покажете на Scout какво харесвате</string>
+    <string name="scout_picks_quick_count">%1$d от %2$d</string>
+    <string name="scout_picks_quick_done">Готово</string>
+    <string name="scout_picks_quick_skip">Пропускане</string>
+    <string name="scout_picks_words_title">Вашият вкус с думи</string>
+    <string name="scout_picks_words_row_sub">С AI ключ: описание, което можете да редактирате, и AI подреждане</string>
+    <string name="scout_picks_words_sub">Написано от вашия AI по оценените заглавия. Можете да го редактирате. Използва се от функцията Питай и от AI подреждането.</string>
+    <string name="scout_picks_words_empty">Още няма нищо. Напишете свое или оставете AI да го напише по заглавията, които сте оценили.</string>
+    <string name="scout_picks_words_edit">Редактиране</string>
+    <string name="scout_picks_words_write">Напиши отново</string>
+    <string name="scout_picks_words_writing">Пише се…</string>
+    <string name="scout_picks_words_remove">Премахване</string>
+    <string name="scout_picks_sort_title">AI да подрежда предложенията ми</string>
+    <string name="scout_picks_sort_sub">Около веднъж седмично, с вашия ключ. Предложенията на Scout не се нуждаят от AI.</string>
+    <string name="scout_picks_on">Вкл.</string>
+    <string name="scout_picks_off">Изкл.</string>
+    <string name="scout_picks_sent">Отива към вашата AI услуга с вашия ключ: около 100 заглавия, намерени от Scout за вас, вкусът ви с думи, заглавия, които са ви харесали и не, и жанровете, които изключвате. Цялата ви история не се изпраща.</string>
+    <string name="scout_picks_refine_violent">По-малко насилие</string>
+    <string name="scout_picks_refine_older">По-старо</string>
+    <string name="scout_picks_refine_newer">По-ново</string>
+    <string name="scout_picks_refine_lighter">Нещо по-леко</string>
+</resources>

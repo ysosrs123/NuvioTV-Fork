@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">同时隐藏“计划观看”</string>
+    <string name="layout_hide_plan_to_watch_sub">“计划观看”列表中的内容不会出现在首页各行和横幅中。</string>
+    <string name="layout_hide_watching">同时隐藏“观看中”</string>
+    <string name="layout_hide_watching_sub">看到一半的节目和电影不会出现在首页各行和横幅中。仍会保留在继续观看中。</string>
+</resources>

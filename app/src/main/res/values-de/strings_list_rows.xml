@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Auch „Geplant“ ausblenden</string>
+    <string name="layout_hide_plan_to_watch_sub">Titel auf der Liste „Geplant“ erscheinen nicht in den Reihen der Startseite und im Banner.</string>
+    <string name="layout_hide_watching">Auch „Schaue ich“ ausblenden</string>
+    <string name="layout_hide_watching_sub">Angefangene Serien und Filme erscheinen nicht in den Reihen der Startseite und im Banner. Sie bleiben in Weiter ansehen.</string>
+</resources>

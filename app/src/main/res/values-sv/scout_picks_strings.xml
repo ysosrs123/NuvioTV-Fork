@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">För att du älskar %1$s och %2$s</string>
+    <string name="scout_picks_why_person_loved">För att du älskar %1$s</string>
+    <string name="scout_picks_why_person">Du ser ofta %1$s</string>
+    <string name="scout_picks_why_keyword">För att du gillar %1$s</string>
+    <string name="scout_picks_why_stretch">Något lite annorlunda</string>
+    <string name="scout_picks_row_genre_language">%1$s på %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Mer %1$s</string>
+    <string name="scout_picks_row_new">Nytt för dig</string>
+    <string name="scout_picks_row_trending">Trendar för dig</string>
+    <string name="scout_picks_quick_title">Välj fem du älskar</string>
+    <string name="scout_picks_quick_sub">Det ger Scout ett försprång. Ändra dem när som helst under Din smak.</string>
+    <string name="scout_picks_quick_row_sub">Ett snabbt sätt att lära Scout vad du gillar</string>
+    <string name="scout_picks_quick_count">%1$d av %2$d</string>
+    <string name="scout_picks_quick_done">Klar</string>
+    <string name="scout_picks_quick_skip">Hoppa över</string>
+    <string name="scout_picks_words_title">Din smak i ord</string>
+    <string name="scout_picks_words_row_sub">Med AI-nyckel: en beskrivning du kan redigera och AI-sortering</string>
+    <string name="scout_picks_words_sub">Skriven av din AI utifrån titlarna du har betygsatt. Du kan redigera texten. Både Fråga och AI-sortering använder den.</string>
+    <string name="scout_picks_words_empty">Inget än. Skriv en egen eller låt din AI skriva den utifrån titlarna du har betygsatt.</string>
+    <string name="scout_picks_words_edit">Redigera</string>
+    <string name="scout_picks_words_write">Skriv om</string>
+    <string name="scout_picks_words_writing">Skriver…</string>
+    <string name="scout_picks_words_remove">Ta bort</string>
+    <string name="scout_picks_sort_title">Låt AI sortera mina förslag</string>
+    <string name="scout_picks_sort_sub">Ungefär en gång i veckan, med din nyckel. Scouts egna förslag behöver ingen AI.</string>
+    <string name="scout_picks_on">På</string>
+    <string name="scout_picks_off">Av</string>
+    <string name="scout_picks_sent">Skickas till din AI-tjänst med din egen nyckel: ungefär 100 titlar som Scout hittat åt dig, din smak i ord, titlar du gillade och inte gillade, och genrer du utesluter. Hela din historik får den inte.</string>
+    <string name="scout_picks_refine_violent">Mindre våldsamt</string>
+    <string name="scout_picks_refine_older">Äldre</string>
+    <string name="scout_picks_refine_newer">Nyare</string>
+    <string name="scout_picks_refine_lighter">Något lättare</string>
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Campuran</string>
+    <string name="scout_mixes_add">Tambahkan ke campuran</string>
+    <string name="scout_mixes_add_title">Tambahkan %1$s ke campuran</string>
+    <string name="scout_mixes_already_in">Sudah ada di campuran ini</string>
+    <string name="scout_mixes_new">Campuran baru</string>
+    <string name="scout_mixes_name_title">Beri nama campuran ini</string>
+    <string name="scout_mixes_name_label">Nama campuran</string>
+    <string name="scout_mixes_name_default">Campuran %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="other">%1$s, %2$s, dan %3$d lainnya</item>
+    </plurals>
+    <string name="scout_mixes_save">Simpan</string>
+    <string name="scout_mixes_cancel">Batal</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="other">%1$d serial</item>
+    </plurals>
+    <string name="scout_mixes_kind">Campuran</string>
+    <string name="scout_mixes_about">Episode acak dari %1$s, satu demi satu.</string>
+    <string name="scout_mixes_fits">Acara yang cocok dengan campuran ini</string>
+    <string name="scout_mixes_add_show">Tambah</string>
+    <string name="scout_mixes_watch_again">Tonton lagi</string>
+    <string name="scout_mixes_find_show">Cari acara</string>
+    <string name="scout_mixes_up_next">Berikutnya</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Memilih episode…</string>
+    <string name="scout_mixes_play">Putar</string>
+    <string name="scout_mixes_remix">Campur ulang</string>
+    <string name="scout_mixes_unwatched_only">Hanya belum ditonton</string>
+    <string name="scout_mixes_keep_playing">Terus putar</string>
+    <string name="scout_mixes_edit">Edit campuran</string>
+    <string name="scout_mixes_in_this_mix">Di campuran ini</string>
+    <string name="scout_mixes_next_in">Berikutnya di %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="other">Mulai dalam %1$d detik</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Putar sekarang</string>
+    <string name="scout_mixes_stop">Hentikan</string>
+    <string name="scout_mixes_all_seen">Anda sudah menonton semua episode di campuran ini</string>
+    <string name="scout_mixes_all_seen_hint">Tambahkan acara agar terus berlanjut, atau tonton lagi favorit Anda.</string>
+    <string name="scout_mixes_no_shows">Campuran ini belum memiliki serial</string>
+    <string name="scout_mixes_add_hint">Tambahkan serial lain dari menu tekan lamanya</string>
+    <string name="scout_mixes_unavailable">Tidak dapat memuat episode</string>
+    <string name="scout_mixes_unavailable_hint">Add-on Anda tidak merespons untuk serial ini. Tekan Campur ulang untuk mencoba lagi.</string>
+    <string name="scout_mixes_edit_title">Edit %1$s</string>
+    <string name="scout_mixes_rename">Ubah nama</string>
+    <string name="scout_mixes_remove">Hapus %1$s</string>
+    <string name="scout_mixes_delete">Hapus campuran ini</string>
+    <string name="scout_mixes_delete_title">Hapus %1$s?</string>
+    <string name="scout_mixes_delete_detail">Serial dan riwayat tontonan Anda tetap seperti semula</string>
+    <string name="scout_mixes_delete_confirm">Hapus</string>
+</resources>

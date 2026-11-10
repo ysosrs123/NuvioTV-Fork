@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Pretraga</string>
+    <string name="settings_search_title">Pretraga podešavanja</string>
+    <string name="settings_search_subtitle">Pronađite bilo koje podešavanje po nazivu ili po tome šta radi.</string>
+    <string name="settings_search_try">Probajte: noćni režim, titlovi, passthrough ili bafer.</string>
+    <string name="settings_search_none">Nema rezultata za \"%1$s\"</string>
+    <string name="settings_search_none_tip">Probajte kraću reč ili opišite šta podešavanje radi.</string>
+    <string name="settings_search_results">Rezultati: %1$d</string>
+    <string name="settings_search_more_advanced">Još %1$d u naprednom režimu</string>
+    <string name="settings_search_unavailable">Ovo podešavanje trenutno nije dostupno. Možda prvo treba uključiti drugo podešavanje.</string>
+</resources>

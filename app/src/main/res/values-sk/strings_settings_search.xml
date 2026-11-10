@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Hľadať</string>
+    <string name="settings_search_title">Hľadať v nastaveniach</string>
+    <string name="settings_search_subtitle">Nájdite akékoľvek nastavenie podľa názvu alebo podľa toho, čo robí.</string>
+    <string name="settings_search_try">Skúste: nočný režim, titulky, priechod zvuku alebo vyrovnávacia pamäť.</string>
+    <string name="settings_search_none">Pre \"%1$s\" sa nič nenašlo</string>
+    <string name="settings_search_none_tip">Skúste kratšie slovo alebo opíšte, čo robí.</string>
+    <string name="settings_search_results">Výsledky: %1$d</string>
+    <string name="settings_search_more_advanced">Ďalšie v pokročilom režime: %1$d</string>
+    <string name="settings_search_unavailable">Toto nastavenie teraz nie je dostupné. Možno treba najprv zapnúť iné nastavenie.</string>
+</resources>

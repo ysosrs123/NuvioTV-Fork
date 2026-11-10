@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">כי אתם אוהבים מאוד את %1$s ואת %2$s</string>
+    <string name="scout_picks_why_person_loved">כי אתם אוהבים מאוד את %1$s</string>
+    <string name="scout_picks_why_person">אתם צופים הרבה ב-%1$s</string>
+    <string name="scout_picks_why_keyword">כי אתם אוהבים %1$s</string>
+    <string name="scout_picks_why_stretch">משהו קצת אחר</string>
+    <string name="scout_picks_row_genre_language">%1$s ב%2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">עוד %1$s</string>
+    <string name="scout_picks_row_new">חדש בשבילך</string>
+    <string name="scout_picks_row_trending">טרנדי בשבילך</string>
+    <string name="scout_picks_quick_title">בחרו חמישה שאתם אוהבים</string>
+    <string name="scout_picks_quick_sub">כך Scout מתחיל עם יתרון. אפשר לשנות אותם בכל זמן בטעם שלך.</string>
+    <string name="scout_picks_quick_row_sub">דרך מהירה ללמד את Scout מה אתם אוהבים</string>
+    <string name="scout_picks_quick_count">%1$d מתוך %2$d</string>
+    <string name="scout_picks_quick_done">סיום</string>
+    <string name="scout_picks_quick_skip">דילוג</string>
+    <string name="scout_picks_words_title">הטעם שלך במילים</string>
+    <string name="scout_picks_words_row_sub">עם מפתח AI: תיאור שאפשר לערוך ומיון AI</string>
+    <string name="scout_picks_words_sub">נכתב על ידי ה-AI שלכם לפי הכותרים שדירגתם. אפשר לערוך. שאלה ומיון AI משתמשים בו.</string>
+    <string name="scout_picks_words_empty">עדיין אין כלום. כתבו בעצמכם, או תנו ל-AI לכתוב לפי הכותרים שדירגתם.</string>
+    <string name="scout_picks_words_edit">עריכה</string>
+    <string name="scout_picks_words_write">כתיבה מחדש</string>
+    <string name="scout_picks_words_writing">כותב…</string>
+    <string name="scout_picks_words_remove">הסרה</string>
+    <string name="scout_picks_sort_title">לתת ל-AI למיין את ההמלצות שלי</string>
+    <string name="scout_picks_sort_sub">בערך פעם בשבוע, עם המפתח שלכם. ההמלצות של Scout עצמו לא צריכות AI.</string>
+    <string name="scout_picks_on">פועל</string>
+    <string name="scout_picks_off">כבוי</string>
+    <string name="scout_picks_sent">נשלח לשירות ה-AI שבחרתם, עם המפתח שלכם: כ-100 כותרים ש-Scout מצא בשבילכם, הטעם שלכם במילים, כותרים שאהבתם ושלא אהבתם, וז׳אנרים שהשמטתם. ההיסטוריה המלאה שלכם לא נשלחת.</string>
+    <string name="scout_picks_refine_violent">פחות אלים</string>
+    <string name="scout_picks_refine_older">ישן יותר</string>
+    <string name="scout_picks_refine_newer">חדש יותר</string>
+    <string name="scout_picks_refine_lighter">משהו קליל יותר</string>
+</resources>

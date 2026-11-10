@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Masquer aussi « À regarder »</string>
+    <string name="layout_hide_plan_to_watch_sub">Les titres de la liste « À regarder » sont retirés des rangées de l\'accueil et de la bannière.</string>
+    <string name="layout_hide_watching">Masquer aussi « En cours »</string>
+    <string name="layout_hide_watching_sub">Les séries et films commencés sont retirés des rangées de l\'accueil et de la bannière. Ils restent dans Continuer à regarder.</string>
+</resources>

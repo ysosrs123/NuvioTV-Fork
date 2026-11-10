@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Perché adori %1$s e %2$s</string>
+    <string name="scout_picks_why_person_loved">Perché adori %1$s</string>
+    <string name="scout_picks_why_person">Guardi spesso %1$s</string>
+    <string name="scout_picks_why_keyword">Perché ti piace %1$s</string>
+    <string name="scout_picks_why_stretch">Qualcosa di un po\' diverso</string>
+    <string name="scout_picks_row_genre_language">%1$s in %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Più %1$s</string>
+    <string name="scout_picks_row_new">Novità per te</string>
+    <string name="scout_picks_row_trending">Di tendenza per te</string>
+    <string name="scout_picks_quick_title">Scegline cinque che adori</string>
+    <string name="scout_picks_quick_sub">Così Scout parte avvantaggiato. Cambiali quando vuoi in I tuoi gusti.</string>
+    <string name="scout_picks_quick_row_sub">Un modo rapido per far capire a Scout cosa ti piace</string>
+    <string name="scout_picks_quick_count">%1$d di %2$d</string>
+    <string name="scout_picks_quick_done">Fine</string>
+    <string name="scout_picks_quick_skip">Salta</string>
+    <string name="scout_picks_words_title">I tuoi gusti in parole</string>
+    <string name="scout_picks_words_row_sub">Con una chiave IA: una descrizione modificabile e l\'ordinamento con IA</string>
+    <string name="scout_picks_words_sub">Scritta dalla tua IA in base ai titoli che hai valutato. Puoi modificarla. La usano Chiedi e l\'ordinamento IA.</string>
+    <string name="scout_picks_words_empty">Ancora niente. Scrivi la tua o lascia che la tua IA la scriva dai titoli che hai valutato.</string>
+    <string name="scout_picks_words_edit">Modifica</string>
+    <string name="scout_picks_words_write">Riscrivi</string>
+    <string name="scout_picks_words_writing">Scrittura…</string>
+    <string name="scout_picks_words_remove">Rimuovi</string>
+    <string name="scout_picks_sort_title">Lascia che l\'IA ordini i miei suggerimenti</string>
+    <string name="scout_picks_sort_sub">Circa una volta a settimana, con la tua chiave. I suggerimenti di Scout non hanno bisogno di IA.</string>
+    <string name="scout_picks_on">Attivo</string>
+    <string name="scout_picks_off">Disattivo</string>
+    <string name="scout_picks_sent">Va al tuo servizio IA con la tua chiave: circa 100 titoli trovati da Scout per te, i tuoi gusti in parole, i titoli che ti sono piaciuti e quelli no, e i generi che escludi. Non riceve tutta la tua cronologia.</string>
+    <string name="scout_picks_refine_violent">Meno violento</string>
+    <string name="scout_picks_refine_older">Più vecchio</string>
+    <string name="scout_picks_refine_newer">Più recente</string>
+    <string name="scout_picks_refine_lighter">Qualcosa di più leggero</string>
+</resources>

@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">मीडिया सर्वर</string>
-    <string name="settings_media_servers_subtitle">अपनी लाइब्रेरी ब्राउज़ करने और चलाने के लिए Jellyfin, Emby या Silo कनेक्ट करें।</string>
+    <string name="settings_media_servers_subtitle">अपनी लाइब्रेरी ब्राउज़ करने और चलाने के लिए Jellyfin, Emby, Silo या Plex कनेक्ट करें।</string>
     <string name="servers_section_connected">सर्वर</string>
     <string name="servers_section_add">सर्वर जोड़ें</string>
     <string name="servers_section_account">Nuvio अकाउंट</string>
     <string name="servers_source_details">सोर्स डिटेल्स</string>
-    <string name="servers_source_details_description">विस्तृत: सर्वर सोर्स पर फ़ाइल नाम और आइकन दिखते हैं। सादा: सिर्फ़ वीडियो, ऑडियो और साइज़ दिखता है।</string>
+    <string name="servers_source_details_description">विस्तृत: सर्वर सोर्स पर फ़ाइल नाम और ज़्यादा जानकारी दिखती है। सादा: सिर्फ़ वीडियो, ऑडियो और साइज़ दिखता है।</string>
     <string name="servers_source_details_full">विस्तृत</string>
     <string name="servers_source_details_clean">सादा</string>
     <string name="servers_show_logos">सर्वर लोगो दिखाएँ</string>
-    <string name="servers_show_logos_description">सर्वर सोर्स के पास और प्लेयर में Jellyfin, Emby या Silo का लोगो दिखाएँ।</string>
+    <string name="servers_show_logos_description">सर्वर सोर्स के पास और प्लेयर में Jellyfin, Emby, Silo या Plex का लोगो दिखाएँ।</string>
     <string name="servers_account_sync">मीडिया सर्वर मेरे Nuvio अकाउंट से सिंक करें</string>
     <string name="servers_account_sync_description">बंद: आपके सर्वर और उनके साइन-इन इसी डिवाइस पर रहते हैं। चालू: सर्वर सूची, साइन-इन समेत, आपके Nuvio अकाउंट में सेव होती है और आपके दूसरे डिवाइस के साथ शेयर होती है।</string>
     <string name="servers_account_remove">मेरे सर्वर मेरे Nuvio अकाउंट से हटाएँ</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">सक्षम</string>
     <string name="servers_enabled_description">इस सर्वर को होम, खोज और स्ट्रीम नतीजों में दिखाएँ।</string>
     <string name="servers_catalog_metadata">ऐडऑन मेटाडेटा इस्तेमाल करें</string>
-    <string name="servers_catalog_metadata_description">टाइटल आपके ऐडऑन के विवरण के साथ खुलते हैं और किसी भी कैटलॉग टाइटल की तरह सिंक होते हैं, जबकि प्लेबैक और देखे गए के निशान %1$s को भेजे जाते रहते हैं। अगर आपके ऐडऑन इन्हें अलग तरह से नंबर या पहचान देते हैं तो कुछ टाइटल मैच या प्ले नहीं हो सकते।</string>
+    <string name="servers_catalog_metadata_description">टाइटल आपके ऐडऑन के विवरण के साथ खुलते हैं और किसी भी कैटलॉग टाइटल की तरह सिंक होते हैं, जबकि प्लेबैक और देखे गए के निशान %1$s को भेजे जाते रहते हैं। अगर आपके ऐडऑन इन्हें अलग तरह से नंबर या पहचान देते हैं तो कुछ टाइटल मैच या प्ले नहीं हो सकते। केवल %1$s से चलाने के लिए इसे बंद करें, ऐड-ऑन में खोज नहीं होगी।</string>
     <string name="servers_import_continue_watching">\"देखना जारी रखें\" इंपोर्ट करें</string>
     <string name="servers_import_continue_watching_description">%1$s पर शुरू किए गए टाइटल होम पर \"देखना जारी रखें\" में दिखते हैं। देखे गए के निशान दोनों तरफ़ एक जैसे रखे जाते हैं।</string>
     <string name="servers_import_watch_state">देखने की प्रगति इंपोर्ट करें</string>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Ascunde și „De văzut”</string>
+    <string name="layout_hide_plan_to_watch_sub">Titlurile din lista „De văzut” nu apar în rândurile din Acasă și în banner.</string>
+    <string name="layout_hide_watching">Ascunde și „În vizionare”</string>
+    <string name="layout_hide_watching_sub">Serialele și filmele începute nu apar în rândurile din Acasă și în banner. Rămân în Continuă vizionarea.</string>
+</resources>

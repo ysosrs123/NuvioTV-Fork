@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">ミックス</string>
+    <string name="scout_mixes_add">ミックスに追加</string>
+    <string name="scout_mixes_add_title">%1$s をミックスに追加</string>
+    <string name="scout_mixes_already_in">このミックスに追加済み</string>
+    <string name="scout_mixes_new">新しいミックス</string>
+    <string name="scout_mixes_name_title">ミックスの名前</string>
+    <string name="scout_mixes_name_label">ミックス名</string>
+    <string name="scout_mixes_name_default">%1$s ミックス</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="other">%1$s、%2$s ほか%3$d作品</item>
+    </plurals>
+    <string name="scout_mixes_save">保存</string>
+    <string name="scout_mixes_cancel">キャンセル</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="other">%1$dシリーズ</item>
+    </plurals>
+    <string name="scout_mixes_kind">ミックス</string>
+    <string name="scout_mixes_about">%1$s からランダムなエピソードを次々に再生します。</string>
+    <string name="scout_mixes_fits">このミックスに合う番組</string>
+    <string name="scout_mixes_add_show">追加</string>
+    <string name="scout_mixes_watch_again">もう一度見る</string>
+    <string name="scout_mixes_find_show">番組を探す</string>
+    <string name="scout_mixes_up_next">次に再生</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">エピソードを選択中…</string>
+    <string name="scout_mixes_play">再生</string>
+    <string name="scout_mixes_remix">リミックス</string>
+    <string name="scout_mixes_unwatched_only">未視聴のみ</string>
+    <string name="scout_mixes_keep_playing">続けて再生</string>
+    <string name="scout_mixes_edit">ミックスを編集</string>
+    <string name="scout_mixes_in_this_mix">このミックスの作品</string>
+    <string name="scout_mixes_next_in">%1$s の次のエピソード</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="other">%1$d秒後に開始</item>
+    </plurals>
+    <string name="scout_mixes_play_now">今すぐ再生</string>
+    <string name="scout_mixes_stop">停止</string>
+    <string name="scout_mixes_all_seen">このミックスのエピソードはすべて視聴済みです</string>
+    <string name="scout_mixes_all_seen_hint">番組を追加して続けるか、お気に入りをもう一度見ましょう。</string>
+    <string name="scout_mixes_no_shows">このミックスにはまだ作品がありません</string>
+    <string name="scout_mixes_add_hint">長押しメニューから作品を追加</string>
+    <string name="scout_mixes_unavailable">エピソードを読み込めませんでした</string>
+    <string name="scout_mixes_unavailable_hint">これらのシリーズについてアドオンから応答がありませんでした。リミックスを押して再試行してください。</string>
+    <string name="scout_mixes_edit_title">%1$s を編集</string>
+    <string name="scout_mixes_rename">名前を変更</string>
+    <string name="scout_mixes_remove">%1$s を削除</string>
+    <string name="scout_mixes_delete">このミックスを削除</string>
+    <string name="scout_mixes_delete_title">%1$s を削除しますか?</string>
+    <string name="scout_mixes_delete_detail">作品と視聴履歴はそのまま残ります</string>
+    <string name="scout_mixes_delete_confirm">削除</string>
+</resources>

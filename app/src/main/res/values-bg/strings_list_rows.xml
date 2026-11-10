@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Скриване и на „План за гледане“</string>
+    <string name="layout_hide_plan_to_watch_sub">Заглавията от списъка „План за гледане“ не се показват в редовете на Начало и в банера.</string>
+    <string name="layout_hide_watching">Скриване и на „Гледам“</string>
+    <string name="layout_hide_watching_sub">Започнатите сериали и филми не се показват в редовете на Начало и в банера. Остават в „Продължаване на гледането“.</string>
+</resources>

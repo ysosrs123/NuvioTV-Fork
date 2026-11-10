@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Μείγματα</string>
+    <string name="scout_mixes_add">Προσθήκη σε μείγμα</string>
+    <string name="scout_mixes_add_title">Προσθήκη %1$s σε μείγμα</string>
+    <string name="scout_mixes_already_in">Υπάρχει ήδη σε αυτό το μείγμα</string>
+    <string name="scout_mixes_new">Νέο μείγμα</string>
+    <string name="scout_mixes_name_title">Ονομάστε αυτό το μείγμα</string>
+    <string name="scout_mixes_name_label">Όνομα μείγματος</string>
+    <string name="scout_mixes_name_default">Μείγμα %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s και %3$d ακόμη</item>
+        <item quantity="other">%1$s, %2$s και %3$d ακόμη</item>
+    </plurals>
+    <string name="scout_mixes_save">Αποθήκευση</string>
+    <string name="scout_mixes_cancel">Ακύρωση</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d σειρά</item>
+        <item quantity="other">%1$d σειρές</item>
+    </plurals>
+    <string name="scout_mixes_kind">Μείγμα</string>
+    <string name="scout_mixes_about">Τυχαία επεισόδια από %1$s, το ένα μετά το άλλο.</string>
+    <string name="scout_mixes_fits">Σειρές που ταιριάζουν σε αυτό το μείγμα</string>
+    <string name="scout_mixes_add_show">Προσθήκη</string>
+    <string name="scout_mixes_watch_again">Δες τα ξανά</string>
+    <string name="scout_mixes_find_show">Βρες μια σειρά</string>
+    <string name="scout_mixes_up_next">Επόμενο</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Επιλογή επεισοδίου…</string>
+    <string name="scout_mixes_play">Αναπαραγωγή</string>
+    <string name="scout_mixes_remix">Νέα ανάμειξη</string>
+    <string name="scout_mixes_unwatched_only">Μόνο όσα δεν έχετε δει</string>
+    <string name="scout_mixes_keep_playing">Συνέχιση αναπαραγωγής</string>
+    <string name="scout_mixes_edit">Επεξεργασία μείγματος</string>
+    <string name="scout_mixes_in_this_mix">Σε αυτό το μείγμα</string>
+    <string name="scout_mixes_next_in">Επόμενο στο %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Ξεκινά σε %1$d δευτερόλεπτο</item>
+        <item quantity="other">Ξεκινά σε %1$d δευτερόλεπτα</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Αναπαραγωγή τώρα</string>
+    <string name="scout_mixes_stop">Διακοπή</string>
+    <string name="scout_mixes_all_seen">Έχετε δει όλα τα επεισόδια αυτού του μείγματος</string>
+    <string name="scout_mixes_all_seen_hint">Πρόσθεσε μια σειρά για να συνεχιστεί ή δες ξανά τα αγαπημένα σου.</string>
+    <string name="scout_mixes_no_shows">Αυτό το μείγμα δεν έχει ακόμη σειρές</string>
+    <string name="scout_mixes_add_hint">Προσθέστε σειρές από το μενού παρατεταμένου πατήματός τους</string>
+    <string name="scout_mixes_unavailable">Δεν ήταν δυνατή η φόρτωση επεισοδίων</string>
+    <string name="scout_mixes_unavailable_hint">Τα πρόσθετά σας δεν απάντησαν για αυτές τις σειρές. Πατήστε Νέα ανάμειξη για νέα προσπάθεια.</string>
+    <string name="scout_mixes_edit_title">Επεξεργασία %1$s</string>
+    <string name="scout_mixes_rename">Μετονομασία</string>
+    <string name="scout_mixes_remove">Αφαίρεση %1$s</string>
+    <string name="scout_mixes_delete">Διαγραφή αυτού του μείγματος</string>
+    <string name="scout_mixes_delete_title">Διαγραφή %1$s;</string>
+    <string name="scout_mixes_delete_detail">Οι σειρές και το ιστορικό σας μένουν ως έχουν</string>
+    <string name="scout_mixes_delete_confirm">Διαγραφή</string>
+</resources>

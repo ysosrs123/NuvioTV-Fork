@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Serwery multimediów</string>
-    <string name="settings_media_servers_subtitle">Połącz Jellyfin, Emby lub Silo, aby przeglądać i odtwarzać własną bibliotekę.</string>
+    <string name="settings_media_servers_subtitle">Połącz Jellyfin, Emby, Silo lub Plex, aby przeglądać i odtwarzać własną bibliotekę.</string>
     <string name="servers_section_connected">Serwery</string>
     <string name="servers_section_add">Dodaj serwer</string>
     <string name="servers_section_account">Konto Nuvio</string>
     <string name="servers_source_details">Szczegóły źródła</string>
-    <string name="servers_source_details_description">Pełne pokazują nazwę pliku i ikony przy źródłach serwera. Przejrzyste pokazują tylko wideo, audio i rozmiar.</string>
+    <string name="servers_source_details_description">Pełne pokazują nazwę pliku i więcej szczegółów przy źródłach serwera. Przejrzyste pokazują tylko wideo, audio i rozmiar.</string>
     <string name="servers_source_details_full">Pełne</string>
     <string name="servers_source_details_clean">Przejrzyste</string>
     <string name="servers_show_logos">Pokazuj logo serwerów</string>
-    <string name="servers_show_logos_description">Pokazuj logo Jellyfin, Emby lub Silo obok źródeł serwera i w odtwarzaczu.</string>
+    <string name="servers_show_logos_description">Pokazuj logo Jellyfin, Emby, Silo lub Plex obok źródeł serwera i w odtwarzaczu.</string>
     <string name="servers_account_sync">Synchronizuj serwery multimediów z moim kontem Nuvio</string>
     <string name="servers_account_sync_description">Wył.: serwery i dane logowania zostają na tym urządzeniu. Wł.: lista serwerów razem z danymi logowania jest zapisywana na koncie Nuvio i udostępniana Twoim innym urządzeniom.</string>
     <string name="servers_account_remove">Usuń moje serwery z konta Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Włączony</string>
     <string name="servers_enabled_description">Pokazuj ten serwer na stronie głównej, w wyszukiwaniu i wynikach strumieni.</string>
     <string name="servers_catalog_metadata">Używaj metadanych dodatków</string>
-    <string name="servers_catalog_metadata_description">Tytuły otwierają się ze szczegółami z Twoich dodatków i synchronizują jak każdy inny tytuł z katalogu, a odtwarzanie i oznaczenia obejrzanych nadal trafiają do %1$s. Niektóre tytuły mogą się nie dopasować lub nie odtworzyć, jeśli dodatki inaczej je numerują lub identyfikują.</string>
+    <string name="servers_catalog_metadata_description">Tytuły otwierają się ze szczegółami z Twoich dodatków i synchronizują jak każdy inny tytuł z katalogu, a odtwarzanie i oznaczenia obejrzanych nadal trafiają do %1$s. Niektóre tytuły mogą się nie dopasować lub nie odtworzyć, jeśli dodatki inaczej je numerują lub identyfikują. Wyłącz to, aby odtwarzać tylko z %1$s, bez wyszukiwania w dodatkach.</string>
     <string name="servers_import_continue_watching">Importuj Kontynuuj oglądanie</string>
     <string name="servers_import_continue_watching_description">Tytuły zaczęte na %1$s pojawiają się w Kontynuuj oglądanie na stronie głównej. Oznaczenia obejrzanych są uzgadniane w obu przypadkach.</string>
     <string name="servers_import_watch_state">Importuj postęp oglądania</string>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Tìm kiếm</string>
+    <string name="settings_search_title">Tìm trong cài đặt</string>
+    <string name="settings_search_subtitle">Tìm bất kỳ cài đặt nào theo tên hoặc theo chức năng của nó.</string>
+    <string name="settings_search_try">Thử chế độ ban đêm, phụ đề, truyền thẳng hoặc bộ đệm.</string>
+    <string name="settings_search_none">Không tìm thấy kết quả cho \"%1$s\"</string>
+    <string name="settings_search_none_tip">Hãy thử từ ngắn hơn hoặc mô tả chức năng của nó.</string>
+    <string name="settings_search_results">Kết quả: %1$d</string>
+    <string name="settings_search_more_advanced">Còn %1$d mục trong chế độ Nâng cao</string>
+    <string name="settings_search_unavailable">Cài đặt này hiện không khả dụng. Có thể cần bật một cài đặt khác trước.</string>
+</resources>

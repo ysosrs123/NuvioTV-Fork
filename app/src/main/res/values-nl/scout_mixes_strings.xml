@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Mixen</string>
+    <string name="scout_mixes_add">Toevoegen aan mix</string>
+    <string name="scout_mixes_add_title">%1$s toevoegen aan een mix</string>
+    <string name="scout_mixes_already_in">Staat al in deze mix</string>
+    <string name="scout_mixes_new">Nieuwe mix</string>
+    <string name="scout_mixes_name_title">Geef deze mix een naam</string>
+    <string name="scout_mixes_name_label">Naam van de mix</string>
+    <string name="scout_mixes_name_default">%1$s-mix</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s en %3$d meer</item>
+        <item quantity="other">%1$s, %2$s en %3$d meer</item>
+    </plurals>
+    <string name="scout_mixes_save">Opslaan</string>
+    <string name="scout_mixes_cancel">Annuleren</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d serie</item>
+        <item quantity="other">%1$d series</item>
+    </plurals>
+    <string name="scout_mixes_kind">Mix</string>
+    <string name="scout_mixes_about">Willekeurige afleveringen uit %1$s, de een na de ander.</string>
+    <string name="scout_mixes_fits">Series die bij deze mix passen</string>
+    <string name="scout_mixes_add_show">Toevoegen</string>
+    <string name="scout_mixes_watch_again">Opnieuw kijken</string>
+    <string name="scout_mixes_find_show">Serie zoeken</string>
+    <string name="scout_mixes_up_next">Hierna</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Aflevering kiezen…</string>
+    <string name="scout_mixes_play">Afspelen</string>
+    <string name="scout_mixes_remix">Opnieuw mixen</string>
+    <string name="scout_mixes_unwatched_only">Alleen ongezien</string>
+    <string name="scout_mixes_keep_playing">Blijven afspelen</string>
+    <string name="scout_mixes_edit">Mix bewerken</string>
+    <string name="scout_mixes_in_this_mix">In deze mix</string>
+    <string name="scout_mixes_next_in">Volgende in %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Start over %1$d seconde</item>
+        <item quantity="other">Start over %1$d seconden</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Nu afspelen</string>
+    <string name="scout_mixes_stop">Stoppen</string>
+    <string name="scout_mixes_all_seen">Je hebt elke aflevering in deze mix gezien</string>
+    <string name="scout_mixes_all_seen_hint">Voeg een serie toe om door te gaan, of kijk je favorieten opnieuw.</string>
+    <string name="scout_mixes_no_shows">Deze mix heeft nog geen series</string>
+    <string name="scout_mixes_add_hint">Voeg meer series toe via hun menu bij lang indrukken</string>
+    <string name="scout_mixes_unavailable">Kon geen afleveringen laden</string>
+    <string name="scout_mixes_unavailable_hint">Je add-ons gaven geen antwoord voor deze series. Druk op Opnieuw mixen om het nog eens te proberen.</string>
+    <string name="scout_mixes_edit_title">%1$s bewerken</string>
+    <string name="scout_mixes_rename">Hernoemen</string>
+    <string name="scout_mixes_remove">%1$s verwijderen</string>
+    <string name="scout_mixes_delete">Deze mix verwijderen</string>
+    <string name="scout_mixes_delete_title">%1$s verwijderen?</string>
+    <string name="scout_mixes_delete_detail">Je series en kijkgeschiedenis blijven zoals ze zijn</string>
+    <string name="scout_mixes_delete_confirm">Verwijderen</string>
+</resources>

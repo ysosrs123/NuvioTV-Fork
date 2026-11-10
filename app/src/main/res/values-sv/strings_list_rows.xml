@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Dölj även ”Vill se”</string>
+    <string name="layout_hide_plan_to_watch_sub">Titlar på listan ”Vill se” utelämnas från raderna på Hem och bannern.</string>
+    <string name="layout_hide_watching">Dölj även ”Tittar nu”</string>
+    <string name="layout_hide_watching_sub">Påbörjade serier och filmer utelämnas från raderna på Hem och bannern. De stannar kvar i Fortsätt titta.</string>
+</resources>

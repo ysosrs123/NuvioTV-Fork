@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Iskanje</string>
+    <string name="settings_search_title">Iskanje po nastavitvah</string>
+    <string name="settings_search_subtitle">Poiščite katero koli nastavitev po imenu ali po tem, kaj počne.</string>
+    <string name="settings_search_try">Poskusite: nočni način, podnapisi, prehod zvoka ali medpomnilnik.</string>
+    <string name="settings_search_none">Ni rezultatov za \"%1$s\"</string>
+    <string name="settings_search_none_tip">Poskusite s krajšo besedo ali opišite, kaj počne.</string>
+    <string name="settings_search_results">Rezultati: %1$d</string>
+    <string name="settings_search_more_advanced">Še %1$d v naprednem načinu</string>
+    <string name="settings_search_unavailable">Ta nastavitev trenutno ni na voljo. Morda je treba najprej vklopiti drugo nastavitev.</string>
+</resources>

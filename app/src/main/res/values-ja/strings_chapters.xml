@@ -3,7 +3,7 @@
 
     <!-- Nuvio-test additions -->
     <string name="player_chapters">チャプター</string>
-    <string name="player_chapter_number">チャプター %1$d</string>
+    <string name="player_chapter_number">チャプター%1$d</string>
     <string name="player_chapter_named">チャプター %1$d: %2$s</string>
     <string name="player_chapter_now_playing">再生中</string>
     <string name="playback_chapters">プレーヤーのチャプター</string>

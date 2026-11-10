@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">מיקסים</string>
+    <string name="scout_mixes_add">הוספה למיקס</string>
+    <string name="scout_mixes_add_title">הוספת %1$s למיקס</string>
+    <string name="scout_mixes_already_in">כבר במיקס הזה</string>
+    <string name="scout_mixes_new">מיקס חדש</string>
+    <string name="scout_mixes_name_title">מתן שם למיקס</string>
+    <string name="scout_mixes_name_label">שם המיקס</string>
+    <string name="scout_mixes_name_default">מיקס %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s ועוד %3$d</item>
+        <item quantity="two">%1$s, %2$s ועוד %3$d</item>
+        <item quantity="other">%1$s, %2$s ועוד %3$d</item>
+    </plurals>
+    <string name="scout_mixes_save">שמירה</string>
+    <string name="scout_mixes_cancel">ביטול</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">סדרה %1$d</item>
+        <item quantity="two">%1$d סדרות</item>
+        <item quantity="other">%1$d סדרות</item>
+    </plurals>
+    <string name="scout_mixes_kind">מיקס</string>
+    <string name="scout_mixes_about">פרקים אקראיים מתוך %1$s, אחד אחרי השני.</string>
+    <string name="scout_mixes_fits">סדרות שמתאימות למיקס הזה</string>
+    <string name="scout_mixes_add_show">הוספה</string>
+    <string name="scout_mixes_watch_again">צפייה חוזרת</string>
+    <string name="scout_mixes_find_show">חיפוש סדרה</string>
+    <string name="scout_mixes_up_next">הבא בתור</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">בוחר פרק…</string>
+    <string name="scout_mixes_play">הפעלה</string>
+    <string name="scout_mixes_remix">ערבוב מחדש</string>
+    <string name="scout_mixes_unwatched_only">רק מה שלא נצפה</string>
+    <string name="scout_mixes_keep_playing">המשך הפעלה</string>
+    <string name="scout_mixes_edit">עריכת המיקס</string>
+    <string name="scout_mixes_in_this_mix">במיקס הזה</string>
+    <string name="scout_mixes_next_in">הבא ב%1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">מתחיל בעוד שנייה %1$d</item>
+        <item quantity="two">מתחיל בעוד %1$d שניות</item>
+        <item quantity="other">מתחיל בעוד %1$d שניות</item>
+    </plurals>
+    <string name="scout_mixes_play_now">הפעלה עכשיו</string>
+    <string name="scout_mixes_stop">עצירה</string>
+    <string name="scout_mixes_all_seen">צפית בכל הפרקים במיקס הזה</string>
+    <string name="scout_mixes_all_seen_hint">הוסיפו סדרה כדי להמשיך, או צפו שוב באהובות עליכם.</string>
+    <string name="scout_mixes_no_shows">אין עדיין סדרות במיקס הזה</string>
+    <string name="scout_mixes_add_hint">הוספת סדרות מתפריט הלחיצה הארוכה שלהן</string>
+    <string name="scout_mixes_unavailable">לא ניתן לטעון פרקים</string>
+    <string name="scout_mixes_unavailable_hint">התוספים שלך לא הגיבו לסדרות האלה. לחיצה על ערבוב מחדש תנסה שוב.</string>
+    <string name="scout_mixes_edit_title">עריכת %1$s</string>
+    <string name="scout_mixes_rename">שינוי שם</string>
+    <string name="scout_mixes_remove">הסרת %1$s</string>
+    <string name="scout_mixes_delete">מחיקת המיקס הזה</string>
+    <string name="scout_mixes_delete_title">למחוק את %1$s?</string>
+    <string name="scout_mixes_delete_detail">הסדרות והיסטוריית הצפייה שלך נשארות כפי שהן</string>
+    <string name="scout_mixes_delete_confirm">מחיקה</string>
+</resources>

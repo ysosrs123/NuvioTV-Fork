@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Zoeken</string>
+    <string name="settings_search_title">Instellingen doorzoeken</string>
+    <string name="settings_search_subtitle">Vind elke instelling op naam of op wat ze doet.</string>
+    <string name="settings_search_try">Probeer nachtmodus, ondertiteling, passthrough of buffer.</string>
+    <string name="settings_search_none">Niets gevonden voor \"%1$s\"</string>
+    <string name="settings_search_none_tip">Probeer een korter woord of beschrijf wat de instelling doet.</string>
+    <string name="settings_search_results">Resultaten: %1$d</string>
+    <string name="settings_search_more_advanced">Nog %1$d in de modus Geavanceerd</string>
+    <string name="settings_search_unavailable">Deze instelling is nu niet beschikbaar. Misschien moet eerst een andere instelling aan staan.</string>
+</resources>

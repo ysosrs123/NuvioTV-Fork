@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Skjul også ”Vil se”</string>
+    <string name="layout_hide_plan_to_watch_sub">Titler på listen ”Vil se” udelades fra rækkerne på Hjem og banneret.</string>
+    <string name="layout_hide_watching">Skjul også ”Ser nu”</string>
+    <string name="layout_hide_watching_sub">Påbegyndte serier og film udelades fra rækkerne på Hjem og banneret. De bliver i Fortsæt med at se.</string>
+</resources>

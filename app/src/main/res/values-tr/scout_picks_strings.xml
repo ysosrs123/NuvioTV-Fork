@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Çünkü %1$s ve %2$s yapımlarını çok seviyorsunuz</string>
+    <string name="scout_picks_why_person_loved">Çünkü %1$s yapımlarını çok seviyorsunuz</string>
+    <string name="scout_picks_why_person">Sık sık %1$s izliyorsunuz</string>
+    <string name="scout_picks_why_keyword">Çünkü %1$s seviyorsunuz</string>
+    <string name="scout_picks_why_stretch">Biraz farklı bir şey</string>
+    <string name="scout_picks_row_genre_language">%2$s %1$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Daha fazla %1$s</string>
+    <string name="scout_picks_row_new">Size özel yeniler</string>
+    <string name="scout_picks_row_trending">Size özel trendler</string>
+    <string name="scout_picks_quick_title">Sevdiğiniz beş yapımı seçin</string>
+    <string name="scout_picks_quick_sub">Böylece Scout önde başlar. İstediğiniz zaman Zevkiniz bölümünden değiştirin.</string>
+    <string name="scout_picks_quick_row_sub">Scout\'a neyi sevdiğinizi öğretmenin hızlı yolu</string>
+    <string name="scout_picks_quick_count">%1$d / %2$d</string>
+    <string name="scout_picks_quick_done">Bitti</string>
+    <string name="scout_picks_quick_skip">Atla</string>
+    <string name="scout_picks_words_title">Sözlerle zevkiniz</string>
+    <string name="scout_picks_words_row_sub">Yapay zeka anahtarıyla: düzenlenebilir açıklama ve yapay zeka sıralaması</string>
+    <string name="scout_picks_words_sub">Puanladığınız yapımlardan yapay zekanız yazdı. Düzenleyebilirsiniz. Sor ve yapay zeka sıralaması bunu kullanır.</string>
+    <string name="scout_picks_words_empty">Henüz yok. Kendiniz yazın ya da puanladığınız yapımlardan yapay zekanız yazsın.</string>
+    <string name="scout_picks_words_edit">Düzenle</string>
+    <string name="scout_picks_words_write">Yeniden yaz</string>
+    <string name="scout_picks_words_writing">Yazılıyor…</string>
+    <string name="scout_picks_words_remove">Kaldır</string>
+    <string name="scout_picks_sort_title">Önerilerimi yapay zeka sıralasın</string>
+    <string name="scout_picks_sort_sub">Haftada yaklaşık bir kez, anahtarınızla. Scout\'un kendi önerileri yapay zeka gerektirmez.</string>
+    <string name="scout_picks_on">Açık</string>
+    <string name="scout_picks_off">Kapalı</string>
+    <string name="scout_picks_sent">Anahtarınızla seçtiğiniz yapay zeka hizmetine gider: Scout\'un sizin için bulduğu yaklaşık 100 yapım, sözlerle zevkiniz, beğendiğiniz ve beğenmediğiniz yapımlar ve dışarıda bıraktığınız türler. Tüm geçmişiniz gönderilmez.</string>
+    <string name="scout_picks_refine_violent">Daha az şiddet</string>
+    <string name="scout_picks_refine_older">Daha eski</string>
+    <string name="scout_picks_refine_newer">Daha yeni</string>
+    <string name="scout_picks_refine_lighter">Daha hafif bir şey</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Ocultar também “Planejo assistir”</string>
+    <string name="layout_hide_plan_to_watch_sub">Títulos da lista “Planejo assistir” ficam fora das linhas do Início e do banner.</string>
+    <string name="layout_hide_watching">Ocultar também “Assistindo”</string>
+    <string name="layout_hide_watching_sub">Séries e filmes começados ficam fora das linhas do Início e do banner. Eles seguem em Continuar Assistindo.</string>
+</resources>

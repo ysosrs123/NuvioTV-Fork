@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">搜尋</string>
+    <string name="settings_search_title">搜尋設定</string>
+    <string name="settings_search_subtitle">依名稱或功能尋找任何設定。</string>
+    <string name="settings_search_try">試試夜間模式、字幕、穿透或緩衝。</string>
+    <string name="settings_search_none">找不到「%1$s」</string>
+    <string name="settings_search_none_tip">試試更短的字詞，或描述它的功能。</string>
+    <string name="settings_search_results">結果：%1$d</string>
+    <string name="settings_search_more_advanced">進階模式中還有 %1$d 項</string>
+    <string name="settings_search_unavailable">此設定目前無法使用。可能需要先開啟另一項設定。</string>
+</resources>

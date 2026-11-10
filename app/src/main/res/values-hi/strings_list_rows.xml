@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">\"देखने की योजना\" भी छुपाएँ</string>
+    <string name="layout_hide_plan_to_watch_sub">\"देखने की योजना\" लिस्ट के टाइटल होम की रो और बैनर में नहीं दिखते।</string>
+    <string name="layout_hide_watching">\"देख रहे हैं\" भी छुपाएँ</string>
+    <string name="layout_hide_watching_sub">अधूरे देखे गए शो और मूवी होम की रो और बैनर में नहीं दिखते। वे \"देखना जारी रखें\" में बने रहते हैं।</string>
+</resources>

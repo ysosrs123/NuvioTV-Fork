@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Сакриј и „Планирам да гледам“</string>
+    <string name="layout_hide_plan_to_watch_sub">Наслови са листе „Планирам да гледам“ изостављају се из редова Почетне и банера.</string>
+    <string name="layout_hide_watching">Сакриј и „Гледам“</string>
+    <string name="layout_hide_watching_sub">Започете серије и филмови изостављају се из редова Почетне и банера. Остају у Настави гледање.</string>
+</resources>

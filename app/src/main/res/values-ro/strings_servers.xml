@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Servere media</string>
-    <string name="settings_media_servers_subtitle">Conectează Jellyfin, Emby sau Silo ca să răsfoiești și să redai propria bibliotecă.</string>
+    <string name="settings_media_servers_subtitle">Conectează Jellyfin, Emby, Silo sau Plex ca să răsfoiești și să redai propria bibliotecă.</string>
     <string name="servers_section_connected">Servere</string>
     <string name="servers_section_add">Adaugă server</string>
     <string name="servers_section_account">Cont Nuvio</string>
     <string name="servers_source_details">Detalii sursă</string>
-    <string name="servers_source_details_description">Complet afișează numele fișierului și pictogramele la sursele serverului. Simplu afișează doar video, audio și dimensiunea.</string>
+    <string name="servers_source_details_description">Complet afișează numele fișierului și mai multe detalii la sursele serverului. Simplu afișează doar video, audio și dimensiunea.</string>
     <string name="servers_source_details_full">Complet</string>
     <string name="servers_source_details_clean">Simplu</string>
     <string name="servers_show_logos">Afișează logo-urile serverelor</string>
-    <string name="servers_show_logos_description">Afișează logo-ul Jellyfin, Emby sau Silo lângă sursele serverului și în player.</string>
+    <string name="servers_show_logos_description">Afișează logo-ul Jellyfin, Emby, Silo sau Plex lângă sursele serverului și în player.</string>
     <string name="servers_account_sync">Sincronizează serverele media cu contul meu Nuvio</string>
     <string name="servers_account_sync_description">Dezactivat: serverele și autentificările lor rămân pe acest dispozitiv. Activat: lista de servere, inclusiv autentificările, se salvează în contul tău Nuvio și ajunge pe celelalte dispozitive ale tale.</string>
     <string name="servers_account_remove">Elimină serverele mele din contul meu Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Activat</string>
     <string name="servers_enabled_description">Afișează acest server în Acasă, în căutare și în rezultatele de fluxuri.</string>
     <string name="servers_catalog_metadata">Folosește metadatele suplimentelor</string>
-    <string name="servers_catalog_metadata_description">Titlurile se deschid cu detaliile din suplimentele tale și se sincronizează ca orice alt titlu de catalog, iar redarea și marcajele de vizionat sunt trimise în continuare către %1$s. Unele titluri s-ar putea să nu se potrivească sau să nu se redea dacă suplimentele le numerotează sau le identifică diferit.</string>
+    <string name="servers_catalog_metadata_description">Titlurile se deschid cu detaliile din suplimentele tale și se sincronizează ca orice alt titlu de catalog, iar redarea și marcajele de vizionat sunt trimise în continuare către %1$s. Unele titluri s-ar putea să nu se potrivească sau să nu se redea dacă suplimentele le numerotează sau le identifică diferit. Dezactivați pentru a reda doar de pe %1$s, fără căutare în suplimente.</string>
     <string name="servers_import_continue_watching">Importă Continuă vizionarea</string>
     <string name="servers_import_continue_watching_description">Titlurile începute pe %1$s apar în Continuă vizionarea din Acasă. Marcajele de vizionat se țin la zi în ambele sensuri.</string>
     <string name="servers_import_watch_state">Importă progresul vizionării</string>

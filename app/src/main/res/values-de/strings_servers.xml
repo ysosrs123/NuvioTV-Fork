@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Medienserver</string>
-    <string name="settings_media_servers_subtitle">Jellyfin, Emby oder Silo verbinden, um die eigene Bibliothek zu durchsuchen und abzuspielen.</string>
+    <string name="settings_media_servers_subtitle">Jellyfin, Emby, Silo oder Plex verbinden, um die eigene Bibliothek zu durchsuchen und abzuspielen.</string>
     <string name="servers_section_connected">Server</string>
     <string name="servers_section_add">Server hinzufügen</string>
     <string name="servers_section_account">Nuvio-Konto</string>
     <string name="servers_source_details">Quellendetails</string>
-    <string name="servers_source_details_description">Ausführlich zeigt bei Server-Quellen den Dateinamen und Symbole. Schlicht zeigt nur Video, Audio und Größe.</string>
+    <string name="servers_source_details_description">Ausführlich zeigt bei Server-Quellen den Dateinamen und mehr Details. Schlicht zeigt nur Video, Audio und Größe.</string>
     <string name="servers_source_details_full">Ausführlich</string>
     <string name="servers_source_details_clean">Schlicht</string>
     <string name="servers_show_logos">Server-Logos anzeigen</string>
-    <string name="servers_show_logos_description">Das Jellyfin-, Emby- oder Silo-Logo neben Server-Quellen und im Player anzeigen.</string>
+    <string name="servers_show_logos_description">Das Jellyfin-, Emby, Silo- oder Plex-Logo neben Server-Quellen und im Player anzeigen.</string>
     <string name="servers_account_sync">Medienserver mit meinem Nuvio-Konto synchronisieren</string>
     <string name="servers_account_sync_description">Aus: Ihre Server und deren Anmeldungen bleiben auf diesem Gerät. Ein: Die Serverliste wird samt Anmeldungen in Ihrem Nuvio-Konto gespeichert und mit Ihren anderen Geräten geteilt.</string>
     <string name="servers_account_remove">Meine Server aus meinem Nuvio-Konto entfernen</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Aktiviert</string>
     <string name="servers_enabled_description">Diesen Server auf der Startseite, in der Suche und in den Stream-Ergebnissen anzeigen.</string>
     <string name="servers_catalog_metadata">Add-on-Metadaten verwenden</string>
-    <string name="servers_catalog_metadata_description">Titel öffnen sich mit den Details Ihrer Add-ons und werden wie jeder andere Katalogtitel synchronisiert; Wiedergabe und Gesehen-Markierungen gehen weiterhin an %1$s. Manche Titel werden eventuell nicht erkannt oder lassen sich nicht abspielen, wenn Ihre Add-ons sie anders nummerieren oder zuordnen.</string>
+    <string name="servers_catalog_metadata_description">Titel öffnen sich mit den Details Ihrer Add-ons und werden wie jeder andere Katalogtitel synchronisiert; Wiedergabe und Gesehen-Markierungen gehen weiterhin an %1$s. Manche Titel werden eventuell nicht erkannt oder lassen sich nicht abspielen, wenn Ihre Add-ons sie anders nummerieren oder zuordnen. Schalten Sie dies aus, um nur von %1$s abzuspielen, ohne Suche in Add-ons.</string>
     <string name="servers_import_continue_watching">Weiter ansehen importieren</string>
     <string name="servers_import_continue_watching_description">Titel, die Sie auf %1$s begonnen haben, erscheinen auf der Startseite unter Weiter ansehen. Gesehen-Markierungen werden in jedem Fall abgeglichen.</string>
     <string name="servers_import_watch_state">Fortschritt importieren</string>

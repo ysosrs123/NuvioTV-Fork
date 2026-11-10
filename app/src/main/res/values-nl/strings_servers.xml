@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Mediaservers</string>
-    <string name="settings_media_servers_subtitle">Verbind Jellyfin, Emby of Silo om door je eigen bibliotheek te bladeren en die af te spelen.</string>
+    <string name="settings_media_servers_subtitle">Verbind Jellyfin, Emby, Silo of Plex om door je eigen bibliotheek te bladeren en die af te spelen.</string>
     <string name="servers_section_connected">Servers</string>
     <string name="servers_section_add">Server toevoegen</string>
     <string name="servers_section_account">Nuvio-account</string>
     <string name="servers_source_details">Brondetails</string>
-    <string name="servers_source_details_description">Volledig toont de bestandsnaam en pictogrammen bij serverbronnen. Beknopt toont alleen video, audio en grootte.</string>
+    <string name="servers_source_details_description">Volledig toont de bestandsnaam en meer details bij serverbronnen. Beknopt toont alleen video, audio en grootte.</string>
     <string name="servers_source_details_full">Volledig</string>
     <string name="servers_source_details_clean">Beknopt</string>
     <string name="servers_show_logos">Serverlogo\'s tonen</string>
-    <string name="servers_show_logos_description">Toon het Jellyfin-, Emby- of Silo-logo naast serverbronnen en in de speler.</string>
+    <string name="servers_show_logos_description">Toon het Jellyfin-, Emby, Silo- of Plex-logo naast serverbronnen en in de speler.</string>
     <string name="servers_account_sync">Mediaservers synchroniseren met mijn Nuvio-account</string>
     <string name="servers_account_sync_description">Uit: je servers en hun aanmeldingen blijven op dit apparaat. Aan: de serverlijst, inclusief de aanmeldingen, wordt opgeslagen in je Nuvio-account en gedeeld met je andere apparaten.</string>
     <string name="servers_account_remove">Mijn servers uit mijn Nuvio-account verwijderen</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Ingeschakeld</string>
     <string name="servers_enabled_description">Toon deze server op Home, bij zoeken en in streamresultaten.</string>
     <string name="servers_catalog_metadata">Add-onmetadata gebruiken</string>
-    <string name="servers_catalog_metadata_description">Titels openen met de details van je add-ons en synchroniseren zoals elke andere catalogustitel, terwijl afspelen en bekeken-markeringen nog steeds naar %1$s gaan. Sommige titels komen mogelijk niet overeen of spelen niet af als je add-ons ze anders nummeren of herkennen.</string>
+    <string name="servers_catalog_metadata_description">Titels openen met de details van je add-ons en synchroniseren zoals elke andere catalogustitel, terwijl afspelen en bekeken-markeringen nog steeds naar %1$s gaan. Sommige titels komen mogelijk niet overeen of spelen niet af als je add-ons ze anders nummeren of herkennen. Zet dit uit om alleen vanaf %1$s af te spelen, zonder te zoeken in add-ons.</string>
     <string name="servers_import_continue_watching">Verder kijken importeren</string>
     <string name="servers_import_continue_watching_description">Titels die je op %1$s bent begonnen, verschijnen in Verder kijken op Home. Bekeken-markeringen worden hoe dan ook gesynchroniseerd.</string>
     <string name="servers_import_watch_state">Kijkvoortgang importeren</string>

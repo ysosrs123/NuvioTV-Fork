@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">A „Megnézendő” elrejtése is</string>
+    <string name="layout_hide_plan_to_watch_sub">A „Megnézendő” lista címei kimaradnak a Kezdőlap soraiból és a bannerből.</string>
+    <string name="layout_hide_watching">A „Folyamatban” elrejtése is</string>
+    <string name="layout_hide_watching_sub">A megkezdett sorozatok és filmek kimaradnak a Kezdőlap soraiból és a bannerből. A Megtekintés folytatása sorban megmaradnak.</string>
+</resources>

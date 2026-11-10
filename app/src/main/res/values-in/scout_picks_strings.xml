@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Karena Anda suka sekali %1$s dan %2$s</string>
+    <string name="scout_picks_why_person_loved">Karena Anda suka sekali %1$s</string>
+    <string name="scout_picks_why_person">Anda sering menonton %1$s</string>
+    <string name="scout_picks_why_keyword">Karena Anda suka %1$s</string>
+    <string name="scout_picks_why_stretch">Sesuatu yang sedikit berbeda</string>
+    <string name="scout_picks_row_genre_language">%1$s dalam %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">%1$s lainnya</string>
+    <string name="scout_picks_row_new">Baru untuk Anda</string>
+    <string name="scout_picks_row_trending">Tren untuk Anda</string>
+    <string name="scout_picks_quick_title">Pilih lima favorit Anda</string>
+    <string name="scout_picks_quick_sub">Ini jadi bekal awal untuk Scout. Anda bisa mengubahnya kapan saja di Selera Anda.</string>
+    <string name="scout_picks_quick_row_sub">Cara cepat memberi tahu Scout apa yang Anda suka</string>
+    <string name="scout_picks_quick_count">%1$d dari %2$d</string>
+    <string name="scout_picks_quick_done">Selesai</string>
+    <string name="scout_picks_quick_skip">Lewati</string>
+    <string name="scout_picks_words_title">Selera Anda dalam kata-kata</string>
+    <string name="scout_picks_words_row_sub">Dengan kunci AI: deskripsi yang bisa diedit dan pengurutan AI</string>
+    <string name="scout_picks_words_sub">Ditulis AI Anda dari judul yang Anda nilai. Anda bisa mengeditnya. Tanya dan pengurutan AI memakainya.</string>
+    <string name="scout_picks_words_empty">Belum ada. Tulis sendiri, atau biarkan AI menulisnya dari judul yang Anda nilai.</string>
+    <string name="scout_picks_words_edit">Edit</string>
+    <string name="scout_picks_words_write">Tulis ulang</string>
+    <string name="scout_picks_words_writing">Menulis…</string>
+    <string name="scout_picks_words_remove">Hapus</string>
+    <string name="scout_picks_sort_title">Biarkan AI mengurutkan pilihan saya</string>
+    <string name="scout_picks_sort_sub">Sekitar seminggu sekali, dengan kunci Anda. Pilihan Scout sendiri tidak perlu AI.</string>
+    <string name="scout_picks_on">Aktif</string>
+    <string name="scout_picks_off">Nonaktif</string>
+    <string name="scout_picks_sent">Dikirim ke layanan AI pilihan Anda dengan kunci Anda: sekitar 100 judul yang ditemukan Scout, selera Anda dalam kata-kata, judul yang Anda suka dan tidak suka, serta genre yang Anda kecualikan. Seluruh riwayat Anda tidak dikirim.</string>
+    <string name="scout_picks_refine_violent">Kurang kekerasan</string>
+    <string name="scout_picks_refine_older">Lebih lama</string>
+    <string name="scout_picks_refine_newer">Lebih baru</string>
+    <string name="scout_picks_refine_lighter">Sesuatu yang lebih ringan</string>
+</resources>

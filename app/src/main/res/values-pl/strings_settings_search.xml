@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Szukaj</string>
+    <string name="settings_search_title">Szukaj w ustawieniach</string>
+    <string name="settings_search_subtitle">Znajdź dowolne ustawienie po nazwie lub po tym, co robi.</string>
+    <string name="settings_search_try">Spróbuj: tryb nocny, napisy, przepuszczanie lub bufor.</string>
+    <string name="settings_search_none">Nic nie znaleziono dla \"%1$s\"</string>
+    <string name="settings_search_none_tip">Spróbuj krótszego słowa lub opisz, co robi.</string>
+    <string name="settings_search_results">Wyniki: %1$d</string>
+    <string name="settings_search_more_advanced">Jeszcze %1$d w trybie zaawansowanym</string>
+    <string name="settings_search_unavailable">To ustawienie jest teraz niedostępne. Być może najpierw trzeba włączyć inne ustawienie.</string>
+</resources>

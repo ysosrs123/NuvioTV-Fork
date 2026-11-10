@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Weil du %1$s und %2$s liebst</string>
+    <string name="scout_picks_why_person_loved">Weil du %1$s liebst</string>
+    <string name="scout_picks_why_person">Du siehst oft %1$s</string>
+    <string name="scout_picks_why_keyword">Weil du %1$s magst</string>
+    <string name="scout_picks_why_stretch">Mal etwas anderes</string>
+    <string name="scout_picks_row_genre_language">%1$s auf %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Mehr %1$s</string>
+    <string name="scout_picks_row_new">Neu für dich</string>
+    <string name="scout_picks_row_trending">Angesagt für dich</string>
+    <string name="scout_picks_quick_title">Wähle fünf Lieblingstitel</string>
+    <string name="scout_picks_quick_sub">Das verschafft Scout einen Vorsprung. Ändere sie jederzeit unter Dein Geschmack.</string>
+    <string name="scout_picks_quick_row_sub">So zeigst du Scout schnell, was dir gefällt</string>
+    <string name="scout_picks_quick_count">%1$d von %2$d</string>
+    <string name="scout_picks_quick_done">Fertig</string>
+    <string name="scout_picks_quick_skip">Überspringen</string>
+    <string name="scout_picks_words_title">Dein Geschmack in Worten</string>
+    <string name="scout_picks_words_row_sub">Mit KI-Schlüssel: eine Beschreibung zum Bearbeiten und KI-Sortierung</string>
+    <string name="scout_picks_words_sub">Von deiner KI aus deinen bewerteten Titeln geschrieben. Du kannst den Text bearbeiten. Fragen und KI-Sortierung nutzen ihn beide.</string>
+    <string name="scout_picks_words_empty">Noch nichts da. Schreib selbst eine, oder lass deine KI sie aus deinen bewerteten Titeln schreiben.</string>
+    <string name="scout_picks_words_edit">Bearbeiten</string>
+    <string name="scout_picks_words_write">Neu schreiben</string>
+    <string name="scout_picks_words_writing">Wird geschrieben…</string>
+    <string name="scout_picks_words_remove">Entfernen</string>
+    <string name="scout_picks_sort_title">KI meine Vorschläge sortieren lassen</string>
+    <string name="scout_picks_sort_sub">Etwa einmal pro Woche mit deinem Schlüssel. Scouts eigene Vorschläge brauchen keine KI.</string>
+    <string name="scout_picks_on">An</string>
+    <string name="scout_picks_off">Aus</string>
+    <string name="scout_picks_sent">Geht mit deinem Schlüssel an deinen KI-Dienst: etwa 100 Titel, die Scout für dich gefunden hat, dein Geschmack in Worten, Titel, die dir gefallen haben und die nicht, und Genres, die du ausschließt. Deinen ganzen Verlauf bekommt er nicht.</string>
+    <string name="scout_picks_refine_violent">Weniger Gewalt</string>
+    <string name="scout_picks_refine_older">Älter</string>
+    <string name="scout_picks_refine_newer">Neuer</string>
+    <string name="scout_picks_refine_lighter">Etwas Leichteres</string>
+</resources>

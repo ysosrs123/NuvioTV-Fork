@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">المزيج</string>
+    <string name="scout_mixes_add">إضافة إلى مزيج</string>
+    <string name="scout_mixes_add_title">إضافة %1$s إلى مزيج</string>
+    <string name="scout_mixes_already_in">موجود في هذا المزيج</string>
+    <string name="scout_mixes_new">مزيج جديد</string>
+    <string name="scout_mixes_name_title">سمّ هذا المزيج</string>
+    <string name="scout_mixes_name_label">اسم المزيج</string>
+    <string name="scout_mixes_name_default">مزيج %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="zero">%1$s و%2$s و%3$d آخر</item>
+        <item quantity="one">%1$s و%2$s و%3$d آخر</item>
+        <item quantity="two">%1$s و%2$s و%3$d آخر</item>
+        <item quantity="few">%1$s و%2$s و%3$d أخرى</item>
+        <item quantity="many">%1$s و%2$s و%3$d آخر</item>
+        <item quantity="other">%1$s و%2$s و%3$d آخر</item>
+    </plurals>
+    <string name="scout_mixes_save">حفظ</string>
+    <string name="scout_mixes_cancel">إلغاء</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="zero">%1$d مسلسل</item>
+        <item quantity="one">%1$d مسلسل</item>
+        <item quantity="two">%1$d مسلسل</item>
+        <item quantity="few">%1$d مسلسلات</item>
+        <item quantity="many">%1$d مسلسلًا</item>
+        <item quantity="other">%1$d مسلسل</item>
+    </plurals>
+    <string name="scout_mixes_kind">مزيج</string>
+    <string name="scout_mixes_about">حلقات عشوائية من %1$s، واحدة تلو الأخرى.</string>
+    <string name="scout_mixes_fits">مسلسلات تناسب هذا المزيج</string>
+    <string name="scout_mixes_add_show">إضافة</string>
+    <string name="scout_mixes_watch_again">شاهدها مرة أخرى</string>
+    <string name="scout_mixes_find_show">ابحث عن مسلسل</string>
+    <string name="scout_mixes_up_next">التالي</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">جارٍ اختيار حلقة…</string>
+    <string name="scout_mixes_play">تشغيل</string>
+    <string name="scout_mixes_remix">إعادة المزج</string>
+    <string name="scout_mixes_unwatched_only">غير المشاهد فقط</string>
+    <string name="scout_mixes_keep_playing">متابعة التشغيل</string>
+    <string name="scout_mixes_edit">تعديل المزيج</string>
+    <string name="scout_mixes_in_this_mix">في هذا المزيج</string>
+    <string name="scout_mixes_next_in">التالي في %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="zero">يبدأ خلال %1$d ثانية</item>
+        <item quantity="one">يبدأ خلال %1$d ثانية</item>
+        <item quantity="two">يبدأ خلال %1$d ثانية</item>
+        <item quantity="few">يبدأ خلال %1$d ثوانٍ</item>
+        <item quantity="many">يبدأ خلال %1$d ثانية</item>
+        <item quantity="other">يبدأ خلال %1$d ثانية</item>
+    </plurals>
+    <string name="scout_mixes_play_now">تشغيل الآن</string>
+    <string name="scout_mixes_stop">إيقاف</string>
+    <string name="scout_mixes_all_seen">شاهدت كل حلقات هذا المزيج</string>
+    <string name="scout_mixes_all_seen_hint">أضف مسلسلاً ليستمر المزيج، أو أعد مشاهدة مفضلاتك.</string>
+    <string name="scout_mixes_no_shows">لا يحتوي هذا المزيج على مسلسلات بعد</string>
+    <string name="scout_mixes_add_hint">أضف مسلسلات أخرى من قائمة الضغط المطول</string>
+    <string name="scout_mixes_unavailable">تعذّر تحميل أي حلقات</string>
+    <string name="scout_mixes_unavailable_hint">لم تستجب إضافاتك لهذه المسلسلات. اضغط إعادة المزج للمحاولة مجددًا.</string>
+    <string name="scout_mixes_edit_title">تعديل %1$s</string>
+    <string name="scout_mixes_rename">إعادة التسمية</string>
+    <string name="scout_mixes_remove">إزالة %1$s</string>
+    <string name="scout_mixes_delete">حذف هذا المزيج</string>
+    <string name="scout_mixes_delete_title">حذف %1$s؟</string>
+    <string name="scout_mixes_delete_detail">تبقى مسلسلاتك وسجل مشاهدتك كما هي</string>
+    <string name="scout_mixes_delete_confirm">حذف</string>
+</resources>

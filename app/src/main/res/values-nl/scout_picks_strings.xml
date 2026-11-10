@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Omdat je dol bent op %1$s en %2$s</string>
+    <string name="scout_picks_why_person_loved">Omdat je dol bent op %1$s</string>
+    <string name="scout_picks_why_person">Je kijkt vaak %1$s</string>
+    <string name="scout_picks_why_keyword">Omdat je %1$s leuk vindt</string>
+    <string name="scout_picks_why_stretch">Iets heel anders</string>
+    <string name="scout_picks_row_genre_language">%1$s in het %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Meer %1$s</string>
+    <string name="scout_picks_row_new">Nieuw voor jou</string>
+    <string name="scout_picks_row_trending">Trending voor jou</string>
+    <string name="scout_picks_quick_title">Kies vijf favorieten</string>
+    <string name="scout_picks_quick_sub">Zo heeft Scout meteen een voorsprong. Je kunt ze altijd wijzigen bij Jouw smaak.</string>
+    <string name="scout_picks_quick_row_sub">Een snelle manier om Scout te leren wat je leuk vindt</string>
+    <string name="scout_picks_quick_count">%1$d van %2$d</string>
+    <string name="scout_picks_quick_done">Klaar</string>
+    <string name="scout_picks_quick_skip">Overslaan</string>
+    <string name="scout_picks_words_title">Jouw smaak in woorden</string>
+    <string name="scout_picks_words_row_sub">Met een AI-sleutel: een beschrijving die je kunt bewerken en AI-sortering</string>
+    <string name="scout_picks_words_sub">Door je AI geschreven op basis van je beoordeelde titels. Je kunt de tekst bewerken. Vraag en AI-sortering gebruiken hem allebei.</string>
+    <string name="scout_picks_words_empty">Nog niets. Schrijf er zelf een, of laat je AI hem schrijven op basis van je beoordeelde titels.</string>
+    <string name="scout_picks_words_edit">Bewerken</string>
+    <string name="scout_picks_words_write">Opnieuw schrijven</string>
+    <string name="scout_picks_words_writing">Schrijven…</string>
+    <string name="scout_picks_words_remove">Verwijderen</string>
+    <string name="scout_picks_sort_title">AI mijn suggesties laten sorteren</string>
+    <string name="scout_picks_sort_sub">Ongeveer eens per week, met je sleutel. Scouts eigen suggesties hebben geen AI nodig.</string>
+    <string name="scout_picks_on">Aan</string>
+    <string name="scout_picks_off">Uit</string>
+    <string name="scout_picks_sent">Gaat met je sleutel naar je AI-dienst: ongeveer 100 titels die Scout voor je vond, jouw smaak in woorden, titels die je wel en niet leuk vond en genres die je weglaat. Je hele geschiedenis krijgt die dienst niet.</string>
+    <string name="scout_picks_refine_violent">Minder gewelddadig</string>
+    <string name="scout_picks_refine_older">Ouder</string>
+    <string name="scout_picks_refine_newer">Nieuwer</string>
+    <string name="scout_picks_refine_lighter">Iets lichters</string>
+</resources>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Karışımlar</string>
+    <string name="scout_mixes_add">Karışıma ekle</string>
+    <string name="scout_mixes_add_title">%1$s karışıma eklensin</string>
+    <string name="scout_mixes_already_in">Zaten bu karışımda</string>
+    <string name="scout_mixes_new">Yeni karışım</string>
+    <string name="scout_mixes_name_title">Bu karışımı adlandır</string>
+    <string name="scout_mixes_name_label">Karışım adı</string>
+    <string name="scout_mixes_name_default">%1$s karışımı</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="other">%1$s, %2$s ve %3$d tane daha</item>
+    </plurals>
+    <string name="scout_mixes_save">Kaydet</string>
+    <string name="scout_mixes_cancel">İptal</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="other">%1$d dizi</item>
+    </plurals>
+    <string name="scout_mixes_kind">Karışım</string>
+    <string name="scout_mixes_about">%1$s dizilerinden rastgele bölümler, art arda.</string>
+    <string name="scout_mixes_fits">Bu karışıma uyan diziler</string>
+    <string name="scout_mixes_add_show">Ekle</string>
+    <string name="scout_mixes_watch_again">Yeniden izle</string>
+    <string name="scout_mixes_find_show">Dizi bul</string>
+    <string name="scout_mixes_up_next">Sıradaki</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Bölüm seçiliyor…</string>
+    <string name="scout_mixes_play">Oynat</string>
+    <string name="scout_mixes_remix">Yeniden karıştır</string>
+    <string name="scout_mixes_unwatched_only">Yalnızca izlenmeyenler</string>
+    <string name="scout_mixes_keep_playing">Oynatmaya devam et</string>
+    <string name="scout_mixes_edit">Karışımı düzenle</string>
+    <string name="scout_mixes_in_this_mix">Bu karışımda</string>
+    <string name="scout_mixes_next_in">%1$s içinde sıradaki</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="other">%1$d saniye içinde başlıyor</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Şimdi oynat</string>
+    <string name="scout_mixes_stop">Durdur</string>
+    <string name="scout_mixes_all_seen">Bu karışımdaki tüm bölümleri izlediniz</string>
+    <string name="scout_mixes_all_seen_hint">Devam etmek için bir dizi ekleyin ya da favorilerinizi yeniden izleyin.</string>
+    <string name="scout_mixes_no_shows">Bu karışımda henüz dizi yok</string>
+    <string name="scout_mixes_add_hint">Uzun basma menüsünden başka diziler ekleyin</string>
+    <string name="scout_mixes_unavailable">Bölümler yüklenemedi</string>
+    <string name="scout_mixes_unavailable_hint">Eklentileriniz bu diziler için yanıt vermedi. Tekrar denemek için Yeniden karıştır\'a basın.</string>
+    <string name="scout_mixes_edit_title">%1$s düzenle</string>
+    <string name="scout_mixes_rename">Yeniden adlandır</string>
+    <string name="scout_mixes_remove">%1$s kaldır</string>
+    <string name="scout_mixes_delete">Bu karışımı sil</string>
+    <string name="scout_mixes_delete_title">%1$s silinsin mi?</string>
+    <string name="scout_mixes_delete_detail">Dizileriniz ve izleme geçmişiniz olduğu gibi kalır</string>
+    <string name="scout_mixes_delete_confirm">Sil</string>
+</resources>

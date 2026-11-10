@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">חיפוש</string>
+    <string name="settings_search_title">חיפוש בהגדרות</string>
+    <string name="settings_search_subtitle">אפשר למצוא כל הגדרה לפי השם שלה או לפי מה שהיא עושה.</string>
+    <string name="settings_search_try">כדאי לנסות: מצב לילה, כתוביות, מעבר שמע או אגירת נתונים.</string>
+    <string name="settings_search_none">לא נמצאו תוצאות עבור \"%1$s\"</string>
+    <string name="settings_search_none_tip">כדאי לנסות מילה קצרה יותר, או לתאר מה ההגדרה עושה.</string>
+    <string name="settings_search_results">תוצאות: %1$d</string>
+    <string name="settings_search_more_advanced">תוצאות נוספות במצב מתקדם: %1$d</string>
+    <string name="settings_search_unavailable">ההגדרה הזו לא זמינה כרגע. ייתכן שצריך להפעיל קודם הגדרה אחרת.</string>
+</resources>

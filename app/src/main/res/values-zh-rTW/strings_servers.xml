@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">媒體伺服器</string>
-    <string name="settings_media_servers_subtitle">連接 Jellyfin、Emby 或 Silo，瀏覽並播放您自己的媒體庫。</string>
+    <string name="settings_media_servers_subtitle">連接 Jellyfin、Emby、Silo 或 Plex，瀏覽並播放您自己的媒體庫。</string>
     <string name="servers_section_connected">伺服器</string>
     <string name="servers_section_add">新增伺服器</string>
     <string name="servers_section_account">Nuvio 帳戶</string>
     <string name="servers_source_details">來源詳細資訊</string>
-    <string name="servers_source_details_description">完整會顯示伺服器來源的檔案名稱和圖示。簡潔只顯示影片、音訊和大小。</string>
+    <string name="servers_source_details_description">完整會顯示伺服器來源的檔案名稱和更多詳細資料。簡潔只顯示影片、音訊和大小。</string>
     <string name="servers_source_details_full">完整</string>
     <string name="servers_source_details_clean">簡潔</string>
     <string name="servers_show_logos">顯示伺服器標誌</string>
-    <string name="servers_show_logos_description">在伺服器來源旁邊和播放器中顯示 Jellyfin、Emby 或 Silo 標誌。</string>
+    <string name="servers_show_logos_description">在伺服器來源旁邊和播放器中顯示 Jellyfin、Emby、Silo 或 Plex 標誌。</string>
     <string name="servers_account_sync">將媒體伺服器同步到我的 Nuvio 帳戶</string>
     <string name="servers_account_sync_description">關閉：您的伺服器及其登入資訊保留在此裝置上。開啟：伺服器清單 (包括登入資訊) 會儲存到您的 Nuvio 帳戶，並與您的其他裝置共用。</string>
     <string name="servers_account_remove">從我的 Nuvio 帳戶中移除伺服器</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">已啟用</string>
     <string name="servers_enabled_description">在首頁、搜尋和串流結果中顯示此伺服器。</string>
     <string name="servers_catalog_metadata">使用擴充套件中繼資料</string>
-    <string name="servers_catalog_metadata_description">標題會以擴充套件提供的詳細資訊開啟，並像其他目錄標題一樣同步，播放和已觀看標記仍會傳送到 %1$s。如果您的擴充套件對標題的編號或識別方式不同，部分標題可能無法比對或播放。</string>
+    <string name="servers_catalog_metadata_description">標題會以擴充套件提供的詳細資訊開啟，並像其他目錄標題一樣同步，播放和已觀看標記仍會傳送到 %1$s。如果您的擴充套件對標題的編號或識別方式不同，部分標題可能無法比對或播放。關閉後只從 %1$s 播放，不搜尋外掛。</string>
     <string name="servers_import_continue_watching">匯入繼續觀看</string>
     <string name="servers_import_continue_watching_description">您在 %1$s 上開始觀看的標題會顯示在首頁的繼續觀看中。無論開啟與否，已觀看標記都會保持同步。</string>
     <string name="servers_import_watch_state">匯入觀看進度</string>

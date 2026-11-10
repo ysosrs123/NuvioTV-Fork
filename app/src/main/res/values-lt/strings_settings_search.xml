@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Paieška</string>
+    <string name="settings_search_title">Ieškoti nustatymuose</string>
+    <string name="settings_search_subtitle">Raskite bet kurį nustatymą pagal pavadinimą arba tai, ką jis daro.</string>
+    <string name="settings_search_try">Išbandykite: naktinis režimas, subtitrai, passthrough arba buferis.</string>
+    <string name="settings_search_none">Nieko nerasta pagal \"%1$s\"</string>
+    <string name="settings_search_none_tip">Išbandykite trumpesnį žodį arba apibūdinkite, ką nustatymas daro.</string>
+    <string name="settings_search_results">Rezultatai: %1$d</string>
+    <string name="settings_search_more_advanced">Dar %1$d išplėstiniame režime</string>
+    <string name="settings_search_unavailable">Šis nustatymas dabar nepasiekiamas. Gali reikėti pirmiau įjungti kitą nustatymą.</string>
+</resources>

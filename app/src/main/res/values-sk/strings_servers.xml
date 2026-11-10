@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_media_servers">Mediálne servery</string>
-    <string name="settings_media_servers_subtitle">Pripojte Jellyfin, Emby alebo Silo a prechádzajte a prehrávajte vlastnú knižnicu.</string>
+    <string name="settings_media_servers_subtitle">Pripojte Jellyfin, Emby, Silo alebo Plex a prechádzajte a prehrávajte vlastnú knižnicu.</string>
     <string name="servers_section_connected">Servery</string>
     <string name="servers_section_add">Pridať server</string>
     <string name="servers_empty">Zatiaľ nie sú pripojené žiadne servery.</string>
@@ -10,11 +10,11 @@
     <string name="servers_sign_in_subtitle">Zadajte adresu servera a používateľa %1$s, pod ktorým sa chcete prihlásiť. Vaše heslo sa používa iba na prihlásenie.</string>
     <string name="servers_section_account">Účet Nuvio</string>
     <string name="servers_source_details">Podrobnosti zdroja</string>
-    <string name="servers_source_details_description">Úplné zobrazia názov súboru a ikony pri zdrojoch servera. Prehľadné zobrazia len video, audio a veľkosť.</string>
+    <string name="servers_source_details_description">Úplné zobrazia názov súboru a viac podrobností pri zdrojoch servera. Prehľadné zobrazia len video, audio a veľkosť.</string>
     <string name="servers_source_details_full">Úplné</string>
     <string name="servers_source_details_clean">Prehľadné</string>
     <string name="servers_show_logos">Zobraziť logá serverov</string>
-    <string name="servers_show_logos_description">Zobraziť logo Jellyfin, Emby alebo Silo pri zdrojoch servera a v prehrávači.</string>
+    <string name="servers_show_logos_description">Zobraziť logo Jellyfin, Emby, Silo alebo Plex pri zdrojoch servera a v prehrávači.</string>
     <string name="servers_account_sync">Synchronizovať mediálne servery s mojím účtom Nuvio</string>
     <string name="servers_account_sync_description">Vypnuté: vaše servery a ich prihlásenia zostávajú na tomto zariadení. Zapnuté: zoznam serverov vrátane prihlásení sa uloží do vášho účtu Nuvio a zdieľa s vašimi ďalšími zariadeniami.</string>
     <string name="servers_account_remove">Odstrániť moje servery z účtu Nuvio</string>
@@ -36,7 +36,7 @@
     <string name="servers_enabled">Povolené</string>
     <string name="servers_enabled_description">Zobrazovať tento server na Domovskej obrazovke, vo vyhľadávaní a vo výsledkoch streamov.</string>
     <string name="servers_catalog_metadata">Použiť metadáta z doplnkov</string>
-    <string name="servers_catalog_metadata_description">Tituly sa otvoria s podrobnosťami z vašich doplnkov a synchronizujú sa ako akýkoľvek iný titul z katalógu. Priebeh prehrávania a označenia o pozretí sa stále odosielajú do %1$s. Niektoré tituly sa nemusia zhodovať alebo prehrať, ak ich vaše doplnky číslujú alebo identifikujú odlišne.</string>
+    <string name="servers_catalog_metadata_description">Tituly sa otvoria s podrobnosťami z vašich doplnkov a synchronizujú sa ako akýkoľvek iný titul z katalógu. Priebeh prehrávania a označenia o pozretí sa stále odosielajú do %1$s. Niektoré tituly sa nemusia zhodovať alebo prehrať, ak ich vaše doplnky číslujú alebo identifikujú odlišne. Vypnite to, ak chcete prehrávať len z %1$s, bez hľadania v doplnkoch.</string>
     <string name="servers_import_watch_state">Importovať priebeh sledovania</string>
     <string name="servers_import_watch_state_description">Pridá tituly, ktoré sledujete v %1$s, do sekcie Pokračovať v sledovaní spolu s označením o pozretí. Prehrávanie bude v oboch prípadoch nadväzovať z %1$s.</string>
     <string name="servers_sign_in_again">Znova sa prihlásiť</string>

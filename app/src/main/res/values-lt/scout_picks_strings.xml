@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Nes mėgstate %1$s ir %2$s</string>
+    <string name="scout_picks_why_person_loved">Nes mėgstate %1$s</string>
+    <string name="scout_picks_why_person">Dažnai žiūrite %1$s</string>
+    <string name="scout_picks_why_keyword">Nes jums patinka %1$s</string>
+    <string name="scout_picks_why_stretch">Kažkas šiek tiek kito</string>
+    <string name="scout_picks_row_genre_language">%1$s, kalba: %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Daugiau: %1$s</string>
+    <string name="scout_picks_row_new">Nauja jums</string>
+    <string name="scout_picks_row_trending">Populiaru jums</string>
+    <string name="scout_picks_quick_title">Išsirinkite penkis mėgstamus</string>
+    <string name="scout_picks_quick_sub">Taip Scout pradės su pranašumu. Bet kada galite pakeisti skiltyje Jūsų skonis.</string>
+    <string name="scout_picks_quick_row_sub">Greitas būdas parodyti Scout, kas jums patinka</string>
+    <string name="scout_picks_quick_count">%1$d iš %2$d</string>
+    <string name="scout_picks_quick_done">Atlikta</string>
+    <string name="scout_picks_quick_skip">Praleisti</string>
+    <string name="scout_picks_words_title">Jūsų skonis žodžiais</string>
+    <string name="scout_picks_words_row_sub">Su AI raktu: redaguojamas aprašymas ir AI rikiavimas</string>
+    <string name="scout_picks_words_sub">Aprašą parašė jūsų AI pagal jūsų įvertintus pavadinimus. Galite jį redaguoti. Jį naudoja Klausti ir AI rikiavimas.</string>
+    <string name="scout_picks_words_empty">Kol kas nieko. Parašykite patys arba leiskite AI parašyti pagal įvertintus pavadinimus.</string>
+    <string name="scout_picks_words_edit">Redaguoti</string>
+    <string name="scout_picks_words_write">Parašyti iš naujo</string>
+    <string name="scout_picks_words_writing">Rašoma…</string>
+    <string name="scout_picks_words_remove">Pašalinti</string>
+    <string name="scout_picks_sort_title">Leisti AI rikiuoti mano pasiūlymus</string>
+    <string name="scout_picks_sort_sub">Maždaug kartą per savaitę, su jūsų raktu. Paties Scout pasiūlymams AI nereikia.</string>
+    <string name="scout_picks_on">Įjungta</string>
+    <string name="scout_picks_off">Išjungta</string>
+    <string name="scout_picks_sent">Jūsų pasirinktai AI paslaugai su jūsų raktu siunčiama: apie 100 pavadinimų, kuriuos Scout rado jums, jūsų skonis žodžiais, patikę ir nepatikę pavadinimai bei žanrai, kuriuos praleidžiate. Visos istorijos ji negauna.</string>
+    <string name="scout_picks_refine_violent">Mažiau smurto</string>
+    <string name="scout_picks_refine_older">Senesni</string>
+    <string name="scout_picks_refine_newer">Naujesni</string>
+    <string name="scout_picks_refine_lighter">Kažkas lengvesnio</string>
+</resources>

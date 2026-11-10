@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">“İzlenecekler” listesini de gizle</string>
+    <string name="layout_hide_plan_to_watch_sub">“İzlenecekler” listesindeki içerikler Ana Sayfa satırlarında ve banner\'da gösterilmez.</string>
+    <string name="layout_hide_watching">“İzleniyor” listesini de gizle</string>
+    <string name="layout_hide_watching_sub">Yarım kalan diziler ve filmler Ana Sayfa satırlarında ve banner\'da gösterilmez. İzlemeye Devam Et\'te kalırlar.</string>
+</resources>

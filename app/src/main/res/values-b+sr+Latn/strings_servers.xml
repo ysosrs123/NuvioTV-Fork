@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Medijski serveri</string>
-    <string name="settings_media_servers_subtitle">Povežite Jellyfin, Emby ili Silo da pregledate i puštate sopstvenu biblioteku.</string>
+    <string name="settings_media_servers_subtitle">Povežite Jellyfin, Emby, Silo ili Plex da pregledate i puštate sopstvenu biblioteku.</string>
     <string name="servers_section_connected">Serveri</string>
     <string name="servers_section_add">Dodaj server</string>
     <string name="servers_section_account">Nuvio nalog</string>
     <string name="servers_source_details">Detalji izvora</string>
-    <string name="servers_source_details_description">Detaljno prikazuje naziv fajla i ikonice na izvorima servera. Jednostavno prikazuje samo video, zvuk i veličinu.</string>
+    <string name="servers_source_details_description">Detaljno prikazuje naziv fajla i više detalja na izvorima servera. Jednostavno prikazuje samo video, zvuk i veličinu.</string>
     <string name="servers_source_details_full">Detaljno</string>
     <string name="servers_source_details_clean">Jednostavno</string>
     <string name="servers_show_logos">Prikaži logotipe servera</string>
-    <string name="servers_show_logos_description">Prikaži logo Jellyfin, Emby ili Silo pored izvora sa servera i u plejeru.</string>
+    <string name="servers_show_logos_description">Prikaži logo Jellyfin, Emby, Silo ili Plex pored izvora sa servera i u plejeru.</string>
     <string name="servers_account_sync">Sinhronizuj medijske servere sa mojim Nuvio nalogom</string>
     <string name="servers_account_sync_description">Isključeno: vaši serveri i prijave na njih ostaju na ovom uređaju. Uključeno: lista servera, zajedno sa prijavama, čuva se na vašem Nuvio nalogu i deli sa vašim ostalim uređajima.</string>
     <string name="servers_account_remove">Ukloni moje servere sa mog Nuvio naloga</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Uključeno</string>
     <string name="servers_enabled_description">Prikaži ovaj server na Početnoj, u pretrazi i rezultatima strimova.</string>
     <string name="servers_catalog_metadata">Koristi metapodatke dodataka</string>
-    <string name="servers_catalog_metadata_description">Naslovi se otvaraju sa detaljima iz vaših dodataka i sinhronizuju se kao svaki drugi naslov iz kataloga, a reprodukcija i oznake odgledanog se i dalje šalju na %1$s. Neki naslovi se možda neće poklopiti ili pustiti ako ih vaši dodaci drugačije numerišu ili prepoznaju.</string>
+    <string name="servers_catalog_metadata_description">Naslovi se otvaraju sa detaljima iz vaših dodataka i sinhronizuju se kao svaki drugi naslov iz kataloga, a reprodukcija i oznake odgledanog se i dalje šalju na %1$s. Neki naslovi se možda neće poklopiti ili pustiti ako ih vaši dodaci drugačije numerišu ili prepoznaju. Isključite ovo da puštate samo sa %1$s, bez pretrage dodataka.</string>
     <string name="servers_import_continue_watching">Uvezi Nastavak gledanja</string>
     <string name="servers_import_continue_watching_description">Naslovi koje ste započeli na %1$s pojavljuju se u Nastavku gledanja na Početnoj. Oznake odgledanog se usklađuju u oba smera.</string>
     <string name="servers_import_watch_state">Uvezi napredak gledanja</string>

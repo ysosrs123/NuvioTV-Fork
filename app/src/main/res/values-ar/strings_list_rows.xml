@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">إخفاء «أخطط لمشاهدته» أيضًا</string>
+    <string name="layout_hide_plan_to_watch_sub">تُستبعد العناوين الموجودة في قائمة «أخطط لمشاهدته» من صفوف الرئيسية والقسم المميز.</string>
+    <string name="layout_hide_watching">إخفاء «أشاهده الآن» أيضًا</string>
+    <string name="layout_hide_watching_sub">تُستبعد المسلسلات والأفلام التي لم تكتمل مشاهدتها من صفوف الرئيسية والقسم المميز. تبقى في متابعة المشاهدة.</string>
+</resources>

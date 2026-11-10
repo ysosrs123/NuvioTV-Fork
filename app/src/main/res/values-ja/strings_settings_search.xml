@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">検索</string>
+    <string name="settings_search_title">設定を検索</string>
+    <string name="settings_search_subtitle">名前や機能から設定を探せます。</string>
+    <string name="settings_search_try">ナイトモード、字幕、パススルー、バッファなどを試してください。</string>
+    <string name="settings_search_none">「%1$s」は見つかりませんでした</string>
+    <string name="settings_search_none_tip">短い言葉にするか、機能を説明してみてください。</string>
+    <string name="settings_search_results">結果: %1$d 件</string>
+    <string name="settings_search_more_advanced">詳細モードにあと %1$d 件</string>
+    <string name="settings_search_unavailable">この設定は現在使用できません。先に別の設定をオンにする必要があるかもしれません。</string>
+</resources>

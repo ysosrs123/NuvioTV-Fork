@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Медијски сервери</string>
-    <string name="settings_media_servers_subtitle">Повежите Jellyfin, Emby или Silo да прегледате и пуштате сопствену библиотеку.</string>
+    <string name="settings_media_servers_subtitle">Повежите Jellyfin, Emby, Silo или Plex да прегледате и пуштате сопствену библиотеку.</string>
     <string name="servers_section_connected">Сервери</string>
     <string name="servers_section_add">Додај сервер</string>
     <string name="servers_section_account">Nuvio налог</string>
     <string name="servers_source_details">Детаљи извора</string>
-    <string name="servers_source_details_description">Детаљно приказује назив фајла и иконице на изворима сервера. Једноставно приказује само видео, звук и величину.</string>
+    <string name="servers_source_details_description">Детаљно приказује назив фајла и више детаља на изворима сервера. Једноставно приказује само видео, звук и величину.</string>
     <string name="servers_source_details_full">Детаљно</string>
     <string name="servers_source_details_clean">Једноставно</string>
     <string name="servers_show_logos">Прикажи логотипе сервера</string>
-    <string name="servers_show_logos_description">Прикажи лого Jellyfin, Emby или Silo поред извора са сервера и у плејеру.</string>
+    <string name="servers_show_logos_description">Прикажи лого Jellyfin, Emby, Silo или Plex поред извора са сервера и у плејеру.</string>
     <string name="servers_account_sync">Синхронизуј медијске сервере са мојим Nuvio налогом</string>
     <string name="servers_account_sync_description">Искључено: ваши сервери и пријаве на њих остају на овом уређају. Укључено: листа сервера, заједно са пријавама, чува се на вашем Nuvio налогу и дели са вашим осталим уређајима.</string>
     <string name="servers_account_remove">Уклони моје сервере са мог Nuvio налога</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Укључено</string>
     <string name="servers_enabled_description">Прикажи овај сервер на Почетној, у претрази и резултатима стримова.</string>
     <string name="servers_catalog_metadata">Користи метаподатке додатака</string>
-    <string name="servers_catalog_metadata_description">Наслови се отварају са детаљима из ваших додатака и синхронизују се као сваки други наслов из каталога, а репродукција и ознаке одгледаног се и даље шаљу на %1$s. Неки наслови се можда неће поклопити или пустити ако их ваши додаци другачије нумеришу или препознају.</string>
+    <string name="servers_catalog_metadata_description">Наслови се отварају са детаљима из ваших додатака и синхронизују се као сваки други наслов из каталога, а репродукција и ознаке одгледаног се и даље шаљу на %1$s. Неки наслови се можда неће поклопити или пустити ако их ваши додаци другачије нумеришу или препознају. Искључите ово да пуштате само са %1$s, без претраге додатака.</string>
     <string name="servers_import_continue_watching">Увези Наставак гледања</string>
     <string name="servers_import_continue_watching_description">Наслови које сте започели на %1$s појављују се у Наставку гледања на Почетној. Ознаке одгледаног се усклађују у оба смера.</string>
     <string name="servers_import_watch_state">Увези напредак гледања</string>

@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Medieservere</string>
-    <string name="settings_media_servers_subtitle">Koble til Jellyfin, Emby eller Silo for å bla i og spille av ditt eget bibliotek.</string>
+    <string name="settings_media_servers_subtitle">Koble til Jellyfin, Emby, Silo eller Plex for å bla i og spille av ditt eget bibliotek.</string>
     <string name="servers_section_connected">Servere</string>
     <string name="servers_section_add">Legg til server</string>
     <string name="servers_section_account">Nuvio-konto</string>
     <string name="servers_source_details">Kildedetaljer</string>
-    <string name="servers_source_details_description">Fullstendig viser filnavn og ikoner på serverkilder. Enkel viser bare video, lyd og størrelse.</string>
+    <string name="servers_source_details_description">Fullstendig viser filnavn og flere detaljer på serverkilder. Enkel viser bare video, lyd og størrelse.</string>
     <string name="servers_source_details_full">Fullstendig</string>
     <string name="servers_source_details_clean">Enkel</string>
     <string name="servers_show_logos">Vis serverlogoer</string>
-    <string name="servers_show_logos_description">Vis Jellyfin-, Emby- eller Silo-logoen ved serverkilder og i spilleren.</string>
+    <string name="servers_show_logos_description">Vis Jellyfin-, Emby, Silo- eller Plex-logoen ved serverkilder og i spilleren.</string>
     <string name="servers_account_sync">Synkroniser medieservere til Nuvio-kontoen min</string>
     <string name="servers_account_sync_description">Av: serverne dine og innloggingene deres blir på denne enheten. På: serverlisten, med innloggingene, lagres i Nuvio-kontoen din og deles med de andre enhetene dine.</string>
     <string name="servers_account_remove">Fjern serverne mine fra Nuvio-kontoen min</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Aktivert</string>
     <string name="servers_enabled_description">Vis denne serveren i Hjem, søk og strømresultater.</string>
     <string name="servers_catalog_metadata">Bruk tilleggsmetadata</string>
-    <string name="servers_catalog_metadata_description">Titler åpnes med detaljene fra tilleggene dine og synkroniseres som alle andre katalogtitler, mens avspilling og sett-merker fortsatt sendes til %1$s. Noen titler samsvarer kanskje ikke eller kan ikke spilles av hvis tilleggene dine nummererer eller identifiserer dem annerledes.</string>
+    <string name="servers_catalog_metadata_description">Titler åpnes med detaljene fra tilleggene dine og synkroniseres som alle andre katalogtitler, mens avspilling og sett-merker fortsatt sendes til %1$s. Noen titler samsvarer kanskje ikke eller kan ikke spilles av hvis tilleggene dine nummererer eller identifiserer dem annerledes. Slå av dette for å spille bare fra %1$s, uten søk i tillegg.</string>
     <string name="servers_import_continue_watching">Importer Fortsett å se</string>
     <string name="servers_import_continue_watching_description">Titler du har begynt på i %1$s, vises i Fortsett å se på Hjem. Sett-merker holdes i takt begge veier.</string>
     <string name="servers_import_watch_state">Importer visningsfremdrift</string>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Ook “Van plan te kijken” verbergen</string>
+    <string name="layout_hide_plan_to_watch_sub">Titels op de lijst “Van plan te kijken” worden weggelaten uit de rijen op Home en de banner.</string>
+    <string name="layout_hide_watching">Ook “Aan het kijken” verbergen</string>
+    <string name="layout_hide_watching_sub">Begonnen series en films worden weggelaten uit de rijen op Home en de banner. Ze blijven in Verder kijken.</string>
+</resources>

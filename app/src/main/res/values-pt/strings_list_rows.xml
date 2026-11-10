@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Ocultar também “Para ver”</string>
+    <string name="layout_hide_plan_to_watch_sub">Os títulos da lista “Para ver” ficam fora das linhas do Início e do banner.</string>
+    <string name="layout_hide_watching">Ocultar também “A ver”</string>
+    <string name="layout_hide_watching_sub">As séries e os filmes começados ficam fora das linhas do Início e do banner. Mantêm-se em Continuar a ver.</string>
+</resources>

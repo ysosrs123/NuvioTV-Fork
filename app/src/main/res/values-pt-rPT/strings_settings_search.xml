@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Pesquisar</string>
+    <string name="settings_search_title">Pesquisar nas definições</string>
+    <string name="settings_search_subtitle">Encontra qualquer definição pelo nome ou pelo que faz.</string>
+    <string name="settings_search_try">Experimenta: modo noturno, legendas, passthrough ou buffer.</string>
+    <string name="settings_search_none">Nada encontrado para \"%1$s\"</string>
+    <string name="settings_search_none_tip">Experimenta uma palavra mais curta ou descreve o que faz.</string>
+    <string name="settings_search_results">Resultados: %1$d</string>
+    <string name="settings_search_more_advanced">Mais %1$d no modo Avançado</string>
+    <string name="settings_search_unavailable">Esta definição não está disponível agora. Talvez outra definição tenha de estar ativa primeiro.</string>
+</resources>

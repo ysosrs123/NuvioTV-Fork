@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">لأنك تحب %1$s و%2$s</string>
+    <string name="scout_picks_why_person_loved">لأنك تحب %1$s</string>
+    <string name="scout_picks_why_person">تشاهد %1$s كثيرًا</string>
+    <string name="scout_picks_why_keyword">لأن %1$s يعجبك</string>
+    <string name="scout_picks_why_stretch">شيء مختلف قليلًا</string>
+    <string name="scout_picks_row_genre_language">%1$s باللغة %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">المزيد من %1$s</string>
+    <string name="scout_picks_row_new">جديد لك</string>
+    <string name="scout_picks_row_trending">رائج لك</string>
+    <string name="scout_picks_quick_title">اختر خمسة تحبها</string>
+    <string name="scout_picks_quick_sub">هذا يمنح Scout بداية أسرع. يمكنك تغييرها في أي وقت من ذوقك.</string>
+    <string name="scout_picks_quick_row_sub">طريقة سريعة لتعريف Scout بما تستمتع به</string>
+    <string name="scout_picks_quick_count">%1$d من %2$d</string>
+    <string name="scout_picks_quick_done">تم</string>
+    <string name="scout_picks_quick_skip">تخطي</string>
+    <string name="scout_picks_words_title">ذوقك بالكلمات</string>
+    <string name="scout_picks_words_row_sub">مع مفتاح ذكاء اصطناعي: وصف يمكنك تعديله وفرز بالذكاء الاصطناعي</string>
+    <string name="scout_picks_words_sub">كتبه ذكاؤك الاصطناعي من العناوين التي قيّمتها. يمكنك تعديله. يستخدمه السؤال والفرز بالذكاء الاصطناعي.</string>
+    <string name="scout_picks_words_empty">لا شيء بعد. اكتب وصفك أو دع ذكاءك الاصطناعي يكتبه من العناوين التي قيّمتها.</string>
+    <string name="scout_picks_words_edit">تعديل</string>
+    <string name="scout_picks_words_write">اكتبه من جديد</string>
+    <string name="scout_picks_words_writing">جارٍ الكتابة…</string>
+    <string name="scout_picks_words_remove">إزالة</string>
+    <string name="scout_picks_sort_title">دع الذكاء الاصطناعي يرتب اختياراتي</string>
+    <string name="scout_picks_sort_sub">مرة في الأسبوع تقريبًا باستخدام مفتاحك. اختيارات Scout نفسها لا تحتاج إلى ذكاء اصطناعي.</string>
+    <string name="scout_picks_on">تشغيل</string>
+    <string name="scout_picks_off">إيقاف</string>
+    <string name="scout_picks_sent">يُرسل إلى خدمة الذكاء الاصطناعي التي اخترتها بمفتاحك: نحو 100 عنوان وجدها Scout لك، وذوقك بالكلمات، والعناوين التي أعجبتك والتي لم تعجبك، والأنواع التي تستبعدها. لا يصلها سجلك الكامل.</string>
+    <string name="scout_picks_refine_violent">أقل عنفًا</string>
+    <string name="scout_picks_refine_older">أقدم</string>
+    <string name="scout_picks_refine_newer">أحدث</string>
+    <string name="scout_picks_refine_lighter">شيء أخف</string>
+</resources>

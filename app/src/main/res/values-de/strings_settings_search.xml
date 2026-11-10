@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Suchen</string>
+    <string name="settings_search_title">Einstellungen durchsuchen</string>
+    <string name="settings_search_subtitle">Finden Sie jede Einstellung über ihren Namen oder ihre Funktion.</string>
+    <string name="settings_search_try">Versuchen Sie z. B. Nachtmodus, Untertitel, Passthrough oder Puffer.</string>
+    <string name="settings_search_none">Nichts gefunden für \"%1$s\"</string>
+    <string name="settings_search_none_tip">Versuchen Sie es mit einem kürzeren Wort oder beschreiben Sie, was die Einstellung tut.</string>
+    <string name="settings_search_results">Ergebnisse: %1$d</string>
+    <string name="settings_search_more_advanced">%1$d weitere im Modus Fortgeschritten</string>
+    <string name="settings_search_unavailable">Diese Einstellung ist gerade nicht verfügbar. Vielleicht muss zuerst eine andere Einstellung aktiv sein.</string>
+</resources>

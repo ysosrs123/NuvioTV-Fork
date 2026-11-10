@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Медіасервери</string>
-    <string name="settings_media_servers_subtitle">Підключіть Jellyfin, Emby або Silo, щоб переглядати й відтворювати власну бібліотеку.</string>
+    <string name="settings_media_servers_subtitle">Підключіть Jellyfin, Emby, Silo або Plex, щоб переглядати й відтворювати власну бібліотеку.</string>
     <string name="servers_section_connected">Сервери</string>
     <string name="servers_section_add">Додати сервер</string>
     <string name="servers_section_account">Акаунт Nuvio</string>
     <string name="servers_source_details">Деталі джерела</string>
-    <string name="servers_source_details_description">Повні показують ім\'я файлу та значки на джерелах сервера. Стислі показують лише відео, аудіо та розмір.</string>
+    <string name="servers_source_details_description">Повні показують ім\'я файлу та більше подробиць на джерелах сервера. Стислі показують лише відео, аудіо та розмір.</string>
     <string name="servers_source_details_full">Повні</string>
     <string name="servers_source_details_clean">Стислі</string>
     <string name="servers_show_logos">Показувати логотипи серверів</string>
-    <string name="servers_show_logos_description">Показувати логотип Jellyfin, Emby або Silo поруч із джерелами сервера та в плеєрі.</string>
+    <string name="servers_show_logos_description">Показувати логотип Jellyfin, Emby, Silo або Plex поруч із джерелами сервера та в плеєрі.</string>
     <string name="servers_account_sync">Синхронізувати медіасервери з моїм акаунтом Nuvio</string>
     <string name="servers_account_sync_description">Вимк: сервери та дані входу лишаються на цьому пристрої. Увімк: список серверів разом із даними входу зберігається в акаунті Nuvio і доступний на інших ваших пристроях.</string>
     <string name="servers_account_remove">Видалити мої сервери з акаунта Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Увімкнено</string>
     <string name="servers_enabled_description">Показувати цей сервер на головному екрані, у пошуку та серед потоків.</string>
     <string name="servers_catalog_metadata">Використовувати метадані адонів</string>
-    <string name="servers_catalog_metadata_description">Тайтли відкриваються з відомостями з ваших адонів і синхронізуються як будь-який тайтл каталогу, а відтворення й позначки про перегляд і далі надсилаються в %1$s. Деякі тайтли можуть не збігтися або не відтворитися, якщо адони нумерують чи визначають їх інакше.</string>
+    <string name="servers_catalog_metadata_description">Тайтли відкриваються з відомостями з ваших адонів і синхронізуються як будь-який тайтл каталогу, а відтворення й позначки про перегляд і далі надсилаються в %1$s. Деякі тайтли можуть не збігтися або не відтворитися, якщо адони нумерують чи визначають їх інакше. Вимкніть, щоб відтворювати лише з %1$s, без пошуку в додатках.</string>
     <string name="servers_import_continue_watching">Імпортувати «Продовжити перегляд»</string>
     <string name="servers_import_continue_watching_description">Тайтли, розпочаті в %1$s, з\'являються в розділі «Продовжити перегляд» на головному екрані. Позначки про перегляд синхронізуються в будь-якому разі.</string>
     <string name="servers_import_watch_state">Імпортувати прогрес перегляду</string>

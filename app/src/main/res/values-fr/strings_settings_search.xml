@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Rechercher</string>
+    <string name="settings_search_title">Rechercher dans les paramètres</string>
+    <string name="settings_search_subtitle">Trouvez n\'importe quel paramètre par son nom ou par ce qu\'il fait.</string>
+    <string name="settings_search_try">Essayez : mode nuit, sous-titres, passthrough ou mémoire tampon.</string>
+    <string name="settings_search_none">Aucun résultat pour \"%1$s\"</string>
+    <string name="settings_search_none_tip">Essayez un mot plus court ou décrivez ce que fait le paramètre.</string>
+    <string name="settings_search_results">Résultats : %1$d</string>
+    <string name="settings_search_more_advanced">%1$d de plus en mode Avancé</string>
+    <string name="settings_search_unavailable">Ce paramètre n\'est pas disponible pour le moment. Un autre paramètre doit peut-être être activé d\'abord.</string>
+</resources>

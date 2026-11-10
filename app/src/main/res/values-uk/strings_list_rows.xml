@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Також приховувати «Планую переглянути»</string>
+    <string name="layout_hide_plan_to_watch_sub">Тайтли зі списку «Планую переглянути» не показуються в рядах головного екрана й у банері.</string>
+    <string name="layout_hide_watching">Також приховувати «Дивлюся»</string>
+    <string name="layout_hide_watching_sub">Розпочаті серіали та фільми не показуються в рядах головного екрана й у банері. Вони залишаються в «Продовжити перегляд».</string>
+</resources>

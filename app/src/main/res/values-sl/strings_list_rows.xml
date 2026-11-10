@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Skrij tudi „Za ogled“</string>
+    <string name="layout_hide_plan_to_watch_sub">Naslovi s seznama „Za ogled“ so izpuščeni iz vrstic začetnega zaslona in pasice.</string>
+    <string name="layout_hide_watching">Skrij tudi „Gledam“</string>
+    <string name="layout_hide_watching_sub">Začete serije in filmi so izpuščeni iz vrstic začetnega zaslona in pasice. Ostanejo v Nadaljuj z gledanjem.</string>
+</resources>

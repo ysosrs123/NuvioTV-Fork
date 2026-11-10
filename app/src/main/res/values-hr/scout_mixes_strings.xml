@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Miksevi</string>
+    <string name="scout_mixes_add">Dodaj u miks</string>
+    <string name="scout_mixes_add_title">Dodaj %1$s u miks</string>
+    <string name="scout_mixes_already_in">Već je u ovom miksu</string>
+    <string name="scout_mixes_new">Novi miks</string>
+    <string name="scout_mixes_name_title">Imenuj ovaj miks</string>
+    <string name="scout_mixes_name_label">Naziv miksa</string>
+    <string name="scout_mixes_name_default">Miks %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s i još %3$d</item>
+        <item quantity="few">%1$s, %2$s i još %3$d</item>
+        <item quantity="other">%1$s, %2$s i još %3$d</item>
+    </plurals>
+    <string name="scout_mixes_save">Spremi</string>
+    <string name="scout_mixes_cancel">Odustani</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d serija</item>
+        <item quantity="few">%1$d serije</item>
+        <item quantity="other">%1$d serija</item>
+    </plurals>
+    <string name="scout_mixes_kind">Miks</string>
+    <string name="scout_mixes_about">Nasumične epizode iz serija %1$s, jedna za drugom.</string>
+    <string name="scout_mixes_fits">Serije koje odgovaraju ovom miksu</string>
+    <string name="scout_mixes_add_show">Dodaj</string>
+    <string name="scout_mixes_watch_again">Gledaj ih ponovno</string>
+    <string name="scout_mixes_find_show">Pronađi seriju</string>
+    <string name="scout_mixes_up_next">Sljedeće</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Odabir epizode…</string>
+    <string name="scout_mixes_play">Reproduciraj</string>
+    <string name="scout_mixes_remix">Ponovno izmiješaj</string>
+    <string name="scout_mixes_unwatched_only">Samo nepogledano</string>
+    <string name="scout_mixes_keep_playing">Nastavi reprodukciju</string>
+    <string name="scout_mixes_edit">Uredi miks</string>
+    <string name="scout_mixes_in_this_mix">U ovom miksu</string>
+    <string name="scout_mixes_next_in">Sljedeće u miksu %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Počinje za %1$d sekundu</item>
+        <item quantity="few">Počinje za %1$d sekunde</item>
+        <item quantity="other">Počinje za %1$d sekundi</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Reproduciraj sada</string>
+    <string name="scout_mixes_stop">Zaustavi</string>
+    <string name="scout_mixes_all_seen">Pogledao/la si sve epizode u ovom miksu</string>
+    <string name="scout_mixes_all_seen_hint">Dodaj seriju da miks traje ili ponovno gledaj omiljene.</string>
+    <string name="scout_mixes_no_shows">Ovaj miks još nema serija</string>
+    <string name="scout_mixes_add_hint">Dodaj još serija iz njihovog izbornika dugog pritiska</string>
+    <string name="scout_mixes_unavailable">Nije moguće učitati epizode</string>
+    <string name="scout_mixes_unavailable_hint">Tvoji dodaci nisu odgovorili za ove serije. Pritisni Ponovno izmiješaj za novi pokušaj.</string>
+    <string name="scout_mixes_edit_title">Uredi %1$s</string>
+    <string name="scout_mixes_rename">Preimenuj</string>
+    <string name="scout_mixes_remove">Ukloni %1$s</string>
+    <string name="scout_mixes_delete">Izbriši ovaj miks</string>
+    <string name="scout_mixes_delete_title">Izbrisati %1$s?</string>
+    <string name="scout_mixes_delete_detail">Tvoje serije i povijest gledanja ostaju kakve jesu</string>
+    <string name="scout_mixes_delete_confirm">Izbriši</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Căutare</string>
+    <string name="settings_search_title">Caută în setări</string>
+    <string name="settings_search_subtitle">Găsește orice setare după nume sau după ce face.</string>
+    <string name="settings_search_try">Încearcă: mod noapte, subtitrări, passthrough sau buffer.</string>
+    <string name="settings_search_none">Niciun rezultat pentru \"%1$s\"</string>
+    <string name="settings_search_none_tip">Încearcă un cuvânt mai scurt sau descrie ce face.</string>
+    <string name="settings_search_results">Rezultate: %1$d</string>
+    <string name="settings_search_more_advanced">Încă %1$d în modul Avansat</string>
+    <string name="settings_search_unavailable">Această setare nu este disponibilă acum. Poate trebuie activată mai întâi altă setare.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Ara</string>
+    <string name="settings_search_title">Ayarlarda ara</string>
+    <string name="settings_search_subtitle">Herhangi bir ayarı adına veya ne yaptığına göre bulun.</string>
+    <string name="settings_search_try">Deneyin: gece modu, altyazılar, ses geçidi veya arabellek.</string>
+    <string name="settings_search_none">\"%1$s\" için sonuç bulunamadı</string>
+    <string name="settings_search_none_tip">Daha kısa bir sözcük deneyin veya ne yaptığını anlatın.</string>
+    <string name="settings_search_results">Sonuçlar: %1$d</string>
+    <string name="settings_search_more_advanced">Gelişmiş modda %1$d tane daha</string>
+    <string name="settings_search_unavailable">Bu ayar şu anda kullanılamıyor. Önce başka bir ayarın açılması gerekebilir.</string>
+</resources>

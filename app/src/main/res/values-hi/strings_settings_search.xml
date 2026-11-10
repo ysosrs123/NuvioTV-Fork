@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">खोज</string>
+    <string name="settings_search_title">सेटिंग्स में खोजें</string>
+    <string name="settings_search_subtitle">कोई भी सेटिंग उसके नाम या उसके काम से ढूँढें।</string>
+    <string name="settings_search_try">नाइट मोड, सबटाइटल, पासथ्रू या बफर आज़माएँ।</string>
+    <string name="settings_search_none">\"%1$s\" के लिए कुछ नहीं मिला</string>
+    <string name="settings_search_none_tip">छोटा शब्द आज़माएँ, या बताएँ कि सेटिंग क्या करती है।</string>
+    <string name="settings_search_results">नतीजे: %1$d</string>
+    <string name="settings_search_more_advanced">एडवांस्ड मोड में %1$d और</string>
+    <string name="settings_search_unavailable">यह सेटिंग अभी उपलब्ध नहीं है। हो सकता है पहले कोई दूसरी सेटिंग चालू करनी पड़े।</string>
+</resources>

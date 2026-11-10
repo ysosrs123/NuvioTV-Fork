@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">「見たい」も非表示</string>
+    <string name="layout_hide_plan_to_watch_sub">「見たい」リストのタイトルを、ホームの行とバナーから除外します。</string>
+    <string name="layout_hide_watching">「視聴中」も非表示</string>
+    <string name="layout_hide_watching_sub">途中まで視聴した番組と映画を、ホームの行とバナーから除外します。「視聴を続ける」には残ります。</string>
+</resources>

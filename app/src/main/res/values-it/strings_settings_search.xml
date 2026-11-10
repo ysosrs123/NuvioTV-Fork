@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Cerca</string>
+    <string name="settings_search_title">Cerca nelle impostazioni</string>
+    <string name="settings_search_subtitle">Trova qualsiasi impostazione dal nome o da ciò che fa.</string>
+    <string name="settings_search_try">Prova: modalità notte, sottotitoli, passthrough o buffer.</string>
+    <string name="settings_search_none">Nessun risultato per \"%1$s\"</string>
+    <string name="settings_search_none_tip">Prova una parola più corta o descrivi cosa fa.</string>
+    <string name="settings_search_results">Risultati: %1$d</string>
+    <string name="settings_search_more_advanced">Altri %1$d nella modalità Avanzata</string>
+    <string name="settings_search_unavailable">Questa impostazione non è disponibile ora. Forse deve essere prima attivata un\'altra impostazione.</string>
+</resources>

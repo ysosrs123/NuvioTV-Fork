@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Vì bạn rất thích %1$s và %2$s</string>
+    <string name="scout_picks_why_person_loved">Vì bạn rất thích %1$s</string>
+    <string name="scout_picks_why_person">Bạn thường xem %1$s</string>
+    <string name="scout_picks_why_keyword">Vì bạn thích %1$s</string>
+    <string name="scout_picks_why_stretch">Một chút khác biệt</string>
+    <string name="scout_picks_row_genre_language">%1$s bằng %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Thêm %1$s</string>
+    <string name="scout_picks_row_new">Mới cho bạn</string>
+    <string name="scout_picks_row_trending">Thịnh hành cho bạn</string>
+    <string name="scout_picks_quick_title">Chọn năm tựa bạn yêu thích</string>
+    <string name="scout_picks_quick_sub">Điều này giúp Scout khởi đầu nhanh hơn. Bạn có thể đổi bất cứ lúc nào trong Gu của bạn.</string>
+    <string name="scout_picks_quick_row_sub">Cách nhanh để Scout biết bạn thích gì</string>
+    <string name="scout_picks_quick_count">%1$d/%2$d</string>
+    <string name="scout_picks_quick_done">Xong</string>
+    <string name="scout_picks_quick_skip">Bỏ qua</string>
+    <string name="scout_picks_words_title">Gu của bạn bằng lời</string>
+    <string name="scout_picks_words_row_sub">Với khóa AI: mô tả có thể sửa và sắp xếp bằng AI</string>
+    <string name="scout_picks_words_sub">Do AI của bạn viết từ các tựa bạn đã đánh giá. Bạn có thể sửa. Hỏi và sắp xếp AI đều dùng nó.</string>
+    <string name="scout_picks_words_empty">Chưa có gì. Tự viết hoặc để AI viết từ các tựa bạn đã đánh giá.</string>
+    <string name="scout_picks_words_edit">Sửa</string>
+    <string name="scout_picks_words_write">Viết lại</string>
+    <string name="scout_picks_words_writing">Đang viết…</string>
+    <string name="scout_picks_words_remove">Xóa</string>
+    <string name="scout_picks_sort_title">Để AI sắp xếp gợi ý của tôi</string>
+    <string name="scout_picks_sort_sub">Khoảng mỗi tuần một lần, bằng khóa của bạn. Gợi ý riêng của Scout không cần AI.</string>
+    <string name="scout_picks_on">Bật</string>
+    <string name="scout_picks_off">Tắt</string>
+    <string name="scout_picks_sent">Gửi tới dịch vụ AI bạn đã chọn, kèm khóa của bạn: khoảng 100 tựa Scout tìm cho bạn, gu của bạn bằng lời, các tựa bạn thích và không thích, và thể loại bạn loại trừ. Toàn bộ lịch sử không được gửi.</string>
+    <string name="scout_picks_refine_violent">Ít bạo lực hơn</string>
+    <string name="scout_picks_refine_older">Cũ hơn</string>
+    <string name="scout_picks_refine_newer">Mới hơn</string>
+    <string name="scout_picks_refine_lighter">Nhẹ nhàng hơn</string>
+</resources>

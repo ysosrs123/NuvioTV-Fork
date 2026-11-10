@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Hledat</string>
+    <string name="settings_search_title">Hledat v nastavení</string>
+    <string name="settings_search_subtitle">Najděte jakékoli nastavení podle názvu nebo podle toho, co dělá.</string>
+    <string name="settings_search_try">Zkuste noční režim, titulky, passthrough nebo buffer.</string>
+    <string name="settings_search_none">Pro \"%1$s\" nebylo nic nalezeno</string>
+    <string name="settings_search_none_tip">Zkuste kratší slovo nebo popište, co nastavení dělá.</string>
+    <string name="settings_search_results">Výsledky: %1$d</string>
+    <string name="settings_search_more_advanced">Další v pokročilém režimu: %1$d</string>
+    <string name="settings_search_unavailable">Toto nastavení teď není dostupné. Možná je potřeba nejdřív zapnout jiné nastavení.</string>
+</resources>

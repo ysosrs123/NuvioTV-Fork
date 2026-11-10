@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Parce que vous adorez %1$s et %2$s</string>
+    <string name="scout_picks_why_person_loved">Parce que vous adorez %1$s</string>
+    <string name="scout_picks_why_person">Vous regardez souvent %1$s</string>
+    <string name="scout_picks_why_keyword">Parce que vous aimez %1$s</string>
+    <string name="scout_picks_why_stretch">Quelque chose d\'un peu différent</string>
+    <string name="scout_picks_row_genre_language">%1$s en %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s : %2$s</string>
+    <string name="scout_picks_row_genre">Plus de %1$s</string>
+    <string name="scout_picks_row_new">Nouveautés pour vous</string>
+    <string name="scout_picks_row_trending">Tendances pour vous</string>
+    <string name="scout_picks_quick_title">Choisissez cinq titres que vous adorez</string>
+    <string name="scout_picks_quick_sub">Scout prend ainsi de l\'avance. Modifiez-les à tout moment dans Vos goûts.</string>
+    <string name="scout_picks_quick_row_sub">Un moyen rapide de montrer à Scout ce que vous aimez</string>
+    <string name="scout_picks_quick_count">%1$d sur %2$d</string>
+    <string name="scout_picks_quick_done">Terminé</string>
+    <string name="scout_picks_quick_skip">Ignorer</string>
+    <string name="scout_picks_words_title">Vos goûts en quelques mots</string>
+    <string name="scout_picks_words_row_sub">Avec une clé d\'IA : une description modifiable et le tri par IA</string>
+    <string name="scout_picks_words_sub">Écrite par votre IA d\'après les titres notés. Vous pouvez la modifier. Demander et le tri par IA l\'utilisent.</string>
+    <string name="scout_picks_words_empty">Rien pour l\'instant. Écrivez la vôtre ou laissez votre IA l\'écrire d\'après les titres notés.</string>
+    <string name="scout_picks_words_edit">Modifier</string>
+    <string name="scout_picks_words_write">Réécrire</string>
+    <string name="scout_picks_words_writing">Écriture…</string>
+    <string name="scout_picks_words_remove">Supprimer</string>
+    <string name="scout_picks_sort_title">Laisser l\'IA trier mes suggestions</string>
+    <string name="scout_picks_sort_sub">Environ une fois par semaine, avec votre clé. Les suggestions de Scout n\'ont pas besoin d\'IA.</string>
+    <string name="scout_picks_on">Activé</string>
+    <string name="scout_picks_off">Désactivé</string>
+    <string name="scout_picks_sent">Envoyé à votre service d\'IA avec votre clé : environ 100 titres trouvés par Scout pour vous, vos goûts en quelques mots, les titres que vous avez aimés ou non, et les genres que vous excluez. Il ne reçoit pas tout votre historique.</string>
+    <string name="scout_picks_refine_violent">Moins violent</string>
+    <string name="scout_picks_refine_older">Plus ancien</string>
+    <string name="scout_picks_refine_newer">Plus récent</string>
+    <string name="scout_picks_refine_lighter">Quelque chose de plus léger</string>
+</resources>

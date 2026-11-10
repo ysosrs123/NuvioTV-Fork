@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Pretraga</string>
+    <string name="settings_search_title">Pretraga postavki</string>
+    <string name="settings_search_subtitle">Pronađi bilo koju postavku po nazivu ili po tome šta radi.</string>
+    <string name="settings_search_try">Probaj: noćni način, titlovi, passthrough ili buffer.</string>
+    <string name="settings_search_none">Nema rezultata za \"%1$s\"</string>
+    <string name="settings_search_none_tip">Probaj kraću riječ ili opiši šta postavka radi.</string>
+    <string name="settings_search_results">Rezultati: %1$d</string>
+    <string name="settings_search_more_advanced">Još %1$d u naprednom načinu</string>
+    <string name="settings_search_unavailable">Ova postavka trenutno nije dostupna. Možda prvo treba uključiti drugu postavku.</string>
+</resources>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Miksai</string>
+    <string name="scout_mixes_add">Pridėti į miksą</string>
+    <string name="scout_mixes_add_title">Pridėti %1$s į miksą</string>
+    <string name="scout_mixes_already_in">Jau šiame mikse</string>
+    <string name="scout_mixes_new">Naujas miksas</string>
+    <string name="scout_mixes_name_title">Pavadinkite šį miksą</string>
+    <string name="scout_mixes_name_label">Mikso pavadinimas</string>
+    <string name="scout_mixes_name_default">Miksas %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s ir dar %3$d</item>
+        <item quantity="few">%1$s, %2$s ir dar %3$d</item>
+        <item quantity="many">%1$s, %2$s ir dar %3$d</item>
+        <item quantity="other">%1$s, %2$s ir dar %3$d</item>
+    </plurals>
+    <string name="scout_mixes_save">Išsaugoti</string>
+    <string name="scout_mixes_cancel">Atšaukti</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d serialas</item>
+        <item quantity="few">%1$d serialai</item>
+        <item quantity="many">%1$d serialo</item>
+        <item quantity="other">%1$d serialų</item>
+    </plurals>
+    <string name="scout_mixes_kind">Miksas</string>
+    <string name="scout_mixes_about">Atsitiktinės serijos iš %1$s, viena po kitos.</string>
+    <string name="scout_mixes_fits">Serialai, tinkantys šiam miksui</string>
+    <string name="scout_mixes_add_show">Pridėti</string>
+    <string name="scout_mixes_watch_again">Žiūrėti iš naujo</string>
+    <string name="scout_mixes_find_show">Rasti serialą</string>
+    <string name="scout_mixes_up_next">Toliau</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Renkama serija…</string>
+    <string name="scout_mixes_play">Leisti</string>
+    <string name="scout_mixes_remix">Maišyti iš naujo</string>
+    <string name="scout_mixes_unwatched_only">Tik nežiūrėti</string>
+    <string name="scout_mixes_keep_playing">Leisti toliau</string>
+    <string name="scout_mixes_edit">Redaguoti miksą</string>
+    <string name="scout_mixes_in_this_mix">Šiame mikse</string>
+    <string name="scout_mixes_next_in">Toliau mikse %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Prasidės po %1$d sekundės</item>
+        <item quantity="few">Prasidės po %1$d sekundžių</item>
+        <item quantity="many">Prasidės po %1$d sekundės</item>
+        <item quantity="other">Prasidės po %1$d sekundžių</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Leisti dabar</string>
+    <string name="scout_mixes_stop">Stabdyti</string>
+    <string name="scout_mixes_all_seen">Peržiūrėjote visas šio mikso serijas</string>
+    <string name="scout_mixes_all_seen_hint">Pridėkite serialą, kad tęstumėte, arba vėl žiūrėkite mėgstamus.</string>
+    <string name="scout_mixes_no_shows">Šiame mikse dar nėra serialų</string>
+    <string name="scout_mixes_add_hint">Pridėkite daugiau serialų iš jų ilgo paspaudimo meniu</string>
+    <string name="scout_mixes_unavailable">Nepavyko įkelti serijų</string>
+    <string name="scout_mixes_unavailable_hint">Jūsų priedai neatsakė dėl šių serialų. Paspauskite Maišyti iš naujo, kad bandytumėte vėl.</string>
+    <string name="scout_mixes_edit_title">Redaguoti %1$s</string>
+    <string name="scout_mixes_rename">Pervadinti</string>
+    <string name="scout_mixes_remove">Pašalinti %1$s</string>
+    <string name="scout_mixes_delete">Ištrinti šį miksą</string>
+    <string name="scout_mixes_delete_title">Ištrinti %1$s?</string>
+    <string name="scout_mixes_delete_detail">Jūsų serialai ir žiūrėjimo istorija lieka nepakitę</string>
+    <string name="scout_mixes_delete_confirm">Ištrinti</string>
+</resources>

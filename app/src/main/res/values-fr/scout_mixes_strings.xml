@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Mix</string>
+    <string name="scout_mixes_add">Ajouter à un mix</string>
+    <string name="scout_mixes_add_title">Ajouter %1$s à un mix</string>
+    <string name="scout_mixes_already_in">Déjà dans ce mix</string>
+    <string name="scout_mixes_new">Nouveau mix</string>
+    <string name="scout_mixes_name_title">Nommer ce mix</string>
+    <string name="scout_mixes_name_label">Nom du mix</string>
+    <string name="scout_mixes_name_default">Mix %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s et %3$d autre</item>
+        <item quantity="many">%1$s, %2$s et %3$d autres</item>
+        <item quantity="other">%1$s, %2$s et %3$d autres</item>
+    </plurals>
+    <string name="scout_mixes_save">Enregistrer</string>
+    <string name="scout_mixes_cancel">Annuler</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d série</item>
+        <item quantity="many">%1$d séries</item>
+        <item quantity="other">%1$d séries</item>
+    </plurals>
+    <string name="scout_mixes_kind">Mix</string>
+    <string name="scout_mixes_about">Des épisodes au hasard de %1$s, l’un après l’autre.</string>
+    <string name="scout_mixes_fits">Séries qui vont avec ce mix</string>
+    <string name="scout_mixes_add_show">Ajouter</string>
+    <string name="scout_mixes_watch_again">Les revoir</string>
+    <string name="scout_mixes_find_show">Trouver une série</string>
+    <string name="scout_mixes_up_next">À suivre</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Choix d\'un épisode…</string>
+    <string name="scout_mixes_play">Regarder</string>
+    <string name="scout_mixes_remix">Remixer</string>
+    <string name="scout_mixes_unwatched_only">Non vus uniquement</string>
+    <string name="scout_mixes_keep_playing">Lecture continue</string>
+    <string name="scout_mixes_edit">Modifier le mix</string>
+    <string name="scout_mixes_in_this_mix">Dans ce mix</string>
+    <string name="scout_mixes_next_in">À suivre dans %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Démarre dans %1$d seconde</item>
+        <item quantity="many">Démarre dans %1$d secondes</item>
+        <item quantity="other">Démarre dans %1$d secondes</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Regarder maintenant</string>
+    <string name="scout_mixes_stop">Arrêter</string>
+    <string name="scout_mixes_all_seen">Vous avez vu tous les épisodes de ce mix</string>
+    <string name="scout_mixes_all_seen_hint">Ajoutez une série pour continuer, ou revoyez vos préférées.</string>
+    <string name="scout_mixes_no_shows">Ce mix n\'a pas encore de séries</string>
+    <string name="scout_mixes_add_hint">Ajoutez d\'autres séries depuis leur menu d\'appui long</string>
+    <string name="scout_mixes_unavailable">Impossible de charger des épisodes</string>
+    <string name="scout_mixes_unavailable_hint">Vos add-ons n\'ont pas répondu pour ces séries. Appuyez sur Remixer pour réessayer.</string>
+    <string name="scout_mixes_edit_title">Modifier %1$s</string>
+    <string name="scout_mixes_rename">Renommer</string>
+    <string name="scout_mixes_remove">Retirer %1$s</string>
+    <string name="scout_mixes_delete">Supprimer ce mix</string>
+    <string name="scout_mixes_delete_title">Supprimer %1$s ?</string>
+    <string name="scout_mixes_delete_detail">Vos séries et votre historique restent inchangés</string>
+    <string name="scout_mixes_delete_confirm">Supprimer</string>
+</resources>

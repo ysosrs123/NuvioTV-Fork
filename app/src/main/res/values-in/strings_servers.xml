@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">Server media</string>
-    <string name="settings_media_servers_subtitle">Hubungkan Jellyfin, Emby, atau Silo untuk menjelajah dan memutar pustaka Anda sendiri.</string>
+    <string name="settings_media_servers_subtitle">Hubungkan Jellyfin, Emby, Silo, atau Plex untuk menjelajah dan memutar pustaka Anda sendiri.</string>
     <string name="servers_section_connected">Server</string>
     <string name="servers_section_add">Tambah server</string>
     <string name="servers_section_account">Akun Nuvio</string>
     <string name="servers_source_details">Detail sumber</string>
-    <string name="servers_source_details_description">Lengkap menampilkan nama file dan ikon pada sumber server. Ringkas hanya menampilkan video, audio, dan ukuran.</string>
+    <string name="servers_source_details_description">Lengkap menampilkan nama file dan detail lebih banyak pada sumber server. Ringkas hanya menampilkan video, audio, dan ukuran.</string>
     <string name="servers_source_details_full">Lengkap</string>
     <string name="servers_source_details_clean">Ringkas</string>
     <string name="servers_show_logos">Tampilkan logo server</string>
-    <string name="servers_show_logos_description">Tampilkan logo Jellyfin, Emby, atau Silo di samping sumber server dan di pemutar.</string>
+    <string name="servers_show_logos_description">Tampilkan logo Jellyfin, Emby, Silo, atau Plex di samping sumber server dan di pemutar.</string>
     <string name="servers_account_sync">Sinkronkan server media ke akun Nuvio saya</string>
     <string name="servers_account_sync_description">Nonaktif: server dan data loginnya tetap di perangkat ini. Aktif: daftar server, termasuk data loginnya, disimpan ke akun Nuvio Anda dan dibagikan ke perangkat Anda yang lain.</string>
     <string name="servers_account_remove">Hapus server saya dari akun Nuvio saya</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">Diaktifkan</string>
     <string name="servers_enabled_description">Tampilkan server ini di Beranda, pencarian, dan hasil stream.</string>
     <string name="servers_catalog_metadata">Gunakan metadata addon</string>
-    <string name="servers_catalog_metadata_description">Judul dibuka dengan detail dari addon Anda dan disinkronkan seperti judul katalog lain, sementara pemutaran dan tanda sudah ditonton tetap dikirim ke %1$s. Beberapa judul mungkin tidak cocok atau tidak dapat diputar jika addon Anda menomori atau mengenalinya secara berbeda.</string>
+    <string name="servers_catalog_metadata_description">Judul dibuka dengan detail dari addon Anda dan disinkronkan seperti judul katalog lain, sementara pemutaran dan tanda sudah ditonton tetap dikirim ke %1$s. Beberapa judul mungkin tidak cocok atau tidak dapat diputar jika addon Anda menomori atau mengenalinya secara berbeda. Matikan ini untuk memutar hanya dari %1$s, tanpa mencari di addon.</string>
     <string name="servers_import_continue_watching">Impor Lanjutkan Menonton</string>
     <string name="servers_import_continue_watching_description">Judul yang sudah Anda mulai di %1$s muncul di Lanjutkan Menonton di Beranda. Tanda sudah ditonton tetap disamakan bagaimanapun juga.</string>
     <string name="servers_import_watch_state">Impor progres tontonan</string>

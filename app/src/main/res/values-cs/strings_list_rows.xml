@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Skrýt také „Plánuji sledovat“</string>
+    <string name="layout_hide_plan_to_watch_sub">Tituly ze seznamu „Plánuji sledovat“ se nezobrazí v řádcích na domovské obrazovce ani v banneru.</string>
+    <string name="layout_hide_watching">Skrýt také „Sleduji“</string>
+    <string name="layout_hide_watching_sub">Rozkoukané seriály a filmy se nezobrazí v řádcích na domovské obrazovce ani v banneru. Zůstanou v řádku Pokračovat ve sledování.</string>
+</resources>

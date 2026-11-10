@@ -3,16 +3,16 @@
 
     <!-- Nuvio-test additions -->
     <string name="settings_media_servers">خوادم الوسائط</string>
-    <string name="settings_media_servers_subtitle">اربط Jellyfin أو Emby أو Silo لتصفح مكتبتك الخاصة وتشغيلها.</string>
+    <string name="settings_media_servers_subtitle">اربط Jellyfin أو Emby أو Silo أو Plex لتصفح مكتبتك الخاصة وتشغيلها.</string>
     <string name="servers_section_connected">الخوادم</string>
     <string name="servers_section_add">إضافة خادم</string>
     <string name="servers_section_account">حساب Nuvio</string>
     <string name="servers_source_details">تفاصيل المصدر</string>
-    <string name="servers_source_details_description">كاملة تعرض اسم الملف والأيقونات على مصادر الخادم. مبسطة تعرض الفيديو والصوت والحجم فقط.</string>
+    <string name="servers_source_details_description">كاملة تعرض اسم الملف وتفاصيل أكثر على مصادر الخادم. مبسطة تعرض الفيديو والصوت والحجم فقط.</string>
     <string name="servers_source_details_full">كاملة</string>
     <string name="servers_source_details_clean">مبسطة</string>
     <string name="servers_show_logos">إظهار شعارات الخوادم</string>
-    <string name="servers_show_logos_description">إظهار شعار Jellyfin أو Emby أو Silo بجانب مصادر الخادم وفي المشغل.</string>
+    <string name="servers_show_logos_description">إظهار شعار Jellyfin أو Emby أو Silo أو Plex بجانب مصادر الخادم وفي المشغل.</string>
     <string name="servers_account_sync">مزامنة خوادم الوسائط مع حسابي في Nuvio</string>
     <string name="servers_account_sync_description">معطل: تبقى خوادمك وبيانات الدخول إليها على هذا الجهاز. مفعل: تُحفظ قائمة الخوادم، مع بيانات الدخول، في حسابك في Nuvio وتُشارك مع أجهزتك الأخرى.</string>
     <string name="servers_account_remove">إزالة خوادمي من حسابي في Nuvio</string>
@@ -53,7 +53,7 @@
     <string name="servers_enabled">مفعل</string>
     <string name="servers_enabled_description">إظهار هذا الخادم في الرئيسية والبحث ونتائج البث.</string>
     <string name="servers_catalog_metadata">استخدام بيانات الإضافات</string>
-    <string name="servers_catalog_metadata_description">تُفتح العناوين بتفاصيل إضافاتك وتُزامَن مثل أي عنوان من القوائم، مع استمرار إرسال التشغيل وعلامات المشاهدة إلى %1$s. قد لا تتطابق بعض العناوين أو لا تعمل إذا كانت إضافاتك ترقّمها أو تعرّفها بشكل مختلف.</string>
+    <string name="servers_catalog_metadata_description">تُفتح العناوين بتفاصيل إضافاتك وتُزامَن مثل أي عنوان من القوائم، مع استمرار إرسال التشغيل وعلامات المشاهدة إلى %1$s. قد لا تتطابق بعض العناوين أو لا تعمل إذا كانت إضافاتك ترقّمها أو تعرّفها بشكل مختلف. أوقف هذا الخيار للتشغيل من %1$s فقط، دون البحث في الإضافات.</string>
     <string name="servers_import_continue_watching">استيراد متابعة المشاهدة</string>
     <string name="servers_import_continue_watching_description">العناوين التي بدأتها على %1$s تظهر في متابعة المشاهدة في الرئيسية. علامات المشاهدة تبقى متزامنة في الاتجاهين.</string>
     <string name="servers_import_watch_state">استيراد تقدم المشاهدة</string>

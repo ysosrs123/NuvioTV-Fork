@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Nascondi anche «Da guardare»</string>
+    <string name="layout_hide_plan_to_watch_sub">I titoli della lista «Da guardare» non compaiono nelle righe della Home né nel banner.</string>
+    <string name="layout_hide_watching">Nascondi anche «In visione»</string>
+    <string name="layout_hide_watching_sub">Le serie e i film iniziati non compaiono nelle righe della Home né nel banner. Restano in Continua a guardare.</string>
+</resources>

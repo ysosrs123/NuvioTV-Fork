@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Потому что вы любите %1$s и %2$s</string>
+    <string name="scout_picks_why_person_loved">Потому что вы любите %1$s</string>
+    <string name="scout_picks_why_person">Вы часто смотрите %1$s</string>
+    <string name="scout_picks_why_keyword">Потому что вам нравится %1$s</string>
+    <string name="scout_picks_why_stretch">Что-то немного другое</string>
+    <string name="scout_picks_row_genre_language">%1$s на языке %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Ещё %1$s</string>
+    <string name="scout_picks_row_new">Новое для вас</string>
+    <string name="scout_picks_row_trending">В тренде для вас</string>
+    <string name="scout_picks_quick_title">Выберите пять любимых</string>
+    <string name="scout_picks_quick_sub">Так Scout начнёт быстрее. Изменить их можно в любое время в разделе Ваш вкус.</string>
+    <string name="scout_picks_quick_row_sub">Быстрый способ показать Scout, что вам нравится</string>
+    <string name="scout_picks_quick_count">%1$d из %2$d</string>
+    <string name="scout_picks_quick_done">Готово</string>
+    <string name="scout_picks_quick_skip">Пропустить</string>
+    <string name="scout_picks_words_title">Ваш вкус словами</string>
+    <string name="scout_picks_words_row_sub">С ключом ИИ: описание, которое можно править, и сортировка ИИ</string>
+    <string name="scout_picks_words_sub">Написано вашим ИИ по оценённым вами названиям. Можно править. Используется в разделе «Спросить» и при сортировке ИИ.</string>
+    <string name="scout_picks_words_empty">Пока ничего нет. Напишите сами или попросите ИИ написать по оценённым названиям.</string>
+    <string name="scout_picks_words_edit">Изменить</string>
+    <string name="scout_picks_words_write">Написать заново</string>
+    <string name="scout_picks_words_writing">Пишется…</string>
+    <string name="scout_picks_words_remove">Удалить</string>
+    <string name="scout_picks_sort_title">Пусть ИИ сортирует мои подборки</string>
+    <string name="scout_picks_sort_sub">Примерно раз в неделю, вашим ключом. Собственным подборкам Scout ИИ не нужен.</string>
+    <string name="scout_picks_on">Вкл.</string>
+    <string name="scout_picks_off">Выкл.</string>
+    <string name="scout_picks_sent">Отправляется в ваш сервис ИИ с вашим ключом: около 100 названий, которые Scout нашёл для вас, ваш вкус словами, названия, которые вам понравились и не понравились, и жанры, которые вы исключили. Вся ваша история не отправляется.</string>
+    <string name="scout_picks_refine_violent">Меньше насилия</string>
+    <string name="scout_picks_refine_older">Постарше</string>
+    <string name="scout_picks_refine_newer">Поновее</string>
+    <string name="scout_picks_refine_lighter">Что-то полегче</string>
+</resources>

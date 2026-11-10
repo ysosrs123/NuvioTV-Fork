@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Mixy</string>
+    <string name="scout_mixes_add">Přidat do mixu</string>
+    <string name="scout_mixes_add_title">Přidat %1$s do mixu</string>
+    <string name="scout_mixes_already_in">Už je v tomto mixu</string>
+    <string name="scout_mixes_new">Nový mix</string>
+    <string name="scout_mixes_name_title">Pojmenovat tento mix</string>
+    <string name="scout_mixes_name_label">Název mixu</string>
+    <string name="scout_mixes_name_default">Mix %1$s</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s a %3$d další</item>
+        <item quantity="few">%1$s, %2$s a %3$d další</item>
+        <item quantity="many">%1$s, %2$s a %3$d dalších</item>
+        <item quantity="other">%1$s, %2$s a %3$d dalších</item>
+    </plurals>
+    <string name="scout_mixes_save">Uložit</string>
+    <string name="scout_mixes_cancel">Zrušit</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d seriál</item>
+        <item quantity="few">%1$d seriály</item>
+        <item quantity="many">%1$d seriálu</item>
+        <item quantity="other">%1$d seriálů</item>
+    </plurals>
+    <string name="scout_mixes_kind">Mix</string>
+    <string name="scout_mixes_about">Náhodné díly z %1$s, jeden za druhým.</string>
+    <string name="scout_mixes_fits">Seriály, které se do mixu hodí</string>
+    <string name="scout_mixes_add_show">Přidat</string>
+    <string name="scout_mixes_watch_again">Pustit je znovu</string>
+    <string name="scout_mixes_find_show">Najít seriál</string>
+    <string name="scout_mixes_up_next">Další na řadě</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Vybírá se epizoda…</string>
+    <string name="scout_mixes_play">Přehrát</string>
+    <string name="scout_mixes_remix">Znovu zamíchat</string>
+    <string name="scout_mixes_unwatched_only">Jen nezhlédnuté</string>
+    <string name="scout_mixes_keep_playing">Přehrávat dál</string>
+    <string name="scout_mixes_edit">Upravit mix</string>
+    <string name="scout_mixes_in_this_mix">V tomto mixu</string>
+    <string name="scout_mixes_next_in">Další v mixu %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">Začne za %1$d sekundu</item>
+        <item quantity="few">Začne za %1$d sekundy</item>
+        <item quantity="many">Začne za %1$d sekundy</item>
+        <item quantity="other">Začne za %1$d sekund</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Přehrát teď</string>
+    <string name="scout_mixes_stop">Zastavit</string>
+    <string name="scout_mixes_all_seen">Zhlédli jste všechny epizody v tomto mixu</string>
+    <string name="scout_mixes_all_seen_hint">Přidejte seriál a pokračujte, nebo si pusťte oblíbené znovu.</string>
+    <string name="scout_mixes_no_shows">Tento mix zatím nemá žádné seriály</string>
+    <string name="scout_mixes_add_hint">Další seriály přidáte z jejich nabídky dlouhého stisku</string>
+    <string name="scout_mixes_unavailable">Epizody se nepodařilo načíst</string>
+    <string name="scout_mixes_unavailable_hint">Vaše doplňky na tyto seriály neodpověděly. Stiskněte Znovu zamíchat a zkuste to znovu.</string>
+    <string name="scout_mixes_edit_title">Upravit %1$s</string>
+    <string name="scout_mixes_rename">Přejmenovat</string>
+    <string name="scout_mixes_remove">Odebrat %1$s</string>
+    <string name="scout_mixes_delete">Smazat tento mix</string>
+    <string name="scout_mixes_delete_title">Smazat %1$s?</string>
+    <string name="scout_mixes_delete_detail">Vaše seriály a historie sledování zůstanou beze změny</string>
+    <string name="scout_mixes_delete_confirm">Smazat</string>
+</resources>

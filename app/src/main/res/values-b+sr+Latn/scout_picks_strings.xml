@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Zato što volite %1$s i %2$s</string>
+    <string name="scout_picks_why_person_loved">Zato što volite %1$s</string>
+    <string name="scout_picks_why_person">Često gledate %1$s</string>
+    <string name="scout_picks_why_keyword">Zato što vam se sviđa %1$s</string>
+    <string name="scout_picks_why_stretch">Nešto malo drugačije</string>
+    <string name="scout_picks_row_genre_language">%1$s na jeziku %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">Još %1$s</string>
+    <string name="scout_picks_row_new">Novo za vas</string>
+    <string name="scout_picks_row_trending">U trendu za vas</string>
+    <string name="scout_picks_quick_title">Izaberite pet koje volite</string>
+    <string name="scout_picks_quick_sub">Tako Scout ima dobar početak. Možete ih promeniti bilo kada u odeljku Vaš ukus.</string>
+    <string name="scout_picks_quick_row_sub">Brz način da naučite Scout šta volite</string>
+    <string name="scout_picks_quick_count">%1$d od %2$d</string>
+    <string name="scout_picks_quick_done">Gotovo</string>
+    <string name="scout_picks_quick_skip">Preskoči</string>
+    <string name="scout_picks_words_title">Vaš ukus rečima</string>
+    <string name="scout_picks_words_row_sub">Sa AI ključem: opis koji možete da menjate i AI sortiranje</string>
+    <string name="scout_picks_words_sub">Napisao ga je vaš AI na osnovu naslova koje ste ocenili. Možete ga menjati. Koriste ga funkcija Pitaj i AI sortiranje.</string>
+    <string name="scout_picks_words_empty">Još ništa. Napišite svoj ili neka ga vaša AI napiše na osnovu naslova koje ste ocenili.</string>
+    <string name="scout_picks_words_edit">Izmeni</string>
+    <string name="scout_picks_words_write">Napiši ponovo</string>
+    <string name="scout_picks_words_writing">Pisanje…</string>
+    <string name="scout_picks_words_remove">Ukloni</string>
+    <string name="scout_picks_sort_title">Neka AI sortira moje predloge</string>
+    <string name="scout_picks_sort_sub">Otprilike jednom nedeljno, vašim ključem. Scoutovim predlozima AI nije potrebna.</string>
+    <string name="scout_picks_on">Uključeno</string>
+    <string name="scout_picks_off">Isključeno</string>
+    <string name="scout_picks_sent">Šalje se vašoj AI usluzi sa vašim ključem: oko 100 naslova koje je Scout pronašao za vas, vaš ukus rečima, naslovi koji su vam se dopali i koji nisu i žanrovi koje izostavljate. Ne dobija celu vašu istoriju.</string>
+    <string name="scout_picks_refine_violent">Manje nasilno</string>
+    <string name="scout_picks_refine_older">Starije</string>
+    <string name="scout_picks_refine_newer">Novije</string>
+    <string name="scout_picks_refine_lighter">Nešto lakše</string>
+</resources>

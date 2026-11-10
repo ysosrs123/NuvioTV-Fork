@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">同時隱藏「計劃觀看」</string>
+    <string name="layout_hide_plan_to_watch_sub">「計劃觀看」清單中的內容不會出現在首頁各列和橫幅中。</string>
+    <string name="layout_hide_watching">同時隱藏「觀看中」</string>
+    <string name="layout_hide_watching_sub">看到一半的節目和電影不會出現在首頁各列和橫幅中。仍會保留在繼續觀看中。</string>
+</resources>

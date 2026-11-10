@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">मिक्स</string>
+    <string name="scout_mixes_add">मिक्स में जोड़ें</string>
+    <string name="scout_mixes_add_title">%1$s को मिक्स में जोड़ें</string>
+    <string name="scout_mixes_already_in">पहले से इस मिक्स में है</string>
+    <string name="scout_mixes_new">नया मिक्स</string>
+    <string name="scout_mixes_name_title">इस मिक्स को नाम दें</string>
+    <string name="scout_mixes_name_label">मिक्स का नाम</string>
+    <string name="scout_mixes_name_default">%1$s मिक्स</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s और %3$d अन्य</item>
+        <item quantity="other">%1$s, %2$s और %3$d अन्य</item>
+    </plurals>
+    <string name="scout_mixes_save">सेव</string>
+    <string name="scout_mixes_cancel">रद्द करें</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d सीरीज़</item>
+        <item quantity="other">%1$d सीरीज़</item>
+    </plurals>
+    <string name="scout_mixes_kind">मिक्स</string>
+    <string name="scout_mixes_about">%1$s के बेतरतीब एपिसोड, एक के बाद एक।</string>
+    <string name="scout_mixes_fits">इस मिक्स के लिए उपयुक्त शो</string>
+    <string name="scout_mixes_add_show">जोड़ें</string>
+    <string name="scout_mixes_watch_again">फिर से देखें</string>
+    <string name="scout_mixes_find_show">कोई शो खोजें</string>
+    <string name="scout_mixes_up_next">अगला</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">एपिसोड चुना जा रहा है…</string>
+    <string name="scout_mixes_play">चलाएँ</string>
+    <string name="scout_mixes_remix">फिर से मिलाएँ</string>
+    <string name="scout_mixes_unwatched_only">सिर्फ़ अनदेखे</string>
+    <string name="scout_mixes_keep_playing">चलाते रहें</string>
+    <string name="scout_mixes_edit">मिक्स संपादित करें</string>
+    <string name="scout_mixes_in_this_mix">इस मिक्स में</string>
+    <string name="scout_mixes_next_in">%1$s में अगला</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">%1$d सेकंड में शुरू होगा</item>
+        <item quantity="other">%1$d सेकंड में शुरू होगा</item>
+    </plurals>
+    <string name="scout_mixes_play_now">अभी चलाएँ</string>
+    <string name="scout_mixes_stop">रोकें</string>
+    <string name="scout_mixes_all_seen">आप इस मिक्स का हर एपिसोड देख चुके हैं</string>
+    <string name="scout_mixes_all_seen_hint">इसे जारी रखने के लिए शो जोड़ें, या अपने पसंदीदा फिर से देखें।</string>
+    <string name="scout_mixes_no_shows">इस मिक्स में अभी कोई सीरीज़ नहीं है</string>
+    <string name="scout_mixes_add_hint">उनके लंबे दबाव वाले मेन्यू से और सीरीज़ जोड़ें</string>
+    <string name="scout_mixes_unavailable">कोई एपिसोड लोड नहीं हो सका</string>
+    <string name="scout_mixes_unavailable_hint">आपके ऐड-ऑन ने इन सीरीज़ के लिए जवाब नहीं दिया। फिर से कोशिश के लिए फिर से मिलाएँ दबाएँ।</string>
+    <string name="scout_mixes_edit_title">%1$s संपादित करें</string>
+    <string name="scout_mixes_rename">नाम बदलें</string>
+    <string name="scout_mixes_remove">%1$s हटाएँ</string>
+    <string name="scout_mixes_delete">यह मिक्स हटाएँ</string>
+    <string name="scout_mixes_delete_title">%1$s हटाएँ?</string>
+    <string name="scout_mixes_delete_detail">आपकी सीरीज़ और देखने का इतिहास वैसे ही रहेंगे</string>
+    <string name="scout_mixes_delete_confirm">हटाएँ</string>
+</resources>

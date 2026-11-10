@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_mixes_title">Mixek</string>
+    <string name="scout_mixes_add">Hozzáadás mixhez</string>
+    <string name="scout_mixes_add_title">%1$s hozzáadása mixhez</string>
+    <string name="scout_mixes_already_in">Már ebben a mixben van</string>
+    <string name="scout_mixes_new">Új mix</string>
+    <string name="scout_mixes_name_title">Mix elnevezése</string>
+    <string name="scout_mixes_name_label">Mix neve</string>
+    <string name="scout_mixes_name_default">%1$s mix</string>
+    <string name="scout_mixes_name_two">%1$s &amp; %2$s</string>
+    <plurals name="scout_mixes_name_more">
+        <item quantity="one">%1$s, %2$s és még %3$d</item>
+        <item quantity="other">%1$s, %2$s és még %3$d</item>
+    </plurals>
+    <string name="scout_mixes_save">Mentés</string>
+    <string name="scout_mixes_cancel">Mégse</string>
+    <plurals name="scout_mixes_shows">
+        <item quantity="one">%1$d sorozat</item>
+        <item quantity="other">%1$d sorozat</item>
+    </plurals>
+    <string name="scout_mixes_kind">Mix</string>
+    <string name="scout_mixes_about">Véletlenszerű epizódok ebből: %1$s, egymás után.</string>
+    <string name="scout_mixes_fits">A mixhez illő sorozatok</string>
+    <string name="scout_mixes_add_show">Hozzáadás</string>
+    <string name="scout_mixes_watch_again">Újranézés</string>
+    <string name="scout_mixes_find_show">Sorozat keresése</string>
+    <string name="scout_mixes_up_next">Következő</string>
+    <string name="scout_mixes_episode">S%1$d E%2$d • %3$s</string>
+    <string name="scout_mixes_episode_short">S%1$d E%2$d</string>
+    <string name="scout_mixes_choosing">Epizód választása…</string>
+    <string name="scout_mixes_play">Lejátszás</string>
+    <string name="scout_mixes_remix">Újrakeverés</string>
+    <string name="scout_mixes_unwatched_only">Csak a nem látottak</string>
+    <string name="scout_mixes_keep_playing">Lejátszás folytatása</string>
+    <string name="scout_mixes_edit">Mix szerkesztése</string>
+    <string name="scout_mixes_in_this_mix">Ebben a mixben</string>
+    <string name="scout_mixes_next_in">Következő: %1$s</string>
+    <plurals name="scout_mixes_starts_in">
+        <item quantity="one">%1$d másodperc múlva indul</item>
+        <item quantity="other">%1$d másodperc múlva indul</item>
+    </plurals>
+    <string name="scout_mixes_play_now">Lejátszás most</string>
+    <string name="scout_mixes_stop">Leállítás</string>
+    <string name="scout_mixes_all_seen">A mix minden epizódját láttad</string>
+    <string name="scout_mixes_all_seen_hint">Adj hozzá egy sorozatot a folytatáshoz, vagy nézd újra a kedvenceidet.</string>
+    <string name="scout_mixes_no_shows">Ebben a mixben még nincs sorozat</string>
+    <string name="scout_mixes_add_hint">További sorozatokat a hosszú nyomás menüjükből adhatsz hozzá</string>
+    <string name="scout_mixes_unavailable">Nem sikerült epizódokat betölteni</string>
+    <string name="scout_mixes_unavailable_hint">A kiegészítőid nem válaszoltak ezekhez a sorozatokhoz. Nyomd meg az Újrakeverést az újrapróbáláshoz.</string>
+    <string name="scout_mixes_edit_title">%1$s szerkesztése</string>
+    <string name="scout_mixes_rename">Átnevezés</string>
+    <string name="scout_mixes_remove">%1$s eltávolítása</string>
+    <string name="scout_mixes_delete">Mix törlése</string>
+    <string name="scout_mixes_delete_title">Törlöd: %1$s?</string>
+    <string name="scout_mixes_delete_detail">A sorozataid és a megtekintési előzményeid változatlanok maradnak</string>
+    <string name="scout_mixes_delete_confirm">Törlés</string>
+</resources>

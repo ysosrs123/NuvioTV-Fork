@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Ukryj też „Do obejrzenia”</string>
+    <string name="layout_hide_plan_to_watch_sub">Tytuły z listy „Do obejrzenia” nie pojawiają się w wierszach strony głównej ani w banerze.</string>
+    <string name="layout_hide_watching">Ukryj też „Oglądane”</string>
+    <string name="layout_hide_watching_sub">Rozpoczęte seriale i filmy nie pojawiają się w wierszach strony głównej ani w banerze. Zostają w sekcji Kontynuuj oglądanie.</string>
+</resources>

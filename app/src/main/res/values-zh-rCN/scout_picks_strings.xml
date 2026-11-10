@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">因为你喜爱 %1$s 和 %2$s</string>
+    <string name="scout_picks_why_person_loved">因为你喜爱 %1$s</string>
+    <string name="scout_picks_why_person">你经常看 %1$s</string>
+    <string name="scout_picks_why_keyword">因为你喜欢 %1$s</string>
+    <string name="scout_picks_why_stretch">换点不一样的</string>
+    <string name="scout_picks_row_genre_language">%2$s%1$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">更多%1$s</string>
+    <string name="scout_picks_row_new">为你上新</string>
+    <string name="scout_picks_row_trending">为你推荐的热门</string>
+    <string name="scout_picks_quick_title">选择五部你喜爱的作品</string>
+    <string name="scout_picks_quick_sub">这样 Scout 能更快上手。你可以随时在“你的口味”中更改。</string>
+    <string name="scout_picks_quick_row_sub">快速告诉 Scout 你喜欢什么</string>
+    <string name="scout_picks_quick_count">%1$d/%2$d</string>
+    <string name="scout_picks_quick_done">完成</string>
+    <string name="scout_picks_quick_skip">跳过</string>
+    <string name="scout_picks_words_title">用文字描述你的口味</string>
+    <string name="scout_picks_words_row_sub">使用 AI 密钥:可编辑的描述和 AI 排序</string>
+    <string name="scout_picks_words_sub">由你的 AI 根据你评分的作品撰写。你可以编辑。提问和 AI 排序都会用到它。</string>
+    <string name="scout_picks_words_empty">还没有内容。自己写,或让 AI 根据你评分的作品来写。</string>
+    <string name="scout_picks_words_edit">编辑</string>
+    <string name="scout_picks_words_write">重新撰写</string>
+    <string name="scout_picks_words_writing">正在撰写…</string>
+    <string name="scout_picks_words_remove">移除</string>
+    <string name="scout_picks_sort_title">让 AI 排序我的推荐</string>
+    <string name="scout_picks_sort_sub">大约每周一次,使用你的密钥。Scout 自身的推荐不需要 AI。</string>
+    <string name="scout_picks_on">开</string>
+    <string name="scout_picks_off">关</string>
+    <string name="scout_picks_sent">会用你的密钥发送给你选的 AI 服务：Scout 为你找到的约 100 部作品、你用文字描述的口味、你喜欢和不喜欢的作品，以及你排除的类型。不会发送完整的观看记录。</string>
+    <string name="scout_picks_refine_violent">少点暴力</string>
+    <string name="scout_picks_refine_older">老一点</string>
+    <string name="scout_picks_refine_newer">新一点</string>
+    <string name="scout_picks_refine_lighter">轻松一点</string>
+</resources>
