@@ -2251,9 +2251,9 @@ Confirmed now: a golf playoff after a full event (not yet one in progress).
 
 Still unconfirmed: as in the fifty-second pass.
 
-## Fifty-sixth pass (9 November 12:28 to 10 November 10:28)
+## Fifty-sixth pass (9 November 12:28 to 10 November 12:28)
 
-Three scheduled captures (nothing new at 14:28 on the 9th or 10:28 on the 10th) and a 30-minute NHL poll (41 samples) while Philadelphia at Calgary was level
+Four scheduled captures (nothing new after 12:28 on the 9th) and a 30-minute NHL poll (41 samples) while Philadelphia at Calgary was level
 3–3 late in the third. It went to overtime and Calgary scored with the clock at `0:00`, so there was
 no shootout. Trimmed copies in `app/src/test/resources/sports/espn-nhl-scoreboard-real-20261109.json`
 (overtime at `4:03`) and `espn-nhl-scoreboard-real-20261109b.json` (`End of OT`)
