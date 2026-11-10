@@ -209,6 +209,8 @@ data class CalendarTitleRecord(
     val status: CalendarShowStatus = CalendarShowStatus.UNKNOWN,
     val network: String? = null,
     val networkZone: String? = null,
+    @SerialName("tvs") val tvmazeStreaming: Boolean = false,
+    @SerialName("tva") val tvmazeAnime: Boolean = false,
     val sources: Map<CalendarSource, List<CalendarEntry>> = emptyMap(),
     val sourceFetchedAtMs: Map<CalendarSource, Long> = emptyMap(),
     val fetchedAtMs: Long = 0L,
@@ -223,7 +225,7 @@ data class CalendarTitleRecord(
 ) {
     val entries: List<CalendarEntry> by lazy {
         val showZone = networkZone?.let { runCatching { ZoneId.of(it) }.getOrNull() }
-        mergeCalendarEntries(sources.values.flatten().map { it.placedFor(showZone) }, sourceFetchedAtMs)
+        mergeCalendarEntries(calendarEntriesToMerge(this).map { it.placedFor(showZone) }, sourceFetchedAtMs)
     }
 
     fun episodeKey(entry: CalendarEntry): String = "$key|${entry.slot}"

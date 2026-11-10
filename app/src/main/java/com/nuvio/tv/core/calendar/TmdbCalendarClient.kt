@@ -105,11 +105,20 @@ fun tmdbFilmReleaseEntries(results: List<TmdbMovieReleaseDateCountry>, region: S
         return null
     }
 
+    /** For a film with no date in the box's region or the US, the earliest anywhere. */
+    fun firstAnywhere(vararg types: Int): String? = results.flatMap { it.releaseDates.orEmpty() }
+        .filter { item -> item.type?.let { it in types } == true }
+        .mapNotNull { item -> item.releaseDate?.take(10)?.takeIf { runCatching { LocalDate.parse(it) }.isSuccess } }
+        .minOrNull()
+
+    val cinema = firstDate(TYPE_THEATRICAL, TYPE_THEATRICAL_LIMITED)
+    val digital = firstDate(TYPE_DIGITAL)
+    val noneNearby = cinema == null && digital == null
     return listOfNotNull(
-        firstDate(TYPE_THEATRICAL, TYPE_THEATRICAL_LIMITED)?.let {
+        (cinema ?: firstAnywhere(TYPE_THEATRICAL, TYPE_THEATRICAL_LIMITED).takeIf { noneNearby })?.let {
             CalendarEntry(kind = CalendarEntryKind.MOVIE_THEATRICAL, airDate = it, source = CalendarSource.TMDB)
         },
-        firstDate(TYPE_DIGITAL)?.let {
+        (digital ?: firstAnywhere(TYPE_DIGITAL).takeIf { noneNearby })?.let {
             CalendarEntry(kind = CalendarEntryKind.MOVIE_DIGITAL, airDate = it, source = CalendarSource.TMDB)
         }
     )

@@ -1,7 +1,12 @@
 package com.nuvio.tv.core.calendar
 
+import com.nuvio.tv.core.util.parseEpisodeReleaseInstant
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
+import kotlin.math.abs
 
 internal const val CALENDAR_MAX_ENTRIES_PER_TITLE = 40
 internal val CALENDAR_KEEP_PAST: Duration = Duration.ofDays(15)
@@ -12,6 +17,55 @@ internal val CALENDAR_KEEP_AHEAD: Duration = Duration.ofDays(366)
  * two sources give a time, the one fetched last wins, so a show that moved is not held back by an older answer.
  * Trakt's episode type beats every other label.
  */
+/**
+ * Which sources' dates count for a title. Sources disagree on a few titles, and comparing them showed where each is
+ * reliable: TVmaze for anime, and TVmaze's earlier date when a show streams days before it reaches cable.
+ */
+internal fun calendarEntriesToMerge(record: CalendarTitleRecord): List<CalendarEntry> {
+    val tvMaze = record.sources[CalendarSource.TVMAZE].orEmpty()
+    if (record.tvmazeAnime && tvMaze.any { it.kind == CalendarEntryKind.EPISODE }) return tvMaze
+    val all = record.sources.values.flatten()
+    if (tvMaze.isEmpty()) return all
+    val tvMazeDays = tvMaze.mapNotNull { entry -> entry.utcDay()?.let { entry.slot to it } }.toMap()
+    val others = all.filter { it.source != CalendarSource.TVMAZE }
+    val otherSlots = others.mapTo(HashSet()) { it.slot }
+    val traktCovers = !record.sources[CalendarSource.TRAKT].isNullOrEmpty()
+    return all.filter { entry ->
+        if (entry.source == CalendarSource.TVMAZE) {
+            // Sources number some shows differently: under the Trakt calendar a TVmaze-only number on a day it already
+            // has is that release again, not another one.
+            !(traktCovers && entry.slot !in otherSlots && entry.utcDay()?.let { day ->
+                others.any { other -> other.utcDay()?.let { abs(ChronoUnit.DAYS.between(day, it)) <= 1L } == true }
+            } == true)
+        } else {
+            val gap = tvMazeDays[entry.slot]?.let { day -> entry.utcDay()?.let { ChronoUnit.DAYS.between(day, it) } }
+            !(record.tvmazeStreaming && gap != null && gap in STREAMING_FIRST_GAP_DAYS)
+        }
+    }
+}
+
+private fun CalendarEntry.utcDay(): LocalDate? =
+    (airInstantMs ?: placeAtMs)?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
+        ?: airDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+
+/**
+ * A date the Calendar knows for an episode, when it is up to [EARLIER_RELEASE_MAX_DAYS] days before what the details
+ * add-on says. Later dates are never returned: an episode the add-on says is out stays out.
+ */
+internal fun calendarEarlierRelease(addonReleased: String?, entry: CalendarEntry): String? {
+    val addon = parseEpisodeReleaseInstant(addonReleased, ZoneOffset.UTC) ?: return null
+    val calendar = entry.airInstantMs?.let(Instant::ofEpochMilli)
+        ?: entry.airDate?.let { runCatching { LocalDate.parse(it).atStartOfDay(ZoneOffset.UTC).toInstant() }.getOrNull() }
+        ?: return null
+    if (!calendar.isBefore(addon)) return null
+    val days = ChronoUnit.DAYS.between(calendar.atZone(ZoneOffset.UTC).toLocalDate(), addon.atZone(ZoneOffset.UTC).toLocalDate())
+    if (days > EARLIER_RELEASE_MAX_DAYS) return null
+    return entry.airDate.takeIf { entry.airInstantMs == null } ?: calendar.toString()
+}
+
+private val STREAMING_FIRST_GAP_DAYS = 2L..3L
+private const val EARLIER_RELEASE_MAX_DAYS = 3L
+
 fun mergeCalendarEntries(
     entries: List<CalendarEntry>,
     fetchedAtMs: Map<CalendarSource, Long> = emptyMap()
@@ -24,7 +78,10 @@ fun mergeCalendarEntries(
 private fun mergeSameRelease(candidates: List<CalendarEntry>, fetchedAtMs: Map<CalendarSource, Long>): CalendarEntry {
     if (candidates.size == 1) return candidates.single()
     val byPriority = candidates.sortedBy { it.source.priority }
-    val base = byPriority.filter { it.timeKnown }.maxWithOrNull(
+    val timed = byPriority.filter { it.timeKnown }
+    // TheTVDB's time is a show's regular slot; Trakt's is for the episode.
+    val preferred = if (timed.any { it.source.isTrakt }) timed.filter { it.source != CalendarSource.TVDB } else timed
+    val base = preferred.maxWithOrNull(
         compareBy<CalendarEntry> { fetchedAtMs[it.source] ?: 0L }.thenByDescending { it.source.priority }
     ) ?: byPriority.firstOrNull { it.airDate != null } ?: byPriority.first()
     val label = byPriority.firstOrNull { it.source.isTrakt }?.label

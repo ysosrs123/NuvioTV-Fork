@@ -3,6 +3,7 @@ package com.nuvio.tv.ui.screens.settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
@@ -167,6 +168,7 @@ private fun ComingUpHiddenDialog(
             )
         } else {
             LazyColumn(
+                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
                 modifier = Modifier.fillMaxWidth().heightIn(max = 280.dp),
                 verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
             ) {
@@ -340,6 +342,7 @@ private fun CalendarHiddenDialog(
             )
         } else {
             LazyColumn(
+                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
                 modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
                 verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
             ) {

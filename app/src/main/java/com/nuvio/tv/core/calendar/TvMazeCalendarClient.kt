@@ -28,7 +28,9 @@ data class CalendarShowDates(
     val network: String? = null,
     val networkZone: String? = null,
     val ids: CalendarIds = CalendarIds(),
-    val poster: String? = null
+    val poster: String? = null,
+    val streaming: Boolean = false,
+    val anime: Boolean = false
 )
 
 @Singleton
@@ -99,7 +101,9 @@ fun tvMazeShowDates(show: TvMazeShowDto, seasonEpisodes: List<TvMazeEpisodeDto>)
         network = show.network?.name ?: show.webChannel?.name,
         networkZone = show.network?.country?.timezone?.takeIf { runCatching { ZoneId.of(it) }.isSuccess },
         ids = CalendarIds(imdb = show.externals?.imdb?.takeIf { it.startsWith("tt") }, tvdb = show.externals?.thetvdb),
-        poster = show.image?.let { it.medium ?: it.original }?.takeIf(String::isNotBlank)?.replaceFirst("http://", "https://")
+        poster = show.image?.let { it.medium ?: it.original }?.takeIf(String::isNotBlank)?.replaceFirst("http://", "https://"),
+        streaming = show.network == null && show.webChannel != null,
+        anime = show.type.equals("Animation", ignoreCase = true) && show.language.equals("Japanese", ignoreCase = true)
     )
 }
 

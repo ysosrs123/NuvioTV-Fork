@@ -65,7 +65,7 @@ class CalendarTitleFetcher(
         val refreshed = try {
             when {
                 record.type == CalendarTitleType.MOVIE -> refreshFilm(record, now)
-                coveredByTrakt && !record.needsPoster(now) -> record
+                coveredByTrakt && !record.needsPoster(now) -> withDailyTvMazeDates(record, tvMazeIds, learned, now)
                 else -> refreshShow(record, tvMazeIds, learned, now).withPosterChecked(now)
             }.copy(failures = 0, fetchedAtMs = now.toEpochMilli())
         } catch (cancelled: CancellationException) {
@@ -88,6 +88,27 @@ class CalendarTitleFetcher(
         return withTmdb.withSource(CalendarSource.TMDB, remote.tmdbFilm(tmdbId, region).entries, now)
     }
 
+    /** A show the Trakt calendar covers is read at TVmaze once a day for the dates it has right; a miss changes nothing. */
+    private suspend fun withDailyTvMazeDates(
+        record: CalendarTitleRecord,
+        known: Map<String, CalendarTvMazeId>,
+        learned: MutableMap<String, CalendarTvMazeId>,
+        now: Instant
+    ): CalendarTitleRecord {
+        val readAt = record.sourceFetchedAtMs[CalendarSource.TVMAZE]
+        if (readAt != null && now.toEpochMilli() - readAt < TVMAZE_FOR_TRAKT_RECHECK.toMillis()) return record
+        return try {
+            val id = record.tvmazeId ?: resolveTvMazeId(record.ids, known, learned, now) ?: return record
+            val dates = remote.tvMazeShow(id, now)
+            record.copy(tvmazeId = id, tvmazeStreaming = dates.streaming, tvmazeAnime = dates.anime)
+                .withSource(CalendarSource.TVMAZE, dates.entries, now)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            record
+        }
+    }
+
     private suspend fun refreshShow(
         record: CalendarTitleRecord,
         known: Map<String, CalendarTvMazeId>,
@@ -104,7 +125,9 @@ class CalendarTitleFetcher(
                 poster = record.poster ?: dates.poster,
                 network = dates.network ?: record.network,
                 networkZone = dates.networkZone ?: record.networkZone,
-                status = dates.status
+                status = dates.status,
+                tvmazeStreaming = dates.streaming,
+                tvmazeAnime = dates.anime
             ).withSource(CalendarSource.TVMAZE, dates.entries, now)
             return withFinales(withTraktTime(withTvdbTimes(updated, CalendarSource.TVMAZE, now), now), now)
         }
@@ -148,7 +171,6 @@ class CalendarTitleFetcher(
             .filter { it.kind == CalendarEntryKind.EPISODE && !it.isOut(now) }
             .minByOrNull { it.sortInstant() ?: Instant.MAX }
         if (next == null || next.timeKnown || next.airDate == null) return record.withoutSources(CalendarSource.TRAKT_NEXT)
-        if (record.sources[CalendarSource.TVDB].orEmpty().any { it.slot == next.slot }) return record.withoutSources(CalendarSource.TRAKT_NEXT)
         val askedAt = record.sourceFetchedAtMs[CalendarSource.TRAKT_NEXT]
         val kept = record.sources[CalendarSource.TRAKT_NEXT].orEmpty()
         if (askedAt != null && now.toEpochMilli() - askedAt < TRAKT_TIME_RECHECK.toMillis() && kept.any { it.slot == next.slot }) {
@@ -229,6 +251,7 @@ class CalendarTitleFetcher(
         val NOT_FOUND_RECHECK: Duration = Duration.ofDays(30)
         val FINALE_LOOKAHEAD: Duration = Duration.ofDays(60)
         val TRAKT_TIME_RECHECK: Duration = Duration.ofHours(6)
+        val TVMAZE_FOR_TRAKT_RECHECK: Duration = Duration.ofHours(24)
     }
 }
 

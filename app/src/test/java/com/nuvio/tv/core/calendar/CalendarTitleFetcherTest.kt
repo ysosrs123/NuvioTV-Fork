@@ -125,11 +125,24 @@ class CalendarTitleFetcherTest {
         assertEquals(now.plus(Duration.ofDays(7)).toEpochMilli(), outcome.record.nextRefreshAtMs)
     }
 
+    @Test fun aShowTheTraktCalendarCoversReadsTvMazeOnceADayAndAFailureChangesNothing() = runBlocking {
+        val remote = FakeRemote().apply { tvMazeShow = CalendarShowDates(streaming = true, anime = true) }
+        val covered = show.copy(
+            poster = "https://example.org/p.jpg",
+            tvmazeId = 5,
+            sources = mapOf(CalendarSource.TRAKT to listOf(CalendarEntry(season = 1, episode = 2, airInstantMs = inDays(2), source = CalendarSource.TRAKT)))
+        )
+        val outcome = CalendarTitleFetcher(remote, "AU").refresh(covered, emptyMap(), coveredByTrakt = true, now = now)
+        assertEquals(listOf("tvmaze:5"), remote.calls)
+        assertTrue(outcome.record.tvmazeStreaming && outcome.record.tvmazeAnime)
+    }
+
     @Test fun aShowTheTraktCalendarCoversMakesNoCalls() = runBlocking {
         val remote = FakeRemote()
         val covered = show.copy(
             poster = "https://example.org/p.jpg",
-            sources = mapOf(CalendarSource.TRAKT to listOf(CalendarEntry(season = 1, episode = 2, airInstantMs = inDays(2), source = CalendarSource.TRAKT)))
+            sources = mapOf(CalendarSource.TRAKT to listOf(CalendarEntry(season = 1, episode = 2, airInstantMs = inDays(2), source = CalendarSource.TRAKT))),
+            sourceFetchedAtMs = mapOf(CalendarSource.TVMAZE to now.minus(Duration.ofHours(23)).toEpochMilli())
         )
         val outcome = CalendarTitleFetcher(remote, "AU").refresh(covered, emptyMap(), coveredByTrakt = true, now = now)
         assertTrue(remote.calls.isEmpty())
@@ -152,7 +165,7 @@ class CalendarTitleFetcherTest {
         assertEquals(now.toEpochMilli(), unchecked.posterCheckedAtMs)
         val soon = FakeRemote()
         CalendarTitleFetcher(soon, "AU").refresh(unchecked, emptyMap(), coveredByTrakt = true, now = now.plus(Duration.ofDays(29)))
-        assertTrue(soon.calls.isEmpty())
+        assertEquals(listOf("tvmaze:83"), soon.calls)
         val later = FakeRemote()
         CalendarTitleFetcher(later, "AU").refresh(unchecked.copy(tvmazeId = null), emptyMap(), coveredByTrakt = true, now = now.plus(Duration.ofDays(31)))
         assertEquals("lookup", later.calls.first())
@@ -314,7 +327,7 @@ class CalendarTitleFetcherTest {
     private val fridays = TvdbAirs(java.time.LocalTime.of(21, 0), java.time.ZoneId.of("America/New_York"), setOf(java.time.DayOfWeek.FRIDAY))
     private val tvdbAt = Instant.parse("2026-10-10T01:00:00Z").toEpochMilli()
 
-    @Test fun theTvdbTimeComesBeforeTraktsAndTraktIsNotAsked() = runBlocking {
+    @Test fun aTraktTimeBeatsTheTvdbTimeAndBothAreRead() = runBlocking {
         val remote = FakeRemote().apply {
             tvMazeShow = dateOnlyShow.copy(ids = CalendarIds(tvdb = 305288))
             tvdb = fridays
@@ -322,12 +335,12 @@ class CalendarTitleFetcherTest {
         }
         val record = show.copy(tvmazeId = 9, sources = mapOf(CalendarSource.TRAKT_NEXT to listOf(CalendarEntry(season = 1, episode = 4, airInstantMs = traktAt, source = CalendarSource.TRAKT_NEXT))))
         val outcome = CalendarTitleFetcher(remote, "AU").refresh(record, emptyMap(), false, now)
-        assertEquals(listOf("tvmaze:9"), remote.calls)
+        assertEquals(listOf("tvmaze:9", "trakt"), remote.calls)
         assertEquals(305288L, remote.tvdbCalls.single().tvdb)
         val entry = outcome.record.entries.single()
-        assertEquals(tvdbAt, entry.airInstantMs)
-        assertEquals(CalendarSource.TVDB, entry.source)
-        assertEquals(setOf(CalendarSource.TVMAZE, CalendarSource.TVDB), outcome.record.sources.keys)
+        assertEquals(traktAt, entry.airInstantMs)
+        assertEquals(CalendarSource.TRAKT_NEXT, entry.source)
+        assertEquals(setOf(CalendarSource.TVMAZE, CalendarSource.TVDB, CalendarSource.TRAKT_NEXT), outcome.record.sources.keys)
     }
 
     @Test fun anExactTvMazeTimeIsKeptAndTheTvdbIsNotAsked() = runBlocking {
@@ -370,7 +383,7 @@ class CalendarTitleFetcherTest {
         val record = show.copy(tvmazeId = 9, sources = mapOf(CalendarSource.TVDB to listOf(CalendarEntry(season = 1, episode = 4, airInstantMs = tvdbAt, source = CalendarSource.TVDB))))
         val outcome = CalendarTitleFetcher(remote, "AU").refresh(record, emptyMap(), false, now)
         assertEquals(0, outcome.record.failures)
-        assertEquals(listOf("tvmaze:9"), remote.calls)
+        assertEquals(listOf("tvmaze:9", "trakt"), remote.calls)
         assertEquals(tvdbAt, outcome.record.entries.single().airInstantMs)
     }
 

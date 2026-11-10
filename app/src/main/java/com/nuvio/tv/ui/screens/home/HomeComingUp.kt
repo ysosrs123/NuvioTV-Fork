@@ -274,6 +274,20 @@ class CalendarComingUpSource @Inject constructor(
 ) {
     private var localized: Pair<String, Context>? = null
 
+    /** The show's episodes with any earlier date the Calendar knows for them. Nothing changes until the Calendar has loaded. */
+    fun withEarlierReleases(meta: com.nuvio.tv.domain.model.Meta): com.nuvio.tv.domain.model.Meta {
+        val titles = refresher.get().state.value.titles
+        if (titles.isEmpty() || meta.videos.isEmpty()) return meta
+        val ids = CalendarIds.fromContentId(meta.id).merged(CalendarIds(imdb = meta.imdbId?.takeIf { it.startsWith("tt") }))
+        val title = titles.firstOrNull { it.type == CalendarTitleType.SERIES && it.ids.sharesIdWith(ids) } ?: return meta
+        val bySlot = title.entries.associateBy { it.slot }
+        return meta.copy(videos = meta.videos.map { video ->
+            val entry = bySlot["S${video.season ?: 0}E${video.episode ?: 0}"]
+            entry?.let { com.nuvio.tv.core.calendar.calendarEarlierRelease(video.released, it) }
+                ?.let { video.copy(released = it) } ?: video
+        })
+    }
+
     /**
      * [continueWatching] is what the Continue Watching row shows, [upcoming] what the Upcoming row would show, and
      * [active] is true while Home is in front. Until the Calendar knows what has been watched only the Upcoming
