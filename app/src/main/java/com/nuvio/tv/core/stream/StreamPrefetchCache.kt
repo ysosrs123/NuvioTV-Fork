@@ -6,6 +6,7 @@ import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.player.PrefetchedSelection
 import com.nuvio.tv.domain.model.AddonStreams
 import com.nuvio.tv.domain.repository.StreamRepository
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -13,13 +14,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 /** Per-profile, opt-in source listing cache. Provider resolution and media access are playback-only.
@@ -32,6 +36,8 @@ object StreamPrefetchCache {
     private const val TTL_MS = 5L * 60L * 1000L
     private const val MAX_ENTRIES = 2
     private const val JOIN_TIMEOUT_MS = 20_000L
+    private const val EMPTY_CAP_WAIT_MS = 20_000L
+    private const val EMPTY_CAP_POLL_MS = 100L
     /** The player takes over a completed list only this fresh; an older one is loaded again. */
     const val PLAYER_REUSE_MS = 3L * 60L * 1000L
 
@@ -298,6 +304,28 @@ object StreamPrefetchCache {
         Log.i(TAG, "PREFETCH start source=$source key=$key")
     }
 
+    /**
+     * Runs [collect] until [capMs]; with no streams by then it keeps going until the first arrive, up to
+     * [emptyWaitMs] from the start, so a slow source still gets a pick. True when the search was cut short.
+     */
+    internal suspend fun collectCapped(
+        capMs: Long,
+        emptyWaitMs: Long,
+        hasStreams: () -> Boolean,
+        collect: suspend () -> Unit
+    ): Boolean = coroutineScope {
+        val collecting = launch { collect() }
+        val finished = withTimeoutOrNull(capMs) { collecting.join() } != null
+        if (!finished) {
+            withTimeoutOrNull((emptyWaitMs - capMs).coerceAtLeast(0L)) {
+                while (collecting.isActive && !hasStreams()) delay(EMPTY_CAP_POLL_MS)
+            }
+        }
+        val cut = collecting.isActive
+        if (cut) collecting.cancel()
+        cut
+    }
+
     private data class CollectFinalResult(
         val streams: List<AddonStreams>,
         val capHit: Boolean
@@ -311,7 +339,7 @@ object StreamPrefetchCache {
         episode: Int?,
         capMs: Long?
     ): CollectFinalResult {
-        var last: List<AddonStreams> = emptyList()
+        val last = AtomicReference<List<AddonStreams>>(emptyList())
         var capHit = false
         // Each Success emission from the repository carries the FULL accumulated
         // pool, so `last` after the collect (or after the cap cancels it) always
@@ -320,15 +348,13 @@ object StreamPrefetchCache {
         // remains partial: explicit Play can collect the normal complete search.
         val collectBlock: suspend () -> Unit = {
             repository.getStreamsForPrefetch(type, videoId, season, episode).collect { result ->
-                if (result is NetworkResult.Success) last = result.data
+                if (result is NetworkResult.Success) last.set(result.data)
             }
         }
         try {
             if (capMs != null) {
-                if (withTimeoutOrNull(capMs) { collectBlock() } == null) {
-                    capHit = true
-                    Log.i(TAG, "PREFETCH cap-hit ms=$capMs groups=${last.size}")
-                }
+                capHit = collectCapped(capMs, EMPTY_CAP_WAIT_MS, { last.get().any { it.streams.isNotEmpty() } }, collectBlock)
+                if (capHit) Log.i(TAG, "PREFETCH cap-hit ms=$capMs groups=${last.get().size}")
             } else {
                 collectBlock()
             }
@@ -338,8 +364,8 @@ object StreamPrefetchCache {
             Log.w(TAG, "PREFETCH failed: ${e.message}")
             return CollectFinalResult(emptyList(), false)
         }
-        Log.i(TAG, "PREFETCH done groups=${last.size}")
-        return CollectFinalResult(last, capHit)
+        Log.i(TAG, "PREFETCH done groups=${last.get().size}")
+        return CollectFinalResult(last.get(), capHit)
     }
 
     /**
