@@ -36,6 +36,8 @@ jobs:
       RELEASE_KEY_ALIAS: ${{ secrets.NUVIO_RELEASE_KEY_ALIAS }}
       RELEASE_KEY_PASSWORD: ${{ secrets.NUVIO_RELEASE_KEY_PASSWORD }}
       RELEASE_STORE_PASSWORD: ${{ secrets.NUVIO_RELEASE_STORE_PASSWORD }}
+      ARC_REPORTS_BASE_URL: ${{ secrets.ARC_REPORTS_BASE_URL }}
+      ARC_REPORTS_SIGNING_KEY: ${{ secrets.ARC_REPORTS_SIGNING_KEY }}
 
     steps:
       - name: Check out full history
@@ -207,6 +209,8 @@ jobs:
           set_property NUVIO_RELEASE_KEY_ALIAS "${RELEASE_KEY_ALIAS}"
           set_property NUVIO_RELEASE_KEY_PASSWORD "${RELEASE_KEY_PASSWORD}"
           set_property NUVIO_RELEASE_STORE_PASSWORD "${RELEASE_STORE_PASSWORD}"
+          set_property PLAYBACK_REPORTS_BASE_URL "${ARC_REPORTS_BASE_URL}"
+          set_property REPORTS_SIGNING_KEY "${ARC_REPORTS_SIGNING_KEY}"
 
           required_properties=(
             NUVIO_RELEASE_STORE_PASSWORD
