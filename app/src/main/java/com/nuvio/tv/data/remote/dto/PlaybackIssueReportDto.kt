@@ -16,7 +16,99 @@ data class PlaybackIssueReportRequestDto(
     @Json(name = "error") val error: PlaybackIssueErrorDto,
     @Json(name = "diagnostics") val diagnostics: PlaybackIssueDiagnosticsDto,
     @Json(name = "playbackSettings") val playbackSettings: PlaybackIssuePlaybackSettingsDto? = null,
-    @Json(name = "playbackAnalytics") val playbackAnalytics: PlaybackIssuePlaybackAnalyticsDto? = null
+    @Json(name = "playbackAnalytics") val playbackAnalytics: PlaybackIssuePlaybackAnalyticsDto? = null,
+    @Json(name = "viewer") val viewer: PlaybackIssueViewerDto? = null,
+    @Json(name = "recorder") val recorder: PlaybackIssueRecorderDto? = null,
+    @Json(name = "network") val network: PlaybackIssueNetworkDto? = null,
+    @Json(name = "box") val box: PlaybackIssueBoxDto? = null,
+    @Json(name = "extra") val extra: Map<String, String>? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueRecorderDto(
+    @Json(name = "enabled") val enabled: Boolean,
+    @Json(name = "sampleCount") val sampleCount: Int,
+    @Json(name = "coveredMs") val coveredMs: Long,
+    @Json(name = "samples") val samples: PlaybackIssueRecorderSamplesDto?,
+    @Json(name = "eventLines") val eventLines: List<String>,
+    @Json(name = "recording") val recording: PlaybackIssueRecordingDto? = null,
+    @Json(name = "marks") val marks: List<PlaybackIssueMarkDto> = emptyList(),
+    @Json(name = "trimmedSamples") val trimmedSamples: Int = 0,
+    @Json(name = "trimmedEventLines") val trimmedEventLines: Int = 0,
+    @Json(name = "settings") val settings: Map<String, String>? = null,
+    @Json(name = "route") val route: Map<String, String>? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueRecordingDto(
+    @Json(name = "startedAtMs") val startedAtMs: Long,
+    @Json(name = "lengthMs") val lengthMs: Long,
+    @Json(name = "endedBy") val endedBy: String?,
+    @Json(name = "logBytes") val logBytes: Long = 0L,
+    @Json(name = "logCapped") val logCapped: Boolean = false,
+    @Json(name = "frameBucketEdgesMs") val frameBucketEdgesMs: List<Int>
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueMarkDto(
+    @Json(name = "wallMs") val wallMs: Long,
+    @Json(name = "positionMs") val positionMs: Long?,
+    @Json(name = "elapsedMs") val elapsedMs: Long
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueRecorderSamplesDto(
+    @Json(name = "ageMs") val ageMs: List<Long>,
+    @Json(name = "readyAheadMs") val readyAheadMs: List<Int?>,
+    @Json(name = "droppedFrames") val droppedFrames: List<Int?>,
+    @Json(name = "audioUnderruns") val audioUnderruns: List<Int?>,
+    @Json(name = "ownCpuTenthsOfPercent") val ownCpuTenthsOfPercent: List<Int?>,
+    @Json(name = "rssKb") val rssKb: List<Int?>,
+    @Json(name = "javaHeapKb") val javaHeapKb: List<Int?>,
+    @Json(name = "nativeHeapKb") val nativeHeapKb: List<Int?>,
+    @Json(name = "memAvailableKb") val memAvailableKb: List<Int?>,
+    @Json(name = "bufferCapKb") val bufferCapKb: List<Int?>,
+    @Json(name = "thermalStatus") val thermalStatus: List<Int?>,
+    @Json(name = "loaderActive") val loaderActive: List<Int?>,
+    @Json(name = "tunnelled") val tunnelled: List<Int?>,
+    @Json(name = "playing") val playing: List<Int?>,
+    @Json(name = "skippedFrames") val skippedFrames: List<Int?> = emptyList(),
+    @Json(name = "frameLeadUs") val frameLeadUs: List<Int?> = emptyList(),
+    @Json(name = "audioJitterAvgMs") val audioJitterAvgMs: List<Int?> = emptyList(),
+    @Json(name = "audioJitterMaxMs") val audioJitterMaxMs: List<Int?> = emptyList(),
+    @Json(name = "fillerCount") val fillerCount: List<Int?> = emptyList(),
+    @Json(name = "audioPositionMs") val audioPositionMs: List<Int?> = emptyList(),
+    @Json(name = "speedPercent") val speedPercent: List<Int?> = emptyList(),
+    @Json(name = "connections") val connections: List<Int?> = emptyList(),
+    @Json(name = "watchedMs") val watchedMs: List<Int?> = emptyList(),
+    @Json(name = "frameBuckets") val frameBuckets: List<List<Int>> = emptyList()
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueNetworkDto(
+    @Json(name = "connection") val connection: String?,
+    @Json(name = "viaVpn") val viaVpn: Boolean,
+    @Json(name = "wifiGeneration") val wifiGeneration: Int? = null,
+    @Json(name = "wifiBandGhz") val wifiBandGhz: String? = null,
+    @Json(name = "wifiSignalDbm") val wifiSignalDbm: Int? = null,
+    @Json(name = "wifiLinkMbps") val wifiLinkMbps: Int? = null,
+    @Json(name = "ethernetSpeedMbps") val ethernetSpeedMbps: Int? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueBoxDto(
+    @Json(name = "socModel") val socModel: String?,
+    @Json(name = "totalMemoryMb") val totalMemoryMb: Long?,
+    @Json(name = "lowRamDevice") val lowRamDevice: Boolean?,
+    @Json(name = "freeStorageMb") val freeStorageMb: Long?,
+    @Json(name = "uptimeSeconds") val uptimeSeconds: Long
+)
+
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueViewerDto(
+    @Json(name = "problems") val problems: List<String>,
+    @Json(name = "whenHappened") val whenHappened: String? = null,
+    @Json(name = "note") val note: String? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -65,7 +157,10 @@ data class PlaybackIssueStreamDto(
     @Json(name = "videoHash") val videoHash: String?,
     @Json(name = "videoSize") val videoSize: Long?,
     @Json(name = "requestHeaderNames") val requestHeaderNames: List<String>,
-    @Json(name = "responseHeaderNames") val responseHeaderNames: List<String>
+    @Json(name = "responseHeaderNames") val responseHeaderNames: List<String>,
+    @Json(name = "filename") val filename: String? = null,
+    @Json(name = "provider") val provider: String? = null,
+    @Json(name = "sourceDetail") val sourceDetail: String? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -400,5 +495,6 @@ data class PlaybackIssuePlaybackEventDto(
 @JsonClass(generateAdapter = true)
 data class PlaybackIssueReportResponseDto(
     @Json(name = "reportId") val reportId: String? = null,
-    @Json(name = "id") val id: String? = null
+    @Json(name = "id") val id: String? = null,
+    @Json(name = "followUrl") val followUrl: String? = null
 )

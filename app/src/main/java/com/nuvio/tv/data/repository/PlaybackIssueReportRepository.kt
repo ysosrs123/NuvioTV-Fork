@@ -4,16 +4,19 @@ import android.net.Uri
 import android.os.Build
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.build.IssueReports
-import com.nuvio.tv.core.logging.redactLinksForLog
+import com.nuvio.tv.core.logging.ReportHosts
 import com.nuvio.tv.core.player.LastPlaybackDiagnostics
-import com.nuvio.tv.data.remote.api.PlaybackIssueReportApi
+import com.nuvio.tv.core.report.RecorderSnapshot
+import com.nuvio.tv.core.report.ReportFacts
 import com.nuvio.tv.data.remote.dto.PlaybackIssueAppDto
+import com.nuvio.tv.data.remote.dto.PlaybackIssueBoxDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueContentDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDeviceDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDiagnosticsDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueErrorDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueLoadingDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueLoadingEventDto
+import com.nuvio.tv.data.remote.dto.PlaybackIssueNetworkDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssuePlayerDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssuePlaybackAnalyticsDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssuePlaybackEventDto
@@ -23,10 +26,85 @@ import com.nuvio.tv.data.remote.dto.PlaybackIssuePlaybackLoadDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssuePlaybackLoadErrorDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssuePlaybackSettingsDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueReportRequestDto
+import com.nuvio.tv.data.remote.dto.PlaybackIssueViewerDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueStreamDto
+import com.squareup.moshi.Moshi
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+data class PlaybackIssueViewerChoices(
+    val problems: List<String> = emptyList(),
+    val whenHappened: String? = null,
+    val note: String? = null,
+    val includeLog: Boolean = true
+)
+
+data class PlaybackIssueReceipt(val id: String, val followUrl: String?, val saved: Boolean = false)
+
+internal fun reportAppDto(): PlaybackIssueAppDto = PlaybackIssueAppDto(
+    applicationId = BuildConfig.APPLICATION_ID,
+    versionName = BuildConfig.VERSION_NAME,
+    versionCode = BuildConfig.VERSION_CODE.toLong(),
+    debugBuild = BuildConfig.IS_DEBUG_BUILD
+)
+
+internal fun reportDeviceDto(): PlaybackIssueDeviceDto = PlaybackIssueDeviceDto(
+    manufacturer = Build.MANUFACTURER.orEmpty().take(80),
+    brand = Build.BRAND.orEmpty().take(80),
+    model = Build.MODEL.orEmpty().take(120),
+    product = Build.PRODUCT.orEmpty().take(120),
+    androidRelease = Build.VERSION.RELEASE.orEmpty().take(40),
+    sdkInt = Build.VERSION.SDK_INT,
+    supportedAbis = Build.SUPPORTED_ABIS.orEmpty().map { it.take(40) }
+)
+
+internal fun PlaybackIssueReportRequestDto.applyViewerChoices(choices: PlaybackIssueViewerChoices): PlaybackIssueReportRequestDto {
+    val named = this
+    val logged = if (choices.includeLog) named else named.copy(
+        loading = named.loading.copy(rawEventLines = emptyList(), events = emptyList()),
+        playbackAnalytics = named.playbackAnalytics?.copy(
+            rawEventLines = emptyList(),
+            events = emptyList(),
+            rawEvents = emptyList(),
+            deepExoEvents = emptyList(),
+            exoEvents = emptyList()
+        ),
+        recorder = named.recorder?.copy(eventLines = emptyList())
+    )
+    return logged.copy(
+        viewer = PlaybackIssueViewerDto(
+            problems = choices.problems.take(12),
+            whenHappened = choices.whenHappened,
+            note = ReportText.clean(choices.note, 1000)
+        )
+    )
+}
+
+internal fun gzippedSize(bytes: ByteArray): Int {
+    val out = java.io.ByteArrayOutputStream(bytes.size / 4 + 64)
+    java.util.zip.GZIPOutputStream(out).use { it.write(bytes) }
+    return out.size()
+}
+
+/** The relay refuses a body over [maxGzipBytes] compressed; trim the recorder section until it fits. */
+internal fun fitToRelay(
+    body: PlaybackIssueReportRequestDto,
+    maxGzipBytes: Int = RELAY_MAX_GZIP_BYTES,
+    serialize: (PlaybackIssueReportRequestDto) -> ByteArray
+): ByteArray {
+    val full = serialize(body)
+    val recorder = body.recorder ?: return full
+    if (gzippedSize(full) <= maxGzipBytes) return full
+    var last = full
+    fitRecorderToBudget(recorder) { candidate ->
+        last = serialize(body.copy(recorder = candidate))
+        gzippedSize(last) <= maxGzipBytes
+    }
+    return last
+}
 
 data class PlaybackIssueReportInput(
     val diagnostics: LastPlaybackDiagnostics,
@@ -41,6 +119,8 @@ data class PlaybackIssueReportInput(
     val episodeTitle: String?,
     val releaseYear: String?,
     val streamUrl: String,
+    val hideLinkHash: Boolean = false,
+    val viewer: PlaybackIssueViewerChoices = PlaybackIssueViewerChoices(),
     val streamMimeType: String?,
     val streamName: String?,
     val addonName: String?,
@@ -57,7 +137,15 @@ data class PlaybackIssueReportInput(
     val selectedSubtitleTrack: String?,
     val isTorrentStream: Boolean,
     val playbackSettings: PlaybackIssuePlaybackSettingsInput?,
-    val playbackAnalytics: PlaybackIssuePlaybackAnalyticsInput?
+    val playbackAnalytics: PlaybackIssuePlaybackAnalyticsInput?,
+    val recorder: RecorderSnapshot? = null,
+    val network: PlaybackIssueNetworkDto? = null,
+    val box: PlaybackIssueBoxDto? = null,
+    val recorderSettings: Map<String, String>? = null,
+    val recorderRoute: Map<String, String>? = null,
+    val filename: String? = null,
+    val provider: String? = null,
+    val sourceDetail: String? = null
 )
 
 data class PlaybackIssueLoadingInput(
@@ -191,44 +279,31 @@ data class PlaybackIssuePlaybackSettingsInput(
 
 @Singleton
 class PlaybackIssueReportRepository @Inject constructor(
-    private val playbackIssueReportApi: PlaybackIssueReportApi
+    private val outbox: ReportOutbox,
+    private val reportFacts: ReportFacts,
+    private val moshi: Moshi
 ) {
-    suspend fun submit(input: PlaybackIssueReportInput): Result<String> = runCatching {
+    suspend fun submit(input: PlaybackIssueReportInput): Result<PlaybackIssueReceipt> = runCatching {
         if (!IssueReports.available) {
             error("Playback report endpoint is not configured")
         }
-        val response = playbackIssueReportApi.createPlaybackIssueReport(input.toDto())
-        if (!response.isSuccessful) {
-            error("Playback report upload failed: HTTP ${response.code()}")
+        val extra = reportFacts.collect()
+        val json = withContext(Dispatchers.Default) {
+            val adapter = moshi.adapter(PlaybackIssueReportRequestDto::class.java)
+            val body = input.toDto(extra).applyViewerChoices(input.viewer)
+            fitToRelay(body) { adapter.toJson(it).toByteArray(Charsets.UTF_8) }
         }
-        val body = response.body()
-        val reportId = body?.reportId?.trim()?.takeIf { it.isNotBlank() }
-            ?: body?.id?.trim()?.takeIf { it.isNotBlank() }
-            ?: error("Playback report upload failed: missing report id")
-        reportId
+        outbox.deliver(ReportRoute.Playback, "playback", json)
     }
 
-    private fun PlaybackIssueReportInput.toDto(): PlaybackIssueReportRequestDto {
+    private fun PlaybackIssueReportInput.toDto(extra: Map<String, String>?): PlaybackIssueReportRequestDto {
         val streamUri = runCatching { Uri.parse(streamUrl) }.getOrNull()
         val urlWithoutQuery = streamUri?.withoutQueryAndFragment()
         return PlaybackIssueReportRequestDto(
             schemaVersion = 1,
             createdAtMs = System.currentTimeMillis(),
-            app = PlaybackIssueAppDto(
-                applicationId = BuildConfig.APPLICATION_ID,
-                versionName = BuildConfig.VERSION_NAME,
-                versionCode = BuildConfig.VERSION_CODE.toLong(),
-                debugBuild = BuildConfig.IS_DEBUG_BUILD
-            ),
-            device = PlaybackIssueDeviceDto(
-                manufacturer = Build.MANUFACTURER.orEmpty().limit(80),
-                brand = Build.BRAND.orEmpty().limit(80),
-                model = Build.MODEL.orEmpty().limit(120),
-                product = Build.PRODUCT.orEmpty().limit(120),
-                androidRelease = Build.VERSION.RELEASE.orEmpty().limit(40),
-                sdkInt = Build.VERSION.SDK_INT,
-                supportedAbis = Build.SUPPORTED_ABIS.orEmpty().map { it.limit(40) }
-            ),
+            app = reportAppDto(),
+            device = reportDeviceDto(),
             content = PlaybackIssueContentDto(
                 title = title.cleanText(160),
                 contentName = contentName.cleanText(160),
@@ -241,11 +316,11 @@ class PlaybackIssueReportRepository @Inject constructor(
                 releaseYear = releaseYear.cleanText(20)
             ),
             stream = PlaybackIssueStreamDto(
-                host = streamUri?.host.cleanText(160) ?: diagnostics.host.cleanText(160),
+                host = ReportHosts.label(streamUri?.host ?: diagnostics.host),
                 scheme = streamUri?.scheme.cleanText(24),
                 port = streamUri?.port?.takeIf { it >= 0 },
-                urlHash = streamUrl.sha256OrNull(),
-                urlWithoutQueryHash = urlWithoutQuery.sha256OrNull(),
+                urlHash = streamUrl.takeUnless { hideLinkHash }.sha256OrNull(),
+                urlWithoutQueryHash = urlWithoutQuery.takeUnless { hideLinkHash }.sha256OrNull(),
                 fileExtension = streamUri.fileExtension(),
                 mimeType = streamMimeType.cleanText(120),
                 streamName = streamName.cleanText(160),
@@ -253,7 +328,10 @@ class PlaybackIssueReportRepository @Inject constructor(
                 videoHash = videoHash.cleanText(160),
                 videoSize = videoSize,
                 requestHeaderNames = requestHeaders.safeHeaderNames(),
-                responseHeaderNames = responseHeaders.safeHeaderNames()
+                responseHeaderNames = responseHeaders.safeHeaderNames(),
+                filename = ReportText.fileName(filename.takeUnless { hideLinkHash }, 300),
+                provider = provider.takeUnless { hideLinkHash }.cleanText(120),
+                sourceDetail = sourceDetail.takeUnless { hideLinkHash }.cleanText(400)
             ),
             player = PlaybackIssuePlayerDto(
                 engine = playerEngine.limit(80),
@@ -276,7 +354,11 @@ class PlaybackIssueReportRepository @Inject constructor(
             ),
             diagnostics = diagnostics.toDto(),
             playbackSettings = playbackSettings?.toDto(),
-            playbackAnalytics = playbackAnalytics?.toDto()
+            playbackAnalytics = playbackAnalytics?.toDto(),
+            recorder = recorder?.toDto(recorderSettings, recorderRoute),
+            network = network,
+            box = box,
+            extra = extra
         )
     }
 
@@ -323,7 +405,7 @@ class PlaybackIssueReportRepository @Inject constructor(
     private fun LastPlaybackDiagnostics.toDto(): PlaybackIssueDiagnosticsDto =
         PlaybackIssueDiagnosticsDto(
             timestampMs = timestampMs,
-            host = host.limit(160),
+            host = ReportHosts.label(host).orEmpty(),
             hdrCapsKnown = hdrCapsKnown,
             displayDv = displayDv,
             displayHdr10 = displayHdr10,
@@ -348,7 +430,7 @@ class PlaybackIssueReportRepository @Inject constructor(
             videoHdrType = videoHdrType.cleanText(120),
             rebufferCount = rebufferCount,
             rebufferTotalMs = rebufferTotalMs,
-            result = result.limit(1000)
+            result = result.cleanText(1000).orEmpty()
         )
 
     private fun PlaybackIssuePlaybackSettingsInput.toDto(): PlaybackIssuePlaybackSettingsDto =
@@ -559,7 +641,7 @@ class PlaybackIssueReportRepository @Inject constructor(
 
     private fun PlaybackIssuePlaybackLoadInput.toDto(): PlaybackIssuePlaybackLoadDto =
         PlaybackIssuePlaybackLoadDto(
-            host = host.cleanText(160),
+            host = ReportHosts.label(host),
             scheme = scheme.cleanText(24),
             dataType = dataType.cleanText(80),
             trackType = trackType.cleanText(40),
@@ -576,7 +658,7 @@ class PlaybackIssueReportRepository @Inject constructor(
 
     private fun PlaybackIssuePlaybackLoadErrorInput.toDto(): PlaybackIssuePlaybackLoadErrorDto =
         PlaybackIssuePlaybackLoadErrorDto(
-            host = host.cleanText(160),
+            host = ReportHosts.label(host),
             dataType = dataType.cleanText(80),
             trackType = trackType.cleanText(40),
             exceptionClass = exceptionClass.cleanText(160),
@@ -640,29 +722,9 @@ class PlaybackIssueReportRepository @Inject constructor(
         return digest.joinToString("") { "%02x".format(it) }
     }
 
-    private fun String?.cleanText(maxLength: Int): String? =
-        this?.trim()
-            ?.redactSensitiveText()
-            ?.replace(Regex("\\s+"), " ")
-            ?.takeIf { it.isNotBlank() }
-            ?.limit(maxLength)
+    private fun String?.cleanText(maxLength: Int): String? = ReportText.clean(this, maxLength)
 
-    private fun String.rawLogLine(maxLength: Int): String? =
-        replace('\n', ' ')
-            .replace('\r', ' ')
-            .redactLinksForLog()
-            .trim()
-            .takeIf { it.isNotBlank() }
-            ?.limit(maxLength)
-
-    private fun String.redactSensitiveText(): String =
-        replace(Regex("""https?://\S+""", RegexOption.IGNORE_CASE), "[redacted-url]")
-            .replace(
-                Regex("""(?i)\b(authorization|proxy-authorization|cookie|set-cookie)\b\s*:\s*[^\r\n]+"""),
-                "$1: [redacted]"
-            )
-            .replace(Regex("""(?i)\b(bearer|token|apikey|api_key)\b\s*[:=]\s*\S+"""), "$1=[redacted]")
-            .replace(Regex("""(?i)\b(authorization|proxy-authorization|cookie|set-cookie)\b\s*=\s*\S+"""), "$1=[redacted]")
+    private fun String.rawLogLine(maxLength: Int): String? = ReportText.rawLine(this, maxLength)
 
     private fun String.limit(maxLength: Int): String =
         if (length <= maxLength) this else take(maxLength)

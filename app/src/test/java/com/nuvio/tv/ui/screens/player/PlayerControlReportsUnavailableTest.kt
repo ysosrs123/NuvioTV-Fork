@@ -22,6 +22,11 @@ class PlayerControlReportsUnavailableTest {
         assertTrue(report in available(PlayerUiState(playbackIssueReportsEnabled = true), reports = true))
     }
 
+    @Test fun `a saved report leaves no dead report control behind`() {
+        val state = PlayerUiState(playbackIssueReportsEnabled = true, playbackIssueReportStatus = PlaybackIssueReportStatus.Saved)
+        assertFalse(report in available(state, reports = true))
+    }
+
     @Test fun `arrangeable list leaves out the report control only when reports are unavailable`() {
         assertEquals(PlayerControlAction.entries.toSet() - report, PlayerControlAction.offered(reportsAvailable = false))
         assertEquals(PlayerControlAction.entries.toSet(), PlayerControlAction.offered(reportsAvailable = true))
