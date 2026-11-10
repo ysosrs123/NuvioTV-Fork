@@ -180,6 +180,8 @@ internal data class CwVideoSummary(
     val runtime: Int? = null
 )
 
+private fun Meta.withCalendarDates(home: HomeViewModel): Meta = home.calendarComingUp?.withEarlierReleases(this) ?: this
+
 private fun Meta.toCwSummary(): CwMetaSummary = CwMetaSummary(
     id = id,
     name = name,
@@ -2545,7 +2547,7 @@ private suspend fun HomeViewModel.resolveMetaForProgress(
                     }
                     NetworkResult.Loading -> Unit
                 }
-                summary = ((result as? NetworkResult.Success<*>)?.data as? Meta)?.toCwSummary()
+                summary = ((result as? NetworkResult.Success<*>)?.data as? Meta)?.withCalendarDates(this@resolveMetaForProgress)?.toCwSummary()
                 if (summary != null) break
             }
             if (summary != null) break
@@ -2561,7 +2563,7 @@ private suspend fun HomeViewModel.resolveMetaForProgress(
                             id = candidateId
                         ).first { it !is NetworkResult.Loading }
                     }
-                    summary = ((fallbackResult as? NetworkResult.Success<*>)?.data as? Meta)?.toCwSummary()
+                    summary = ((fallbackResult as? NetworkResult.Success<*>)?.data as? Meta)?.withCalendarDates(this@resolveMetaForProgress)?.toCwSummary()
                     if (summary != null) break
                 }
                 if (summary != null) break
@@ -2667,7 +2669,7 @@ private suspend fun HomeViewModel.resolveBadgeEpisodes(
                 }
             } ?: continue
             val meta = (result as? NetworkResult.Success<*>)?.data as? Meta ?: continue
-            val summary = meta.toCwSummary()
+            val summary = meta.withCalendarDates(this).toCwSummary()
             val episodes = summary.watchableEpisodes()
                 .mapNotNull { v -> v.season?.let { s -> v.episode?.let { e -> s to e } } }
                 .toSet()

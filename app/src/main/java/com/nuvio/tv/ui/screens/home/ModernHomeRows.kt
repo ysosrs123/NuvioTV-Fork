@@ -45,6 +45,10 @@ import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -1020,6 +1024,7 @@ internal fun ModernRowSection(
                             heightPx = cwHeightPx
                             if (widthPx <= 0 || heightPx <= 0) return
                             cacheKey = continueWatchingImageCacheKey(model, widthPx, heightPx, blur)
+                            extras = com.nuvio.tv.ui.components.continueWatchingFallbackExtras(payload.item, model)
                         } else {
                             val landscape = item.usesLandscapeCardTreatment(useLandscapePosters, addonLandscapeBackdropLogo)
                             val url = item.collapsedArtworkUrl(
@@ -1535,7 +1540,9 @@ private fun ModernCarouselCard(
     } else {
         item.collapsedArtworkUrl(useLandscapeOverlayTreatment, effectiveBackdropUrl, alwaysShowLandscapeClearlogo)
     }
+    val mixRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val imageUrl = when {
+        payload?.scoutMix != null -> (if (mixRtl) payload.scoutMix.deckMirrored else payload.scoutMix.deck) ?: baseImageUrl
         payload == null -> baseImageUrl
         !payload.focusGifEnabled -> baseImageUrl
         else -> baseImageUrl
@@ -1931,6 +1938,10 @@ private fun ModernCarouselCard(
                     }
                 }
 
+                payload?.scoutMix?.takeIf { !folderNameTile && hasImage }?.let { mix ->
+                    ScoutMixCardWords(name = item.title, shows = mix.shows, rtl = mixRtl)
+                }
+
                 if (hasLandscapeLogo) {
                     AsyncImage(
                         model = logoModel,
@@ -2006,7 +2017,7 @@ private fun ModernCarouselCard(
             }
         }
 
-        if (showLabels && !isBackdropExpanded && item.title.isNotBlank()) {
+        if (showLabels && !isBackdropExpanded && item.title.isNotBlank() && payload?.scoutMix == null) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2038,6 +2049,63 @@ private fun ModernCarouselCard(
     }
 }
 
+
+/** A mix card's name and size, on a fade of the page colour that leaves the dealt posters clear. */
+@Composable
+private fun BoxScope.ScoutMixCardWords(name: String, shows: String, rtl: Boolean) {
+    val page = NuvioTheme.colors.Background
+    Box(
+        Modifier
+            .matchParentSize()
+            .drawWithCache {
+                val stops = arrayOf(
+                    0f to page.copy(alpha = .86f),
+                    .44f to page.copy(alpha = .45f),
+                    .72f to page.copy(alpha = .05f),
+                    1f to Color.Transparent
+                )
+                val brush = if (rtl) Brush.horizontalGradient(*stops, startX = size.width, endX = 0f)
+                else Brush.horizontalGradient(*stops, startX = 0f, endX = size.width)
+                onDrawBehind { drawRect(brush) }
+            }
+    )
+    Column(
+        modifier = Modifier
+            .align(Alignment.BottomStart)
+            .fillMaxWidth(.46f)
+            .padding(start = NuvioTheme.spacing.md, end = NuvioTheme.spacing.xs, bottom = NuvioTheme.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                textDirection = name.contentTextDirection()
+            ),
+            color = NuvioTheme.colors.TextPrimary,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+        ) {
+            androidx.tv.material3.Icon(
+                imageVector = Icons.Default.Shuffle,
+                contentDescription = null,
+                tint = NuvioTheme.colors.TextSecondary,
+                modifier = Modifier.size(NuvioTheme.spacing.md + NuvioTheme.spacing.xxs)
+            )
+            Text(
+                text = shows,
+                style = MaterialTheme.typography.labelMedium,
+                color = NuvioTheme.colors.TextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
 
 /**
  * Keys that should collapse an expanded poster so navigation can re-arm expand.

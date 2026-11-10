@@ -27,10 +27,9 @@ class StreamResumeProgressTest {
         assertNull(streamResumeProgress(progress.copy(position = 0L), false))
     }
 
-    @Test fun `a position the player will not resume from is hidden`() {
+    @Test fun `a short start is shown because the player resumes from it`() {
         val film = progress.copy(position = 119_000L, duration = 8_700_680L)
-        assertNull(streamResumeProgress(film, false))
-        assertEquals(film.copy(position = 202_000L), streamResumeProgress(film.copy(position = 202_000L), false))
+        assertEquals(film, streamResumeProgress(film, false))
     }
 
     @Test fun `completed local content is hidden`() {

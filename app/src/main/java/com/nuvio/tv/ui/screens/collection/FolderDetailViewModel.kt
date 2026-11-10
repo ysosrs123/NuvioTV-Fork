@@ -141,7 +141,9 @@ class FolderDetailViewModel @Inject constructor(
     private val tmdbCollectionSourceResolver: TmdbCollectionSourceResolver,
     private val traktPublicListSourceResolver: TraktPublicListSourceResolver,
     private val serverCatalog: ServerCatalog,
-    val posterOptions: com.nuvio.tv.ui.components.posteroptions.PosterOptionsController
+    val posterOptions: com.nuvio.tv.ui.components.posteroptions.PosterOptionsController,
+    private val builtInCatalogs: com.nuvio.tv.core.catalog.BuiltInCatalogs = com.nuvio.tv.core.catalog.BuiltInCatalogs.None,
+    private val scoutFolders: com.nuvio.tv.core.scout.ScoutFolderSupport? = null
 ) : ViewModel() {
 
     private val collectionId: String = savedStateHandle["collectionId"] ?: ""
@@ -236,6 +238,18 @@ class FolderDetailViewModel @Inject constructor(
         }
     }
 
+    val scoutSliceId: String? get() = scoutFolders?.sliceId(collectionId, folderId)
+    val scoutSliceSaved: kotlinx.coroutines.flow.Flow<Boolean>?
+        get() = scoutSliceId?.let { id -> scoutFolders?.isSaved(id) }
+
+    fun toggleScoutSlice() {
+        val id = scoutSliceId ?: return
+        viewModelScope.launch { scoutFolders?.toggleSaved(id) }
+    }
+
+    private suspend fun scoutVisible(items: List<MetaPreview>): List<MetaPreview> =
+        if (scoutSliceId != null) scoutFolders?.withoutSeen(items) ?: items else items
+
     private val hasAllTab: Boolean
         get() {
             val state = _uiState.value
@@ -247,6 +261,7 @@ class FolderDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val collections = collectionsDataStore.collections.first()
             val collection = collections.find { it.id == collectionId }
+                ?: builtInCatalogs.collectionForFolders(collectionId)
             val folder = collection?.folders?.find { it.id == folderId }
 
             if (folder == null || folder.sources.isEmpty()) {
@@ -669,63 +684,57 @@ class FolderDetailViewModel @Inject constructor(
                 targetRowKeys.add(allRows[focusedIdx + 1].key)
             }
 
-            val itemsToFetch = mutableListOf<MetaPreview>()
-            for (rk in targetRowKeys) {
-                val carouselRow = allRows.firstOrNull { it.key == rk } ?: continue
-                for (carouselItem in carouselRow.items.list) {
-                    val meta = carouselItem.metaPreview ?: continue
-                    if (meta.mdbListRatings != null) continue
-                    if (meta.id in mdbBatchNegativeIds) continue
-                    if (meta.id.startsWith("__placeholder")) continue
-                    itemsToFetch.add(meta)
-                }
+            val nearbyItems = targetRowKeys.flatMap { rk ->
+                allRows.firstOrNull { it.key == rk }?.items?.list.orEmpty().mapNotNull { it.metaPreview }
             }
+            val itemsToFetch = mdbRatingsToFetch(nearbyItems, mdbBatchNegativeIds)
 
             if (itemsToFetch.isEmpty()) return@launch
+            val anyRated = java.util.concurrent.atomic.AtomicBoolean(false)
             val ratingOrder = settings.enabledRatingOrder()
-            kotlinx.coroutines.coroutineScope {
-                itemsToFetch.map { item ->
-                    async(kotlinx.coroutines.Dispatchers.IO) {
-                        try {
-                            val meta = com.nuvio.tv.domain.model.Meta(
-                                id = item.id, type = item.type, name = item.name,
-                                poster = item.poster, posterShape = item.posterShape,
-                                background = item.background, logo = item.logo,
-                                description = item.description, releaseInfo = item.releaseInfo,
-                                imdbRating = item.imdbRating, genres = item.genres,
-                                runtime = item.runtime, director = item.director,
-                                cast = emptyList(), videos = emptyList(),
-                                country = item.country, awards = null,
-                                language = item.language, links = item.links
+            try {
+                fetchMdbRatings(
+                    items = itemsToFetch,
+                    noRating = mdbBatchNegativeIds,
+                    lookup = { item ->
+                        val meta = com.nuvio.tv.domain.model.Meta(
+                            id = item.id, type = item.type, name = item.name,
+                            poster = item.poster, posterShape = item.posterShape,
+                            background = item.background, logo = item.logo,
+                            description = item.description, releaseInfo = item.releaseInfo,
+                            imdbRating = item.imdbRating, genres = item.genres,
+                            runtime = item.runtime, director = item.director,
+                            cast = emptyList(), videos = emptyList(),
+                            country = item.country, awards = null,
+                            language = item.language, links = item.links
+                        )
+                        mdbListRepository.getRatingsForMeta(
+                            meta = meta, fallbackItemId = item.id, fallbackItemType = item.apiType
+                        )
+                    },
+                    onRated = { item, result ->
+                        anyRated.set(true)
+                        updateItemInTabs(item.id) { current ->
+                            current.copy(
+                                mdbListRatings = result.ratings,
+                                mdbListRatingOrder = ratingOrder,
+                                imdbRating = result.ratings.imdb?.toFloat() ?: current.imdbRating
                             )
-                            val result = mdbListRepository.getRatingsForMeta(
-                                meta = meta, fallbackItemId = item.id, fallbackItemType = item.apiType
-                            )
-                            if (result != null) {
-                                updateItemInTabs(item.id) { current ->
-                                    current.copy(
-                                        mdbListRatings = result.ratings,
-                                        mdbListRatingOrder = ratingOrder,
-                                        imdbRating = result.ratings.imdb?.toFloat() ?: current.imdbRating
-                                    )
-                                }
-                                val existing = _enrichedPreviews.value[item.id]
-                                if (existing != null) {
-                                    val enriched = _uiState.value.tabs
-                                        .firstNotNullOfOrNull { tab -> tab.catalogRow?.items?.firstOrNull { it.id == item.id } }
-                                    if (enriched != null) {
-                                        publishEnrichedPreview(item.id, enriched)
-                                    }
-                                }
-                            } else {
-                                mdbBatchNegativeIds.add(item.id)
+                        }
+                        val existing = _enrichedPreviews.value[item.id]
+                        if (existing != null) {
+                            val enriched = _uiState.value.tabs
+                                .firstNotNullOfOrNull { tab -> tab.catalogRow?.items?.firstOrNull { it.id == item.id } }
+                            if (enriched != null) {
+                                publishEnrichedPreview(item.id, enriched)
                             }
-                        } catch (e: kotlinx.coroutines.CancellationException) { throw e }
-                        catch (_: Exception) { }
+                        }
                     }
-                }.awaitAll()
+                )
+            } finally {
+                // Moving on cancels the batch: still show the ratings that already landed.
+                if (anyRated.get()) rebuildFollowLayoutState()
             }
-            rebuildFollowLayoutState()
         }
     }
 
@@ -1078,7 +1087,7 @@ class FolderDetailViewModel @Inject constructor(
                             } else {
                                 filteredData
                             }
-                            if (tabIndex < tabs.size) tabs[tabIndex] = tabs[tabIndex].copy(catalogRow = row.copy(items = row.items.withCustomPosterUrls(com.nuvio.tv.core.poster.patternForScreen(posterPattern, com.nuvio.tv.core.poster.CustomPosterScreen.COLLECTIONS, enabledScreens))), isLoading = false)
+                            if (tabIndex < tabs.size) tabs[tabIndex] = tabs[tabIndex].copy(catalogRow = row.copy(items = scoutVisible(row.items).withCustomPosterUrls(com.nuvio.tv.core.poster.patternForScreen(posterPattern, com.nuvio.tv.core.poster.CustomPosterScreen.COLLECTIONS, enabledScreens))), isLoading = false)
                             s.copy(tabs = tabs)
                         }
                         rebuildAllTab()
@@ -1582,13 +1591,8 @@ class FolderDetailViewModel @Inject constructor(
             var changed = false
             val updatedTabs = state.tabs.map { tab ->
                 val row = tab.catalogRow ?: return@map tab
-                val idx = row.items.indexOfFirst { it.id == itemId }
-                if (idx < 0) return@map tab
-                val merged = transform(row.items[idx])
-                if (merged == row.items[idx]) return@map tab
+                val items = replaceEveryCopy(row.items, itemId, transform) ?: return@map tab
                 changed = true
-                val items = row.items.toMutableList()
-                items[idx] = merged
                 tab.copy(catalogRow = row.copy(items = items))
             }
             if (changed) state.copy(tabs = updatedTabs) else state

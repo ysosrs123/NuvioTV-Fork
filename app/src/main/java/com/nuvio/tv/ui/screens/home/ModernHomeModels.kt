@@ -84,7 +84,9 @@ data class HeroPreview(
      *  even after navigation away and back. */
     val frozenBackdropUrl: String? = null,
     /** Same idea for the logo URL. */
-    val frozenLogoUrl: String? = null
+    val frozenLogoUrl: String? = null,
+    /** Several shows' logos in a row, for a hero that stands for more than one title. */
+    val logos: StableList<String> = emptyList<String>().asStable()
 )
 
 @Immutable
@@ -111,7 +113,8 @@ sealed class ModernPayload {
         val heroBackdropUrl: String?,
         val heroVideoUrl: String?,
         val titleLogoUrl: String?,
-        val coverEmoji: String? = null
+        val coverEmoji: String? = null,
+        val scoutMix: com.nuvio.tv.domain.model.ScoutMixTile? = null
     ) : ModernPayload()
 }
 
@@ -531,6 +534,7 @@ internal fun buildCatalogItem(
         isSeries = isSeriesType(item.apiType),
         yearText = extractYearText(item.type, item.releaseInfo, item.released, showFullReleaseDate),
         runtimeText = formatHeroRuntime(item.runtime),
+        secondaryHighlightText = item.scoutReason,
         imdbText = item.imdbRating
             ?.let { String.format("%.1f", it) },
         ageRatingText = item.ageRating,
@@ -590,6 +594,7 @@ internal fun buildCollectionFolderItem(
     // Don't use it as a static poster — it would still animate via Coil's GIF decoder.
     val imageUrl = firstNonBlank(folder.coverImageUrl, collection.backdropImageUrl)
     val heroBackdrop = firstNonBlank(folder.heroBackdropUrl, folder.coverImageUrl, collection.backdropImageUrl)
+    val mix = folder.scoutMix
 
     return ModernCarouselItem(
         key = "collection_${collection.id}_${folder.id}_$occurrence",
@@ -599,14 +604,16 @@ internal fun buildCollectionFolderItem(
         heroPreview = HeroPreview(
             title = if (folder.hideTitle) "" else title,
             logo = folder.titleLogoUrl,
-            description = null,
-            contentTypeText = null,
+            description = mix?.about?.takeIf(String::isNotBlank),
+            contentTypeText = mix?.kind,
             yearText = null,
+            runtimeText = mix?.shows,
             imdbText = null,
-            genres = emptyList<String>().asStable(),
+            genres = listOfNotNull(mix?.genre).asStable(),
             poster = imageUrl,
             backdrop = heroBackdrop,
-            imageUrl = imageUrl
+            imageUrl = imageUrl,
+            logos = mix?.logos.orEmpty().asStable()
         ),
         payload = ModernPayload.CollectionFolder(
             focusKey = "collection_${collection.id}::${folder.id}",
@@ -620,7 +627,8 @@ internal fun buildCollectionFolderItem(
             heroBackdropUrl = folder.heroBackdropUrl,
             heroVideoUrl = folder.heroVideoUrl,
             titleLogoUrl = folder.titleLogoUrl,
-            coverEmoji = folder.coverEmoji
+            coverEmoji = folder.coverEmoji,
+            scoutMix = mix
         )
     )
 }

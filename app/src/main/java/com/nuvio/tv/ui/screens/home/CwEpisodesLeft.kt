@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.home
 
 import androidx.lifecycle.viewModelScope
+import com.nuvio.tv.core.util.parseEpisodeReleaseInstant
 import com.nuvio.tv.domain.model.Meta
 import com.nuvio.tv.domain.model.WatchProgress
 import kotlinx.coroutines.Dispatchers
@@ -15,19 +16,30 @@ import kotlinx.coroutines.withContext
 internal fun Collection<Pair<Int, Int>>.episodesLeftFrom(season: Int, episode: Int): Int? =
     count { (s, e) -> s > season || (s == season && e >= episode) }.takeIf { it > 0 }
 
-internal fun CwMetaSummary.episodeKeys(): Set<Pair<Int, Int>> =
-    watchableEpisodes().mapNotNullTo(mutableSetOf()) { video ->
-        val s = video.season ?: return@mapNotNullTo null
-        val e = video.episode ?: return@mapNotNullTo null
-        s to e
+/** An episode with no date after the last dated one isn't out yet. A show with no dates at all counts in full. */
+private fun <V> List<V>.releasedEpisodeKeys(
+    season: (V) -> Int?,
+    episode: (V) -> Int?,
+    released: (V) -> String?
+): Set<Pair<Int, Int>> {
+    val keyed = mapNotNull { video ->
+        val s = season(video) ?: return@mapNotNull null
+        val e = episode(video) ?: return@mapNotNull null
+        (s to e) to released(video)
     }
+    val lastDated = keyed.filter { (_, date) -> parseEpisodeReleaseInstant(date) != null }
+        .map { (key, _) -> key }
+        .maxWithOrNull(compareBy({ it.first }, { it.second }))
+    return keyed.mapTo(mutableSetOf()) { (key, _) -> key }.filterTo(mutableSetOf()) { (s, e) ->
+        lastDated == null || s < lastDated.first || (s == lastDated.first && e <= lastDated.second)
+    }
+}
+
+internal fun CwMetaSummary.episodeKeys(): Set<Pair<Int, Int>> =
+    watchableEpisodes().releasedEpisodeKeys({ it.season }, { it.episode }, { it.released })
 
 private fun Meta.episodeKeys(): Set<Pair<Int, Int>> =
-    watchableEpisodes().mapNotNullTo(mutableSetOf()) { video ->
-        val s = video.season ?: return@mapNotNullTo null
-        val e = video.episode ?: return@mapNotNullTo null
-        s to e
-    }
+    watchableEpisodes().releasedEpisodeKeys({ it.season }, { it.episode }, { it.released })
 
 internal fun CwMetaSummary.episodesLeftFrom(season: Int, episode: Int): Int? =
     episodeKeys().episodesLeftFrom(season, episode)

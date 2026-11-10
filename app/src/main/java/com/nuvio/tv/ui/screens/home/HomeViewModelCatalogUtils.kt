@@ -223,6 +223,7 @@ internal fun HomeViewModel.removeTruncatedRowCacheEntry(key: String) {
 }
 
 internal fun HomeViewModel.rebuildCatalogOrder(addons: List<Addon>) {
+    val homeCatalogOrderKeys = builtInCatalogs.withDefaultFirst(homeCatalogOrderKeys)
     val defaultOrder = buildDefaultCatalogOrder(addons)
     val collectionKeys = collectionsCache.map { "collection_${it.id}" }
     val allAvailable = (defaultOrder + collectionKeys).toSet()

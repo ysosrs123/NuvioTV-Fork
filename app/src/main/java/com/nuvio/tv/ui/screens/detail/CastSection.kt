@@ -63,6 +63,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import coil3.compose.AsyncImage
+import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import androidx.tv.material3.Border
@@ -72,6 +73,19 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.domain.model.MetaCastMember
+
+internal val CastCardSize = 100.dp
+
+private const val CAST_PHOTOS_PRELOADED = 8
+
+/** Fetches the first photos as the cast arrives, also when the row is still below the screen. */
+internal fun preloadCastPhotos(context: android.content.Context, members: List<MetaCastMember>, sizePx: Int) {
+    members.asSequence().mapNotNull { it.photo?.takeIf(String::isNotBlank) }.distinct().take(CAST_PHOTOS_PRELOADED).forEach { url ->
+        context.imageLoader.enqueue(
+            ImageRequest.Builder(context).data(url).size(width = sizePx, height = sizePx).build()
+        )
+    }
+}
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -198,7 +212,7 @@ fun CastSection(
     }
 
     val itemWidth = 150.dp
-    val cardSize = 100.dp
+    val cardSize = CastCardSize
     val hasTitle = title.isNotBlank()
     val currentUpFocusRequester by rememberUpdatedState(upFocusRequester)
     val currentDownFocusRequester by rememberUpdatedState(downFocusRequester)
@@ -429,7 +443,7 @@ private fun CastMemberItem(
     member: MetaCastMember,
     modifier: Modifier = Modifier,
     itemWidth: Dp = 150.dp,
-    cardSize: Dp = 100.dp,
+    cardSize: Dp = CastCardSize,
     onFocused: () -> Unit = {},
     onClick: () -> Unit = {}
 ) {

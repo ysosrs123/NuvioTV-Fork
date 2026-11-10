@@ -115,9 +115,7 @@ import com.nuvio.tv.ui.components.CatalogRowSection
 import com.nuvio.tv.ui.components.EmptyScreenState
 import com.nuvio.tv.ui.components.ErrorState
 import com.nuvio.tv.ui.components.LoadingIndicator
-import com.nuvio.tv.ui.components.PosterCardDefaults
-import com.nuvio.tv.ui.components.PosterCardStyle
-import com.nuvio.tv.ui.components.rememberScaledPosterCardStyle
+import com.nuvio.tv.ui.components.rememberPosterCardStyle
 import com.nuvio.tv.domain.model.DiscoverLocation
 import com.nuvio.tv.domain.model.stableKey
 import android.view.inputmethod.CompletionInfo
@@ -131,6 +129,17 @@ import com.nuvio.tv.R
 
 /** Skeleton rows shown while a search is pending, matching the two mobile renders. */
 private const val SEARCH_SKELETON_ROW_COUNT = 2
+private const val VOICE_SEARCH_PAUSE_MS = 2_000L
+
+internal fun voiceSearchWords(final: String?, partial: String): String =
+    final?.trim()?.takeIf(String::isNotEmpty) ?: partial.trim()
+
+internal fun voiceSearchWordsOnError(error: Int, partial: String): String? = when (error) {
+    SpeechRecognizer.ERROR_CLIENT,
+    SpeechRecognizer.ERROR_RECOGNIZER_BUSY,
+    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> null
+    else -> partial.trim().takeIf(String::isNotEmpty)
+}
 
 private val NAVIGATION_KEYS = setOf(
     KeyEvent.KEYCODE_DPAD_UP,
@@ -148,8 +157,13 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel(),
     onNavigateToDetail: (String, String, String) -> Unit,
     onNavigateToSeeAll: (catalogId: String, addonId: String, type: String) -> Unit = { _, _, _ -> },
-    onOpenDiscover: () -> Unit = {}
+    onOpenDiscover: () -> Unit = {},
+    onAskScout: (String) -> Unit = {},
+    askAccess: com.nuvio.tv.ui.screens.scout.ask.AskAccessViewModel = hiltViewModel()
 ) {
+    val askHasKey by askAccess.hasKey.collectAsState()
+    var askLineFocusCount by remember { mutableStateOf(0) }
+    val askLineFocus = remember { FocusRequester() }
     val isV2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
     val artworkAccent = com.nuvio.tv.ui.v2.appearance.LocalArtworkAccent.current
     var focusedResultsRow by remember { mutableStateOf<String?>(null) }
@@ -176,6 +190,7 @@ fun SearchScreen(
     var pendingFocusMoveToResultsQuery by remember { mutableStateOf<String?>(null) }
     var isVoiceListening by remember { mutableStateOf(false) }
     var voiceRmsLevel by remember { mutableStateOf(0f) }
+    var voicePartial by remember { mutableStateOf("") }
     var discoverFocusedItemIndex by rememberSaveable { mutableStateOf(0) }
     var restoreDiscoverFocus by rememberSaveable { mutableStateOf(false) }
     var pendingDiscoverRestoreOnResume by rememberSaveable { mutableStateOf(false) }
@@ -193,7 +208,12 @@ fun SearchScreen(
             viewModel.onEvent(SearchEvent.QueryChanged(recognized))
             viewModel.onEvent(SearchEvent.SubmitSearch)
             focusResults = false
-            pendingFocusMoveToResultsQuery = recognized
+            if (askHasKey && com.nuvio.tv.ui.screens.scout.ask.askLineSentence(recognized)) {
+                pendingFocusMoveToResultsQuery = null
+                askLineFocusCount++
+            } else {
+                pendingFocusMoveToResultsQuery = recognized
+            }
         } else {
             Toast.makeText(context, strVoiceNoSpeech, Toast.LENGTH_SHORT).show()
         }
@@ -210,9 +230,12 @@ fun SearchScreen(
         }
     }
     val buildRecognizeIntent: () -> Intent = {
+        voicePartial = ""
         Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false)
+            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, VOICE_SEARCH_PAUSE_MS)
+            putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, VOICE_SEARCH_PAUSE_MS)
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
         }
@@ -265,6 +288,12 @@ fun SearchScreen(
                 isVoiceListening = false
                 voiceRmsLevel = 0f
                 Log.w("SearchScreen", "Voice recognition error: $error")
+                val heardSoFar = voiceSearchWordsOnError(error, voicePartial)
+                voicePartial = ""
+                if (heardSoFar != null) {
+                    onVoiceQueryResultState.value(heardSoFar)
+                    return
+                }
                 when (error) {
                     SpeechRecognizer.ERROR_NO_MATCH,
                     SpeechRecognizer.ERROR_SPEECH_TIMEOUT ->
@@ -281,15 +310,20 @@ fun SearchScreen(
             override fun onResults(results: Bundle?) {
                 isVoiceListening = false
                 voiceRmsLevel = 0f
-                val recognized = results
-                    ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                    ?.firstOrNull()
-                    .orEmpty()
-                    .trim()
+                val recognized = voiceSearchWords(
+                    results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull(),
+                    voicePartial
+                )
+                voicePartial = ""
                 onVoiceQueryResultState.value(recognized)
             }
 
-            override fun onPartialResults(partialResults: Bundle?) = Unit
+            override fun onPartialResults(partialResults: Bundle?) {
+                partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    ?.firstOrNull()
+                    ?.takeIf(String::isNotBlank)
+                    ?.let { voicePartial = it }
+            }
         }
 
         speechRecognizer?.setRecognitionListener(listener)
@@ -315,13 +349,7 @@ fun SearchScreen(
         }
     }
 
-    val posterCardStyle = rememberScaledPosterCardStyle(
-        PosterCardStyle(
-            cornerRadius = uiState.posterCardCornerRadiusDp.dp,
-            focusedBorderWidth = PosterCardDefaults.Style.focusedBorderWidth,
-            focusedScale = PosterCardDefaults.Style.focusedScale
-        )
-    )
+    val posterCardStyle = rememberPosterCardStyle(uiState.posterCardWidthDp, uiState.posterCardCornerRadiusDp)
 
     val trimmedQuery = remember(uiState.query) { uiState.query.trim() }
     val trimmedSubmittedQuery = remember(uiState.submittedQuery) { uiState.submittedQuery.trim() }
@@ -410,6 +438,16 @@ fun SearchScreen(
             trimmedSubmittedQuery.length >= MIN_SEARCH_QUERY_LENGTH &&
                 uiState.catalogRows.any { it.items.isNotEmpty() }
         }
+    }
+    val showAskLine = askHasKey && !isDiscoverMode && com.nuvio.tv.ui.screens.scout.ask.askLineWanted(
+        query = trimmedQuery,
+        noResults = trimmedSubmittedQuery.length >= MIN_SEARCH_QUERY_LENGTH &&
+            !uiState.isSearching &&
+            !hasPendingUnsubmittedQuery &&
+            uiState.catalogRows.none { it.items.isNotEmpty() }
+    )
+    LaunchedEffect(askLineFocusCount, showAskLine) {
+        if (askLineFocusCount > 0 && showAskLine) runCatching { askLineFocus.requestFocus() }
     }
     val submitCurrentQuery: (String) -> Unit = { submittedQuery ->
         viewModel.onEvent(SearchEvent.SubmitSearch)
@@ -637,7 +675,7 @@ fun SearchScreen(
                 SearchInputField(
                     modifier = Modifier.onFocusChanged { inputRowHasFocus = it.hasFocus },
                     query = uiState.query,
-                    canMoveToResults = canMoveToResults,
+                    canMoveToResults = canMoveToResults && !showAskLine,
                     voiceFocusRequester = if (isVoiceSearchAvailable) voiceFocusRequester else null,
                     searchFocusRequester = searchFocusRequester,
                     onSearchFieldFocusChanged = { focused -> isSearchFieldFocused = focused },
@@ -667,6 +705,16 @@ fun SearchScreen(
                     clearHistoryFocusRequester = if (showRecentSearches) recentClearHistoryFocusRequester else null,
                     isScreenActive = isScreenActive
                 )
+            }
+
+            if (showAskLine) {
+                item(key = "ask_scout") {
+                    com.nuvio.tv.ui.screens.scout.ask.AskSearchLine(
+                        query = trimmedQuery,
+                        onClick = { onAskScout(trimmedQuery) },
+                        modifier = Modifier.focusRequester(askLineFocus)
+                    )
+                }
             }
 
             if (isDiscoverMode) {
@@ -1412,7 +1460,7 @@ private fun SearchInputField(
                     color = NuvioTheme.colors.TextTertiary
                 )
             },
-            textStyle = TextStyle(
+            textStyle = androidx.tv.material3.MaterialTheme.typography.bodyMedium.copy(
                 textDirection = TextDirection.Content
             ),
             colors = TextFieldDefaults.colors(

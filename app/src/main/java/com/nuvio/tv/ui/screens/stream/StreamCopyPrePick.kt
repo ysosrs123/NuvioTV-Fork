@@ -10,6 +10,7 @@ import com.nuvio.tv.core.player.thumbnail.CopyFirst
 import com.nuvio.tv.core.player.thumbnail.CopyHeadStart
 import com.nuvio.tv.core.player.thumbnail.CopyOffer
 import com.nuvio.tv.core.player.thumbnail.CopyPrePick
+import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import com.nuvio.tv.core.player.thumbnail.CopySourceBooks
 import com.nuvio.tv.core.player.thumbnail.MemoryGovernor
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnailPreferences
@@ -117,6 +118,7 @@ internal class StreamCopyPrePick(
     fun listReady(
         scope: CoroutineScope, streams: () -> List<Stream>, shown: () -> Boolean, settings: suspend () -> PlayerSettings,
     ) {
+        SeekThumbnails.streamListShown()
         if (tried || pickMade || job?.isActive == true || identity.isBlank()) return
         job = scope.launch {
             delay(CopyPrePick.LIST_DELAY_MS)

@@ -492,6 +492,8 @@ fun MetaDetailsScreen(
         .collectAsStateWithLifecycle(initialValue = viewModel.uiState.value.peopleState())
     val parentalGuideState = remember(viewModel) { viewModel.uiState.map { it.parentalGuide }.distinctUntilChanged() }
         .collectAsStateWithLifecycle(initialValue = viewModel.uiState.value.parentalGuide)
+    val parentalGuidePendingState = remember(viewModel) { viewModel.uiState.map { it.parentalGuidePending }.distinctUntilChanged() }
+        .collectAsStateWithLifecycle(initialValue = viewModel.uiState.value.parentalGuidePending)
     val secondaryReady by viewModel.secondaryReady.collectAsStateWithLifecycle()
     var scrolledPastHero by remember(viewModel) { mutableStateOf(false) }
     var isBackgroundTrailerRendered by remember(
@@ -911,6 +913,7 @@ fun MetaDetailsScreen(
                     ratingState = ratingState,
                     peopleState = peopleState,
                     parentalGuideState = parentalGuideState,
+                    parentalGuidePendingState = parentalGuidePendingState,
                     meta = meta,
                     heroLogoUrl = heroLogoUrl,
                     detailReturnEpisodeFocusRequest = DetailReturnEpisodeFocusRequest(
@@ -1263,6 +1266,7 @@ private fun MetaDetailsContent(
     ratingState: State<DetailRatingState>,
     peopleState: State<DetailPeopleState>,
     parentalGuideState: State<List<com.nuvio.tv.data.repository.ParentalGuideEntry>>,
+    parentalGuidePendingState: State<Boolean>,
     meta: Meta,
     heroLogoUrl: String? = null,
     detailReturnEpisodeFocusRequest: DetailReturnEpisodeFocusRequest? = null,
@@ -1896,6 +1900,7 @@ private fun MetaDetailsContent(
     LaunchedEffect(isScrolledPastHero) { onScrollPastHero(isScrolledPastHero) }
     val people = if (secondaryReady) peopleState.value else DetailPeopleState(emptyList(), emptyList(), emptyList(), emptyList())
     val parentalGuide = if (secondaryReady) parentalGuideState.value else emptyList()
+    val parentalGuidePending = secondaryReady && parentalGuidePendingState.value
 
     // Prepare cast only after the hero or explicit Down demand.
     val castMembersToShow = remember(people.castMembers, people.cast) {
@@ -1904,6 +1909,11 @@ private fun MetaDetailsContent(
         } else {
             people.cast.map { name -> MetaCastMember(name = name) }
         }
+    }
+    val castPhotoContext = androidx.compose.ui.platform.LocalContext.current
+    val castPhotoPx = with(androidx.compose.ui.platform.LocalDensity.current) { CastCardSize.roundToPx() }
+    LaunchedEffect(castMembersToShow, castPhotoPx) {
+        preloadCastPhotos(castPhotoContext, castMembersToShow, castPhotoPx)
     }
 
     fun isLeadCreditRole(role: String?): Boolean {
@@ -2041,7 +2051,7 @@ private fun MetaDetailsContent(
     val visiblePeopleTabItems = if (shouldSplitCollection) peopleTabItems.filterNot { it.tab == PeopleSectionTab.COLLECTION } else peopleTabItems
     val hasVisiblePeopleSection = visiblePeopleTabItems.isNotEmpty()
     val hasVisiblePeopleTabs = visiblePeopleTabItems.size > 1
-    val showParentalGuide = parentalGuide.isNotEmpty()
+    val showParentalGuide = parentalGuide.isNotEmpty() || parentalGuidePending
     val commentsItemIndex = remember(
         isSeries,
         seasons,
@@ -2658,6 +2668,9 @@ private fun MetaDetailsContent(
                         episodeShuffle = episodeShuffle,
                         shuffleActionPending = stoppingShuffle,
                         randomEpisodeFocusRequester = randomEpisodeFocusRequester,
+                        scoutTitle = if (com.nuvio.tv.domain.model.ScoutFeature.available) {
+                            com.nuvio.tv.domain.model.ScoutTitle(meta.id, meta.apiType, meta.name, meta.poster)
+                        } else null,
                         hideLogoDuringTrailer = hideLogoDuringTrailer,
                         isTrailerPlaying = isTrailerPlaying,
                         playButtonFocusRequester = heroPlayButtonFocusRequester,
@@ -2823,7 +2836,7 @@ private fun MetaDetailsContent(
 
                 if (showParentalGuide) {
                     detailSection(key = "parental_guide", contentType = "parental_guide", immediate = revealSecondaryImmediately) {
-                        ParentalGuideSection(entries = parentalGuide)
+                        ParentalGuideSlot(entries = parentalGuide)
                     }
                 }
 
@@ -3516,6 +3529,7 @@ private fun PersistentDetailBackdrop(
     if (owner != null) com.nuvio.tv.ui.v2.appearance.ObserveArtworkAccent(owner, url)
     val request = remember(context, url) {
         ImageRequest.Builder(context).data(url).crossfade(false)
+            .apply { url?.let(com.nuvio.tv.ui.screens.home.HeroImageRequests::backdropKey)?.let { placeholderMemoryCacheKey(it) } }
             .size(context.resources.displayMetrics.widthPixels.coerceAtLeast(1),
                 context.resources.displayMetrics.heightPixels.coerceAtLeast(1)).build()
     }
@@ -3769,6 +3783,7 @@ private fun LibraryListPickerDialog(
         }
 
         LazyColumn(
+            contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 300.dp),

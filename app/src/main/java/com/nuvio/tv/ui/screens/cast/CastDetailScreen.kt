@@ -95,7 +95,8 @@ import com.nuvio.tv.ui.components.rememberPosterCardStyle
 import com.nuvio.tv.ui.components.rememberScaledPosterCardStyle
 import com.nuvio.tv.ui.components.PosterCardDefaults
 import com.nuvio.tv.ui.components.LocalLandscapePosterMode
-import com.nuvio.tv.ui.components.rememberShimmerBrush
+import com.nuvio.tv.ui.components.rememberShimmerFill
+import com.nuvio.tv.ui.components.shimmerFill
 import com.nuvio.tv.ui.screens.detail.requestFocusAfterFrames
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -646,7 +647,7 @@ private fun FilmographyRow(
 private fun CastDetailSkeleton(personName: String) {
     val backgroundColor = NuvioTheme.colors.Background
     val accentColor = NuvioTheme.colors.Secondary
-    val shimmerBrush = rememberShimmerBrush()
+    val shimmerBrush = rememberShimmerFill()
     val skeletonPoster = rememberScaledPosterCardStyle(PosterCardStyle(width = 112.dp, height = 168.dp))
 
     Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
@@ -677,7 +678,7 @@ private fun CastDetailSkeleton(personName: String) {
                         .width(160.dp)
                         .height(240.dp)
                         .clip(RoundedCornerShape(NuvioTheme.radii.xl))
-                        .background(shimmerBrush)
+                        .shimmerFill(shimmerBrush)
                 )
 
                 Spacer(modifier = Modifier.width(NuvioTheme.spacing.xl))
@@ -703,7 +704,7 @@ private fun CastDetailSkeleton(personName: String) {
                                 .fillMaxWidth(if (it == 0) 0.60f else if (it == 1) 0.48f else 0.72f)
                                 .height(14.dp)
                                 .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                                .background(shimmerBrush)
+                                .shimmerFill(shimmerBrush)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                     }
@@ -713,7 +714,7 @@ private fun CastDetailSkeleton(personName: String) {
                             .fillMaxWidth(0.86f)
                             .height(14.dp)
                             .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                            .background(shimmerBrush)
+                            .shimmerFill(shimmerBrush)
                     )
                 }
             }
@@ -730,7 +731,7 @@ private fun CastDetailSkeleton(personName: String) {
                         .width(140.dp)
                         .height(20.dp)
                         .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                        .background(shimmerBrush)
+                        .shimmerFill(shimmerBrush)
                 )
                 Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
                 Box(
@@ -738,7 +739,7 @@ private fun CastDetailSkeleton(personName: String) {
                         .width(36.dp)
                         .height(18.dp)
                         .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                        .background(shimmerBrush)
+                        .shimmerFill(shimmerBrush)
                 )
             }
 
@@ -756,7 +757,7 @@ private fun CastDetailSkeleton(personName: String) {
                                 .width(skeletonPoster.width)
                                 .height(skeletonPoster.height)
                                 .clip(RoundedCornerShape(PosterCardDefaults.Style.cornerRadius))
-                                .background(shimmerBrush)
+                                .shimmerFill(shimmerBrush)
                         )
                         Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
                         Box(
@@ -764,7 +765,7 @@ private fun CastDetailSkeleton(personName: String) {
                                 .fillMaxWidth()
                                 .height(NuvioTheme.spacing.lg)
                                 .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                                .background(shimmerBrush)
+                                .shimmerFill(shimmerBrush)
                         )
                     }
                 }

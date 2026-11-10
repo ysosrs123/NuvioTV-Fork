@@ -55,7 +55,7 @@ private data class CatalogUpdateResult(
 @OptIn(FlowPreview::class)
 internal fun HomeViewModel.observeCollectionsPipeline() {
     viewModelScope.launch {
-        collectionsDataStore.collections
+        combine(collectionsDataStore.collections, builtInCatalogs.collections) { saved, builtIn -> saved + builtIn }
             .distinctUntilChanged()
             .debounce(300)
             .collectLatest { collections ->
@@ -139,10 +139,12 @@ internal fun HomeViewModel.observeTmdbSettingsPipeline() {
 @OptIn(FlowPreview::class)
 internal fun HomeViewModel.observeInstalledAddonsPipeline() {
     viewModelScope.launch {
-        combine(addonRepository.getInstalledAddons(), serverCatalog.addons) { installed, servers ->
-            val hidden = layoutPreferenceDataStore.hideNewCatalogsByDefault(ServerCatalog.hiddenByDefaultKeys(servers))
+        combine(addonRepository.getInstalledAddons(), serverCatalog.addons, builtInCatalogs.addons) { installed, servers, builtIn ->
+            val hidden = layoutPreferenceDataStore.hideNewCatalogsByDefault(
+                ServerCatalog.hiddenByDefaultKeys(servers) + builtInCatalogs.hiddenByDefaultKeys(builtIn)
+            )
             if (hidden.isNotEmpty()) disabledHomeCatalogKeys = disabledHomeCatalogKeys + hidden
-            installed.enabledAddons() + servers
+            installed.enabledAddons() + servers + builtIn
         }
             .distinctUntilChanged()
             .collectLatest { addons ->
@@ -295,7 +297,7 @@ internal suspend fun HomeViewModel.loadAllCatalogsPipeline(
             val custom = titlesSnapshot[key]
             val baseName = if (!custom.isNullOrBlank()) custom else catalog.name
             val catalogName = baseName.replaceFirstChar { it.uppercase() }
-            if (!showTypeSuffix || ServerCatalog.isServerAddonId(addon.id)) return catalogName
+            if (!showTypeSuffix || ServerCatalog.isServerAddonId(addon.id) || builtInCatalogs.skipsTypeSuffix(addon.id)) return catalogName
             val typeLabel = when (catalog.apiType.lowercase()) {
                 "movie" -> strTypeMovie.ifBlank { catalog.apiType.replaceFirstChar { it.uppercase() } }
                 "series" -> strTypeSeries.ifBlank { catalog.apiType.replaceFirstChar { it.uppercase() } }
@@ -607,6 +609,7 @@ internal fun HomeViewModel.loadMoreCatalogItemsPipeline(catalogId: String, addon
 internal suspend fun HomeViewModel.updateCatalogRowsPipeline() {
     val watchedFilter = awaitWatchedFilterPipeline()
     val watchedIds = watchedFilter?.ids?.takeIf { watchedFilter.hides }
+    val listedFilter = watchedTitles.listed.value?.takeIf { it.hides }
     val watchedFocusRowKey = if (watchedTitles.homeShown) liveFocusedRowKey else null
     val shownRowsSnapshot = _uiState.value.catalogRows
     val posterProfileId = profileManager.activeProfileId.value
@@ -634,15 +637,22 @@ internal suspend fun HomeViewModel.updateCatalogRowsPipeline() {
         } else {
             rawRows
         }
-        val visibleRows = if (watchedIds != null) {
+        val withoutWatchedRows = if (watchedIds != null) {
             orderedRows.withoutWatched(watchedIds, watchedFocusRowKey, shownRowsSnapshot)
         } else {
             orderedRows
         }
+        val visibleRows = if (listedFilter != null) {
+            withoutWatchedRows.withoutListed(listedFilter, watchedFocusRowKey, shownRowsSnapshot)
+        } else {
+            withoutWatchedRows
+        }
         ensureActive()
         val heldWatchedRowKey = watchedFocusRowKey?.takeIf { key ->
-            watchedIds != null && visibleRows.any { row ->
-                row.stableKey() == key && row.items.any(watchedIds::isWatched)
+            visibleRows.any { row ->
+                row.stableKey() == key && row.items.any { item ->
+                    watchedIds?.isWatched(item) == true || listedFilter?.hidesFrom(row, item) == true
+                }
             }
         }
         val selectedHeroCatalogSet = heroCatalogKeys.toSet()
@@ -664,10 +674,15 @@ internal suspend fun HomeViewModel.updateCatalogRowsPipeline() {
             } else {
                 heroOnlyRows
             }
-            val heroOnlyFiltered = if (watchedIds != null) {
+            val heroOnlyWatchedFiltered = if (watchedIds != null) {
                 heroOnlyReleased.map { it.withoutWatched(watchedIds) }
             } else {
                 heroOnlyReleased
+            }
+            val heroOnlyFiltered = if (listedFilter != null) {
+                heroOnlyWatchedFiltered.map { it.withoutListed(listedFilter) }
+            } else {
+                heroOnlyWatchedFiltered
             }
             fromOrdered + heroOnlyFiltered
         } else {
@@ -695,7 +710,9 @@ internal suspend fun HomeViewModel.updateCatalogRowsPipeline() {
                 } else {
                     nonOrderedRows
                 }
-                if (watchedIds != null) releasedRows.map { it.withoutWatched(watchedIds) } else releasedRows
+                val watchedFiltered =
+                    if (watchedIds != null) releasedRows.map { it.withoutWatched(watchedIds) } else releasedRows
+                if (listedFilter != null) watchedFiltered.map { it.withoutListed(listedFilter) } else watchedFiltered
             }
             pickHeroItems(allHeroFallbackRows, { it.hasHeroArtwork() }, currentHeroOrder)
         }
@@ -978,7 +995,7 @@ internal suspend fun HomeViewModel.updateCatalogRowsPipeline() {
     }
 
     schedulePosterStatusReconcilePipeline(catalogUpdate.statusRows)
-    if (watchedIds != null) {
+    if (watchedIds != null || listedFilter != null) {
         requestWatchedRefillPages(fullRowsFiltered, displayRows)
     }
 }

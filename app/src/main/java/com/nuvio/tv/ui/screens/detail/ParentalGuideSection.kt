@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.detail
 
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,20 @@ internal fun parentalSeverityColor(severity: String): Color = when (severity) {
     "severe" -> Color(0xFFEF5350)
     "moderate" -> Color(0xFFFF9F43)
     else -> Color(0xFFF5D34A)
+}
+
+private val slotEntries = ParentalGuideCategory.entries.map { ParentalGuideEntry(it, "moderate") }
+
+/** Holds the row's height until the guide arrives, so the sections below stay put. */
+@Composable
+fun ParentalGuideSlot(entries: List<ParentalGuideEntry>) {
+    androidx.compose.animation.Crossfade(entries.isNotEmpty(), label = "parentalGuide") { ready ->
+        if (ready) {
+            ParentalGuideSection(entries)
+        } else {
+            Box(Modifier.alpha(0f)) { ParentalGuideSection(slotEntries) }
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

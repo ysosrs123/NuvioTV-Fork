@@ -176,6 +176,15 @@ fun FolderDetailScreen(
         ) {
             when (uiState.viewMode) {
                 FolderViewMode.TABBED_GRID -> TabbedGridContent(
+                    scoutAction = viewModel.scoutSliceSaved?.let { saved ->
+                        {
+                            val isSaved by saved.collectAsStateWithLifecycle(false)
+                            com.nuvio.tv.ui.scout.ScoutPageButton(
+                                label = stringResource(if (isSaved) R.string.scout_saved_row else R.string.scout_save_row),
+                                onClick = viewModel::toggleScoutSlice
+                            )
+                        }
+                    },
                     uiState = uiState,
                     folder = folder,
                     tabFocusState = tabFocusStates[uiState.selectedTabIndex] ?: FolderDetailGridFocusState(),
@@ -282,7 +291,8 @@ private fun TabbedGridContent(
     onSaveFocusState: (Int, Int, String?) -> Unit,
     onLoadMore: () -> Unit = {},
     isItemWatched: (MetaPreview) -> Boolean = { false },
-    onItemLongPress: (MetaPreview, String) -> Unit = { _, _ -> }
+    onItemLongPress: (MetaPreview, String) -> Unit = { _, _ -> },
+    scoutAction: (@Composable () -> Unit)? = null
 ) {
     val tabFocusRequesters = remember(uiState.tabs.size) { uiState.tabs.indices.map { FocusRequester() } }
     var gridHasFocus by remember { mutableStateOf(false) }
@@ -333,6 +343,7 @@ private fun TabbedGridContent(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = 300.dp)
         )
+        scoutAction?.invoke()
 
         if (uiState.tabs.size > 1) {
             TabRow(

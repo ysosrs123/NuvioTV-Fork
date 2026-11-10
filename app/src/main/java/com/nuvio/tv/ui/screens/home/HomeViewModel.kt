@@ -99,7 +99,8 @@ class HomeViewModel @Inject constructor(
     internal val prefetchSelectionSupplier: com.nuvio.tv.core.stream.PrefetchSelectionSupplier,
     internal val homeRefreshSignal: com.nuvio.tv.core.util.HomeRefreshSignal,
     internal val serverCatalog: ServerCatalog,
-    internal val calendarComingUp: CalendarComingUpSource? = null
+    internal val calendarComingUp: CalendarComingUpSource? = null,
+    internal val builtInCatalogs: com.nuvio.tv.core.catalog.BuiltInCatalogs = com.nuvio.tv.core.catalog.BuiltInCatalogs.None
 ) : ViewModel() {
     companion object {
         internal const val TAG = "HomeViewModel"
@@ -571,6 +572,8 @@ class HomeViewModel @Inject constructor(
             StartupLatencyTrace.mark("home_profile_ready")
             observeLayoutPreferences()
             observeWatchedTitlesPipeline()
+            observeListedTitlesPipeline()
+            observeBuiltInRowChangesPipeline()
             observeModernHomePresentation()
             observeCwEpisodeListsPipeline()
             loadContinueWatching()

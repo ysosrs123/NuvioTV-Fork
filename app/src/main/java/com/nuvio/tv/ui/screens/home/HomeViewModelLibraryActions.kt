@@ -434,7 +434,7 @@ private suspend fun HomeViewModel.markSeriesWatched(item: MetaPreview) {
 private suspend fun HomeViewModel.unmarkSeriesWatched(item: MetaPreview) {
     val episodes = fetchSeriesEpisodes(item)
     if (episodes.isEmpty()) {
-        watchProgressRepository.removeFromHistory(item.id, videoId = item.imdbId)
+        watchProgressRepository.removeFromHistory(item.id, videoId = item.imdbId, wholeSeries = true)
         return
     }
 

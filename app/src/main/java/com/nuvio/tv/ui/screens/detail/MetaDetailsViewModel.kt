@@ -13,6 +13,9 @@ import com.nuvio.tv.core.player.StreamAutoPlayPolicy
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.poster.withCustomPosterUrls
 import com.nuvio.tv.core.tmdb.TmdbMetadataService
+import com.nuvio.tv.data.repository.MetaCaller
+import com.nuvio.tv.data.repository.TITLE_PAGE_META_CALLER
+import kotlinx.coroutines.flow.flowOn
 import com.nuvio.tv.core.tmdb.TmdbMovieCollection
 import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
@@ -158,7 +161,8 @@ class MetaDetailsViewModel @Inject constructor(
     private val itemId: String = savedStateHandle["itemId"] ?: ""
     private val isServerItem = ServerItemRef.isServerId(itemId)
     private val itemType: String = savedStateHandle["itemType"] ?: ""
-    private val preferredAddonBaseUrl: String? = savedStateHandle["addonBaseUrl"]
+    private val preferredAddonBaseUrl: String? = savedStateHandle.get<String>("addonBaseUrl")
+        ?.takeUnless { it.startsWith(com.nuvio.tv.core.catalog.BuiltInCatalogs.BASE_PREFIX) }
 
     private val _uiState = MutableStateFlow(MetaDetailsUiState())
     private val shuffleVisit = System.nanoTime()
@@ -434,6 +438,7 @@ class MetaDetailsViewModel @Inject constructor(
     val lastFocusedEpisodeIdBySeason = androidx.compose.runtime.mutableStateMapOf<Int, String>()
     private var episodeRatingsJob: Job? = null
     private var parentalGuideJob: Job? = null
+    private var trailerLookupKey: Triple<String, String?, List<String>>? = null
     private var parentalGuideImdbId: String? = null
     private var nextToWatchJob: Job? = null
     @Volatile
@@ -470,6 +475,7 @@ class MetaDetailsViewModel @Inject constructor(
     private val _optimisticUnmarks = mutableSetOf<Pair<Int, Int>>()
 
     init {
+        if (com.nuvio.tv.domain.model.ScoutFeature.available) com.nuvio.tv.core.scout.ScoutOpenedLog.mark(context, itemId, itemType)
         posterOptions.bind(viewModelScope)
         observeMetaViewSettings()
         observeTrailerAutoplaySettings()
@@ -1136,7 +1142,7 @@ class MetaDetailsViewModel @Inject constructor(
 
             if (preferExternal) {
                 // 1) Try meta addons first
-                metaRepository.getMetaFromAllAddons(type = itemType, id = metaLookupId).collect { result ->
+                metaRepository.getMetaFromAllAddons(type = itemType, id = metaLookupId).flowOn(MetaCaller(TITLE_PAGE_META_CALLER)).collect { result ->
                     when (result) {
                         is NetworkResult.Success -> {
                             applyMetaWithEnrichment(result.data)
@@ -1181,7 +1187,7 @@ class MetaDetailsViewModel @Inject constructor(
                 if (preferredMeta != null) {
                     applyMetaWithEnrichment(preferredMeta)
                 } else {
-                    metaRepository.getMetaFromAllAddons(type = itemType, id = metaLookupId).collect { result ->
+                    metaRepository.getMetaFromAllAddons(type = itemType, id = metaLookupId).flowOn(MetaCaller(TITLE_PAGE_META_CALLER)).collect { result ->
                         when (result) {
                             is NetworkResult.Success -> applyMetaWithEnrichment(result.data)
                             is NetworkResult.Error -> {
@@ -1388,7 +1394,7 @@ class MetaDetailsViewModel @Inject constructor(
 
         // Start fetching trailer after meta is loaded
         trailerPlaybackRetriedAtMs = null
-        fetchTrailerUrl()
+        refreshTrailerForMeta(meta)
 
         if (traktCommentsEnabled && traktAuthenticated && supportsComments(meta)) {
             loadComments(meta)
@@ -1414,6 +1420,8 @@ class MetaDetailsViewModel @Inject constructor(
         // Remote progress refinement still runs after enrichment.
         refreshNextToWatchFromSnapshot(meta, "meta")
         loadServerEpisodeStates(meta)
+        loadParentalGuide(meta)
+        fetchTrailerUrl()
         // Existing episodes/cast can appear with the hero; remote enrichment must not hold them back.
         secondaryContentReady.value = true
         // Retain the early best-source head start, after the first hero frame.
@@ -1848,18 +1856,18 @@ class MetaDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun loadParentalGuide(meta: Meta) {
+    private suspend fun loadParentalGuide(meta: Meta) {
         val imdbId = meta.id.split(":").firstOrNull()?.takeIf { it.startsWith("tt") }
             ?: meta.imdbId?.takeIf { it.startsWith("tt") }
         if (imdbId != null && imdbId == parentalGuideImdbId) return
         parentalGuideJob?.cancel()
         parentalGuideImdbId = imdbId
-        _uiState.update { if (it.parentalGuide.isEmpty()) it else it.copy(parentalGuide = emptyList()) }
-        if (imdbId == null) return
+        val enabled = imdbId != null && playerSettingsDataStore.playerSettings.first().parentalGuideEnabled
+        _uiState.update { it.copy(parentalGuide = emptyList(), parentalGuidePending = enabled) }
+        if (!enabled) return
         parentalGuideJob = viewModelScope.launch {
-            if (!playerSettingsDataStore.playerSettings.first().parentalGuideEnabled) return@launch
-            val entries = parentalGuideRepository.getParentalGuide(imdbId)?.rankedEntries().orEmpty()
-            _uiState.update { it.copy(parentalGuide = entries) }
+            val entries = parentalGuideRepository.getParentalGuide(imdbId!!)?.rankedEntries().orEmpty()
+            _uiState.update { it.copy(parentalGuide = entries, parentalGuidePending = false) }
         }
     }
 
@@ -3383,9 +3391,24 @@ class MetaDetailsViewModel @Inject constructor(
 
     // --- Trailer ---
 
+    private fun trailerLookupKey(meta: Meta) = Triple(meta.id, meta.imdbId, meta.trailerYtIds)
+
+    /** The lookup started with the hero stands; it runs again only if it found nothing and the enriched meta adds to it. */
+    private fun refreshTrailerForMeta(meta: Meta) {
+        if (isServerItem) return
+        val key = trailerLookupKey(meta)
+        if (key == trailerLookupKey) return
+        val earlier = trailerFetchJob
+        viewModelScope.launch {
+            earlier?.join()
+            if (_uiState.value.trailerUrl == null) fetchTrailerUrl()
+        }
+    }
+
     private fun fetchTrailerUrl() {
         if (isServerItem) return
         val meta = _uiState.value.meta ?: return
+        trailerLookupKey = trailerLookupKey(meta)
 
         trailerFetchJob?.cancel()
         trailerFetchJob = viewModelScope.launch {

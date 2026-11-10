@@ -20,6 +20,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -142,6 +144,9 @@ fun StreamScreen(
     onAutoPlayResolved: (StreamPlaybackInfo) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val pluginSearchSummary by viewModel.pluginSearchSummary.collectAsStateWithLifecycle()
+    val pluginNames by viewModel.pluginNames.collectAsStateWithLifecycle()
+    var showPluginBreakdown by remember { mutableStateOf(false) }
     val watchProgress by viewModel.watchProgress.collectAsStateWithLifecycle()
     val resumeProgress = streamResumeProgress(watchProgress, startFromBeginning)
     val resumePositionMs = resumeProgress?.position?.takeIf { it > 0L }
@@ -481,6 +486,9 @@ fun StreamScreen(
 
                 // Right side - Streams container
                 RightStreamSection(
+                    pluginFooter = pluginSearchSummary?.takeIf { it.total > 0 }?.let { summary ->
+                        { PluginSearchSummaryRow(summary = summary, onClick = { showPluginBreakdown = true }) }
+                    },
                     isLoading = uiState.isLoading,
                     resumeText = resumeText,
                     error = uiState.error,
@@ -579,6 +587,15 @@ fun StreamScreen(
                     // Cancelled P2P consent — fall back to manual stream selection
                     viewModel.onEvent(StreamScreenEvent.OnAutoPlayConsumed)
                 }
+            )
+        }
+
+        val breakdown = pluginSearchSummary
+        if (showPluginBreakdown && breakdown != null) {
+            PluginSearchBreakdownDialog(
+                summary = breakdown,
+                names = pluginNames,
+                onDismiss = { showPluginBreakdown = false }
             )
         }
 
@@ -805,7 +822,8 @@ private fun RightStreamSection(
     onRetry: () -> Unit,
     onExpandStreams: () -> Unit = {},
     hazeState: HazeState?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    pluginFooter: (@Composable () -> Unit)? = null
 ) {
     val isRtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
     var enter by remember { mutableStateOf(false) }
@@ -978,7 +996,14 @@ private fun RightStreamSection(
                         )
                     }
                     streams.isEmpty() -> {
-                        EmptyState()
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            EmptyState()
+                            if (pluginFooter != null) {
+                                Box(modifier = Modifier.widthIn(max = 640.dp).padding(horizontal = NuvioTheme.spacing.lg)) {
+                                    pluginFooter()
+                                }
+                            }
+                        }
                     }
                     else -> {
                         StreamsList(
@@ -1004,7 +1029,8 @@ private fun RightStreamSection(
                             },
                             onFocusedStreamKeyChanged = { focusedStreamKeyInList = it },
                             onFocusChanged = { listHasFocus = it },
-                            onExpandStreams = onExpandStreams
+                            onExpandStreams = onExpandStreams,
+                            footer = pluginFooter
                         )
                     }
                 }
@@ -1161,9 +1187,13 @@ private fun StreamsList(
     onUserNavigatedFromFirstResult: () -> Unit = {},
     onFocusedStreamKeyChanged: (String?) -> Unit = {},
     onFocusChanged: (Boolean) -> Unit = {},
-    onExpandStreams: () -> Unit = {}
+    onExpandStreams: () -> Unit = {},
+    footer: (@Composable () -> Unit)? = null
 ) {
     val isRtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
+    val formatRulesContext = LocalContext.current
+    val formatRules by remember { com.nuvio.tv.core.formatcheck.FormatCheckStore.rules(formatRulesContext) }
+        .collectAsState(initial = emptyMap())
     val lastKeyRepeatDispatchRef = remember { java.util.concurrent.atomic.AtomicLong(0L) }
     val restoreFocusRequester = remember { FocusRequester() }
     val streamListState = rememberLazyListState()
@@ -1175,6 +1205,12 @@ private fun StreamsList(
             seen[base] = occurrence + 1
             stream.stableKey(occurrence)
         }
+    }
+    val warnedStreamKeys = remember(streamKeys, formatRules) {
+        if (formatRules.isEmpty()) emptySet() else streams.indices.filter {
+            com.nuvio.tv.core.formatcheck.FormatCheckStreamRules.actionFor(streams[it], formatRules) ==
+                com.nuvio.tv.core.formatcheck.StreamAction.WARN
+        }.mapTo(HashSet()) { streamKeys[it] }
     }
     val firstStreamKey = streamKeys.firstOrNull()
     val streamFocusRequesters = remember { mutableMapOf<String, FocusRequester>() }
@@ -1307,6 +1343,7 @@ private fun StreamsList(
                     showAddonLogo = showAddonLogo,
                     badgePlacement = badgePlacement,
                     reserveBadgeSpace = hasBadgeRules && stream.badges.isEmpty(),
+                    formatCheckWarning = streamKeys[index] in warnedStreamKeys,
                     onClick = { onStreamSelected(stream) },
                     onFocusSettled = { onStreamFocused(stream) },
                     focusRequester = when {
@@ -1330,10 +1367,14 @@ private fun StreamsList(
                 )
             }
         }
+        if (footer != null) {
+            item(key = "plugin_search_summary") {
+                Box(modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs)) { footer() }
+            }
+        }
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun StreamCard(
     stream: Stream,
@@ -1342,6 +1383,7 @@ private fun StreamCard(
     showAddonLogo: Boolean,
     badgePlacement: StreamBadgePlacement,
     reserveBadgeSpace: Boolean = false,
+    formatCheckWarning: Boolean = false,
     onClick: () -> Unit,
     onFocusSettled: () -> Unit = {},
     focusRequester: FocusRequester? = null,
@@ -1461,6 +1503,14 @@ private fun StreamCard(
                     )
                 }
 
+                if (formatCheckWarning) {
+                    Text(
+                        text = stringResource(R.string.format_check_stream_warning),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = NuvioTheme.colors.TextPrimary
+                    )
+                }
+
                 streamDescription?.let { description ->
                     if (description.isNotBlank() && description != streamName) {
                         Text(
@@ -1525,7 +1575,7 @@ private fun StreamCard(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun StreamResultSurface(
+internal fun StreamResultSurface(
     onClick: () -> Unit,
     focused: Boolean,
     modifier: Modifier,

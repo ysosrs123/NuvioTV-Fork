@@ -24,6 +24,26 @@ class CwEpisodesLeftTest {
     }
 
     @Test
+    fun `episodes with no date after the last dated one are not counted`() {
+        val airing = summary(
+            episode(12, 5, "2020-01-01"),
+            episode(12, 6, "2099-01-01"),
+            episode(12, 7, "2099-01-08"),
+            episode(12, 8, null),
+            episode(12, 9, null)
+        )
+        assertEquals(1, airing.episodesLeftFrom(12, 5))
+    }
+
+    @Test
+    fun `a gap in the dates still counts, and so does a show with no dates`() {
+        val gap = summary(episode(1, 1, "2020-01-01"), episode(1, 2, null), episode(1, 3, "2020-01-15"))
+        assertEquals(3, gap.episodesLeftFrom(1, 1))
+        val noDates = summary(episode(1, 1, null), episode(1, 2, null))
+        assertEquals(2, noDates.episodesLeftFrom(1, 1))
+    }
+
+    @Test
     fun `episodes not aired yet are not counted`() {
         assertNull(show.episodesLeftFrom(2, 4))
     }
@@ -109,7 +129,7 @@ class CwEpisodesLeftTest {
         videos = videos.toList()
     )
 
-    private fun episode(season: Int, ep: Int, released: String) = CwVideoSummary(
+    private fun episode(season: Int, ep: Int, released: String?) = CwVideoSummary(
         id = "tt-show:$season:$ep",
         title = "E$ep",
         released = released,

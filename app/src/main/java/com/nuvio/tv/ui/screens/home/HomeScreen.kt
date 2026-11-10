@@ -513,6 +513,8 @@ fun HomeScreen(
             isSeries = isSeries,
             isWatched = movieWatchedStatus[statusKey] == true,
             isWatchedPending = statusKey in uiState.movieWatchedPending,
+            scoutTitle = com.nuvio.tv.domain.model.ScoutTitle(item.id, item.apiType, item.name, item.poster),
+            mixItem = item,
             onDismiss = { posterOptionsTarget = null },
             onDetails = {
                 onNavigateToDetail(item.id, item.apiType, selectedPoster.addonBaseUrl)
@@ -816,7 +818,9 @@ private fun HomePosterOptionsDialog(
     onDetails: () -> Unit,
     onToggleLibrary: () -> Unit,
     onManageLists: () -> Unit,
-    onToggleWatched: () -> Unit
+    onToggleWatched: () -> Unit,
+    scoutTitle: com.nuvio.tv.domain.model.ScoutTitle? = null,
+    mixItem: com.nuvio.tv.domain.model.MetaPreview? = null
 ) {
     val primaryFocusRequester = remember { FocusRequester() }
 
@@ -864,6 +868,9 @@ private fun HomePosterOptionsDialog(
                 enabled = !isWatchedPending
             )
         }
+
+        scoutTitle?.let { com.nuvio.tv.ui.scout.ScoutPosterRateLine(it, onDone = onDismiss) }
+        mixItem?.let { com.nuvio.tv.ui.screens.scout.ScoutAddToMixLine(it, onDone = onDismiss) }
     }
 }
 
