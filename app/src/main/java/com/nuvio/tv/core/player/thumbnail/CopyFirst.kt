@@ -352,6 +352,7 @@ internal class CopyHeadStart(
                 val batched: (CopyOffer) -> Boolean? = { sources.multiRange(it) }
                 val ranking = SystemClock.elapsedRealtime()
                 val verdicts = CopyFirst.headStartVerdicts(offers, ownBytes, batched)
+                    .let { if (beforePick) CopyPrePick.withoutResolveLinks(it) else it }
                 val order = CopyFirst.headStartOrder(verdicts, offers, { book?.penalised(it) == true }, batched)
                 val top = order.firstOrNull()
                 val rankMs = SystemClock.elapsedRealtime() - ranking

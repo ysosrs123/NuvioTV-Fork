@@ -15,11 +15,11 @@ class ThumbFetchLanesTest {
         assertEquals(4, lanes(FetchPhase.PLAYBACK))
     }
 
-    @Test fun torboxFetchesFourWithPlaybackHeldOrClosedAndThreeWhilePlaying() {
+    @Test fun torboxFetchesFourWithPlaybackHeldOneAfterItClosedAndThreeWhilePlaying() {
         fun tb(phase: FetchPhase, budget: Int = ThumbFetchLanes.MAX, small: Boolean = false) =
             ThumbFetchLanes.limit(phase, false, small, budget, torBox = true)
         assertEquals(4, tb(FetchPhase.GENERATING))
-        assertEquals(4, tb(FetchPhase.PLAYER_CLOSED))
+        assertEquals(1, tb(FetchPhase.PLAYER_CLOSED))
         assertEquals(3, tb(FetchPhase.PLAYBACK))
         assertEquals(2, tb(FetchPhase.PLAYBACK, budget = 2))
         assertEquals(1, tb(FetchPhase.PLAYBACK, small = true))

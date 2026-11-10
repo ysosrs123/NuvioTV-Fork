@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.player.thumbnail
 
 import android.content.Context
+import com.nuvio.tv.core.player.H264LevelLabel
 import com.nuvio.tv.ui.screens.player.isSoftwareVideoDecoderName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -243,14 +244,17 @@ internal object HardwareSetup {
      */
     fun csd(codec: VideoCodec, parameterSetsAnnexB: ByteArray, extradata: ByteArray, keyframe: ByteArray): ByteArray? =
         when (codec) {
-            VideoCodec.H264, VideoCodec.HEVC ->
-                HardwareNal.parameterSets(parameterSetsAnnexB, codec == VideoCodec.HEVC).takeIf { it.isNotEmpty() }
+            VideoCodec.H264 ->
+                HardwareNal.parameterSets(parameterSetsAnnexB, false).takeIf { it.isNotEmpty() }
+                    ?.let(H264LevelLabel::relabelAnnexB)
+            VideoCodec.HEVC -> HardwareNal.parameterSets(parameterSetsAnnexB, true).takeIf { it.isNotEmpty() }
             VideoCodec.MPEG2 -> HardwareNal.mpeg2Headers(extradata) ?: HardwareNal.mpeg2Headers(keyframe)
             VideoCodec.MPEG4 -> HardwareNal.mpeg4Headers(extradata) ?: HardwareNal.mpeg4Headers(keyframe)
             else -> null
         }
 
     fun keyframe(codec: VideoCodec, au: ByteArray, extradata: ByteArray): ByteArray = when (codec) {
+        VideoCodec.H264 -> H264LevelLabel.relabelAnnexB(au)
         VideoCodec.HEVC -> HardwareNal.withoutRpu(au)
         VideoCodec.AV1 -> HardwareNal.av1WithSequenceHeader(au, extradata)
         VideoCodec.MPEG4 -> HardwareNal.withoutMpeg4UserData(au)

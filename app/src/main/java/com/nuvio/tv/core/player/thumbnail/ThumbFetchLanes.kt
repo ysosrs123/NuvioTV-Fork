@@ -30,7 +30,8 @@ internal object ThumbFetchLanes {
     ): Int {
         if (rateLimited) return 1
         val lanes = when (phase) {
-            FetchPhase.PLAYER_CLOSED, FetchPhase.GENERATING -> if (torBox) TORBOX_MAX else MAX
+            FetchPhase.PLAYER_CLOSED -> if (torBox) 1 else MAX
+            FetchPhase.GENERATING -> if (torBox) TORBOX_MAX else MAX
             // Small boxes pace 4K decodes while playing: a second fetch would only wait.
             FetchPhase.PLAYBACK -> when {
                 smallBox4K -> 1

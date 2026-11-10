@@ -65,6 +65,18 @@ class CopyPrePickTest {
     }
 
     @Test
+    fun noDebridResolveLinkIsOpenedBeforeThePick() {
+        val resolve = offer("resolve", kind = CopyKind.RESOLVE)
+        val link = offer("link")
+        val tooBig = offer("big", kind = CopyKind.RESOLVE)
+        val out = CopyPrePick.withoutResolveLinks(listOf(resolve to null, link to null, tooBig to "too big")).toMap()
+        assertEquals("a debrid resolve link is opened after the pick only", out[resolve])
+        assertNull(out[link])
+        assertEquals("too big", out[tooBig])
+        assertTrue(CopyPrePick.withoutResolveLinks(emptyList()).isEmpty())
+    }
+
+    @Test
     fun torrentsUsenetAndAwayServersNeverTakeTheCopy() {
         assertTrue(CopyPrePick.pickUsable(onList = true, torrent = false, usenet = false, awayServer = false))
         assertFalse(CopyPrePick.pickUsable(onList = false, torrent = false, usenet = false, awayServer = false))

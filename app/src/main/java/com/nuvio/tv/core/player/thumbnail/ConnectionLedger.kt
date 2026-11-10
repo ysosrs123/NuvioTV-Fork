@@ -209,9 +209,13 @@ internal object ConnectionMemory {
 internal class ConnectionLedger(
     private val clock: () -> Long = { SystemClock.elapsedRealtime() },
     private val wallClock: () -> Long = { System.currentTimeMillis() },
+    private val budgetHolds: (String?) -> Boolean = RequestBudget.app::holdsThumbnails,
 ) {
     companion object {
         val app = ConnectionLedger()
+        /** TorBox thumbnail requests after the player closed: nobody is waiting for them. */
+        const val UNHURRIED_GAP_MS = 1_000L
+        private const val BUDGET_HOLD_RECENT_MS = 2_000L
         const val SLOT_WAIT_MS = 30_000L
         /** Header and index reads wait less, and the engine gives up after a few. */
         const val START_SLOT_WAIT_MS = 5_000L
@@ -282,7 +286,24 @@ internal class ConnectionLedger(
         var budget: ConnectionBudget? = null
         /** Thumbnail requests at once at most, whatever the budget allows. */
         var thumbCap = UNLIMITED
+        var lastThumbAtMs = Long.MIN_VALUE
     }
+
+    @Volatile private var unhurried = false
+    @Volatile private var budgetHeldAtMs = Long.MIN_VALUE
+
+    /** A thumbnail request, of any pass, was kept back by the request budget just now: nothing more will come for a while. */
+    fun budgetHolding(): Boolean =
+        budgetHeldAtMs != Long.MIN_VALUE && clock() - budgetHeldAtMs < BUDGET_HOLD_RECENT_MS
+
+    /** While on, TorBox thumbnail requests leave [UNHURRIED_GAP_MS] between them. */
+    fun setUnhurried(on: Boolean) {
+        unhurried = on
+    }
+
+    private fun tooSoon(key: String, e: Entry): Boolean =
+        unhurried && key == LedgerKey.TORBOX && e.lastThumbAtMs != Long.MIN_VALUE &&
+            clock() - e.lastThumbAtMs < UNHURRIED_GAP_MS
 
     private val lock = ReentrantLock()
     private val freed = lock.newCondition()
@@ -514,19 +535,24 @@ internal class ConnectionLedger(
     }.getOrNull()
 
     /**
-     * A thumbnail request: waits while the server has no room. Throws [NoSlotException] after [maxWaitMs], or an
-     * IOException once [cancelled].
+     * A thumbnail request: waits while the server has no room, and for as long as [budgetHolds] or the unhurried pace
+     * keeps it back. Throws [NoSlotException] after [maxWaitMs] without room, or an IOException once [cancelled].
      */
     fun acquire(url: String?, maxWaitMs: Long = SLOT_WAIT_MS, cancelled: () -> Boolean = { false }): Slot {
         val key = LedgerKey.of(url) ?: return Slot(null, Kind.THUMBNAIL, clock(), busy = false)
-        val deadline = clock() + maxWaitMs
+        var deadline = clock() + maxWaitMs
         var busy: Boolean
         lock.withLock {
             val e = entry(key)
             var allowed = slotsLocked(key, e)
-            while (e.thumbs >= allowed) {
+            while (true) {
+                val budgetHeld = budgetHolds(url)
+                if (budgetHeld) budgetHeldAtMs = clock()
+                val held = budgetHeld || tooSoon(key, e)
+                if (!held && e.thumbs < allowed) break
                 if (cancelled()) throw IOException("closed")
-                val left = deadline - clock()
+                if (held) deadline = clock() + maxWaitMs
+                val left = if (held) POLL_MS else deadline - clock()
                 if (left <= 0L) throw NoSlotException()
                 try {
                     freed.await(minOf(left, POLL_MS), TimeUnit.MILLISECONDS)
@@ -537,6 +563,7 @@ internal class ConnectionLedger(
                 allowed = slotsLocked(key, e)
             }
             add(e, Kind.THUMBNAIL)
+            e.lastThumbAtMs = clock()
             busy = e.thumbs >= allowed - 1
         }
         return Slot(key, Kind.THUMBNAIL, clock(), busy)

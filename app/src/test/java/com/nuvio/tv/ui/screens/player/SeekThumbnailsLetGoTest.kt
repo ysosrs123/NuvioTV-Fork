@@ -93,4 +93,26 @@ class SeekThumbnailsLetGoTest {
         verify(exactly = 0) { runtime.scheduleOwnedPlaybackRecovery(any(), any(), any()) }
         verify(exactly = 1) { player.play() }
     }
+
+    @Test
+    fun `amlogic film decoders stay held after a first picture`() {
+        assertTrue(keepsFilmDecoderHeld(true, "c2.amlogic.avc.decoder"))
+        assertTrue(keepsFilmDecoderHeld(true, "c2.amlogic.hevc.decoder"))
+        assertTrue(keepsFilmDecoderHeld(true, "c2.amlogic.dolby-vision.dvhe.decoder"))
+    }
+
+    @Test
+    fun `amlogic film decoders let go before a first picture`() {
+        assertFalse(keepsFilmDecoderHeld(false, "c2.amlogic.avc.decoder"))
+    }
+
+    @Test
+    fun `other decoders still let go`() {
+        assertFalse(keepsFilmDecoderHeld(true, "c2.mtk.avc.decoder"))
+        assertFalse(keepsFilmDecoderHeld(true, "OMX.MTK.VIDEO.DECODER.AVC"))
+        assertFalse(keepsFilmDecoderHeld(true, "c2.android.avc.decoder"))
+        assertFalse(keepsFilmDecoderHeld(true, "OMX.google.h264.decoder"))
+        assertFalse(keepsFilmDecoderHeld(true, "amstream_dves_hevc"))
+        assertFalse(keepsFilmDecoderHeld(true, null))
+    }
 }

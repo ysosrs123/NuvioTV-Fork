@@ -129,6 +129,10 @@ internal object CopyPrePick {
     fun assumedPlaying(offers: List<CopyOffer>): CopyOffer? =
         offers.firstOrNull { it.height > 1080 && !it.remote && it.kind != CopyKind.USENET }
 
+    /** Opening a debrid resolve link can leave the title in that account, so nothing opens one before the pick. */
+    fun withoutResolveLinks(verdicts: List<Pair<CopyOffer, String?>>): List<Pair<CopyOffer, String?>> =
+        verdicts.map { (o, why) -> o to (why ?: "a debrid resolve link is opened after the pick only".takeIf { o.kind == CopyKind.RESOLVE }) }
+
     /** The stream picked can take the copy: it is on the list the copy was chosen from, not a torrent, Usenet or away server. */
     fun pickUsable(onList: Boolean, torrent: Boolean, usenet: Boolean, awayServer: Boolean): Boolean =
         onList && !torrent && !usenet && !awayServer

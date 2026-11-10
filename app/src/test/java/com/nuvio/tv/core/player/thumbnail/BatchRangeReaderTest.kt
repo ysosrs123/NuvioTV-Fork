@@ -84,6 +84,8 @@ class BatchRangeReaderTest {
         assertEquals("tb-cdn.pw:443", MultiRangeSupport.key("https://nexus-171.apac.tb-cdn.pw/dld/x?token=y"))
         assertEquals(MultiRangeSupport.key("https://nexus-1.eu.tb-cdn.pw/a"), MultiRangeSupport.key("https://nexus-9.apac.tb-cdn.pw/b"))
         assertEquals("10.0.0.5:3100", MultiRangeSupport.key("http://10.0.0.5:3100/stream"))
+        assertEquals("tb-cdn.io:443", MultiRangeSupport.key("https://nexus-341.wnam.tb-cdn.io/a"))
+        assertEquals("store.tb-cdn.io:443", MultiRangeSupport.key("https://store-013.wnam.tb-cdn.io/a"))
         val s = MultiRangeSupport(MemoryOf())
         assertTrue(s.allowed("https://a.example.com/f", now = 0))
         s.note("https://a.example.com/f", yes = false, now = 0)

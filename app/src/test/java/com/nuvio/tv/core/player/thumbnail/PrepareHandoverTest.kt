@@ -124,4 +124,25 @@ class PrepareHandoverTest {
         assertEquals("4k|sw", PrepareRateBook.key(fourK = true, remux = false, hardware = false))
         assertEquals("hd|hw", PrepareRateBook.key(fourK = false, remux = true, hardware = true))
     }
+
+    @Test
+    fun `screen counts the copy's first picture`() {
+        assertEquals(1, PrepareHandover.shownDone(done = 0, total = 50, copyMade = 1))
+    }
+
+    @Test
+    fun `screen stays at zero until a picture exists`() {
+        assertEquals(0, PrepareHandover.shownDone(done = 0, total = 50, copyMade = 0))
+    }
+
+    @Test
+    fun `copy pictures never read as finished`() {
+        assertEquals(49, PrepareHandover.shownDone(done = 10, total = 50, copyMade = 80))
+    }
+
+    @Test
+    fun `own thumbnails count when ahead of the copy`() {
+        assertEquals(20, PrepareHandover.shownDone(done = 20, total = 50, copyMade = 5))
+        assertEquals(50, PrepareHandover.shownDone(done = 50, total = 50, copyMade = 5))
+    }
 }

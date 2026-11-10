@@ -76,4 +76,8 @@ internal object PrepareHandover {
             else -> null
         }
     }
+
+    /** The count on the screen: the copy's own pictures count from the first one, and never read as finished. */
+    fun shownDone(done: Int, total: Int, copyMade: Int): Int =
+        if (done >= total) done else maxOf(done, minOf(copyMade, total - 1)).coerceAtLeast(0)
 }

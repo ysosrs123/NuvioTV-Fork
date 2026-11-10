@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.player.thumbnail
 
+import androidx.datastore.core.DataStore
 import android.app.ActivityManager
 import android.content.Context
 import androidx.annotation.StringRes
@@ -181,3 +182,5 @@ object SeekThumbnailPreferences {
         }
     }
 }
+
+internal fun Context.backupSeekThumbnailStore(): DataStore<Preferences> = seekThumbnailDataStore

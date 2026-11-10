@@ -184,7 +184,12 @@ object SeekThumbnails {
         stopServer(keep = false)
         ServerThumbSet.dropRetained()
         val s = session ?: return
-        if (!s.finishAfterPlayback()) stopSession(handBackPlayer = false)
+        if (s.finishAfterPlayback()) ConnectionLedger.app.setUnhurried(true) else stopSession(handBackPlayer = false)
+    }
+
+    /** The next stream list is up: a closed title's coverage pass ends here and goes on when that title plays again. */
+    fun streamListShown() {
+        if (session?.finishingAfterPlayback == true) stopSession(handBackPlayer = false)
     }
 
     private fun stopServer(keep: Boolean) {
@@ -556,8 +561,6 @@ object SeekThumbnails {
             /** Coverage slots in time order: made or not. */
             val coverage: List<Boolean> = emptyList(),
             val recentEndSeq: Int = 0,
-            /** Small boxes, 4K: the film is not loaded behind the screen and loads when it ends. */
-            val filmLoadsAfter: Boolean = false,
         ) : PrepareUi()
         data class Ready(val total: Int) : PrepareUi()
     }
@@ -618,7 +621,7 @@ object SeekThumbnails {
         mainScope.launch {
             val current = session
             val stageOk = when (v) {
-                is PrepareUi.Generating -> from.prepareStageNow() == 3
+                is PrepareUi.Generating -> from.prepareStageNow() in 1..3
                 is PrepareUi.Ready -> from.prepareStageNow() == 4
                 else -> true
             }
@@ -968,6 +971,7 @@ object SeekThumbnails {
         /** Guarded by [recentMade]. */
         private var madeSeq = 0
         @Volatile private var prepareLastCoverage: List<Boolean> = emptyList()
+        private var prepareCopyShown = 0
         private var monitorJob: Job? = null
         @Volatile private var lastScrubAt = 0L
         /** Where playback jumped to, -1 = no jump pending. */
@@ -1176,6 +1180,7 @@ object SeekThumbnails {
 
         fun stop(handBackPlayer: Boolean = true) {
             stoppedExternally = true
+            if (afterPlayback) ConnectionLedger.app.setUnhurried(false)
             if (earlyScreen) mainScope.launch { takeDownEarlyScreen() }
             // Stopped while preparing: give the player back before a newer session can pause it (posts are ordered on Main).
             if (synchronized(prepareLock) { (prepareStage in 1..4).also { if (it) prepareStage = 5 } }) {
@@ -1296,7 +1301,8 @@ object SeekThumbnails {
             Log.i(TAG, "connections: up to ${ConnectionLedger.app.thumbnailCap(r.resolvedUrl)} thumbnail requests on this " +
                 (if (LedgerKey.of(r.resolvedUrl) == LedgerKey.TORBOX) "TorBox account" else "server") +
                 " (${ConnectionLedger.app.inFlightNote(r.resolvedUrl)}, playback setting ${source.playbackConnections})")
-            if (!sourceRateLimited && RateLimitedHosts.appSession.contains(r.resolvedUrl)) {
+            if (!sourceRateLimited && (RateLimitedHosts.appSession.contains(r.resolvedUrl) ||
+                    RequestBudget.app.holdsThumbnails(r.resolvedUrl))) {
                 sourceRateLimited = true
                 fetchRamp.limitToOne()
                 fetchOneAtATime("source rate limited recently")
@@ -1704,6 +1710,8 @@ object SeekThumbnails {
             afterPlayback &&
                 (SystemClock.elapsedRealtime() - afterPlaybackSince > AFTER_PLAYBACK_MAX_MS || memoryShortAfterClose())
 
+        val finishingAfterPlayback: Boolean get() = afterPlayback
+
         /** True when this session carries on without the player to finish its coverage pass. */
         fun finishAfterPlayback(): Boolean {
             // No index yet is fine: a small box may still be waiting for a pause, and reads it once the player is gone.
@@ -1824,7 +1832,7 @@ object SeekThumbnails {
                     if (prepareStage in 1..4) {
                         latticeMade = lattice.count { !needs(st, it) }
                         latticeWorkLeft = PrepareHandover.workLeft(lattice, prepareStride()) { needs(st, it) }
-                        prepareLastCoverage = counted.sorted().map { !needs(st, it) }
+                        prepareLastCoverage = lattice.filter { it % grid == 0 }.sorted().map { !needs(st, it) }
                         val waited = PrepareHandover.screenSet(lattice, grid).filter { it !in unmade }
                         screenTotal = waited.size
                         screenDone = waited.count { !needs(st, it) }
@@ -4542,7 +4550,17 @@ object SeekThumbnails {
             val (recent, endSeq) = synchronized(recentMade) { recentMade.toList() to madeSeq }
             val left = (maxOf(latticeWorkLeft, total - done, 0) * perThumb).toInt()
             val shownTotal = maxOf(screenTotal, total)
-            val shownDone = if (done >= total) shownTotal else minOf(maxOf(screenDone, done), shownTotal)
+            val copyCounts = copy?.ended != true && borrow?.failed != true
+            val shownDone = PrepareHandover.shownDone(
+                done = if (done >= total) shownTotal else minOf(maxOf(screenDone, done), shownTotal),
+                total = shownTotal,
+                copyMade = if (copyCounts) maxOf(copy?.made ?: 0, prepareCopyShown) else 0,
+            )
+            if (copyCounts) prepareCopyShown = maxOf(prepareCopyShown, copy?.made ?: 0)
+            if (prepareStage == 1 && done < total && shownDone > 0) {
+                showPrepare(PrepareUi.Generating(shownDone, shownTotal, left, prepareAnchorMs, prepareStride() * SPACING_MS,
+                    recent, prepareLastCoverage, endSeq))
+            }
             when (prepareStage) {
                 1 -> when {
                     done >= total -> if (advancePrepare(1, 5)) {
@@ -4600,7 +4618,8 @@ object SeekThumbnails {
                     }
                     val handover = PrepareHandover.reason(
                         nowMs = now, startedAtMs = prepareStartedAt, lastProgressAtMs = prepareLastProgressAt, leftS = left,
-                        done = done, total = total, finished = coverageOver(), rateLimited = sourceRateLimited,
+                        done = done, total = total, finished = coverageOver(),
+                        rateLimited = sourceRateLimited || ConnectionLedger.app.budgetHolding(),
                     )
                     if (handover != null && advancePrepare(3, 5)) {
                         showPrepare(PrepareUi.Hidden)
@@ -4624,7 +4643,7 @@ object SeekThumbnails {
                         Log.i(TAG, "prepare: ready - ${shownDone - prepareShownAtStart} thumbnails in ${(now - prepareStartedAt) / 1000} s")
                     } else {
                         showPrepare(PrepareUi.Generating(shownDone, shownTotal, left, prepareAnchorMs, prepareStride() * SPACING_MS,
-                            recent, prepareLastCoverage, endSeq, filmLoadsAfter = (letsPlayerGo || playerLetGo) && preparePausedPlayer))
+                            recent, prepareLastCoverage, endSeq))
                     }
                 }
                 4 -> if (now - prepareReadyAt >= PREPARE_READY_MS && advancePrepare(4, 5)) {
@@ -4706,6 +4725,7 @@ object SeekThumbnails {
         private fun beforePlayName() = beforePlay.name.lowercase().replaceFirstChar { it.uppercase() }
 
         private fun finish() {
+            if (afterPlayback) ConnectionLedger.app.setUnhurried(false)
             val noneMade = synchronized(recentMade) { madeSeq } == 0
             val complete = store?.let { runCatching { coverageStored(it) }.getOrDefault(false) } == true
             if (noneMade && giveUp.anything && !giveUp.logged && !complete) {
