@@ -34,9 +34,15 @@ internal fun calendarEntriesToMerge(record: CalendarTitleRecord): List<CalendarE
         if (entry.source == CalendarSource.TVMAZE) {
             // Sources number some shows differently: under the Trakt calendar a TVmaze-only number on a day it already
             // has is that release again, not another one.
-            !(traktCovers && entry.slot !in otherSlots && entry.utcDay()?.let { day ->
+            val repeat = traktCovers && entry.slot !in otherSlots && entry.utcDay()?.let { day ->
                 others.any { other -> other.utcDay()?.let { abs(ChronoUnit.DAYS.between(day, it)) <= 1L } == true }
-            } == true)
+            } == true
+            // The same number days away from every other source is a different episode under TVmaze's numbering.
+            val otherDays = others.filter { it.slot == entry.slot }.mapNotNull { it.utcDay() }
+            val elsewhere = entry.utcDay()?.let { day ->
+                otherDays.isNotEmpty() && otherDays.none { abs(ChronoUnit.DAYS.between(day, it)) <= SAME_RELEASE_MAX_DAYS }
+            } == true
+            !repeat && !elsewhere
         } else {
             val gap = tvMazeDays[entry.slot]?.let { day -> entry.utcDay()?.let { ChronoUnit.DAYS.between(day, it) } }
             !(record.tvmazeStreaming && gap != null && gap in STREAMING_FIRST_GAP_DAYS)
@@ -64,6 +70,7 @@ internal fun calendarEarlierRelease(addonReleased: String?, entry: CalendarEntry
 }
 
 private val STREAMING_FIRST_GAP_DAYS = 2L..3L
+private const val SAME_RELEASE_MAX_DAYS = 3L
 private const val EARLIER_RELEASE_MAX_DAYS = 3L
 
 fun mergeCalendarEntries(

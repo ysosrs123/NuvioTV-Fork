@@ -146,7 +146,11 @@ class TraktProgressServiceFailureTest {
                 every { state } returns MutableStateFlow(auth)
                 coEvery { getCurrentState(any<Int>()) } returns auth
             },
-            savedWatchedMovies = TraktSavedWatchedMovies(FakeTraktWatchedMoviesStorage())
+            savedWatchedMovies = TraktSavedWatchedMovies(FakeTraktWatchedMoviesStorage()),
+            appVisibility = com.nuvio.tv.core.calendar.CalendarAppVisibility(),
+            screensaverController = io.mockk.mockk(relaxed = true) {
+                io.mockk.every { playbackActive } returns kotlinx.coroutines.flow.MutableStateFlow(false)
+            }
         )
     }
 

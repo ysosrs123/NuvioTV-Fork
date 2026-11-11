@@ -58,6 +58,22 @@ class CalendarDateRulesTest {
         assertEquals(at("2026-11-13T01:00:00Z"), record.entries.single().airInstantMs)
     }
 
+    @Test fun `a TVmaze time a week from the others is another episode and never replaces them`() {
+        val record = show(
+            CalendarSource.TVMAZE to listOf(episode(CalendarSource.TVMAZE, instant = "2026-11-05T01:00:00Z")),
+            CalendarSource.TRAKT to listOf(episode(CalendarSource.TRAKT, instant = "2026-11-12T01:00:00Z"))
+        ).copy(sourceFetchedAtMs = mapOf(CalendarSource.TRAKT to 1L, CalendarSource.TVMAZE to 2L))
+        assertEquals(at("2026-11-12T01:00:00Z"), record.entries.single().airInstantMs)
+    }
+
+    @Test fun `a TVmaze time on the same day as the others still counts when read last`() {
+        val record = show(
+            CalendarSource.TVMAZE to listOf(episode(CalendarSource.TVMAZE, instant = "2026-11-12T02:00:00Z")),
+            CalendarSource.TRAKT to listOf(episode(CalendarSource.TRAKT, instant = "2026-11-12T01:00:00Z"))
+        ).copy(sourceFetchedAtMs = mapOf(CalendarSource.TRAKT to 1L, CalendarSource.TVMAZE to 2L))
+        assertEquals(at("2026-11-12T02:00:00Z"), record.entries.single().airInstantMs)
+    }
+
     @Test fun `a streaming date later than the others is not trusted over them`() {
         val record = show(
             CalendarSource.TVMAZE to listOf(episode(CalendarSource.TVMAZE, date = "2026-11-08")),

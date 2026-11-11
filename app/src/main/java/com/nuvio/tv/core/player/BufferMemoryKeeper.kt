@@ -187,6 +187,11 @@ class BufferMemoryKeeper(
             raise(level, "lowMemory availMb=${free.availMb} thresholdMb=${free.thresholdMb}")
             return
         }
+        val swap = swapFreeMb()
+        if (free != null && swapRunsOut(free, swap)) {
+            raise(maxOf(pressureLevel, LEVEL_LOW), "swap availMb=${free.availMb} thresholdMb=${free.thresholdMb} swapFreeMb=$swap")
+            return
+        }
         if (pressureLevel == LEVEL_NONE) {
             if (now - lastPressureAtMs >= RESTORE_QUIET_MS) tendGrowth(free)
             return
@@ -350,6 +355,14 @@ class BufferMemoryKeeper(
 
         /** The same line as the extra downloads' swap rule. */
         const val WARNING_SWAP_MB = 50L
+
+        /**
+         * Swap nearly gone with little room above the low-memory line: the box's memory killer is about to act even
+         * though Android has not called it low memory, and some boxes never send a warning. Read every tick.
+         */
+        fun swapRunsOut(free: BufferSizing.FreeMemory, swapFreeMb: Long): Boolean =
+            swapFreeMb in 0 until WARNING_SWAP_MB &&
+                free.availMb - free.thresholdMb < BufferSizing.SYSTEM_MARGIN_MB + GROW_RESERVE_MB
 
         private const val TAG = "BufferMemory"
         private const val MB = 1024L * 1024L

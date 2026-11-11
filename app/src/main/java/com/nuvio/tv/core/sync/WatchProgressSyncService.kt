@@ -302,9 +302,6 @@ class WatchProgressSyncService @Inject constructor(
             val remote = response.decodeList<SupabaseWatchProgress>()
 
             Log.d(TAG, "pullFromRemote: fetched ${remote.size} entries from Supabase via RPC for profile $profileId sinceLastWatched=$sinceLastWatched")
-            remote.forEach { entry ->
-                Log.d(TAG, "  pull entry: key=${entry.progressKey} contentId=${entry.contentId} type=${entry.contentType} pos=${entry.position} dur=${entry.duration} lastWatched=${entry.lastWatched}")
-            }
 
             val pulled = remote.mapNotNull { entry ->
             val cid: String? = entry.contentId

@@ -5,6 +5,7 @@ import android.app.ApplicationExitInfo
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.build.IssueReports
 import com.nuvio.tv.data.remote.dto.AppReportCrashDto
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -64,6 +65,17 @@ internal object ExitRules {
     fun forPrompt(records: List<ExitRecord>, handledMs: Long): UnexpectedExit? =
         records.maxByOrNull { it.timestampMs }?.let(::unexpected)?.takeIf { it.timestampMs > handledMs }
 
+    /** Android 10 and older keep no exit records, so Arc's own crash file stands in for one. */
+    fun savedCrash(savedAtMs: Long?, handledMs: Long): UnexpectedExit? =
+        savedAtMs?.takeIf { it > handledMs }?.let {
+            UnexpectedExit(
+                UnexpectedExitKind.Crash, REASON_CRASH, ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND,
+                status = 0, description = null, timestampMs = it, hasTrace = true
+            )
+        }
+
+    private const val REASON_CRASH = 4
+
     fun forSettings(records: List<ExitRecord>, reportedMs: Long, nowMs: Long): UnexpectedExit? =
         records.sortedByDescending { it.timestampMs }
             .firstNotNullOfOrNull(::unexpected)
@@ -89,16 +101,20 @@ class ArcExitReports @Inject constructor(@ApplicationContext private val context
     }
 
     suspend fun exitToOffer(): UnexpectedExit? = withContext(Dispatchers.IO) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return@withContext null
         if (!IssueReports.available || !prefs.getBoolean(KEY_PROMPT_ENABLED, true)) return@withContext null
         val handled = maxOf(prefs.getLong(KEY_OFFERED_MS, 0L), prefs.getLong(KEY_REPORTED_MS, 0L))
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return@withContext ExitRules.savedCrash(ArcCrashFile.savedAtMs(), handled)
         ExitRules.forPrompt(exitInfos().map { it.toRecord() }, handled)?.withTraceFlag()
     }
 
     suspend fun unreportedExit(): UnexpectedExit? = withContext(Dispatchers.IO) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || !IssueReports.available) return@withContext null
-        ExitRules.forSettings(exitInfos().map { it.toRecord() }, prefs.getLong(KEY_REPORTED_MS, 0L), System.currentTimeMillis())
-            ?.withTraceFlag()
+        if (!IssueReports.available) return@withContext null
+        val reported = prefs.getLong(KEY_REPORTED_MS, 0L)
+        val now = System.currentTimeMillis()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return@withContext ExitRules.savedCrash(ArcCrashFile.savedAtMs(), reported)?.takeIf { now - it.timestampMs <= ExitRules.RECENT_MS }
+        }
+        ExitRules.forSettings(exitInfos().map { it.toRecord() }, reported, now)?.withTraceFlag()
     }
 
     fun markOffered(exit: UnexpectedExit) = raise(KEY_OFFERED_MS, exit.timestampMs)
@@ -135,21 +151,47 @@ class ArcExitReports @Inject constructor(@ApplicationContext private val context
     private fun ApplicationExitInfo.toRecord() = ExitRecord(reason, importance, status, description, timestamp)
 
     private fun UnexpectedExit.withTraceFlag(): UnexpectedExit {
-        if (kind != UnexpectedExitKind.NotResponding && kind != UnexpectedExitKind.NativeCrash) return this
+        val own = ArcHeartbeat.linesFor(timestampMs) != null || when (kind) {
+            UnexpectedExitKind.Crash -> ArcCrashFile.linesFor(timestampMs) != null
+            UnexpectedExitKind.NotResponding -> ArcMainWatchdog.linesFor(timestampMs) != null
+            else -> false
+        }
+        if (own || kind == UnexpectedExitKind.Crash || kind == UnexpectedExitKind.LowMemory) return copy(hasTrace = own)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return this
         val found = exitInfos().firstOrNull { it.timestamp == timestampMs }
-        val present = runCatching { found?.traceInputStream?.use { true } ?: false }.getOrDefault(false)
-        return copy(hasTrace = present)
+        return copy(hasTrace = runCatching { found?.traceInputStream?.use { true } ?: false }.getOrDefault(false))
     }
 
     private fun readTrace(exit: UnexpectedExit): List<String>? {
+        val facts = ExitFacts.lines(exit, BuildConfig.GIT_COMMIT, Build.FINGERPRINT, Build.VERSION.SECURITY_PATCH, recentExits())
+        val heartbeat = ArcHeartbeat.linesFor(exit.timestampMs).orEmpty()
+        val own = when (exit.kind) {
+            UnexpectedExitKind.Crash -> ArcCrashFile.linesFor(exit.timestampMs).orEmpty()
+            UnexpectedExitKind.NotResponding -> ArcMainWatchdog.linesFor(exit.timestampMs).orEmpty()
+            else -> emptyList()
+        }
+        val android = if (exit.kind == UnexpectedExitKind.NotResponding || exit.kind == UnexpectedExitKind.NativeCrash) {
+            androidTrace(exit).orEmpty()
+        } else emptyList()
+        if (own.isEmpty() && heartbeat.isEmpty() && android.isEmpty()) return null
+        return ExitTrace.capped((own + facts + heartbeat + android).asSequence()).takeIf { it.isNotEmpty() }
+    }
+
+    private fun androidTrace(exit: UnexpectedExit): List<String>? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
         val info = exitInfos().firstOrNull { it.timestamp == exit.timestampMs } ?: return null
         return runCatching {
             info.traceInputStream?.use { stream ->
                 if (exit.kind == UnexpectedExitKind.NativeCrash) ExitTrace.nativeLines(stream) else ExitTrace.textLines(stream)
             }
-        }.getOrNull()?.takeIf { it.isNotEmpty() }
+        }.getOrNull()
+    }
+
+    private fun recentExits(): Map<UnexpectedExitKind, Int> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return emptyMap()
+        val since = System.currentTimeMillis() - ExitRules.RECENT_MS
+        return exitInfos().map { it.toRecord() }.filter { it.timestampMs >= since }
+            .mapNotNull(ExitRules::unexpected).groupingBy { it.kind }.eachCount()
     }
 
     private companion object {
@@ -167,7 +209,34 @@ internal object ExitTrace {
     private const val RAW_TEXT_MAX = 2L * 1024 * 1024
 
     fun textLines(input: InputStream): List<String> =
-        LimitedStream(input, RAW_TEXT_MAX).bufferedReader(Charsets.UTF_8).useLines(::capped)
+        capped(ordered(LimitedStream(input, RAW_TEXT_MAX).bufferedReader(Charsets.UTF_8).readLines()).asSequence())
+
+    private val THREAD_HEADER = Regex("""^"[^"]*".* tid=\d+""")
+    private val IDLE_STATE = Regex(""" tid=\d+ (Waiting|TimedWaiting|Sleeping|Native|WaitingInMainSignalCatcherLoop)(\s|$)""")
+
+    /**
+     * An ANR dump with the main thread first, then threads in Arc's own code, then other busy threads, and last only
+     * the header line of threads that were just waiting, so the size cap keeps what matters.
+     */
+    fun ordered(lines: List<String>): List<String> {
+        val firstThread = lines.indexOfFirst { THREAD_HEADER.containsMatchIn(it) }
+        if (firstThread < 0) return lines
+        val blocks = ArrayList<List<String>>()
+        var start = firstThread
+        for (i in firstThread + 1..lines.size) {
+            if (i == lines.size || THREAD_HEADER.containsMatchIn(lines[i])) {
+                blocks += lines.subList(start, i)
+                start = i
+            }
+        }
+        val main = blocks.filter { it.first().startsWith("\"main\"") }
+        val rest = blocks - main.toSet()
+        val app = rest.filter { block -> block.any { "com.nuvio." in it } }
+        val others = rest - app.toSet()
+        val idle = others.filter { IDLE_STATE.containsMatchIn(it.first()) }
+        val busy = others - idle.toSet()
+        return lines.subList(0, firstThread) + (main + app + busy).flatten() + idle.map { it.first() }
+    }
 
     /** Android 12 and newer keeps a native crash as a binary record, so only its named fields are read, never its memory. */
     fun nativeLines(input: InputStream): List<String> = capped(TombstoneRecord.lines(input.buffered()).asSequence())
@@ -176,13 +245,25 @@ internal object ExitTrace {
         val kept = ArrayList<String>()
         var used = 0
         for (line in lines) {
-            val clean = ReportText.rawLine(line, LINE_MAX) ?: continue
+            val clean = cleanLine(line) ?: continue
             val size = clean.toByteArray(Charsets.UTF_8).size + 1
             if (used + size > MAX_BYTES) break
             used += size
             kept += clean
         }
         return kept
+    }
+
+    /**
+     * Every line is cleaned like a recorded event, so Arc's own log lines lose media-server names too. A thread's own
+     * name is kept as it is: names such as DefaultDispatcher-worker-12 looked like keys to the cleaner.
+     */
+    fun cleanLine(line: String): String? {
+        val end = if (line.startsWith('"')) line.indexOf('"', 1) else -1
+        val name = if (end > 0) line.substring(0, end + 1) else null
+        if (name == null || "://" in name || '@' in name) return ReportText.eventLine(line, LINE_MAX)
+        val rest = ReportText.eventLine(line.substring(end + 1), LINE_MAX).orEmpty()
+        return (if (rest.isEmpty()) name else "$name $rest").take(LINE_MAX)
     }
 
     private class LimitedStream(private val source: InputStream, private var left: Long) : InputStream() {
@@ -373,6 +454,32 @@ internal object TombstoneRecord {
             const val FIXED64 = 1
             const val BYTES = 2
             const val FIXED32 = 5
+        }
+    }
+}
+
+/** A few lines at the top of every crash and freeze report: which build, which Android, how often Arc ended lately. */
+internal object ExitFacts {
+    private val SIGNALS = mapOf(
+        4 to "SIGILL", 5 to "SIGTRAP", 6 to "SIGABRT", 7 to "SIGBUS", 8 to "SIGFPE", 9 to "SIGKILL", 11 to "SIGSEGV", 13 to "SIGPIPE"
+    )
+
+    fun lines(
+        exit: UnexpectedExit,
+        commit: String,
+        fingerprint: String?,
+        securityPatch: String?,
+        recent: Map<UnexpectedExitKind, Int>
+    ): List<String> = buildList {
+        add("--- Arc facts ---")
+        add("Build commit: ${commit.ifBlank { "unknown" }}")
+        add("Android build: ${fingerprint ?: "unknown"}, security patch ${securityPatch ?: "unknown"}")
+        if (exit.kind == UnexpectedExitKind.NativeCrash) {
+            add("Signal: ${SIGNALS[exit.status] ?: "unknown"} (${exit.status})")
+        }
+        if (recent.isNotEmpty()) {
+            add("Unexpected exits in the last 7 days: " + UnexpectedExitKind.entries.filter { (recent[it] ?: 0) > 0 }
+                .joinToString(", ") { "${it.key} ${recent[it]}" })
         }
     }
 }

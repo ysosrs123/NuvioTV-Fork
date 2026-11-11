@@ -17,6 +17,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -374,6 +375,19 @@ class CalendarRefresherTest {
         refresher.reloadWatched()
         assertTrue(refresher.state.value.watched!!.isWatched(CalendarIds(imdb = "tt1"), 1, 2))
         assertFalse(refresher.state.value.watched!!.isWatched(CalendarIds(imdb = "tt1"), 1, 1))
+    }
+
+    @Test fun watchedEpisodesWaitForPlaybackToStop() = runBlocking {
+        refresher.start()
+        until("cache to load") { refresher.state.value.loaded }
+        inputs.followed[1] = CalendarFollowedSnapshot(watched = CalendarWatchedIndex.Builder().add("tt1", 1, 1).build())
+        inputs.playbackActive.value = true
+        val reload = launch(Dispatchers.Default) { refresher.reloadWatched() }
+        delay(200)
+        assertEquals(null, refresher.state.value.watched)
+        inputs.playbackActive.value = false
+        reload.join()
+        assertTrue(refresher.state.value.watched!!.isWatched(CalendarIds(imdb = "tt1"), 1, 1))
     }
 
     @Test fun dueRemindersPublishesTheWatchedIndexItRead() = runBlocking {

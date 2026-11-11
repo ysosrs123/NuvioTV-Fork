@@ -289,7 +289,9 @@ internal fun ColumnScope.ReadyToSendStep(
     playbackRowHint: String = stringResource(R.string.report_item_playback_hint),
     showLogRow: Boolean = true,
     logTitle: String = stringResource(R.string.report_item_log),
-    logHint: String = stringResource(R.string.report_item_log_hint)
+    logHint: String = stringResource(R.string.report_item_log_hint),
+    logIncluded: Boolean = true,
+    onToggleLog: (() -> Unit)? = null
 ) {
     val sendButton = remember { FocusRequester() }
     val noteRow = remember { FocusRequester() }
@@ -317,7 +319,17 @@ internal fun ColumnScope.ReadyToSendStep(
             }
             if (showLogRow) {
                 item(key = "log") {
-                    ReportFact(logTitle, logHint)
+                    if (onToggleLog != null) {
+                        SettingsActionRow(
+                            title = logTitle,
+                            subtitle = logHint,
+                            trailingIcon = if (logIncluded) Icons.Default.Check else null,
+                            jumpAnchor = false,
+                            onClick = onToggleLog
+                        )
+                    } else {
+                        ReportFact(logTitle, logHint)
+                    }
                 }
             }
             if (titleLabel != null) {

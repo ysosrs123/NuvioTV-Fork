@@ -111,8 +111,9 @@ class DefaultCalendarRefreshInputs @Inject constructor(
     override val appVisible: StateFlow<Boolean> = appVisibility.visible
     override val settings = settingsStore.settings
     override suspend fun settings(profileId: Int) = settingsStore.current(profileId)
-    override suspend fun followed(profileId: Int, knownIds: Map<String, CalendarIds>) =
+    override suspend fun followed(profileId: Int, knownIds: Map<String, CalendarIds>) = withContext(Dispatchers.Default) {
         sourceReader.read(profileId, settingsStore.current(profileId).followOtherServices, knownIds)
+    }
     override fun traktSignedIn() = trackingProviders.isAuthenticated(TrackingProviderId.TRAKT)
     override suspend fun traktCalendar(today: LocalDate) = traktCalendarClient.myShows(today)
     override suspend fun refreshConcurrency() = deviceTier.refreshConcurrency()
@@ -203,6 +204,7 @@ class CalendarRefresher internal constructor(
 
     private val started = AtomicBoolean(false)
     private val dataMutex = Mutex()
+    private val reloadMutex = Mutex()
     private val jobLock = Any()
     private var job: Job? = null
     private var jobTakesRequests = false
@@ -516,10 +518,14 @@ class CalendarRefresher internal constructor(
         return index
     }
 
-    /** Reads what has been watched again, for when watch progress changes outside a refresh. */
+    /**
+     * Reads what has been watched again, for when watch progress changes outside a refresh. Waits while something plays
+     * and runs one read at a time.
+     */
     suspend fun reloadWatched() {
         ensureStarted()
-        readWatched(ensureLoaded(inputs.activeProfileId.value))
+        inputs.playbackActive.first { !it }
+        reloadMutex.withLock { readWatched(ensureLoaded(inputs.activeProfileId.value)) }
     }
 
     private suspend fun save(current: Owner, force: Boolean) {

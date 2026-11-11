@@ -188,7 +188,7 @@ private fun CrashReportFlow(
     }
     var step by remember(exit) { mutableStateOf(CrashStep.Offer) }
     var note by remember(exit) { mutableStateOf("") }
-    val includeTrace = exit.hasTrace
+    var includeTrace by remember(exit) { mutableStateOf(exit.hasTrace) }
     var noteOpen by remember(exit) { mutableStateOf(false) }
     val sending = send.status == PlaybackIssueReportStatus.Sending
 
@@ -213,6 +213,8 @@ private fun CrashReportFlow(
                     showLogRow = exit.hasTrace,
                     logTitle = stringResource(R.string.report_exit_trace),
                     logHint = stringResource(R.string.report_exit_trace_hint),
+                    logIncluded = includeTrace,
+                    onToggleLog = { if (!sending) includeTrace = !includeTrace },
                     note = note,
                     noteHint = stringResource(R.string.report_item_note_hint),
                     onOpenNote = { noteOpen = true },

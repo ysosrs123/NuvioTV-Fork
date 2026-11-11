@@ -40,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -394,10 +395,16 @@ internal fun HomeViewModel.observeComingUpRow() {
             if (state.continueWatchingEnabled) state.upcomingItems else emptyList()
         }.distinctUntilChanged()
         val watchProgress = merge(
-            watchProgressRepository.allProgress.map { },
-            watchProgressRepository.watchedItems.map { }
+            watchProgressRepository.allProgress
+                .map { list -> list.mapTo(HashSet()) { listOf(it.contentId, it.season, it.episode, it.isCompleted()) } }
+                .distinctUntilChanged()
+                .map { },
+            watchProgressRepository.watchedItems
+                .map { list -> list.mapTo(HashSet()) { listOf(it.contentId, it.season, it.episode) } }
+                .distinctUntilChanged()
+                .map { }
         ).debounce(WATCH_PROGRESS_SETTLE_MS)
-        launch { watchProgress.collect { source.reloadWatched() } }
+        launch(Dispatchers.Default) { watchProgress.collectLatest { source.reloadWatched() } }
         source.items(shown, upcoming, comingUpActive)
             .collect { items ->
                 _uiState.update { state -> if (state.comingUpItems == items) state else state.copy(comingUpItems = items) }

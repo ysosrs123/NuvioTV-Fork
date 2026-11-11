@@ -111,6 +111,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
@@ -237,6 +238,7 @@ val LocalSidebarExpanded = compositionLocalOf { false }
 val LocalContentFocusRequester = compositionLocalOf { FocusRequester.Default }
 
 private const val SIDEBAR_AUTO_COLLAPSE_DELAY_MS = 3_000L
+private const val FIRST_TRACKER_REFRESH_DELAY_MS = 8_000L
 
 private const val MAX_SUPPORTED_FONT_SCALE = 1.15f
 
@@ -468,7 +470,7 @@ open class MainActivity : ComponentActivity() {
         val launchEpisodeTitle = intent?.getStringExtra("episodeTitle")
         captureDeepLinkIntent(intent)
 
-        setContent {
+        setContent { LauncherOnlySemantics(hideSemanticsTree.value) {
             var hasSelectedProfileThisSession by rememberSaveable { mutableStateOf(false) }
             var v2ProfilePickerRequested by rememberSaveable { mutableStateOf(false) }
             var onboardingCompletedThisSession by remember { mutableStateOf(false) }
@@ -674,7 +676,7 @@ open class MainActivity : ComponentActivity() {
             // Resolve the device snapshot before profile selection's first themed frame.
             if (device == null || appearance == null || originalScale == null) {
                 Box(Modifier.fillMaxSize().then(if (startPicture.showing) Modifier else Modifier.background(Color.Black)))
-                return@setContent
+                return@LauncherOnlySemantics
             }
             SideEffect { com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("prefs_ready") }
             var playbackUiActive by remember { mutableStateOf(false) }
@@ -977,6 +979,9 @@ open class MainActivity : ComponentActivity() {
                     val actualRoute = navBackStackEntry?.destination?.route
                     val currentRoute = optimisticRoute ?: actualRoute
                     val visibleEntries by navController.visibleEntries.collectAsState()
+                    LaunchedEffect(actualRoute) {
+                        com.nuvio.tv.data.repository.ArcBreadcrumbs.note("screen ${actualRoute?.substringBefore('?') ?: "none"}")
+                    }
                     SideEffect {
                         playbackUiActive = isPlayerUiVisible(
                             actualRoute, visibleEntries.map { it.destination.route }
@@ -1527,11 +1532,14 @@ open class MainActivity : ComponentActivity() {
                     "JANK: ${frameData.frameDurationUiNanos / 1_000_000}ms | states: ${frameData.states}"
                 )
             }
-        }
+        } }
     }
+
+    private val hideSemanticsTree = mutableStateOf(false)
 
     override fun onResume() {
         super.onResume()
+        hideSemanticsTree.value = com.nuvio.tv.core.performance.launcherOnlySemanticsTest(this)
         ambientIdleController.dismiss()
         qualityGovernor.resume(System.nanoTime())
         if (::jankStats.isInitialized) jankStats.isTrackingEnabled = true
@@ -1541,13 +1549,14 @@ open class MainActivity : ComponentActivity() {
             startupSyncService.requestForegroundSync()
         }
         lifecycleScope.launch {
-            val refreshIntent = if (isFirstResumeAfterCreate) {
+            if (isFirstResumeAfterCreate) {
                 isFirstResumeAfterCreate = false
-                TrackingRefreshIntent.INVALIDATED
+                // Home loads first; then only the trackers that are due refresh, one after another.
+                delay(FIRST_TRACKER_REFRESH_DELAY_MS)
+                trackingProgressRefreshCoordinator.refreshConnected(TrackingRefreshIntent.AUTOMATIC, oneAtATime = true)
             } else {
-                TrackingRefreshIntent.AUTOMATIC
+                trackingProgressRefreshCoordinator.refreshConnected(TrackingRefreshIntent.AUTOMATIC)
             }
-            trackingProgressRefreshCoordinator.refreshConnected(refreshIntent)
         }
     }
 
@@ -1694,6 +1703,15 @@ open class MainActivity : ComponentActivity() {
         super.onDestroy()
         PluginRuntimeHooks.onActivityDestroy()
     }
+}
+
+/** Test switch: see [com.nuvio.tv.core.performance.launcherOnlySemanticsTest]. */
+@Composable
+private fun LauncherOnlySemantics(hide: Boolean, content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize().then(if (hide) Modifier.clearAndSetSemantics {} else Modifier),
+        propagateMinConstraints = true
+    ) { content() }
 }
 
 @Composable

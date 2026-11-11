@@ -155,4 +155,13 @@ class ArcExitReportsTest {
         val foreign = ByteArray(4_096) { (it * 31).toByte() }
         ExitTrace.nativeLines(ByteArrayInputStream(foreign))
     }
+
+    @Test fun `a saved crash stands in for an exit record on older Android`() {
+        val exit = ExitRules.savedCrash(9_000L, handledMs = 5_000L)!!
+        assertEquals(UnexpectedExitKind.Crash, exit.kind)
+        assertEquals(9_000L, exit.timestampMs)
+        assertTrue(exit.hasTrace)
+        assertNull(ExitRules.savedCrash(9_000L, handledMs = 9_000L))
+        assertNull(ExitRules.savedCrash(null, handledMs = 0L))
+    }
 }

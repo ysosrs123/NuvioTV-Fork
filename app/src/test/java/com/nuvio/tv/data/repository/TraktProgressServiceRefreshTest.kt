@@ -217,7 +217,11 @@ class TraktProgressServiceRefreshTest {
                 every { state } returns MutableStateFlow(TraktAuthState(accessToken = "access", refreshToken = "refresh"))
                 coEvery { getCurrentState(any<Int>()) } returns TraktAuthState(accessToken = "access", refreshToken = "refresh")
             },
-            savedWatchedMovies = TraktSavedWatchedMovies(FakeTraktWatchedMoviesStorage())
+            savedWatchedMovies = TraktSavedWatchedMovies(FakeTraktWatchedMoviesStorage()),
+            appVisibility = com.nuvio.tv.core.calendar.CalendarAppVisibility(),
+            screensaverController = io.mockk.mockk(relaxed = true) {
+                io.mockk.every { playbackActive } returns kotlinx.coroutines.flow.MutableStateFlow(false)
+            }
         )
     }
 

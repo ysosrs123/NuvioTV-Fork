@@ -150,7 +150,11 @@ class TraktProgressServiceSavedMoviesTest {
             profileManager = profileManager,
             watchedSeriesStateHolder = mockk(relaxed = true),
             traktAuthDataStore = authStore,
-            savedWatchedMovies = TraktSavedWatchedMovies(storage)
+            savedWatchedMovies = TraktSavedWatchedMovies(storage),
+            appVisibility = com.nuvio.tv.core.calendar.CalendarAppVisibility(),
+            screensaverController = io.mockk.mockk(relaxed = true) {
+                io.mockk.every { playbackActive } returns kotlinx.coroutines.flow.MutableStateFlow(false)
+            }
         )
     }
 }

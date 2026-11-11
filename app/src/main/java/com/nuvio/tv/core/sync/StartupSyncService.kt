@@ -65,7 +65,7 @@ class StartupSyncService @Inject constructor(
     private val profileSettingsSyncService: ProfileSettingsSyncService,
     private val providerCredentialSyncService: ProviderCredentialSyncService,
     private val profileSyncService: ProfileSyncService,
-    private val pluginManager: PluginManager,
+    private val pluginManager: dagger.Lazy<PluginManager>,
     private val addonRepository: AddonRepositoryImpl,
     private val watchProgressRepository: WatchProgressRepositoryImpl,
     private val libraryRepository: LibraryRepositoryImpl,
@@ -454,9 +454,9 @@ class StartupSyncService @Inject constructor(
         try {
             val profileId = profileManager.activeProfileId.value
             val syncState = startupSyncPreferences.getState(profileId)
+            // Decided from the saved state, so a cold start within FULL_STARTUP_PULL_TTL_MS of the last full pull
+            // reads only what changed; the full pull still runs once that time has passed.
             val canUseWarmSync = !force &&
-                lastPulledKey == pullKey(userId) &&
-                lastPulledAtMs > 0L &&
                 syncState.lastFullPullUserId == userId &&
                 syncState.lastFullPullAtMs > 0L &&
                 System.currentTimeMillis() - syncState.lastFullPullAtMs < FULL_STARTUP_PULL_TTL_MS &&
@@ -531,11 +531,6 @@ class StartupSyncService @Inject constructor(
                 watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
                 Log.d(TAG, "Skipping warm Supabase watch progress sync for profile $profileId because a tracking provider is active")
             }
-            startupSyncPreferences.markFullPull(
-                profileId = profileId,
-                userId = userId,
-                includeProfileSettings = includeProfileSettings
-            )
             return Result.success(Unit)
         } catch (e: Exception) {
             watchProgressRepository.isSyncingFromRemote = false
@@ -664,11 +659,11 @@ class StartupSyncService @Inject constructor(
 
     private suspend fun pullPlugins(profileId: Int, generation: Int) {
         if (!authManager.isAuthenticated) return
-        pluginManager.discardPendingSync()
-        pluginManager.isSyncingFromRemote = true
+        pluginManager.get().discardPendingSync()
+        pluginManager.get().isSyncingFromRemote = true
         try {
             val remotePlugins = pluginSyncService.getRemoteRepoUrls().getOrElse { throw it }
-            pluginManager.reconcileWithRemoteRepoUrls(
+            pluginManager.get().reconcileWithRemoteRepoUrls(
                 remotePlugins = remotePlugins,
                 removeMissingLocal = true
             )
@@ -680,11 +675,11 @@ class StartupSyncService @Inject constructor(
         } finally {
             val ownsPull = synchronized(pluginSyncGenerationLock) { pluginSyncGeneration == generation }
             if (ownsPull) {
-                pluginManager.isSyncingFromRemote = false
+                pluginManager.get().isSyncingFromRemote = false
                 if (coroutineContext.isActive) {
-                    pluginManager.flushPendingSync()
+                    pluginManager.get().flushPendingSync()
                 } else {
-                    pluginManager.discardPendingSync()
+                    pluginManager.get().discardPendingSync()
                 }
             }
         }

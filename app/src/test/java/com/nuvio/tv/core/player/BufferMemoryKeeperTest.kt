@@ -629,4 +629,39 @@ class BufferMemoryKeeperTest {
         unknown.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         assertEquals(BufferMemoryKeeper.LEVEL_LOW, unknown.pressureLevel)
     }
+
+    @Test
+    fun `swap nearly gone with thin room lowers the budget without a warning`() {
+        // A 2 GB Xiaomi box during a 4K film: 276 MB available against a 144 MB line, swap empty, no trim warning.
+        val lc = customControl(budgetMb = 200)
+        val k = keeper(lc)
+        free = BufferSizing.FreeMemory(276 * mb, 144 * mb, false)
+        swapFree = 0
+        k.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_LOW, k.pressureLevel)
+        assertTrue(k.effectiveCapBytes() in 1 until 200 * mb)
+
+        val roomy = keeper(customControl(budgetMb = 200))
+        free = BufferSizing.FreeMemory(658 * mb, 144 * mb, false)
+        roomy.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_NONE, roomy.pressureLevel)
+
+        val swapLeft = keeper(customControl(budgetMb = 200))
+        free = BufferSizing.FreeMemory(276 * mb, 144 * mb, false)
+        swapFree = 300
+        swapLeft.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_NONE, swapLeft.pressureLevel)
+
+        val userSize = keeper(customControl(budgetMb = 200), budgetManaged = false)
+        swapFree = 0
+        userSize.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_NONE, userSize.pressureLevel)
+    }
+
+    @Test
+    fun `a box without swap reads -1 and never arms the swap rule`() {
+        val thin = BufferSizing.FreeMemory(276 * mb, 144 * mb, false)
+        assertFalse(BufferMemoryKeeper.swapRunsOut(thin, -1L))
+        assertTrue(BufferMemoryKeeper.swapRunsOut(thin, 0L))
+    }
 }

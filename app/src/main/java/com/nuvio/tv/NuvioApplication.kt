@@ -57,6 +57,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
     @Inject lateinit var siloArtworkRefresher: com.nuvio.tv.data.mediaserver.silo.SiloArtworkRefresher
     @Inject lateinit var plexArtworkSigner: com.nuvio.tv.data.mediaserver.plex.PlexArtworkSigner
     @Inject lateinit var reportOutbox: com.nuvio.tv.data.repository.ReportOutbox
+    @Inject lateinit var screensaverController: com.nuvio.tv.core.player.ScreensaverController
 
     companion object {
         private const val CACHE_TAG = "NuvioCache"
@@ -119,6 +120,9 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         com.nuvio.tv.core.network.ArcDns.init(this)
         super.onCreate()
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_injected")
+        com.nuvio.tv.data.repository.ArcCrashFile.install(this) { screensaverController.playbackActive.value }
+        com.nuvio.tv.data.repository.ArcMainWatchdog.start(this)
+        com.nuvio.tv.data.repository.ArcHeartbeat.start(this) { screensaverController.playbackActive.value }
         PluginRuntimeHooks.onApplicationCreate(this)
         androidTvChannelSyncService.start()
         // Hydrate the AFR fps cache from disk (background load) so cold
