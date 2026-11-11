@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.local
 
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.nuvio.tv.core.profile.ProfileManager
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 
 private const val FEATURE = "scout_mixes"
 private const val PREFIX = "mix:"
+private val PICK_SOURCES = booleanPreferencesKey("pick_sources")
 
 /** Each profile's mixes, on this device only. */
 @Singleton
@@ -32,6 +34,14 @@ class ScoutMixStore @Inject constructor(
 
     fun observe(profileId: Int): Flow<List<ScoutMix>> =
         factory.get(profileId, FEATURE).data.map(::readScoutMixes)
+
+    /** One choice for all of a profile's mixes: an episode picks its own source, as auto-play would. On unless turned off. */
+    fun observePickSources(profileId: Int): Flow<Boolean> =
+        factory.get(profileId, FEATURE).data.map { it[PICK_SOURCES] ?: true }
+
+    suspend fun setPickSources(on: Boolean) {
+        factory.get(profileManager.activeProfileId.value, FEATURE).edit { it[PICK_SOURCES] = on }
+    }
 
     suspend fun mix(id: String): ScoutMix? = mixes.first().firstOrNull { it.id == id }
 

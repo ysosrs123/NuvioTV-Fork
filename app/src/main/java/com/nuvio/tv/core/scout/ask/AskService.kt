@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -291,12 +292,15 @@ class AskService @Inject constructor(
     private suspend fun seen(): AskSeen {
         val watched = watchProgress.get().tasteHistory.first()
         val started = watchProgress.get().allProgress.first()
-        return AskSeen(
-            ids = (watched.map { it.contentId } + started.map { it.contentId }).toSet(),
-            names = (watched.map { askSeenName(it.title, it.releaseInfo) } + started.map { normaliseTitle(it.name) }).toSet(),
-            watchedIds = watched.map { it.contentId }.toSet(),
-            watchedNames = watched.map { askSeenName(it.title, it.releaseInfo) }.toSet()
-        )
+        return withContext(Dispatchers.Default) {
+            val watchedNames = watched.mapTo(HashSet()) { askSeenName(it.title, it.releaseInfo) }
+            AskSeen(
+                ids = (watched.map { it.contentId } + started.map { it.contentId }).toSet(),
+                names = watchedNames + started.map { normaliseTitle(it.name) },
+                watchedIds = watched.mapTo(HashSet()) { it.contentId },
+                watchedNames = watchedNames
+            )
+        }
     }
 
     suspend fun testKey(config: AskConfig): AskKeyTest = engine.testKey(config)

@@ -68,6 +68,7 @@ sealed interface ScoutMixPick {
 /**
  * Shows are tried in a shuffled order, so each is as likely as any other whatever its length, and only as many are looked
  * up as the pick needs. The show just played goes last. Episodes already played stay out until nothing else is left.
+ * [resume], an episode stopped partway, comes first when the page opens.
  */
 internal suspend fun pickScoutMixEpisode(
     shows: List<ScoutMixShow>,
@@ -77,11 +78,18 @@ internal suspend fun pickScoutMixEpisode(
     current: ScoutMixEpisodeKey? = null,
     lastShowId: String? = null,
     random: Random = Random.Default,
+    resume: Pair<ScoutMixShow, WatchProgress>? = null,
     episodes: suspend (ScoutMixShow) -> ScoutMixEpisodes?
 ): ScoutMixPick {
     if (shows.isEmpty()) return ScoutMixPick.NoShows
     val order = shows.shuffled(random).sortedBy { it.id == lastShowId }
     val loaded = HashMap<String, ScoutMixEpisodes?>()
+    if (resume != null && played.isEmpty() && current == null) {
+        val (show, partway) = resume
+        val offer = episodes(show).also { loaded[show.id] = it }
+        val video = offer?.meta?.videos?.firstOrNull { it.season == partway.season && it.episode == partway.episode }
+        if (offer != null && video != null) return ScoutMixPick.Episode(show, offer.meta, video)
+    }
     val passes = if (unwatchedOnly) {
         listOf(played + setOfNotNull(current), played)
     } else {

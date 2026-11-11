@@ -108,11 +108,15 @@ private fun ScoutRating.seedWeight(): Double = when (this) {
 
 private fun String.scoutIsTv(): Boolean = trim().lowercase() in setOf("series", "tv", "show", "tvshow", "anime")
 
+private val SCOUT_MARKS = Regex("\\p{M}+")
+private val SCOUT_NOT_LETTER_OR_DIGIT = Regex("[^\\p{L}\\p{N}]+")
+private val SCOUT_YEAR = Regex("\\d{4}")
+
 fun scoutNormalizedName(name: String): String =
     Normalizer.normalize(name, Normalizer.Form.NFD)
-        .replace(Regex("\\p{M}+"), "")
+        .replace(SCOUT_MARKS, "")
         .lowercase()
-        .replace(Regex("[^\\p{L}\\p{N}]+"), " ")
+        .replace(SCOUT_NOT_LETTER_OR_DIGIT, " ")
         .trim()
 
 /** What must never be offered: anything watched, started or rated, and any left-out genre. */
@@ -132,7 +136,7 @@ data class ScoutExclusions(
 
 /** With a year, a remake under the same name is not mistaken for the title already seen. */
 fun scoutExclusionName(name: String, releaseInfo: String?): String {
-    val year = releaseInfo?.let { Regex("\\d{4}").find(it)?.value }
+    val year = releaseInfo?.let { SCOUT_YEAR.find(it)?.value }
     return scoutNormalizedName(name) + (year?.let { "|$it" } ?: "")
 }
 

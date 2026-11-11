@@ -79,6 +79,7 @@ class ScoutMixViewModel @Inject constructor(
     private val profileId = profiles.activeProfileId.value
 
     private val allMixes = store.observe(profileId).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    val pickSources = store.observePickSources(profileId).stateIn(viewModelScope, SharingStarted.Eagerly, true)
     val mix: StateFlow<ScoutMix?> = store.observe(profileId).map { mixes -> mixes.firstOrNull { it.id == mixId } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val posterWidthDp = layoutPreferences.posterCardWidthDp.stateIn(viewModelScope, SharingStarted.Eagerly, 126)
@@ -284,6 +285,10 @@ class ScoutMixViewModel @Inject constructor(
         }
     }
 
+    fun setPickSources(on: Boolean) {
+        viewModelScope.launch { store.setPickSources(on) }
+    }
+
     fun setKeepPlaying(on: Boolean) {
         viewModelScope.launch { store.update(mixId) { it.copy(keepPlaying = on) } }
     }
@@ -335,6 +340,9 @@ class ScoutMixViewModel @Inject constructor(
                 return@launch
             }
             val queued = _state.value.coming.firstOrNull { it.key !in played && it.key != current }
+            val resume = if (queued == null && played.isEmpty() && current == null) {
+                runCatching { library.startedEpisode(saved.shows) }.getOrNull()
+            } else null
             val pick = queued ?: pickScoutMixEpisode(
                 shows = saved.shows,
                 unwatchedOnly = saved.unwatchedOnly,
@@ -342,6 +350,7 @@ class ScoutMixViewModel @Inject constructor(
                 lastPlayed = lastPlayed,
                 current = current,
                 lastShowId = lastShowId,
+                resume = resume,
                 episodes = ::episodesOf
             )
             val offers = if (pick is ScoutMixPick.AllSeen) suggestions.forMix(saved) else emptyList()

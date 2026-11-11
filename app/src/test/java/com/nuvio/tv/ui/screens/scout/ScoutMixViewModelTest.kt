@@ -81,6 +81,7 @@ class ScoutMixViewModelTest {
         coEvery { library.episodes(profile, any()) } returns ScoutMixEpisodes(meta(), if (seenEverything) allWatched else emptySet())
         coEvery { library.episodes(profile, match { it.id == "tt2" }) } returns ScoutMixEpisodes(meta())
         coEvery { library.showFrom(offer) } returns added
+        coEvery { library.startedEpisode(any()) } returns null
         every { library.withSuggestedName(any(), any()) } answers { firstArg() }
         val suggestions = mockk<ScoutMixSuggestions>()
         coEvery { suggestions.forMix(any()) } returns listOf(offer)

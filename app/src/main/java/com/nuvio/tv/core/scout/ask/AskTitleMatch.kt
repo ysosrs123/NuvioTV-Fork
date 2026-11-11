@@ -6,11 +6,15 @@ import kotlin.math.abs
 
 private const val MIN_VOTES_WITHOUT_YEAR = 20
 
+private val MARKS = Regex("\\p{M}+")
+private val NOT_LETTER_OR_DIGIT = Regex("[^\\p{L}\\p{N}]+")
+private val YEAR = Regex("\\d{4}")
+
 internal fun normaliseTitle(value: String): String =
     Normalizer.normalize(value, Normalizer.Form.NFD)
-        .replace(Regex("\\p{M}+"), "")
+        .replace(MARKS, "")
         .lowercase()
-        .replace(Regex("[^\\p{L}\\p{N}]+"), "")
+        .replace(NOT_LETTER_OR_DIGIT, "")
 
 /** What this profile has watched or started, so an answer doesn't suggest it again. */
 data class AskSeen(
@@ -33,7 +37,7 @@ data class AskSeen(
 }
 
 internal fun askSeenName(name: String, releaseInfo: String?): String {
-    val year = releaseInfo?.let { Regex("\\d{4}").find(it)?.value }
+    val year = releaseInfo?.let { YEAR.find(it)?.value }
     return normaliseTitle(name) + (year?.let { "|$it" } ?: "")
 }
 

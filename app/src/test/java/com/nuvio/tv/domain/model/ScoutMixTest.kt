@@ -66,6 +66,34 @@ class ScoutMixTest {
     }
 
     @Test
+    fun `opening the page carries on with an episode stopped partway and looks up only its show`() = runTest {
+        val looked = mutableListOf<String>()
+        val partway = WatchProgress(
+            contentId = "b", contentType = "series", name = "b", poster = null, backdrop = null, logo = null,
+            videoId = "b:1:2", season = 1, episode = 2, episodeTitle = null, position = 600_000L, duration = 2_400_000L, lastWatched = 1L
+        )
+        val pick = pickScoutMixEpisode(listOf(show("a"), show("b"), show("c")), unwatchedOnly = true, resume = show("b") to partway) {
+            looked += it.id
+            ScoutMixEpisodes(meta(it.id, 3))
+        }
+        assertEquals("b:1:2", (pick as ScoutMixPick.Episode).video.id)
+        assertEquals(listOf("b"), looked)
+    }
+
+    @Test
+    fun `later picks in the same visit are not pulled back to the stopped episode`() = runTest {
+        val partway = WatchProgress(
+            contentId = "a", contentType = "series", name = "a", poster = null, backdrop = null, logo = null,
+            videoId = "a:1:1", season = 1, episode = 1, episodeTitle = null, position = 600_000L, duration = 2_400_000L, lastWatched = 1L
+        )
+        val pick = pickScoutMixEpisode(
+            listOf(show("a")), unwatchedOnly = true, played = setOf("a" to "a:1:1"), current = "a" to "a:1:1",
+            resume = show("a") to partway
+        ) { ScoutMixEpisodes(meta(it.id, 3)) }
+        assertTrue((pick as ScoutMixPick.Episode).video.id != "a:1:1")
+    }
+
+    @Test
     fun `a show that fails is skipped`() = runTest {
         val pick = pickScoutMixEpisode(listOf(show("bad"), show("good")), unwatchedOnly = true, random = Random(1)) {
             if (it.id == "bad") null else ScoutMixEpisodes(meta("good", 1))

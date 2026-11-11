@@ -109,7 +109,7 @@ private const val ADD_TILE_KEY = "add"
 @Composable
 fun ScoutMixScreen(
     onBack: () -> Unit,
-    onPlay: (ScoutMixPick.Episode) -> Unit,
+    onPlay: (ScoutMixPick.Episode, Boolean) -> Unit,
     onOpenShow: (ScoutMixShow) -> Unit,
     onFindShow: () -> Unit,
     viewModel: ScoutMixViewModel = hiltViewModel()
@@ -117,6 +117,7 @@ fun ScoutMixScreen(
     val mix by viewModel.mix.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val gone by viewModel.gone.collectAsStateWithLifecycle()
+    val pickSources by viewModel.pickSources.collectAsStateWithLifecycle()
     var editing by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
@@ -128,7 +129,7 @@ fun ScoutMixScreen(
         viewModel.onShown()
         onPauseOrDispose { viewModel.onHidden() }
     }
-    LaunchedEffect(Unit) { viewModel.start.collect(onPlay) }
+    LaunchedEffect(Unit) { viewModel.start.collect { onPlay(it, viewModel.pickSources.value) } }
     LaunchedEffect(gone) { if (gone) onBack() }
     BackHandler { onBack() }
 
@@ -181,6 +182,7 @@ fun ScoutMixScreen(
                 if (current != null && !ranOut) {
                     ScoutWord(stringResource(R.string.scout_mixes_unwatched_only), { viewModel.setUnwatchedOnly(!current.unwatchedOnly) }, focus("unwatched"), on = current.unwatchedOnly)
                     ScoutWord(stringResource(R.string.scout_mixes_keep_playing), { viewModel.setKeepPlaying(!current.keepPlaying) }, focus("keep"), on = current.keepPlaying)
+                    ScoutWord(stringResource(R.string.scout_mixes_pick_sources), { viewModel.setPickSources(!pickSources) }, focus("pick"), on = pickSources)
                 }
             }
             Column(
@@ -196,7 +198,7 @@ fun ScoutMixScreen(
                             icon = Icons.Default.PlayArrow,
                             enabled = episode != null,
                             focusRequester = primaryFocus,
-                            onClick = { viewModel.play()?.let(onPlay) }
+                            onClick = { viewModel.play()?.let { onPlay(it, pickSources) } }
                         )
                     }
                     if (ranOut) {
@@ -294,7 +296,7 @@ fun ScoutMixScreen(
                             title = item.video.title.ifBlank { item.meta.name },
                             line = item.meta.name.ifBlank { item.show.name } + " • " + stringResource(R.string.scout_mixes_episode_short, item.video.season ?: 0, item.video.episode ?: 0),
                             height = tileHeight,
-                            onClick = { viewModel.playFrom(item)?.let(onPlay) },
+                            onClick = { viewModel.playFrom(item)?.let { onPlay(it, pickSources) } },
                             badge = if (index == 0 && state.tabShow == null) stringResource(R.string.scout_mixes_up_next) else null,
                             modifier = focus("tile_" + item.meta.id + item.video.id)
                         )

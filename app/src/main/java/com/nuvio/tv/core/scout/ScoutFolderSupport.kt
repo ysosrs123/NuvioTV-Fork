@@ -115,7 +115,7 @@ class ScoutFolderSupport @Inject constructor(
     private suspend fun namesToHide(profile: ScoutProfile, listed: ScoutListed): Set<String> = namesLock.withLock {
         val profileId = profiles.activeProfileId.value
         val now = System.currentTimeMillis()
-        seenNames?.takeIf { it.profileId == profileId && it.profile == profile && it.listed === listed && now - it.at < LISTED_FRESH_MS }?.let { return@withLock it.names }
+        seenNames?.takeIf { it.profileId == profileId && it.profile == profile && it.listed == listed && now - it.at < LISTED_FRESH_MS }?.let { return@withLock it.names }
         val repository = watchProgress.get()
         val names = repository.tasteHistory.first().map { scoutExclusionName(it.title, it.releaseInfo) }.toSet() +
             repository.allProgress.first().map { scoutNormalizedName(it.name) } +

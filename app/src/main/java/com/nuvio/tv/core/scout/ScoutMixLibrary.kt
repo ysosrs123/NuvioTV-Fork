@@ -81,6 +81,15 @@ class ScoutMixLibrary @Inject constructor(
         finder.logo(id, tv = true)
     }
 
+    /** The episode of these shows stopped partway most recently, from saved progress alone, with no lookup. */
+    suspend fun startedEpisode(shows: List<ScoutMixShow>): Pair<ScoutMixShow, com.nuvio.tv.domain.model.WatchProgress>? {
+        val partway = watchProgress.allProgress.first().filter { it.season != null && it.episode != null && it.isInProgress() }
+        if (partway.isEmpty()) return null
+        return shows.mapNotNull { show ->
+            partway.filter { it.contentId == show.id || it.contentId == show.imdbId }.maxByOrNull { it.lastWatched }?.let { show to it }
+        }.maxByOrNull { it.second.lastWatched }
+    }
+
     suspend fun episodes(profileId: Int, show: ScoutMixShow): ScoutMixEpisodes? = withTimeoutOrNull(LOOKUP_TIMEOUT_MS) {
         val result = metaRepository.getMetaFromAllAddons(show.type, show.id)
             .first { it !is NetworkResult.Loading }

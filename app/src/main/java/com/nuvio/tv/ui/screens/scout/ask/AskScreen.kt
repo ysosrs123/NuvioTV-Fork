@@ -297,15 +297,13 @@ private fun PosterWall(posters: List<String>, drift: Boolean, scrim: Brush) {
             val tile = maxWidth / 6.6f
             val gap = tile * .09f
             val shift = if (drift) {
-                val moving = rememberInfiniteTransition(label = "askWall")
-                val at by moving.animateFloat(
+                rememberInfiniteTransition(label = "askWall").animateFloat(
                     initialValue = 0f,
                     targetValue = 1f,
                     animationSpec = infiniteRepeatable(tween(46_000, easing = LinearEasing), RepeatMode.Reverse),
                     label = "askWallAt"
                 )
-                at
-            } else 0f
+            } else null
             val travel = with(LocalDensity.current) { tile.toPx() * .45f }
             Row(
                 modifier = Modifier
@@ -314,7 +312,7 @@ private fun PosterWall(posters: List<String>, drift: Boolean, scrim: Brush) {
                     .align(Alignment.Center)
                     .graphicsLayer {
                         rotationZ = -7f
-                        translationY = -travel * shift
+                        translationY = -travel * (shift?.value ?: 0f)
                     },
                 horizontalArrangement = Arrangement.spacedBy(gap)
             ) {
@@ -1246,7 +1244,9 @@ internal fun rememberAskVoice(keepGoing: Boolean = false, onHeard: (String) -> U
                     listenOnce()
                     return
                 }
-                if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) {
+                if (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY &&
+                    SystemClock.elapsedRealtime() - times[0] < BUSY_GIVE_UP_MS
+                ) {
                     scope.launch {
                         delay(BUSY_RETRY_MS)
                         if (listening) listenOnce()
@@ -1312,6 +1312,7 @@ internal fun rememberAskVoice(keepGoing: Boolean = false, onHeard: (String) -> U
 }
 
 private const val BUSY_RETRY_MS = 300L
+private const val BUSY_GIVE_UP_MS = 6_000L
 
 internal fun askMicHears(rmsdB: Float, floor: Float): Boolean = rmsdB >= floor + MIC_RISE_DB
 
