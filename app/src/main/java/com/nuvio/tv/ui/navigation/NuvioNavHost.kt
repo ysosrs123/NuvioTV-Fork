@@ -560,6 +560,11 @@ private fun PlaybackNavHost(
                     nullable = true
                     defaultValue = "false"
                 },
+                navArgument("pickForMe") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "false"
+                },
                 navArgument("returnToDetailOnBack") {
                     type = NavType.StringType
                     nullable = true
@@ -1261,7 +1266,7 @@ private fun PlaybackNavHost(
         ) {
             com.nuvio.tv.ui.screens.scout.ScoutMixScreen(
                 onBack = { navController.popBackStack() },
-                onPlay = { pick ->
+                onPlay = { pick, pickForMe ->
                     navController.navigate(
                         Screen.Stream.createRoute(
                             videoId = pick.video.id,
@@ -1277,7 +1282,8 @@ private fun PlaybackNavHost(
                             year = pick.meta.releaseInfo,
                             contentId = pick.meta.id,
                             contentName = pick.meta.name,
-                            runtime = pick.video.runtime
+                            runtime = pick.video.runtime,
+                            pickForMe = pickForMe
                         )
                     )
                 },
