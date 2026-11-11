@@ -48,6 +48,7 @@ scripts/*
 !scripts/release-metadata.sh
 !scripts/release_beta.py
 !scripts/verify_native_apk.py
+!scripts/build-dvfelplay.sh
 !scripts/tests/
 !scripts/tests/*.py
 /supabase

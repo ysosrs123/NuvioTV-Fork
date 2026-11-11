@@ -1,0 +1,52 @@
+name: Build libdvfelplay
+
+# Manually triggered. Builds third_party/libdvfelplay (Fire TV Cube 3 FEL helper) for armeabi-v7a
+# with the same NDK as upstream's release build, checks that only dvfp_* is exported, and uploads
+# the library. To ship it: download the artifact, put libdvfelplay.so in
+# app/src/dvfel/jniLibs/armeabi-v7a/ and commit (or set commit=true to let the workflow do it).
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Commit the built library to this branch"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NDK_VERSION: 28.2.13676358
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Install NDK and Ninja
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y ninja-build
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;$NDK_VERSION"
+          echo "ANDROID_NDK=$ANDROID_HOME/ndk/$NDK_VERSION" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: scripts/build-dvfelplay.sh
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: libdvfelplay-armeabi-v7a
+          path: app/src/dvfel/jniLibs/armeabi-v7a/libdvfelplay.so
+
+      - name: Commit
+        if: ${{ inputs.commit }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/dvfel/jniLibs/armeabi-v7a/libdvfelplay.so
+          git diff --cached --quiet || git commit -m "build: libdvfelplay.so (armeabi-v7a) from third_party/libdvfelplay"
+          git push
