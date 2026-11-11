@@ -65,6 +65,10 @@ data class LastPlaybackDiagnostics(
     // the per-playback RPU drop counter, both surfaced in Diagnostics.
     val dvElType: String? = null,
     val dv7RpuDrops: Int = 0,
+    // Native FEL backend that ran ("AM9_AMSTREAM", "GAZELLE_DVFEL"), or null; and, for the
+    // Fire TV Cube 3 backend, the loaded dvfel kernel helper's version.
+    val nativeFelBackend: String? = null,
+    val dvfelModuleVersion: String? = null,
     // One-line static HDR mastering metadata read from the RPU
     // (MaxCLL/MaxFALL + MDL peak in nits), or null when unavailable.
     val dvHdrMastering: String? = null,
@@ -130,6 +134,8 @@ data class LastPlaybackDiagnostics(
         put("dvSourceProfile", dvSourceProfile ?: JSONObject.NULL)
         put("dvElType", dvElType ?: JSONObject.NULL)
         put("dv7RpuDrops", dv7RpuDrops)
+        put("nativeFelBackend", nativeFelBackend ?: JSONObject.NULL)
+        put("dvfelModuleVersion", dvfelModuleVersion ?: JSONObject.NULL)
         put("dvHdrMastering", dvHdrMastering ?: JSONObject.NULL)
         put("dvConvertEndedAtMs", dvConvertEndedAtMs)
         put("videoResolution", videoResolution ?: JSONObject.NULL)
@@ -183,6 +189,8 @@ data class LastPlaybackDiagnostics(
                 dvSourceProfile = o.optString("dvSourceProfile", "").let { if (it.isBlank() || it == "null") null else it },
                 dvElType = o.optString("dvElType", "").let { if (it.isBlank() || it == "null") null else it },
                 dv7RpuDrops = o.optInt("dv7RpuDrops", 0),
+                nativeFelBackend = o.optString("nativeFelBackend", "").let { if (it.isBlank() || it == "null") null else it },
+                dvfelModuleVersion = o.optString("dvfelModuleVersion", "").let { if (it.isBlank() || it == "null") null else it },
                 dvHdrMastering = o.optString("dvHdrMastering", "").let { if (it.isBlank() || it == "null") null else it },
                 dvConvertEndedAtMs = o.optLong("dvConvertEndedAtMs", 0L),
                 videoResolution = o.optString("videoResolution", "").let { if (it.isBlank() || it == "null") null else it },

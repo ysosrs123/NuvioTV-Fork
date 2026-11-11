@@ -212,6 +212,7 @@ private fun dv7HandlingModeLabel(mode: Dv7HandlingMode): String = when (mode) {
     Dv7HandlingMode.STRIP_DV -> stringResource(R.string.dv7_mode_strip_dv)
     Dv7HandlingMode.OFF -> stringResource(R.string.dv7_mode_off)
     Dv7HandlingMode.NATIVE_FEL -> stringResource(R.string.dv7_mode_native_fel)
+    Dv7HandlingMode.NATIVE_FEL_CUBE3 -> stringResource(R.string.dv7_mode_native_fel_cube3)
 }
 
 @Composable
@@ -379,7 +380,21 @@ private fun Dv7HandlingModeDialog(
     onModeSelected: (Dv7HandlingMode) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val options = listOf(
+    // Each native FEL mode is offered only on its own hardware; a stored but hidden choice stays visible so
+    // nobody gets stuck on it. Reading the board and the module touches sysprops/libdvfelplay: once per dialog.
+    // Only the FEL APK (DVFEL_GAZELLE_ENABLED) ships libdvfelplay; the normal APK keeps the old list.
+    val gazelleBoard = remember {
+        com.nuvio.tv.BuildConfig.DVFEL_GAZELLE_ENABLED && com.nuvio.tv.core.player.dvfel.GazelleFelSupport.isGazelleBoard()
+    }
+    val gazelleUsable = remember(gazelleBoard) { gazelleBoard && com.nuvio.tv.core.player.dvfel.GazelleFelSupport.isUsable() }
+    val showAm9NativeFel = !gazelleBoard || selectedMode == Dv7HandlingMode.NATIVE_FEL
+    val showCube3NativeFel = gazelleBoard || selectedMode == Dv7HandlingMode.NATIVE_FEL_CUBE3
+    val cube3Description = stringResource(R.string.dv7_mode_native_fel_cube3_desc).let { desc ->
+        if (gazelleBoard && !gazelleUsable) {
+            desc + "\n" + stringResource(R.string.dv7_mode_native_fel_cube3_status_missing)
+        } else desc
+    }
+    val options = listOfNotNull(
         SettingsPickerOption(
             Dv7HandlingMode.AUTO,
             stringResource(R.string.dv7_mode_auto),
@@ -409,7 +424,12 @@ private fun Dv7HandlingModeDialog(
             Dv7HandlingMode.NATIVE_FEL,
             stringResource(R.string.dv7_mode_native_fel),
             stringResource(R.string.dv7_mode_native_fel_desc)
-        )
+        ).takeIf { showAm9NativeFel },
+        SettingsPickerOption(
+            Dv7HandlingMode.NATIVE_FEL_CUBE3,
+            stringResource(R.string.dv7_mode_native_fel_cube3),
+            cube3Description
+        ).takeIf { showCube3NativeFel }
     )
 
     SettingsSingleChoiceDialog(

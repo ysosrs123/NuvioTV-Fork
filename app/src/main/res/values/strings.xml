@@ -504,6 +504,8 @@
     <string name="licenses_attributions_libmpv_body">Used as an Android playback engine. The libmpv-android wrapper is licensed under the MIT license; mpv/libmpv and bundled native components retain their upstream license terms.</string>
     <string name="licenses_attributions_libdovi_title">libdovi</string>
     <string name="licenses_attributions_libdovi_body">Dolby Vision metadata parsing. By quietvoid. MIT licence.</string>
+    <string name="licenses_attributions_libdvfelplay_title">libdvfelplay</string>
+    <string name="licenses_attributions_libdvfelplay_body">Dolby Vision Profile 7 FEL helper for the Fire TV Cube 3, by Team CoreELEC, djnice and signde. Licensed under the GNU General Public License v2.0 or later. Built unchanged from tag v0.1.0-fc3-experimental (commit 58b7b69).</string>
     <string name="licenses_attributions_ffmpeg_title">FFmpeg</string>
     <string name="licenses_attributions_ffmpeg_body">Audio decoding. Licensed under the LGPL 2.1 or later.</string>
     <string name="licenses_attributions_dav1d_title">dav1d</string>
@@ -1012,6 +1014,7 @@
     <string name="diag_value_not_advertised">Not advertised (native playback may still work)</string>
     <string name="diag_label_dv_el_type">DV7 EL type</string>
     <string name="diag_value_dv7_native_route">Native dual-layer route in use (Android does not list it)</string>
+    <string name="diag_value_dv7_native_route_gazelle">Native route (Fire TV Cube 3, dvfel)</string>
     <string name="diag_value_el_all_layers_fmt">%1$s · RPU + BL + EL, all three layers used</string>
     <string name="diag_value_el_converted_fmt">%1$s · BL + RPU, converted to 8.1 (EL not used)</string>
     <string name="diag_value_el_base_only_fmt">%1$s · BL only (RPU and EL not used)</string>
@@ -4049,6 +4052,9 @@
     <string name="debrid_cached_playback_links_description">Reuse links already resolved during playback. New links are resolved only after choosing a source, or shortly before an episode ends when seek thumbnails prepare the next one.</string>
     <string name="dv7_mode_native_fel">Native DV7 FEL/MEL (Amlogic)</string>
     <string name="dv7_mode_native_fel_desc">Needs a Ugoos AM9 Pro running a custom FEL kernel, which is not available yet. On any other device it behaves like Auto.</string>
+    <string name="dv7_mode_native_fel_cube3">Native FEL (Fire TV Cube 3)</string>
+    <string name="dv7_mode_native_fel_cube3_desc">Rooted Fire TV Cube 3 with the Fire TV AV module: Dolby Vision Profile 7 FEL with the enhancement layer. Elsewhere, or without the module, behaves like Auto.</string>
+    <string name="dv7_mode_native_fel_cube3_status_missing">Fire TV AV module not detected</string>
     <string name="stream_test_parallel_scope">%1$.1f MiB / %2$.2f s measured · %3$.1f MiB total payload</string>
     <string name="stream_test_parallel_scope_detail">Warm-up excluded. Response payload only; total network traffic can be higher. Maximum 72 MiB or 20 seconds per cell. Very short samples are unavailable.</string>
     <string name="diagnostic_run_timed_out">The comparison hit its two-minute limit, so the results are incomplete and there\'s no recommendation.</string>

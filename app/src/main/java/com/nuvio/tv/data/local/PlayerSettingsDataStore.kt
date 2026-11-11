@@ -764,9 +764,20 @@ enum class Dv7HandlingMode {
      * (core/player/amlfel), with the enhancement layer handled by the SoC.
      * Other DV profiles, HDR10/SDR and boxes without the port use the AUTO path.
      */
-    NATIVE_FEL;
+    NATIVE_FEL,
+    /**
+     * Rooted Fire TV Cube 3 (Gazelle) with the Fire TV AV module: Dolby Vision Profile 7 FEL through
+     * libdvfelplay and /dev/dvfel (core/player/dvfel). Elsewhere, or without the module, the AUTO path.
+     */
+    NATIVE_FEL_CUBE3;
+
+    /** Either native FEL mode. Use this wherever code means "the native FEL route". */
+    val isNativeFel: Boolean get() = this == NATIVE_FEL || this == NATIVE_FEL_CUBE3
 
     companion object {
+        /** Stored names of both native FEL modes (for string-typed diagnostics). */
+        val NATIVE_FEL_NAMES: Set<String> = setOf("NATIVE_FEL", "NATIVE_FEL_CUBE3")
+
         /** Tolerant string parser used by the DataStore. */
         fun fromStoredString(value: String?): Dv7HandlingMode = when (value) {
             AUTO.name -> AUTO
@@ -775,6 +786,7 @@ enum class Dv7HandlingMode {
             STRIP_DV.name -> STRIP_DV
             OFF.name -> OFF
             NATIVE_FEL.name -> NATIVE_FEL
+            NATIVE_FEL_CUBE3.name -> NATIVE_FEL_CUBE3
             else -> AUTO
         }
     }

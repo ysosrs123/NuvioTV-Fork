@@ -3006,6 +3006,8 @@ private fun ExoPlayerSurface(
                 initializedTimestampMs: Long,
                 initializationDurationMs: Long
             ) {
+                // Only the AM9 amstream route needs a TRANSLUCENT SurfaceView. The Fire TV Cube 3 FEL renderer
+                // ("dvfel-sc2:" + codec name) decodes into this SurfaceView through MediaCodec and must stay OPAQUE.
                 val nativeFel = decoderName == com.nuvio.tv.core.player.amlfel.AmlDvFelVideoRenderer.DECODER_NAME
                 val surfaceView = playerView.videoSurfaceView as? android.view.SurfaceView ?: return
                 playerView.post {

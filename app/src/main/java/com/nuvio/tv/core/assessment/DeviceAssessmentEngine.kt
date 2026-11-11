@@ -629,7 +629,7 @@ object DeviceAssessmentEngine {
                 s(R.string.assessment_grounds_dv7_unknown)
             },
             tier = dvTier,
-            changeNeeded = settings.dv7HandlingMode != Dv7HandlingMode.AUTO && !(settings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL && facts.nativeFelUsable)
+            changeNeeded = settings.dv7HandlingMode != Dv7HandlingMode.AUTO && !(settings.dv7HandlingMode.isNativeFel && facts.nativeFelUsable)
         )
 
         val stripRecommendOn = policy.hdrCapsKnown && !policy.displayHdr10Plus
@@ -774,7 +774,7 @@ object DeviceAssessmentEngine {
             resolutionMatchingEnabled = null,
             dv7HandlingMode = Dv7HandlingMode.AUTO.takeIf {
                 policy.hdrCapsKnown && settings.dv7HandlingMode != Dv7HandlingMode.AUTO &&
-                    !(settings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL && facts.nativeFelUsable)
+                    !(settings.dv7HandlingMode.isNativeFel && facts.nativeFelUsable)
             },
             // Advisory-only rows, never machine-applied (see class doc).
             dv5ToDv81Enabled = null,
@@ -837,9 +837,13 @@ object DeviceAssessmentEngine {
      * A deliberate Native FEL choice on a box with the Amlogic dual-layer port is not a misconfiguration. On such
      * a box running stock firmware (no FEL-capable kernel) Native FEL plays exactly like Auto, so it must not be
      * "corrected" to Auto either: the saved choice is what enables the native path once a FEL-capable kernel boots.
+     * The Fire TV Cube 3 mode counts only on a Cube whose dvfel helper is ready (never on any other box).
      */
-    private fun nativeFelChosenAndUsable(mode: Dv7HandlingMode): Boolean =
-        mode == Dv7HandlingMode.NATIVE_FEL && com.nuvio.tv.core.player.amlfel.AmlFelSupport.isDeviceUsable()
+    private fun nativeFelChosenAndUsable(mode: Dv7HandlingMode): Boolean = when (mode) {
+        Dv7HandlingMode.NATIVE_FEL -> com.nuvio.tv.core.player.amlfel.AmlFelSupport.isDeviceUsable()
+        Dv7HandlingMode.NATIVE_FEL_CUBE3 -> com.nuvio.tv.core.player.dvfel.GazelleFelSupport.isUsable()
+        else -> false
+    }
 
     private fun dv7ModeLabel(context: Context, mode: Dv7HandlingMode): String = when (mode) {
         Dv7HandlingMode.AUTO -> context.getString(R.string.assessment_value_auto)

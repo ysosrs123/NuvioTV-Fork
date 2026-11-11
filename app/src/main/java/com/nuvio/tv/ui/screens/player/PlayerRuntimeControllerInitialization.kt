@@ -211,7 +211,8 @@ internal data class ExoConstructionFingerprint(
     val convertToDv81Active: Boolean,
     val mapDv7ToHevc: Boolean,
     val tunnelingEnabled: Boolean,
-    val nativeFelActive: Boolean = false
+    val nativeFelActive: Boolean = false,
+    val nativeFelBackend: com.nuvio.tv.core.player.NativeFelBackend = com.nuvio.tv.core.player.NativeFelBackend.NONE
 )
 
 /**
@@ -652,37 +653,60 @@ internal fun PlayerRuntimeController.initializePlayer(
             // The persisted enum stays as-is; only the runtime behavior is derived per playback.
             var effectiveDv7Mode: Dv7HandlingMode
             val dv7AutoResult: DolbyVisionBaseLayerPolicy.Result?
-            // AM9 native FEL: only when selected, not disabled for this stream, the display takes Dolby Vision,
-            // the box exposes the Amlogic dual-layer port AND runs a FEL-capable kernel (the stock kernel
-            // drops the EL with the same port present). Otherwise NATIVE_FEL resolves exactly like AUTO.
-            val nativeFelDeviceBits = if (playerSettings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL) {
+            // Native FEL: only when selected, not disabled for this stream, the display takes Dolby Vision and
+            // the mode's own backend is usable. NATIVE_FEL drives the AM9 amstream port (needs the FEL-capable
+            // kernel: the stock kernel drops the EL with the same port present); NATIVE_FEL_CUBE3 drives the
+            // Fire TV Cube 3 dvfel helper. Otherwise either mode resolves exactly like AUTO.
+            val dv7Mode = playerSettings.dv7HandlingMode
+            val nativeFelDeviceBits = if (dv7Mode == Dv7HandlingMode.NATIVE_FEL) {
                 com.nuvio.tv.core.player.amlfel.AmlFelSupport.deviceBits()
             } else 0
             // FEL is only useful on a display that takes Dolby Vision; on any other display the mode must behave
             // exactly like AUTO (e.g. HDR10 base layer on an HDR10-only TV), so the AUTO policy decides that.
-            val nativeFelDisplayPolicy = if (playerSettings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL) {
+            val nativeFelDisplayPolicy = if (dv7Mode.isNativeFel) {
                 DolbyVisionBaseLayerPolicy.resolve(context = context, bridgeReady = DoviBridge.isLibraryLoaded)
             } else null
-            val nativeFelActive = playerSettings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL &&
+            val nativeFelBackend = when (dv7Mode) {
+                Dv7HandlingMode.NATIVE_FEL ->
+                    if (com.nuvio.tv.core.player.amlfel.AmlFelSupport.isNativeFelUsable(nativeFelDeviceBits)) {
+                        com.nuvio.tv.core.player.NativeFelBackend.AM9_AMSTREAM
+                    } else com.nuvio.tv.core.player.NativeFelBackend.NONE
+                Dv7HandlingMode.NATIVE_FEL_CUBE3 ->
+                    if (com.nuvio.tv.core.player.dvfel.GazelleFelSupport.isUsable()) {
+                        com.nuvio.tv.core.player.NativeFelBackend.GAZELLE_DVFEL
+                    } else com.nuvio.tv.core.player.NativeFelBackend.NONE
+                else -> com.nuvio.tv.core.player.NativeFelBackend.NONE
+            }
+            val nativeFelActive = dv7Mode.isNativeFel &&
                 !nativeFelDisabledStreamUrls.contains(url) &&
                 nativeFelDisplayPolicy?.displayDv == true &&
-                com.nuvio.tv.core.player.amlfel.AmlFelSupport.isNativeFelUsable(nativeFelDeviceBits)
+                nativeFelBackend != com.nuvio.tv.core.player.NativeFelBackend.NONE
             isNativeFelActiveForCurrentPlayback = nativeFelActive
-            if (playerSettings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL) {
+            currentNativeFelBackend = if (nativeFelActive) nativeFelBackend else com.nuvio.tv.core.player.NativeFelBackend.NONE
+            if (dv7Mode.isNativeFel) {
+                val backendDetail = if (dv7Mode == Dv7HandlingMode.NATIVE_FEL_CUBE3) {
+                    "gazelle=${com.nuvio.tv.core.player.dvfel.GazelleFelSupport.isGazelleBoard()} " +
+                        "moduleConfigured=${com.nuvio.tv.core.player.dvfel.GazelleFelSupport.isModuleConfigured()} " +
+                        "dvfel=${com.nuvio.tv.core.player.dvfel.GazelleFelSupport.moduleVersion()} "
+                } else {
+                    "felKernel=${com.nuvio.tv.core.player.amlfel.AmlFelSupport.isFelKernel()} "
+                }
                 Log.i(
                     PlayerRuntimeController.TAG,
                     "DV7_NATIVE_FEL: active=$nativeFelActive " +
-                        "felKernel=${com.nuvio.tv.core.player.amlfel.AmlFelSupport.isFelKernel()} " +
+                        "mode=$dv7Mode backend=$nativeFelBackend " +
+                        backendDetail +
                         "displayDv=${nativeFelDisplayPolicy?.displayDv} " +
                         "disabledForStream=${nativeFelDisabledStreamUrls.contains(url)}"
                 )
             }
-            val autoLikeDv7Mode = playerSettings.dv7HandlingMode == Dv7HandlingMode.AUTO ||
-                (playerSettings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL && !nativeFelActive)
+            val autoLikeDv7Mode = dv7Mode == Dv7HandlingMode.AUTO ||
+                (dv7Mode.isNativeFel && !nativeFelActive)
             when {
                 nativeFelActive -> {
                     dv7AutoResult = null
-                    effectiveDv7Mode = Dv7HandlingMode.NATIVE_FEL
+                    // Keep the selected native mode, so diagnostics record which backend ran.
+                    effectiveDv7Mode = dv7Mode
                 }
                 autoLikeDv7Mode -> {
                     val result = nativeFelDisplayPolicy ?: DolbyVisionBaseLayerPolicy.resolve(
@@ -742,6 +766,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                     Dv7HandlingMode.STRIP_DV -> "strip-dv-mode"
                     Dv7HandlingMode.OFF -> "dv7-mode-off"
                     Dv7HandlingMode.NATIVE_FEL -> "native-fel-mode"
+                    Dv7HandlingMode.NATIVE_FEL_CUBE3 -> "native-fel-cube3-mode"
                     Dv7HandlingMode.AUTO -> "auto-mode-no-dv81"  // unreachable; AUTO is collapsed above
                     Dv7HandlingMode.DV81_LIBDOVI -> "setting-disabled"  // unreachable
                 }
@@ -817,6 +842,10 @@ internal fun PlayerRuntimeController.initializePlayer(
                 dv7ModeRequested = playerSettings.dv7HandlingMode.name,
                 dv7ModeEffective = effectiveDv7Mode.name,
                 dv7AutoDecision = dv7AutoResult?.decision?.name,
+                nativeFelBackend = currentNativeFelBackend.takeIf { it != com.nuvio.tv.core.player.NativeFelBackend.NONE }?.name,
+                dvfelModuleVersion = if (currentNativeFelBackend == com.nuvio.tv.core.player.NativeFelBackend.GAZELLE_DVFEL) {
+                    com.nuvio.tv.core.player.dvfel.GazelleFelSupport.moduleVersion()
+                } else null,
                 dvSourceProfile = null,
                 dv7DoviCalls = 0,
                 dv7DoviSuccess = 0,
@@ -1475,6 +1504,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                 preferFfmpegAudio = preferFfmpegAudioActive,
                 bluetoothForcePcm = isBluetoothAudioOutput,
                 nativeFelActive = nativeFelActive,
+                nativeFelBackend = currentNativeFelBackend,
                 onNativeSelectionChanged = { selected -> nativeVideoSelection.update(nativeSelectionOwner, selected) },
                 nativeMelEnabled = am9SystemProperty("debug.nuvio.native_dv7_mel") != "0",
                 playbackSpeedProvider = { _uiState.value.playbackSpeed },
@@ -1614,7 +1644,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                 // Record the effective flag (raw toggle gated by
                 // prefer-app decoder): construction uses it, so reuse must too.
                 tunnelingEnabled = tunnelingActive,
-                nativeFelActive = nativeFelActive
+                nativeFelActive = nativeFelActive,
+                nativeFelBackend = currentNativeFelBackend
             )
             val reuseCandidatePlayer = _exoPlayer
             // Native renderers bind stats and decoder ownership to one playback session.
@@ -3368,8 +3399,10 @@ private class SubtitleOffsetRenderersFactory(
     private val preferFfmpegAudio: Boolean,
     private val audioPassthroughPolicy: AudioPassthroughPolicy,
     private val bluetoothForcePcm: Boolean = false,
-    /** Native FEL: put [com.nuvio.tv.core.player.amlfel.AmlDvFelVideoRenderer] first (claims DV P7 only). */
+    /** Native FEL: put the backend's DV P7 renderer first (claims DV P7 only). */
     private val nativeFelActive: Boolean = false,
+    /** Which native FEL renderer [nativeFelActive] adds: AM9 amstream or Fire TV Cube 3 dvfel. */
+    private val nativeFelBackend: com.nuvio.tv.core.player.NativeFelBackend = com.nuvio.tv.core.player.NativeFelBackend.NONE,
     private val onNativeSelectionChanged: (Boolean) -> Unit = {},
     private val nativeMelEnabled: Boolean = true,
     private val vendorUnstablePts: Boolean = false,
@@ -3394,9 +3427,31 @@ private class SubtitleOffsetRenderersFactory(
         out: ArrayList<Renderer>
     ) {
         val videoExtensionMode = videoExtensionRendererMode(extensionRendererMode)
-        if (nativeFelActive) {
-            // Ahead of MediaCodec so it wins the DV profile 7 track (equal support -> first renderer).
-            out.add(com.nuvio.tv.core.player.amlfel.AmlDvFelVideoRenderer(eventHandler, eventListener, playbackSpeedProvider, nativeMelEnabled, onNativeSelectionChanged))
+        // Ahead of MediaCodec so it wins the DV profile 7 track (equal support -> first renderer).
+        if (nativeFelActive) when (nativeFelBackend) {
+            com.nuvio.tv.core.player.NativeFelBackend.AM9_AMSTREAM -> out.add(
+                com.nuvio.tv.core.player.amlfel.AmlDvFelVideoRenderer(
+                    eventHandler, eventListener, playbackSpeedProvider, nativeMelEnabled, onNativeSelectionChanged
+                )
+            )
+            com.nuvio.tv.core.player.NativeFelBackend.GAZELLE_DVFEL -> {
+                // Not wired to onNativeSelectionChanged: this renderer reports MediaCodec frames normally,
+                // so the late-video watch must keep running for it.
+                val session = com.nuvio.tv.core.player.dvfel.GazelleFelSession()
+                val builder = MediaCodecVideoRenderer.Builder(context)
+                    .setCodecAdapterFactory(
+                        com.nuvio.tv.core.player.dvfel.GazelleFelCodecAdapterFactory(getCodecAdapterFactory(), session)
+                    )
+                    .setMediaCodecSelector(mediaCodecSelector)
+                    .setAllowedJoiningTimeMs(allowedVideoJoiningTimeMs)
+                    .setEnableDecoderFallback(enableDecoderFallback)
+                    .setEventHandler(eventHandler)
+                    .setEventListener(eventListener)
+                    .setMaxDroppedFramesToNotify(DefaultRenderersFactory.MAX_DROPPED_VIDEO_FRAME_COUNT_TO_NOTIFY)
+                    .setMapDV7ToHevc(false) // must stay on the Dolby Vision decoder
+                out.add(com.nuvio.tv.core.player.dvfel.GazelleDvFelVideoRenderer(builder, session))
+            }
+            com.nuvio.tv.core.player.NativeFelBackend.NONE -> Unit
         }
         val vc1RestampTmp = ArrayList<Renderer>()
         super.buildVideoRenderers(

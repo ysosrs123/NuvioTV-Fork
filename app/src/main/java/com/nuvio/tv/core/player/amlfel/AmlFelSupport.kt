@@ -2,7 +2,6 @@ package com.nuvio.tv.core.player.amlfel
 
 import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
-import java.io.File
 import kotlin.math.roundToInt
 
 /**
@@ -64,11 +63,6 @@ internal object AmlFelSupport {
     fun readVframeAvail(): Int =
         readSysfs(VFRAME_STATES)?.let { Regex("buf_avail_num=(\\d+)").find(it)?.groupValues?.get(1)?.toIntOrNull() } ?: -1
 
-    private fun readSysfs(path: String, max: Int = 4096): String? = runCatching {
-        File(path).inputStream().use { input ->
-            val bytes = ByteArray(max)
-            val n = input.read(bytes)
-            if (n <= 0) "" else String(bytes, 0, n).trim()
-        }
-    }.getOrNull()
+    private fun readSysfs(path: String, max: Int = 4096): String? =
+        com.nuvio.tv.core.player.SysfsFiles.read(path, max)
 }

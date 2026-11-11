@@ -549,7 +549,7 @@ class PlayerViewModel @Inject constructor(
         // so it also appears on strip/HDR10 paths where no source-profile line is
         // emitted. Informational only, no health dot.
         // The RPU detail rows only for native DV7 FEL/MEL, so the panel fits smaller screens on every other film.
-        val dvDetail = dvDiag.dvSourceProfile?.trim() == "7" && dvDiag.dv7ModeEffective == "NATIVE_FEL"
+        val dvDetail = dvDiag.dvSourceProfile?.trim() == "7" && PlaybackStatsDv.isNativeFelMode(dvDiag.dv7ModeEffective)
         (DolbyVisionConversionStats.getLastRpuMetadata()?.toDiagnosticLine() ?: dvDiag.dvHdrMastering)
             ?.takeIf { dvDetail && it.isNotBlank() }?.let { mastering ->
             rows += StatsRow("DV HDR", mastering, StatsDot.NONE, marquee = mastering.length > 40)
@@ -576,8 +576,18 @@ class PlayerViewModel @Inject constructor(
             PlaybackStatsDv.formatRowText(
                 format = format,
                 dm = dmFirst,
-                nativeFel = dvDiag.dv7ModeEffective == "NATIVE_FEL"
+                nativeFel = PlaybackStatsDv.isNativeFelMode(dvDiag.dv7ModeEffective)
             )?.let { rows += StatsRow("Format", it, marquee = it.length > 46) }
+        }
+        // Fire TV Cube 3 FEL: whether EL pictures arrive and pair (the kernel composes, so "composed" stays 0).
+        if (dvDiag.dv7ModeEffective == "NATIVE_FEL_CUBE3" && com.nuvio.tv.core.player.dvfel.GazelleFelState.isFelRunning) {
+            PlaybackStatsDv.gazelleElRows(com.nuvio.tv.core.player.dvfel.GazelleFelState.stats)?.let { (decoded, drops) ->
+                rows += StatsRow("EL", decoded)
+                rows += StatsRow("EL drops", drops, marquee = drops.length > 40)
+            }
+            val versions = "dvfel ${com.nuvio.tv.core.player.dvfel.GazelleFelSupport.moduleVersion() ?: "?"} · " +
+                "lib ${com.nuvio.tv.core.player.dvfel.DvFelPlay.libVersion().ifEmpty { "?" }}"
+            rows += StatsRow("FEL helper", versions, marquee = versions.length > 40)
         }
 
         hud.videoDecoderName?.let { rows += StatsRow("Decoder", it) }

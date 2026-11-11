@@ -36,5 +36,18 @@ class PlaybackStatsDvTest {
   assertEquals(PlaybackStatsDv.Dv7Layers.BL_ONLY,PlaybackStatsDv.dv7LayersUsed("STRIP_DV",null,false))
   assertNull(PlaybackStatsDv.dv7LayersUsed("OFF",null,false))
  }
+ @Test fun cube3RouteCountsOnlyWhileFelRuns() {
+  val dec="dvfel-sc2:OMX.amlogic.dolby_vision.decoder"
+  assertEquals(PlaybackStatsDv.Dv7Layers.RPU_BL_EL,PlaybackStatsDv.dv7LayersUsed("NATIVE_FEL_CUBE3",dec,false,gazelleFelRunning=true))
+  assertNull(PlaybackStatsDv.dv7LayersUsed("NATIVE_FEL_CUBE3",dec,false,gazelleFelRunning=false))
+  assertNull(PlaybackStatsDv.dv7LayersUsed("NATIVE_FEL_CUBE3","OMX.amlogic.hevc.decoder.awesome",false,gazelleFelRunning=true))
+  assertEquals("Profile 7.6 FEL · RPU + BL + EL",PlaybackStatsDv.profileRowText("7","FEL","NATIVE_FEL_CUBE3","dvhe.07.06",false,gazelleFelRunning=true))
+  assertEquals("Profile 7.6 FEL",PlaybackStatsDv.profileRowText("7","FEL","NATIVE_FEL_CUBE3","dvhe.07.06",false,gazelleFelRunning=false))
+ }
+ @Test fun cube3ElRowsReadTheStatsSnapshot() {
+  val s=longArrayOf(0,0,0,0,240,241,240,1,2,3)
+  assertEquals("decoded 240 / in 241" to "overflow 1 · no CRC match 2 · stale 3",PlaybackStatsDv.gazelleElRows(s))
+  assertNull(PlaybackStatsDv.gazelleElRows(null)); assertNull(PlaybackStatsDv.gazelleElRows(LongArray(3)))
+ }
  @Test fun cmPreservesOriginalR14Wording() { assertEquals("v2.9",PlaybackStatsDv.cmText(dm())); assertEquals("v4.0",PlaybackStatsDv.cmText(dm().copy(cmVersion=40))) }
 }
