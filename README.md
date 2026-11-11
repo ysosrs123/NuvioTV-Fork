@@ -168,6 +168,9 @@ Parts from other projects keep their own licences:
 - dav1d by VideoLAN and the dav1d authors (BSD-2-Clause) for software AV1 decoding, with
   cpu_features by Google (Apache-2.0).
 - libdovi by quietvoid (MIT). Matroska extractor files from AndroidX Media3 (Apache-2.0), changed.
+- libdvfelplay by Team CoreELEC, djnice and signde (GPL-2.0-or-later) for Dolby Vision Profile 7 FEL on the
+  rooted Fire TV Cube 3: source in `third_party/libdvfelplay/` (signde/vlc-fel-android, tag
+  v0.1.0-fc3-experimental, commit 58b7b69), built by `scripts/build-dvfelplay.sh`.
 - Release group lists from TRaSH Guides (MIT).
 - Fonts Atkinson Hyperlegible Next, Source Sans 3, and the subtitle fonts Roboto, Montserrat, Noto Sans and Asap Condensed (SIL Open Font License 1.1, texts in
   `app/src/main/assets/licenses/`).
