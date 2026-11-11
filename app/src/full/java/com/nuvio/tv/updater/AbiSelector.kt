@@ -1,6 +1,7 @@
 package com.nuvio.tv.updater
 
 import android.os.Build
+import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.data.remote.dto.GitHubAssetDto
 
 internal object AbiSelector {
@@ -18,12 +19,14 @@ internal object AbiSelector {
 
     fun chooseBestApkAsset(
         assets: List<GitHubAssetDto>,
-        supportedAbis: List<String> = Build.SUPPORTED_ABIS?.toList().orEmpty()
+        supportedAbis: List<String> = Build.SUPPORTED_ABIS?.toList().orEmpty(),
+        // "app-full", or "app-full-fel" in the Fire TV Cube 3 FEL APK, so an update keeps libdvfelplay.
+        apkPrefix: String = BuildConfig.UPDATE_APK_PREFIX
     ): GitHubAssetDto? {
         // Only release/full artifacts from our workflow. Never guess an ABI or flavor.
         for (abi in supportedAbis) {
-            assets.firstOrNull { it.name == "app-full-$abi-release.apk" }?.let { return it }
+            assets.firstOrNull { it.name == "$apkPrefix-$abi-release.apk" }?.let { return it }
         }
-        return assets.firstOrNull { it.name == "app-full-universal-release.apk" }
+        return assets.firstOrNull { it.name == "$apkPrefix-universal-release.apk" }
     }
 }

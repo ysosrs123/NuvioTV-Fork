@@ -8,9 +8,11 @@ from pathlib import Path
 
 MACHINES = {"arm64-v8a": (2, 183), "armeabi-v7a": (1, 40)}
 REQUIRED = {"libdovi_bridge.so", "libffmpegJNI.so", "libass.so", "libasskt.so"}
+# Fire TV Cube 3 FEL: only in the FEL APK (-PDVFEL_GAZELLE_ENABLED=true), never in the normal one.
+FEL_LIBRARIES = {"libdvfelplay.so", "libnuvio_dvfel.so"}
 
 
-def verify(apk: Path, abi: str) -> dict:
+def verify(apk: Path, abi: str, fel: bool = False) -> dict:
     elf_class, machine = MACHINES[abi]
     with zipfile.ZipFile(apk) as archive:
         names = archive.namelist()
@@ -23,6 +25,11 @@ def verify(apk: Path, abi: str) -> dict:
         missing = REQUIRED - {name.rsplit("/", 1)[-1] for name in libraries if name.startswith(f"lib/{abi}/")}
         if missing:
             raise ValueError(f"Missing native playback libraries for {abi}: {sorted(missing)}")
+        present_fel = FEL_LIBRARIES & {name.rsplit("/", 1)[-1] for name in libraries}
+        if fel and present_fel != FEL_LIBRARIES:
+            raise ValueError(f"FEL APK lacks {sorted(FEL_LIBRARIES - present_fel)}")
+        if not fel and present_fel:
+            raise ValueError(f"Normal APK contains FEL libraries: {sorted(present_fel)}")
         hashes = {}
         for name in libraries:
             if not name.startswith(f"lib/{abi}/"):
@@ -43,8 +50,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("apk", type=Path)
     parser.add_argument("--abi", required=True, choices=MACHINES)
+    parser.add_argument("--fel", action="store_true", help="the Fire TV Cube 3 FEL APK")
     args = parser.parse_args()
     try:
-        print(json.dumps(verify(args.apk, args.abi), indent=2))
+        print(json.dumps(verify(args.apk, args.abi, args.fel), indent=2))
     except (ValueError, zipfile.BadZipFile, OSError) as error:
         parser.exit(1, f"Native APK validation failed: {error}\n")

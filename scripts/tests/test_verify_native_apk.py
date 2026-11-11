@@ -10,7 +10,7 @@ module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
 class NativeApkTest(unittest.TestCase):
-    def archive(self, root, abi="arm64-v8a", machine=183, missing=False, real=True):
+    def archive(self, root, abi="arm64-v8a", machine=183, missing=False, real=True, extra=()):
         path = Path(root) / "test.apk"
         header = bytearray(64)
         header[:4] = b"\x7fELF"
@@ -22,6 +22,8 @@ class NativeApkTest(unittest.TestCase):
                     continue
                 payload = header + (b"dovi-bridge-libdovi-capi-0.2 dovi_convert_rpu_with_mode" if real else b"stub")
                 archive.writestr(f"lib/{abi}/{name}", payload)
+            for name in extra:
+                archive.writestr(f"lib/{abi}/{name}", header)
         return path
 
     def test_complete_native_feature_set(self):
@@ -42,6 +44,16 @@ class NativeApkTest(unittest.TestCase):
                 module.verify(self.archive(root, machine=40), "arm64-v8a")
             with self.assertRaisesRegex(ValueError, "Missing native"):
                 module.verify(self.archive(root, abi="armeabi-v7a"), "arm64-v8a")
+
+    def test_fel_libraries_only_in_the_fel_apk(self):
+        with tempfile.TemporaryDirectory() as root:
+            fel = self.archive(root, extra=module.FEL_LIBRARIES)
+            self.assertEqual(6, len(module.verify(fel, "arm64-v8a", fel=True)["nativeLibraries"]))
+            with self.assertRaisesRegex(ValueError, "Normal APK contains FEL"):
+                module.verify(fel, "arm64-v8a")
+        with tempfile.TemporaryDirectory() as root:
+            with self.assertRaisesRegex(ValueError, "FEL APK lacks"):
+                module.verify(self.archive(root, extra=("libnuvio_dvfel.so",)), "arm64-v8a", fel=True)
 
 if __name__ == "__main__":
     unittest.main()

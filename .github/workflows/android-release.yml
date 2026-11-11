@@ -235,13 +235,28 @@ jobs:
         run: |
           python scripts/verify_native_apk.py app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk --abi arm64-v8a
           python scripts/verify_native_apk.py app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk --abi armeabi-v7a
+          mkdir -p release-apks
+          cp app/build/outputs/apk/full/release/*.apk release-apks/
+
+      # The separate Fire TV Cube 3 FEL APK (libdvfelplay), armeabi-v7a only. Same version, "+fel" name;
+      # its updater only installs app-full-fel-*-release.apk.
+      - name: Build Cube 3 FEL release APK
+        if: inputs.mode != 'dry-run'
+        run: ./gradlew :app:assembleFullRelease -PDVFEL_GAZELLE_ENABLED=true --stacktrace
+
+      - name: Verify Cube 3 FEL APK
+        if: inputs.mode != 'dry-run'
+        run: |
+          fel_apk=app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
+          python scripts/verify_native_apk.py "${fel_apk}" --abi armeabi-v7a --fel
+          cp "${fel_apk}" release-apks/app-full-fel-armeabi-v7a-release.apk
 
       - name: Upload build artifacts
         if: inputs.mode != 'dry-run'
         uses: actions/upload-artifact@v6
         with:
           name: nuviotv-${{ steps.release.outputs.version }}-full-release
-          path: app/build/outputs/apk/full/release/*.apk
+          path: release-apks/*.apk
           if-no-files-found: error
 
       - name: Create GitHub release
@@ -252,7 +267,7 @@ jobs:
           RELEASE_TITLE: Nuvio Arc ${{ steps.release.outputs.title }}
           RELEASE_TARGET: ${{ steps.release.outputs.release_commit }}
         run: |
-          mapfile -t release_apks < <(find app/build/outputs/apk/full/release -maxdepth 1 -type f -name '*.apk' -print | sort)
+          mapfile -t release_apks < <(find release-apks -maxdepth 1 -type f -name '*.apk' -print | sort)
           if (( ${#release_apks[@]} == 0 )); then
             echo "No release APKs were produced." >&2
             exit 1

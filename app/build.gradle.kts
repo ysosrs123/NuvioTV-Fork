@@ -178,6 +178,8 @@ android {
             // Build metadata, ignored by the updater's version comparison: 1.1.0-arc.2+fel.
             versionNameSuffix = "+fel"
         }
+        // The updater installs the release asset of the same kind: app-full[-fel]-<abi>-release.apk.
+        buildConfigField("String", "UPDATE_APK_PREFIX", if (enableDvfelGazelle) "\"app-full-fel\"" else "\"app-full\"")
         // libnuviothumb is always built; dovi_bridge, aml_fel and nuvio_dvfel only when enabled.
         externalNativeBuild {
             cmake {
