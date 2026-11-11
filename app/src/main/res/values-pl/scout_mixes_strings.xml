@@ -37,6 +37,7 @@
     <string name="scout_mixes_remix">Wymieszaj</string>
     <string name="scout_mixes_unwatched_only">Tylko nieobejrzane</string>
     <string name="scout_mixes_keep_playing">Odtwarzaj dalej</string>
+    <string name="scout_mixes_pick_sources">Wybieraj źródła za mnie</string>
     <string name="scout_mixes_edit">Edytuj miks</string>
     <string name="scout_mixes_in_this_mix">W tym miksie</string>
     <string name="scout_mixes_next_in">Następny w mixie %1$s</string>

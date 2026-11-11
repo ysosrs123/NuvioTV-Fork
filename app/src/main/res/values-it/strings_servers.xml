@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Mostra questo server nella Home, nella ricerca e nei risultati degli stream.</string>
     <string name="servers_catalog_metadata">Usa i metadati degli addon</string>
     <string name="servers_catalog_metadata_description">I titoli si aprono con i dettagli dei tuoi addon e si sincronizzano come ogni altro titolo di catalogo; riproduzione e stato di visione vengono comunque inviati a %1$s. Alcuni titoli potrebbero non corrispondere o non partire se i tuoi addon li numerano o li identificano in modo diverso. Disattivalo per riprodurre solo da %1$s, senza cercare negli addon.</string>
+    <string name="servers_autoplay_first">La riproduzione automatica preferisce questo server</string>
+    <string name="servers_autoplay_first_description">Quando %1$s ha il titolo, la riproduzione automatica lo riproduce da %1$s, comunque tu sia arrivato al titolo. Se %1$s non lo ha o non è raggiungibile, la scelta avviene come al solito.</string>
+    <string name="servers_autoplay_first_manual">La riproduzione automatica è disattivata, quindi l’elenco delle sorgenti si apre come al solito, con %1$s in cima.</string>
     <string name="servers_import_continue_watching">Importa Continua a guardare</string>
     <string name="servers_import_continue_watching_description">I titoli iniziati su %1$s compaiono in Continua a guardare nella Home. Lo stato di visione resta allineato in ogni caso.</string>
     <string name="servers_import_watch_state">Importa progressi di visione</string>

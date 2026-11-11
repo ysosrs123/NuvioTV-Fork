@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Si vous vous connectez ensuite à Nuvio, vos paramètres synchronisés peuvent remplacer ceux restaurés.</string>
     <string name="backup_restore_button">Restaurer</string>
     <string name="backup_pin_create_heading">Choisissez un code PIN pour les mots de passe et clés</string>
-    <string name="backup_pin_create_support">Au moins 6 chiffres. Arc ne peut pas le récupérer, mais le reste de la sauvegarde se restaure quand même sans lui.</string>
+    <string name="backup_pin_create_support">De 6 à 16 chiffres. Un code PIN plus long protège mieux vos identifiants si quelqu\'un copie le fichier. Arc ne peut pas récupérer le code PIN, mais le reste de la sauvegarde se restaure quand même sans lui.</string>
     <string name="backup_pin_create_back">Appuyez sur «&#160;Retour&#160;» pour sauvegarder sans les mots de passe</string>
     <string name="backup_pin_confirm_heading">Saisissez à nouveau le code PIN</string>
     <string name="backup_pin_confirm_support">Les mêmes chiffres, pour être sûr.</string>

@@ -37,6 +37,7 @@
     <string name="scout_mixes_remix">Znovu zamíchat</string>
     <string name="scout_mixes_unwatched_only">Jen nezhlédnuté</string>
     <string name="scout_mixes_keep_playing">Přehrávat dál</string>
+    <string name="scout_mixes_pick_sources">Vybírat zdroje za mě</string>
     <string name="scout_mixes_edit">Upravit mix</string>
     <string name="scout_mixes_in_this_mix">V tomto mixu</string>
     <string name="scout_mixes_next_in">Další v mixu %1$s</string>

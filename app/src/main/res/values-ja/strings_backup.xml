@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">このあとNuvioにサインインすると、同期済みの設定が復元した設定に置き換わることがあります。</string>
     <string name="backup_restore_button">復元</string>
     <string name="backup_pin_create_heading">パスワードとキー用のPINを決めてください</string>
-    <string name="backup_pin_create_support">6桁以上。Arcでは取り戻せませんが、それ以外の内容はPINなしでも復元できます。</string>
+    <string name="backup_pin_create_support">6〜16桁。ファイルがコピーされた場合でも、長いPINほどログイン情報を守れます。Arcでは取り戻せませんが、それ以外の内容はPINなしでも復元できます。</string>
     <string name="backup_pin_create_back">戻るボタンでパスワードなしでバックアップ</string>
     <string name="backup_pin_confirm_heading">PINをもう一度入力</string>
     <string name="backup_pin_confirm_support">確認のため、同じ数字を入力してください。</string>

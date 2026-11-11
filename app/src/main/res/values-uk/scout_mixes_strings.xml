@@ -37,6 +37,7 @@
     <string name="scout_mixes_remix">Перемішати</string>
     <string name="scout_mixes_unwatched_only">Лише непереглянуті</string>
     <string name="scout_mixes_keep_playing">Продовжувати показ</string>
+    <string name="scout_mixes_pick_sources">Вибирати джерела за мене</string>
     <string name="scout_mixes_edit">Змінити мікс</string>
     <string name="scout_mixes_in_this_mix">У цьому міксі</string>
     <string name="scout_mixes_next_in">Далі в міксі %1$s</string>

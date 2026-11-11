@@ -385,7 +385,7 @@
     <string name="audio_lang_original_hint">Zahtijeva omogućeno TMDB obogaćivanje</string>
     <string name="audio_preferred_lang">Preferirani Jezik Zvuka</string>
     <string name="audio_skip_silence">Preskoči Tišinu</string>
-    <string name="audio_skip_silence_sub">Preskoči tihe dijelove zvuka tokom reprodukcije. Nema efekta dok zvuk ide kao passthrough (bitstream)</string>
+    <string name="audio_skip_silence_sub">Preskoči tihe dijelove zvuka tokom reprodukcije. Slika može zastajkivati, a zvuk se može činiti neusklađenim dok se tihi dijelovi preskaču. Nema efekta dok zvuk ide kao passthrough (bitstream)</string>
     <string name="audio_advanced_section">Napredni Zvuk</string>
     <string name="audio_advanced_warning">Ove postavke mogu uzrokovati probleme na nekim uređajima. Mijenjajte samo ako znate šta radite.</string>
     <string name="audio_decoder_device_only">Samo dekoderi uređaja</string>

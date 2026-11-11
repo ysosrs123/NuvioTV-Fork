@@ -781,7 +781,7 @@
     <string name="audio_lang_original_hint">Изисква се активиране на обогатяването на TMDB</string>
     <string name="audio_preferred_lang">Предпочитан език за аудио</string>
     <string name="audio_skip_silence">Пропусни тишина</string>
-    <string name="audio_skip_silence_sub">Пропускай тихи части от аудиото по време на възпроизвеждане. Няма ефект, докато звукът минава като passthrough (bitstream)</string>
+    <string name="audio_skip_silence_sub">Пропускай тихи части от аудиото по време на възпроизвеждане. Картината може да насича, а звукът може да изглежда несинхронизиран, докато се пропускат тихите части. Няма ефект, докато звукът минава като passthrough (bitstream)</string>
     <string name="audio_remember_delay_per_device">Запомняне на аудио забавянето за всяко устройство</string>
     <string name="audio_remember_delay_per_device_sub">Запазване и възстановяване на забавянето на звука в плейъра за текущия маршрут на аудио изхода</string>
     <string name="audio_advanced_section">Разширено аудио</string>

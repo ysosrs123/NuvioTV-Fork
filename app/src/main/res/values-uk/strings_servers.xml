@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Показувати цей сервер на головному екрані, у пошуку та серед потоків.</string>
     <string name="servers_catalog_metadata">Використовувати метадані адонів</string>
     <string name="servers_catalog_metadata_description">Тайтли відкриваються з відомостями з ваших адонів і синхронізуються як будь-який тайтл каталогу, а відтворення й позначки про перегляд і далі надсилаються в %1$s. Деякі тайтли можуть не збігтися або не відтворитися, якщо адони нумерують чи визначають їх інакше. Вимкніть, щоб відтворювати лише з %1$s, без пошуку в додатках.</string>
+    <string name="servers_autoplay_first">Автовідтворення спершу вибирає цей сервер</string>
+    <string name="servers_autoplay_first_description">Якщо тайтл є на %1$s, автовідтворення запускає його з %1$s, хоч би як ви знайшли тайтл. Якщо на %1$s його немає або сервер недоступний, вибір відбувається як звичайно.</string>
+    <string name="servers_autoplay_first_manual">Автовідтворення вимкнено, тому список джерел відкривається як звичайно, з %1$s угорі.</string>
     <string name="servers_import_continue_watching">Імпортувати «Продовжити перегляд»</string>
     <string name="servers_import_continue_watching_description">Тайтли, розпочаті в %1$s, з\'являються в розділі «Продовжити перегляд» на головному екрані. Позначки про перегляд синхронізуються в будь-якому разі.</string>
     <string name="servers_import_watch_state">Імпортувати прогрес перегляду</string>

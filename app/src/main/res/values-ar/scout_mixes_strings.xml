@@ -41,6 +41,7 @@
     <string name="scout_mixes_remix">إعادة المزج</string>
     <string name="scout_mixes_unwatched_only">غير المشاهد فقط</string>
     <string name="scout_mixes_keep_playing">متابعة التشغيل</string>
+    <string name="scout_mixes_pick_sources">اختيار المصادر تلقائيًا</string>
     <string name="scout_mixes_edit">تعديل المزيج</string>
     <string name="scout_mixes_in_this_mix">في هذا المزيج</string>
     <string name="scout_mixes_next_in">التالي في %1$s</string>

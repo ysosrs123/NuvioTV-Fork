@@ -759,7 +759,7 @@
     <string name="audio_lang_original_hint">Vereist dat TMDB-verrijking is ingeschakeld</string>
     <string name="audio_preferred_lang">Voorkeurstaal audio</string>
     <string name="audio_skip_silence">Stilte overslaan</string>
-    <string name="audio_skip_silence_sub">Sla stille delen van audio over tijdens het afspelen. Geen effect zolang audio wordt doorgegeven (bitstream)</string>
+    <string name="audio_skip_silence_sub">Sla stille delen van audio over tijdens het afspelen. Het beeld kan haperen en de audio kan niet synchroon lijken terwijl stille delen worden overgeslagen. Geen effect zolang audio wordt doorgegeven (bitstream)</string>
     <string name="audio_remember_delay_per_device">Audiovertraging per apparaat onthouden</string>
     <string name="audio_remember_delay_per_device_sub">Bewaar en herstel de audiovertraging in de speler voor de huidige audio-uitgang</string>
     <string name="audio_advanced_section">Geavanceerde audio</string>

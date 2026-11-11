@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Pokazuj ten serwer na stronie głównej, w wyszukiwaniu i wynikach strumieni.</string>
     <string name="servers_catalog_metadata">Używaj metadanych dodatków</string>
     <string name="servers_catalog_metadata_description">Tytuły otwierają się ze szczegółami z Twoich dodatków i synchronizują jak każdy inny tytuł z katalogu, a odtwarzanie i oznaczenia obejrzanych nadal trafiają do %1$s. Niektóre tytuły mogą się nie dopasować lub nie odtworzyć, jeśli dodatki inaczej je numerują lub identyfikują. Wyłącz to, aby odtwarzać tylko z %1$s, bez wyszukiwania w dodatkach.</string>
+    <string name="servers_autoplay_first">Autoodtwarzanie najpierw wybiera ten serwer</string>
+    <string name="servers_autoplay_first_description">Gdy %1$s ma ten tytuł, autoodtwarzanie odtwarza go z %1$s, niezależnie od tego, jak trafiłeś na tytuł. Jeśli %1$s go nie ma lub jest niedostępny, wybór odbywa się jak zwykle.</string>
+    <string name="servers_autoplay_first_manual">Autoodtwarzanie jest wyłączone, więc lista źródeł otwiera się jak zwykle, z %1$s na górze.</string>
     <string name="servers_import_continue_watching">Importuj Kontynuuj oglądanie</string>
     <string name="servers_import_continue_watching_description">Tytuły zaczęte na %1$s pojawiają się w Kontynuuj oglądanie na stronie głównej. Oznaczenia obejrzanych są uzgadniane w obu przypadkach.</string>
     <string name="servers_import_watch_state">Importuj postęp oglądania</string>

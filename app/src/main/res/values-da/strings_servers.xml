@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Vis denne server i Hjem, søgning og stream-resultater.</string>
     <string name="servers_catalog_metadata">Brug addon-metadata</string>
     <string name="servers_catalog_metadata_description">Titler åbnes med dine addons\' detaljer og synkroniseres som enhver anden katalogtitel, mens afspilning og set-markeringer stadig sendes til %1$s. Nogle titler matcher eller afspilles måske ikke, hvis dine addons nummererer eller identificerer dem anderledes. Slå dette fra for kun at afspille fra %1$s, uden søgning i tilføjelser.</string>
+    <string name="servers_autoplay_first">Automatisk afspilning vælger denne server først</string>
+    <string name="servers_autoplay_first_description">Når %1$s har titlen, afspilles den automatisk fra %1$s, uanset hvordan du fandt titlen. Hvis %1$s ikke har den eller ikke kan nås, vælges der som normalt.</string>
+    <string name="servers_autoplay_first_manual">Automatisk afspilning er slået fra, så kildelisten åbner som normalt med %1$s øverst.</string>
     <string name="servers_import_continue_watching">Importer Fortsæt med at se</string>
     <string name="servers_import_continue_watching_description">Titler, du er begyndt på i %1$s, vises i Fortsæt med at se på Hjem. Set-markeringer holdes i takt begge veje.</string>
     <string name="servers_import_watch_state">Importer seerfremgang</string>

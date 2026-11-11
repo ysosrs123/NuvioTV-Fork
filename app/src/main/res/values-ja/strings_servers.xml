@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">このサーバーをホーム、検索、ストリーム結果に表示します。</string>
     <string name="servers_catalog_metadata">アドオンのメタデータを使用</string>
     <string name="servers_catalog_metadata_description">タイトルはアドオンの詳細情報で開き、他のカタログのタイトルと同じように同期されます。再生と視聴済みマークは引き続き%1$sに送られます。アドオンの番号付けや識別方法が異なる場合、一部のタイトルは一致しない、または再生できないことがあります。オフにすると %1$s からのみ再生し、アドオンは検索しません。</string>
+    <string name="servers_autoplay_first">自動再生でこのサーバーを優先</string>
+    <string name="servers_autoplay_first_description">%1$s にタイトルがある場合、どこからタイトルを開いても自動再生は %1$s から再生します。%1$s にない場合や接続できない場合は、通常どおり選びます。</string>
+    <string name="servers_autoplay_first_manual">自動再生がオフのため、ソース一覧は通常どおり開き、%1$s が一番上に表示されます。</string>
     <string name="servers_import_continue_watching">「視聴を続ける」を取り込む</string>
     <string name="servers_import_continue_watching_description">%1$sで視聴を始めたタイトルが、ホームの「視聴を続ける」に表示されます。視聴済みマークはどちらの場合も同期されます。</string>
     <string name="servers_import_watch_state">視聴の進行状況を取り込む</string>

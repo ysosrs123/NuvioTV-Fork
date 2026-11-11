@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">A szerver megjelenítése a Kezdőlapon, a keresésben és a stream-találatokban.</string>
     <string name="servers_catalog_metadata">Bővítmények metaadatainak használata</string>
     <string name="servers_catalog_metadata_description">A címek a bővítményeid adataival nyílnak meg, és úgy szinkronizálódnak, mint bármely más katalóguscím; a lejátszás és a megnézett jelölések közben ide is elmennek: %1$s. Egyes címek nem találnak párt vagy nem játszhatók le, ha a bővítményeid másképp számozzák vagy azonosítják őket. Kapcsold ki, ha csak innen szeretnél lejátszani: %1$s, bővítmények keresése nélkül.</string>
+    <string name="servers_autoplay_first">Automatikus lejátszás: először ez a szerver</string>
+    <string name="servers_autoplay_first_description">Ha a(z) %1$s kínálja a címet, az automatikus lejátszás a(z) %1$s szerverről játssza le, bárhogyan is jutottál el a címhez. Ha a(z) %1$s nem kínálja vagy nem érhető el, a választás a szokásos módon történik.</string>
+    <string name="servers_autoplay_first_manual">Az automatikus lejátszás ki van kapcsolva, így a forráslista a szokásos módon nyílik meg, felül a(z) %1$s szerverrel.</string>
     <string name="servers_import_continue_watching">Megtekintés folytatása importálása</string>
     <string name="servers_import_continue_watching_description">A(z) %1$s szerveren elkezdett címek megjelennek a Kezdőlap Megtekintés folytatása sorában. A megnézett jelölések mindkét irányban szinkronban maradnak.</string>
     <string name="servers_import_watch_state">Megtekintési előrehaladás importálása</string>

@@ -770,7 +770,7 @@
     <string name="audio_lang_original_hint">Zahteva omogućeno TMDB obogaćivanje</string>
     <string name="audio_preferred_lang">Željeni jezik zvuka</string>
     <string name="audio_skip_silence">Preskoči tišinu</string>
-    <string name="audio_skip_silence_sub">Preskoči tihe delove zvuka tokom reprodukcije. Nema efekta dok se zvuk prosleđuje (bitstream)</string>
+    <string name="audio_skip_silence_sub">Preskoči tihe delove zvuka tokom reprodukcije. Slika može da zastajkuje, a zvuk može delovati neusklađeno dok se tihi delovi preskaču. Nema efekta dok se zvuk prosleđuje (bitstream)</string>
     <string name="audio_remember_delay_per_device">Zapamti kašnjenje zvuka po uređaju</string>
     <string name="audio_remember_delay_per_device_sub">Sačuvaj i vrati kašnjenje zvuka u plejeru za trenutni izlazni zvučni put</string>
     <string name="audio_advanced_section">Napredni zvuk</string>

@@ -37,6 +37,9 @@
     <string name="servers_enabled_description">Mostrar este servidor en Inicio, en la búsqueda y en las fuentes disponibles.</string>
     <string name="servers_catalog_metadata">Usar metadatos de complementos</string>
     <string name="servers_catalog_metadata_description">Los títulos se abrirán con los detalles de tus complementos y se sincronizarán como cualquier otro título del catálogo; la reproducción y el estado de visto se seguirán enviando a %1$s. Algunos títulos podrían no coincidir o no reproducirse si tus complementos los numeran o identifican de otra forma. Desactívalo para reproducir solo desde %1$s, sin buscar en los complementos.</string>
+    <string name="servers_autoplay_first">La reproducción automática prioriza este servidor</string>
+    <string name="servers_autoplay_first_description">Cuando %1$s tiene el título, la reproducción automática lo reproduce desde %1$s, llegues como llegues al título. Si %1$s no lo tiene o no responde, elige como siempre.</string>
+    <string name="servers_autoplay_first_manual">La reproducción automática está desactivada, así que la lista de fuentes se abre como siempre, con %1$s arriba.</string>
     <string name="servers_import_watch_state">Importar progreso de reproducción</string>
     <string name="servers_import_watch_state_description">Añade a Continuar viendo los títulos que estés viendo en %1$s, junto con sus marcas de visto. La reproducción se reanuda desde %1$s en cualquier caso.</string>
     <string name="servers_sign_in_again">Iniciar sesión de nuevo</string>

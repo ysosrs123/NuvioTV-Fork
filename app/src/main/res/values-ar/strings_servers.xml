@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">إظهار هذا الخادم في الرئيسية والبحث ونتائج البث.</string>
     <string name="servers_catalog_metadata">استخدام بيانات الإضافات</string>
     <string name="servers_catalog_metadata_description">تُفتح العناوين بتفاصيل إضافاتك وتُزامَن مثل أي عنوان من القوائم، مع استمرار إرسال التشغيل وعلامات المشاهدة إلى %1$s. قد لا تتطابق بعض العناوين أو لا تعمل إذا كانت إضافاتك ترقّمها أو تعرّفها بشكل مختلف. أوقف هذا الخيار للتشغيل من %1$s فقط، دون البحث في الإضافات.</string>
+    <string name="servers_autoplay_first">التشغيل التلقائي يختار هذا الخادم أولاً</string>
+    <string name="servers_autoplay_first_description">عندما يتوفر العنوان على %1$s، يشغّله التشغيل التلقائي من %1$s أياً كانت طريقة وصولك إليه. إذا لم يكن متوفراً على %1$s أو تعذّر الوصول إليه، يختار التشغيل التلقائي كالمعتاد.</string>
+    <string name="servers_autoplay_first_manual">التشغيل التلقائي متوقف، لذا تُفتح قائمة المصادر كالمعتاد مع %1$s في الأعلى.</string>
     <string name="servers_import_continue_watching">استيراد متابعة المشاهدة</string>
     <string name="servers_import_continue_watching_description">العناوين التي بدأتها على %1$s تظهر في متابعة المشاهدة في الرئيسية. علامات المشاهدة تبقى متزامنة في الاتجاهين.</string>
     <string name="servers_import_watch_state">استيراد تقدم المشاهدة</string>

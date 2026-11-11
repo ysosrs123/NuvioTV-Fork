@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Если затем вы войдёте в Nuvio, синхронизированные настройки могут заменить восстановленные.</string>
     <string name="backup_restore_button">Восстановить</string>
     <string name="backup_pin_create_heading">Придумайте PIN-код для паролей и ключей</string>
-    <string name="backup_pin_create_support">Не менее 6 цифр. Arc не сможет его восстановить, но всё остальное из копии восстановится и без него.</string>
+    <string name="backup_pin_create_support">От 6 до 16 цифр. Более длинный PIN-код лучше защищает ваши данные для входа, если кто-то скопирует файл. Arc не сможет восстановить PIN-код, но всё остальное из копии восстановится и без него.</string>
     <string name="backup_pin_create_back">Нажмите «Назад», чтобы создать копию без паролей</string>
     <string name="backup_pin_confirm_heading">Введите PIN-код ещё раз</string>
     <string name="backup_pin_confirm_support">Те же цифры, для проверки.</string>

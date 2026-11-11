@@ -815,7 +815,7 @@
     <string name="audio_lang_original_hint">Requiere que el enriquecimiento de TMDB esté activado</string>
     <string name="audio_preferred_lang">Idioma de Audio Preferido</string>
     <string name="audio_skip_silence">Omitir Silencios</string>
-    <string name="audio_skip_silence_sub">Omite las partes silenciosas del audio durante la reproducción. Sin efecto mientras el audio se envía por passthrough (bitstream)</string>
+    <string name="audio_skip_silence_sub">Omite las partes silenciosas del audio durante la reproducción. La imagen puede entrecortarse y el audio puede parecer desincronizado mientras se omiten las partes silenciosas. Sin efecto mientras el audio se envía por passthrough (bitstream)</string>
     <string name="audio_remember_delay_per_device">Recordar retraso de audio por dispositivo</string>
     <string name="audio_remember_delay_per_device_sub">Guardar y restaurar el retraso de audio del reproductor para la salida de audio actual</string>
     <string name="audio_advanced_section">Audio Avanzado</string>

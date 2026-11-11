@@ -825,7 +825,7 @@
     <string name="audio_lang_original_hint">TMDB zenginleştirmesinin etkin olması gerekir</string>
     <string name="audio_preferred_lang">Tercih Edilen Ses Dili</string>
     <string name="audio_skip_silence">Sessizliği Atla</string>
-    <string name="audio_skip_silence_sub">Oynatma sırasında sesin sessiz kısımlarını atla. Ses geçidi (bitstream) kullanılırken etkisi yoktur</string>
+    <string name="audio_skip_silence_sub">Oynatma sırasında sesin sessiz kısımlarını atla. Sessiz kısımlar atlanırken görüntü takılabilir ve ses senkron dışı gibi gelebilir. Ses geçidi (bitstream) kullanılırken etkisi yoktur</string>
     <string name="audio_remember_delay_per_device">Her Cihaz İçin Ses Gecikmesini Hatırla</string>
     <string name="audio_remember_delay_per_device_sub">Mevcut ses çıkış cihazı için oynatıcıdaki ses gecikmesini kaydet ve geri yükle</string>
     <string name="audio_advanced_section">Gelişmiş Ses</string>

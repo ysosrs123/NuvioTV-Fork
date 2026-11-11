@@ -31,6 +31,7 @@
     <string name="scout_mixes_remix">重新混合</string>
     <string name="scout_mixes_unwatched_only">僅未觀看</string>
     <string name="scout_mixes_keep_playing">繼續播放</string>
+    <string name="scout_mixes_pick_sources">幫我選擇來源</string>
     <string name="scout_mixes_edit">編輯混合</string>
     <string name="scout_mixes_in_this_mix">此混合中</string>
     <string name="scout_mixes_next_in">%1$s 的下一集</string>

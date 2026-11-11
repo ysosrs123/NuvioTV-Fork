@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Vis denne serveren i Hjem, søk og strømresultater.</string>
     <string name="servers_catalog_metadata">Bruk tilleggsmetadata</string>
     <string name="servers_catalog_metadata_description">Titler åpnes med detaljene fra tilleggene dine og synkroniseres som alle andre katalogtitler, mens avspilling og sett-merker fortsatt sendes til %1$s. Noen titler samsvarer kanskje ikke eller kan ikke spilles av hvis tilleggene dine nummererer eller identifiserer dem annerledes. Slå av dette for å spille bare fra %1$s, uten søk i tillegg.</string>
+    <string name="servers_autoplay_first">Automatisk avspilling velger denne serveren først</string>
+    <string name="servers_autoplay_first_description">Når %1$s har tittelen, spiller automatisk avspilling den fra %1$s, uansett hvordan du fant tittelen. Hvis %1$s ikke har den eller ikke svarer, velges det som vanlig.</string>
+    <string name="servers_autoplay_first_manual">Automatisk avspilling er av, så kildelisten åpnes som vanlig med %1$s øverst.</string>
     <string name="servers_import_continue_watching">Importer Fortsett å se</string>
     <string name="servers_import_continue_watching_description">Titler du har begynt på i %1$s, vises i Fortsett å se på Hjem. Sett-merker holdes i takt begge veier.</string>
     <string name="servers_import_watch_state">Importer visningsfremdrift</string>

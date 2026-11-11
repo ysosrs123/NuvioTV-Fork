@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Rodyti šį serverį pradiniame ekrane, paieškoje ir srautų rezultatuose.</string>
     <string name="servers_catalog_metadata">Naudoti priedų metaduomenis</string>
     <string name="servers_catalog_metadata_description">Pavadinimai atidaromi su jūsų priedų informacija ir sinchronizuojami kaip bet kuris kitas katalogo pavadinimas, o atkūrimas ir peržiūros žymės toliau siunčiami į %1$s. Kai kurie pavadinimai gali nesutapti arba nepasileisti, jei jūsų priedai juos numeruoja ar atpažįsta kitaip. Išjunkite, kad būtų leidžiama tik iš %1$s, be paieškos prieduose.</string>
+    <string name="servers_autoplay_first">Automatinis paleidimas pirmiausia renkasi šį serverį</string>
+    <string name="servers_autoplay_first_description">Kai %1$s turi šį turinį, automatinis paleidimas jį leidžia iš %1$s, nesvarbu, kaip jį radote. Jei %1$s jo neturi arba yra nepasiekiamas, renkamasi kaip įprastai.</string>
+    <string name="servers_autoplay_first_manual">Automatinis paleidimas išjungtas, todėl šaltinių sąrašas atsidaro kaip įprastai, su %1$s viršuje.</string>
     <string name="servers_import_continue_watching">Importuoti „Tęsti žiūrėjimą“</string>
     <string name="servers_import_continue_watching_description">Pavadinimai, kuriuos pradėjote žiūrėti %1$s, rodomi skiltyje „Tęsti žiūrėjimą“ pradiniame ekrane. Peržiūros žymės sinchronizuojamos abiem kryptimis.</string>
     <string name="servers_import_watch_state">Importuoti žiūrėjimo eigą</string>

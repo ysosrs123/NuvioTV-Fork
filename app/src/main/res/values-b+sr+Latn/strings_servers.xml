@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Prikaži ovaj server na Početnoj, u pretrazi i rezultatima strimova.</string>
     <string name="servers_catalog_metadata">Koristi metapodatke dodataka</string>
     <string name="servers_catalog_metadata_description">Naslovi se otvaraju sa detaljima iz vaših dodataka i sinhronizuju se kao svaki drugi naslov iz kataloga, a reprodukcija i oznake odgledanog se i dalje šalju na %1$s. Neki naslovi se možda neće poklopiti ili pustiti ako ih vaši dodaci drugačije numerišu ili prepoznaju. Isključite ovo da puštate samo sa %1$s, bez pretrage dodataka.</string>
+    <string name="servers_autoplay_first">Automatska reprodukcija prvo bira ovaj server</string>
+    <string name="servers_autoplay_first_description">Kada %1$s ima naslov, automatska reprodukcija ga pušta sa %1$s, bez obzira na to kako ste došli do naslova. Ako ga %1$s nema ili nije dostupan, bira se kao i obično.</string>
+    <string name="servers_autoplay_first_manual">Automatska reprodukcija je isključena, pa se lista izvora otvara kao i obično, sa %1$s na vrhu.</string>
     <string name="servers_import_continue_watching">Uvezi Nastavak gledanja</string>
     <string name="servers_import_continue_watching_description">Naslovi koje ste započeli na %1$s pojavljuju se u Nastavku gledanja na Početnoj. Oznake odgledanog se usklađuju u oba smera.</string>
     <string name="servers_import_watch_state">Uvezi napredak gledanja</string>

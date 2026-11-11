@@ -33,6 +33,7 @@
     <string name="scout_mixes_remix">Смесване отново</string>
     <string name="scout_mixes_unwatched_only">Само негледани</string>
     <string name="scout_mixes_keep_playing">Продължаване на показа</string>
+    <string name="scout_mixes_pick_sources">Избирай източници вместо мен</string>
     <string name="scout_mixes_edit">Редактиране на микса</string>
     <string name="scout_mixes_in_this_mix">В този микс</string>
     <string name="scout_mixes_next_in">Следва в %1$s</string>

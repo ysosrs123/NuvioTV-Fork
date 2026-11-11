@@ -612,7 +612,7 @@
     <string name="audio_lang_original_hint">يتطلب تفعيل إثراء بيانات TMDB</string>
     <string name="audio_preferred_lang">لغة الصوت المفضلة</string>
     <string name="audio_skip_silence">تخطي الصمت</string>
-    <string name="audio_skip_silence_sub">تخطي الأجزاء الصامتة من الصوت أثناء التشغيل. لا تأثير له عند تمرير الصوت (bitstream)</string>
+    <string name="audio_skip_silence_sub">تخطي الأجزاء الصامتة من الصوت أثناء التشغيل. قد تتقطع الصورة وقد يبدو الصوت غير متزامن أثناء تخطي الأجزاء الصامتة. لا تأثير له عند تمرير الصوت (bitstream)</string>
     <string name="audio_remember_delay_per_device">تذكر تأخير الصوت لكل جهاز</string>
     <string name="audio_remember_delay_per_device_sub">حفظ واستعادة قيمة تأخير الصوت داخل المشغل لمخرج الصوت الحالي</string>
     <string name="audio_advanced_section">إعدادات صوتية متقدمة</string>

@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">הצגת השרת הזה במסך הבית, בחיפוש ובתוצאות הסטרימים.</string>
     <string name="servers_catalog_metadata">שימוש במטא-דאטה של תוספים</string>
     <string name="servers_catalog_metadata_description">כותרים נפתחים עם הפרטים מהתוספים ומסתנכרנים כמו כל כותר מקטלוג, וההפעלה וסימוני הצפייה עדיין נשלחים אל %1$s. ייתכן שכותרים מסוימים לא יותאמו או לא יופעלו אם התוספים ממספרים או מזהים אותם אחרת. כבו זאת כדי לנגן רק מ-%1$s, ללא חיפוש בתוספים.</string>
+    <string name="servers_autoplay_first">ניגון אוטומטי בוחר קודם בשרת הזה</string>
+    <string name="servers_autoplay_first_description">כשהכותר נמצא ב-%1$s, הניגון האוטומטי מפעיל אותו מ-%1$s, לא משנה איך הגעת לכותר. אם הוא לא נמצא ב-%1$s או שאין גישה אליו, הבחירה נעשית כרגיל.</string>
+    <string name="servers_autoplay_first_manual">הניגון האוטומטי כבוי, ולכן רשימת המקורות נפתחת כרגיל, עם %1$s בראש.</string>
     <string name="servers_import_continue_watching">ייבוא \"המשך צפייה\"</string>
     <string name="servers_import_continue_watching_description">כותרים שהתחלת ב-%1$s מופיעים ב\"המשך צפייה\" במסך הבית. סימוני הצפייה מסונכרנים בשני הכיוונים.</string>
     <string name="servers_import_watch_state">ייבוא התקדמות צפייה</string>

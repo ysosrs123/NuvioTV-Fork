@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Tampilkan server ini di Beranda, pencarian, dan hasil stream.</string>
     <string name="servers_catalog_metadata">Gunakan metadata addon</string>
     <string name="servers_catalog_metadata_description">Judul dibuka dengan detail dari addon Anda dan disinkronkan seperti judul katalog lain, sementara pemutaran dan tanda sudah ditonton tetap dikirim ke %1$s. Beberapa judul mungkin tidak cocok atau tidak dapat diputar jika addon Anda menomori atau mengenalinya secara berbeda. Matikan ini untuk memutar hanya dari %1$s, tanpa mencari di addon.</string>
+    <string name="servers_autoplay_first">Putar otomatis memilih server ini lebih dulu</string>
+    <string name="servers_autoplay_first_description">Jika %1$s memiliki judul ini, putar otomatis memutarnya dari %1$s, dari mana pun Anda menemukan judul itu. Jika %1$s tidak memilikinya atau tidak dapat dijangkau, pilihan berjalan seperti biasa.</string>
+    <string name="servers_autoplay_first_manual">Putar otomatis nonaktif, jadi daftar sumber terbuka seperti biasa dengan %1$s di atas.</string>
     <string name="servers_import_continue_watching">Impor Lanjutkan Menonton</string>
     <string name="servers_import_continue_watching_description">Judul yang sudah Anda mulai di %1$s muncul di Lanjutkan Menonton di Beranda. Tanda sudah ditonton tetap disamakan bagaimanapun juga.</string>
     <string name="servers_import_watch_state">Impor progres tontonan</string>

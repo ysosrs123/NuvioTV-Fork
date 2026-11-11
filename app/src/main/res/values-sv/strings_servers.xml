@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Visa den här servern i Hem, sök och strömresultat.</string>
     <string name="servers_catalog_metadata">Använd tilläggsmetadata</string>
     <string name="servers_catalog_metadata_description">Titlar öppnas med dina tilläggs detaljer och synkas som alla andra katalogtitlar, medan uppspelning och sett-markeringar fortfarande skickas till %1$s. Vissa titlar kanske inte matchar eller går att spela om dina tillägg numrerar eller identifierar dem annorlunda. Stäng av detta för att bara spela upp från %1$s, utan sökning i tillägg.</string>
+    <string name="servers_autoplay_first">Automatisk uppspelning väljer den här servern först</string>
+    <string name="servers_autoplay_first_description">När %1$s har titeln spelar automatisk uppspelning den från %1$s, oavsett hur du hittade titeln. Om %1$s inte har den eller inte svarar väljer automatisk uppspelning som vanligt.</string>
+    <string name="servers_autoplay_first_manual">Automatisk uppspelning är av, så källistan öppnas som vanligt med %1$s överst.</string>
     <string name="servers_import_continue_watching">Importera Fortsätt titta</string>
     <string name="servers_import_continue_watching_description">Titlar du har börjat på i %1$s visas i Fortsätt titta på Hem. Sett-markeringar hålls i takt åt båda håll.</string>
     <string name="servers_import_watch_state">Importera tittarframsteg</string>

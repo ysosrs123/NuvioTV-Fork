@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">התחברות ל-Nuvio לאחר מכן עשויה להחליף את ההגדרות ששוחזרו בהגדרות המסונכרנות שלך.</string>
     <string name="backup_restore_button">שחזור</string>
     <string name="backup_pin_create_heading">בחירת קוד PIN לסיסמאות ולמפתחות</string>
-    <string name="backup_pin_create_support">לפחות 6 ספרות. Arc לא יכול לשחזר אותו, אבל כל השאר בגיבוי עדיין משוחזר גם בלעדיו.</string>
+    <string name="backup_pin_create_support">6 עד 16 ספרות. קוד PIN ארוך יותר מגן טוב יותר על פרטי הכניסה שלך אם מישהו מעתיק את הקובץ. Arc לא יכול לשחזר את קוד ה-PIN, אבל כל השאר בגיבוי עדיין משוחזר גם בלעדיו.</string>
     <string name="backup_pin_create_back">יש ללחוץ חזרה כדי לגבות בלי סיסמאות</string>
     <string name="backup_pin_confirm_heading">יש להזין שוב את קוד ה-PIN</string>
     <string name="backup_pin_confirm_support">אותן ספרות, ליתר ביטחון.</string>

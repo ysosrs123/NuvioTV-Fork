@@ -819,7 +819,7 @@
     <string name="audio_lang_original_hint">Yêu cầu bật tính năng bổ sung dữ liệu từ TMDB.</string>
     <string name="audio_preferred_lang">Ngôn ngữ âm thanh ưu tiên</string>
     <string name="audio_skip_silence">Bỏ qua đoạn im lặng</string>
-    <string name="audio_skip_silence_sub">Bỏ qua các đoạn im lặng trong quá trình phát. Không có tác dụng khi âm thanh được truyền thẳng (bitstream)</string>
+    <string name="audio_skip_silence_sub">Bỏ qua các đoạn im lặng trong quá trình phát. Hình ảnh có thể bị giật và âm thanh có thể có vẻ không đồng bộ trong khi các đoạn im lặng bị bỏ qua. Không có tác dụng khi âm thanh được truyền thẳng (bitstream)</string>
     <string name="audio_night_mode_medium">Trung bình</string>
     <string name="audio_remember_delay_per_device">Ghi nhớ độ trễ âm thanh cho từng thiết bị</string>
     <string name="audio_remember_delay_per_device_sub">Lưu và khôi phục độ trễ âm thanh trong trình phát cho đường xuất âm thanh hiện tại</string>

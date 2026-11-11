@@ -610,7 +610,7 @@
     <string name="audio_lang_original_hint">Потрібне увімкнене збагачення TMDB</string>
     <string name="audio_preferred_lang">Бажана мова аудіо</string>
     <string name="audio_skip_silence">Пропуск тиші</string>
-    <string name="audio_skip_silence_sub">Пропускати тихі ділянки аудіо під час відтворення. Не діє під час проходу звуку (bitstream)</string>
+    <string name="audio_skip_silence_sub">Пропускати тихі ділянки аудіо під час відтворення. Поки тихі ділянки пропускаються, зображення може смикатися, а звук може здаватися несинхронним. Не діє під час проходу звуку (bitstream)</string>
     <string name="audio_remember_delay_per_device">Запам\'ятовувати затримку аудіо для кожного пристрою</string>
     <string name="audio_remember_delay_per_device_sub">Зберігати та відновлювати затримку аудіо для поточного маршруту виводу</string>
     <string name="audio_advanced_section">Розширені налаштування аудіо</string>

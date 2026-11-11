@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Afișează acest server în Acasă, în căutare și în rezultatele de fluxuri.</string>
     <string name="servers_catalog_metadata">Folosește metadatele suplimentelor</string>
     <string name="servers_catalog_metadata_description">Titlurile se deschid cu detaliile din suplimentele tale și se sincronizează ca orice alt titlu de catalog, iar redarea și marcajele de vizionat sunt trimise în continuare către %1$s. Unele titluri s-ar putea să nu se potrivească sau să nu se redea dacă suplimentele le numerotează sau le identifică diferit. Dezactivați pentru a reda doar de pe %1$s, fără căutare în suplimente.</string>
+    <string name="servers_autoplay_first">Redarea automată alege mai întâi acest server</string>
+    <string name="servers_autoplay_first_description">Când %1$s are titlul, redarea automată îl redă de pe %1$s, indiferent cum ai ajuns la titlu. Dacă %1$s nu îl are sau nu răspunde, alegerea se face ca de obicei.</string>
+    <string name="servers_autoplay_first_manual">Redarea automată este oprită, așa că lista de surse se deschide ca de obicei, cu %1$s sus.</string>
     <string name="servers_import_continue_watching">Importă Continuă vizionarea</string>
     <string name="servers_import_continue_watching_description">Titlurile începute pe %1$s apar în Continuă vizionarea din Acasă. Marcajele de vizionat se țin la zi în ambele sensuri.</string>
     <string name="servers_import_watch_state">Importă progresul vizionării</string>

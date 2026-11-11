@@ -743,7 +743,7 @@
 <string name="audio_lang_original_hint">Richiede che l\'arricchimento TMDB sia abilitato</string>
 <string name="audio_preferred_lang">Lingua audio preferita</string>
 <string name="audio_skip_silence">Salta silenzio</string>
-<string name="audio_skip_silence_sub">Salta le porzioni di audio silenziose durante la riproduzione. Nessun effetto quando l\'audio è in passthrough (bitstream)</string>
+<string name="audio_skip_silence_sub">Salta le porzioni di audio silenziose durante la riproduzione. L\'immagine può andare a scatti e l\'audio può sembrare fuori sincrono mentre le porzioni silenziose vengono saltate. Nessun effetto quando l\'audio è in passthrough (bitstream)</string>
 <string name="audio_remember_delay_per_device">Ricorda ritardo audio per dispositivo</string>
 <string name="audio_remember_delay_per_device_sub">Salva e ripristina il ritardo audio nel player per l\'attuale uscita audio</string>
 <string name="audio_advanced_section">Audio avanzato</string>

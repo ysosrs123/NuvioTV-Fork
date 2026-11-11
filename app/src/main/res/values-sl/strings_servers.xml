@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Prikaži ta strežnik na začetnem zaslonu, v iskanju in med viri.</string>
     <string name="servers_catalog_metadata">Uporabi metapodatke dodatkov</string>
     <string name="servers_catalog_metadata_description">Naslovi se odprejo s podrobnostmi vaših dodatkov in se sinhronizirajo kot vsak drug naslov iz kataloga, predvajanje in oznake ogledanega pa se še vedno pošiljajo v %1$s. Nekateri naslovi se morda ne ujemajo ali ne predvajajo, če jih vaši dodatki številčijo ali prepoznajo drugače. Izklopite to za predvajanje samo iz %1$s, brez iskanja po dodatkih.</string>
+    <string name="servers_autoplay_first">Samodejno predvajanje najprej izbere ta strežnik</string>
+    <string name="servers_autoplay_first_description">Ko ima %1$s naslov, ga samodejno predvajanje predvaja s %1$s, ne glede na to, kako ste prišli do naslova. Če ga %1$s nima ali ni dosegljiv, se izbira kot običajno.</string>
+    <string name="servers_autoplay_first_manual">Samodejno predvajanje je izklopljeno, zato se seznam virov odpre kot običajno, z %1$s na vrhu.</string>
     <string name="servers_import_continue_watching">Uvozi Nadaljuj z gledanjem</string>
     <string name="servers_import_continue_watching_description">Naslovi, ki ste jih začeli gledati v %1$s, se prikažejo v vrstici Nadaljuj z gledanjem na začetnem zaslonu. Oznake ogledanega se usklajujejo v obe smeri.</string>
     <string name="servers_import_watch_state">Uvozi napredek gledanja</string>

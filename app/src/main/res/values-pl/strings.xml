@@ -250,7 +250,7 @@
     <string name="audio_lang_original_hint">Wymaga włączonego wzbogacania TMDB</string>
     <string name="audio_preferred_lang">Preferowany język audio</string>
     <string name="audio_skip_silence">Pomijaj ciszę</string>
-    <string name="audio_skip_silence_sub">Pomijaj ciche fragmenty audio podczas odtwarzania. Nie działa, gdy audio jest przepuszczane (bitstream)</string>
+    <string name="audio_skip_silence_sub">Pomijaj ciche fragmenty audio podczas odtwarzania. Obraz może się zacinać, a audio może wydawać się niezsynchronizowane, gdy ciche fragmenty są pomijane. Nie działa, gdy audio jest przepuszczane (bitstream)</string>
     <string name="audio_advanced_section">Zaawansowane audio</string>
     <string name="audio_advanced_warning">Te ustawienia mogą powodować problemy na niektórych urządzeniach. Zmieniaj tylko jeśli wiesz co robisz.</string>
     <string name="audio_decoder_device_only">Tylko dekodery urządzenia</string>

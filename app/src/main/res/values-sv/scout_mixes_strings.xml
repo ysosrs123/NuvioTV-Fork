@@ -33,6 +33,7 @@
     <string name="scout_mixes_remix">Mixa om</string>
     <string name="scout_mixes_unwatched_only">Bara osedda</string>
     <string name="scout_mixes_keep_playing">Fortsätt spela</string>
+    <string name="scout_mixes_pick_sources">Välj källor åt mig</string>
     <string name="scout_mixes_edit">Redigera mix</string>
     <string name="scout_mixes_in_this_mix">I den här mixen</string>
     <string name="scout_mixes_next_in">Nästa i %1$s</string>

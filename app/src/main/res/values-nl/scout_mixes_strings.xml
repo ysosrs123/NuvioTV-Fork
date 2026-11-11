@@ -33,6 +33,7 @@
     <string name="scout_mixes_remix">Opnieuw mixen</string>
     <string name="scout_mixes_unwatched_only">Alleen ongezien</string>
     <string name="scout_mixes_keep_playing">Blijven afspelen</string>
+    <string name="scout_mixes_pick_sources">Bronnen voor mij kiezen</string>
     <string name="scout_mixes_edit">Mix bewerken</string>
     <string name="scout_mixes_in_this_mix">In deze mix</string>
     <string name="scout_mixes_next_in">Volgende in %1$s</string>

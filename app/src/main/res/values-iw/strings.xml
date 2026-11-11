@@ -819,7 +819,7 @@
     <string name="audio_lang_original_hint">דורש הפעלה של העשרת מידע מ-TMDB</string>
     <string name="audio_preferred_lang">שפת שמע מועדפת</string>
     <string name="audio_skip_silence">דילוג על שקט</string>
-    <string name="audio_skip_silence_sub">דילוג על קטעים שקטים בשמע במהלך ההפעלה. אין השפעה כשהשמע עובר כמות שהוא (bitstream)</string>
+    <string name="audio_skip_silence_sub">דילוג על קטעים שקטים בשמע במהלך ההפעלה. התמונה עלולה לקפץ והשמע עלול להישמע לא מסונכרן בזמן הדילוג על קטעים שקטים. אין השפעה כשהשמע עובר כמות שהוא (bitstream)</string>
     <string name="audio_remember_delay_per_device">זכירת עיכוב שמע לפי מכשיר</string>
     <string name="audio_remember_delay_per_device_sub">שמירה ושחזור של עיכוב השמע בנגן עבור נתיב פלט השמע הנוכחי</string>
     <string name="audio_advanced_section">שמע מתקדם</string>

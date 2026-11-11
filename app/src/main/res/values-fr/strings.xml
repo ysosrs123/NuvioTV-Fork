@@ -802,7 +802,7 @@
     <string name="audio_lang_original_hint">Nécessite l’activation de l’enrichissement TMDB</string>
     <string name="audio_preferred_lang">Langue audio préférée</string>
     <string name="audio_skip_silence">Passer les silences</string>
-    <string name="audio_skip_silence_sub">Passer les passages silencieux de l\'audio pendant la lecture. Sans effet quand l\'audio est transmis en passthrough (bitstream)</string>
+    <string name="audio_skip_silence_sub">Passer les passages silencieux de l\'audio pendant la lecture. L\'image peut saccader et l\'audio peut sembler désynchronisé pendant que les passages silencieux sont sautés. Sans effet quand l\'audio est transmis en passthrough (bitstream)</string>
     <string name="audio_remember_delay_per_device">Mémoriser le délai audio par appareil</string>
     <string name="audio_remember_delay_per_device_sub">Enregistrer et rétablir le délai audio du lecteur pour la sortie audio actuelle</string>
     <string name="audio_advanced_section">Audio avancé</string>

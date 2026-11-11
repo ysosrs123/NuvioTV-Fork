@@ -613,7 +613,7 @@
     <string name="audio_lang_original_hint">TMDB補完を有効にする必要があります</string>
     <string name="audio_preferred_lang">優先音声言語</string>
     <string name="audio_skip_silence">無音スキップ</string>
-    <string name="audio_skip_silence_sub">再生中に音声の無音部分をスキップします。音声をパススルー（ビットストリーム）している間は効果がありません</string>
+    <string name="audio_skip_silence_sub">再生中に音声の無音部分をスキップします。無音部分をスキップしている間、映像がカクついたり、音声がずれて感じられることがあります。音声をパススルー（ビットストリーム）している間は効果がありません</string>
     <string name="audio_remember_delay_per_device">音声遅延をデバイスごとに記憶</string>
     <string name="audio_remember_delay_per_device_sub">現在の音声出力ルートに対するプレーヤー内の音声遅延を保存・復元</string>
     <string name="audio_advanced_section">高度な音声設定</string>

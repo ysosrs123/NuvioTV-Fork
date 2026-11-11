@@ -33,6 +33,7 @@
     <string name="scout_mixes_remix">फिर से मिलाएँ</string>
     <string name="scout_mixes_unwatched_only">सिर्फ़ अनदेखे</string>
     <string name="scout_mixes_keep_playing">चलाते रहें</string>
+    <string name="scout_mixes_pick_sources">मेरे लिए सोर्स चुनें</string>
     <string name="scout_mixes_edit">मिक्स संपादित करें</string>
     <string name="scout_mixes_in_this_mix">इस मिक्स में</string>
     <string name="scout_mixes_next_in">%1$s में अगला</string>

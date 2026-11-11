@@ -185,7 +185,7 @@
     <string name="audio_lang_device">Limba dispozitivului</string>
     <string name="audio_preferred_lang">Limba audio preferată</string>
     <string name="audio_skip_silence">Omite tăcerea</string>
-    <string name="audio_skip_silence_sub">Omite porțiunile silențioase ale sunetului în timpul redării. Fără efect cât timp sunetul trece prin passthrough (bitstream)</string>
+    <string name="audio_skip_silence_sub">Omite porțiunile silențioase ale sunetului în timpul redării. Imaginea se poate sacada, iar sunetul poate părea desincronizat cât timp sunt omise porțiunile silențioase. Fără efect cât timp sunetul trece prin passthrough (bitstream)</string>
     <string name="audio_advanced_section">Audio avansat</string>
     <string name="audio_advanced_warning">Aceste setări pot cauza probleme pe unele dispozitive. Modificați doar dacă știți ce faceți.</string>
     <string name="audio_decoder_device_only">Doar decodere dispozitiv</string>

@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">अगर आप बाद में Nuvio में साइन इन करते हैं, तो आपकी सिंक की गई सेटिंग्स रीस्टोर की गई सेटिंग्स की जगह ले सकती हैं।</string>
     <string name="backup_restore_button">रीस्टोर करें</string>
     <string name="backup_pin_create_heading">पासवर्ड और कीज़ के लिए PIN चुनें</string>
-    <string name="backup_pin_create_support">कम से कम 6 अंक। Arc इसे वापस नहीं ला सकता, लेकिन बैकअप का बाकी सब इसके बिना भी रीस्टोर हो जाता है।</string>
+    <string name="backup_pin_create_support">6 से 16 अंक। अगर कोई फ़ाइल कॉपी कर ले, तो लंबा PIN आपके साइन-इन को ज़्यादा सुरक्षित रखता है। Arc PIN को वापस नहीं ला सकता, लेकिन बैकअप का बाकी सब इसके बिना भी रीस्टोर हो जाता है।</string>
     <string name="backup_pin_create_back">पासवर्ड के बिना बैकअप लेने के लिए बैक दबाएँ</string>
     <string name="backup_pin_confirm_heading">PIN दोबारा डालें</string>
     <string name="backup_pin_confirm_support">पक्का करने के लिए वही अंक।</string>

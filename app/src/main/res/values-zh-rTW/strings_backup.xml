@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">如果您之後登入 Nuvio，同步的設定可能會取代已還原的設定。</string>
     <string name="backup_restore_button">還原</string>
     <string name="backup_pin_create_heading">為密碼和金鑰設定 PIN</string>
-    <string name="backup_pin_create_support">至少 6 位數字。Arc 無法找回它，但備份中的其他內容不需要它也能還原。</string>
+    <string name="backup_pin_create_support">6 到 16 位數字。如果有人複製了這個檔案，較長的 PIN 能更好地保護你的登入資訊。Arc 無法找回它，但備份中的其他內容不需要它也能還原。</string>
     <string name="backup_pin_create_back">按返回鍵可不含密碼進行備份</string>
     <string name="backup_pin_confirm_heading">再次輸入 PIN</string>
     <string name="backup_pin_confirm_support">輸入相同的數字以確認。</string>

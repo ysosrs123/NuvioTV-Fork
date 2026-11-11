@@ -591,7 +591,7 @@
     <string name="audio_lang_original_hint">Requer que o enriquecimento do TMDB esteja ativado</string>
     <string name="audio_preferred_lang">Idioma preferido do áudio</string>
     <string name="audio_skip_silence">Saltar silêncio</string>
-    <string name="audio_skip_silence_sub">Salta as partes silenciosas do áudio durante a reprodução. Sem efeito enquanto o áudio é enviado em passthrough (bitstream)</string>
+    <string name="audio_skip_silence_sub">Salta as partes silenciosas do áudio durante a reprodução. A imagem pode dar soluços e o áudio pode parecer dessincronizado enquanto as partes silenciosas são saltadas. Sem efeito enquanto o áudio é enviado em passthrough (bitstream)</string>
     <string name="audio_remember_delay_per_device">Lembrar atraso de áudio por dispositivo</string>
     <string name="audio_remember_delay_per_device_sub">Guardar e restaurar o atraso de áudio no leitor para a rota de saída de áudio atual</string>
     <string name="audio_advanced_section">Áudio Avançado</string>

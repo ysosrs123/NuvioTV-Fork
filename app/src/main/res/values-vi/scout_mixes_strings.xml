@@ -31,6 +31,7 @@
     <string name="scout_mixes_remix">Trộn lại</string>
     <string name="scout_mixes_unwatched_only">Chỉ chưa xem</string>
     <string name="scout_mixes_keep_playing">Tiếp tục phát</string>
+    <string name="scout_mixes_pick_sources">Chọn nguồn giúp tôi</string>
     <string name="scout_mixes_edit">Sửa bản trộn</string>
     <string name="scout_mixes_in_this_mix">Trong bản trộn này</string>
     <string name="scout_mixes_next_in">Tiếp theo trong %1$s</string>

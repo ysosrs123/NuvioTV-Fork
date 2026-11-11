@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Se depois você fizer login no Nuvio, suas configurações sincronizadas podem substituir as restauradas.</string>
     <string name="backup_restore_button">Restaurar</string>
     <string name="backup_pin_create_heading">Escolha um PIN para senhas e chaves</string>
-    <string name="backup_pin_create_support">Pelo menos 6 dígitos. O Arc não consegue recuperá-lo, mas o resto do backup ainda é restaurado sem ele.</string>
+    <string name="backup_pin_create_support">De 6 a 16 dígitos. Um PIN mais longo protege melhor seus logins se alguém copiar o arquivo. O Arc não consegue recuperar o PIN, mas o resto do backup ainda é restaurado sem ele.</string>
     <string name="backup_pin_create_back">Pressione \"Voltar\" para fazer backup sem senhas</string>
     <string name="backup_pin_confirm_heading">Digite o PIN novamente</string>
     <string name="backup_pin_confirm_support">Os mesmos dígitos, para confirmar.</string>

@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Diesen Server auf der Startseite, in der Suche und in den Stream-Ergebnissen anzeigen.</string>
     <string name="servers_catalog_metadata">Add-on-Metadaten verwenden</string>
     <string name="servers_catalog_metadata_description">Titel öffnen sich mit den Details Ihrer Add-ons und werden wie jeder andere Katalogtitel synchronisiert; Wiedergabe und Gesehen-Markierungen gehen weiterhin an %1$s. Manche Titel werden eventuell nicht erkannt oder lassen sich nicht abspielen, wenn Ihre Add-ons sie anders nummerieren oder zuordnen. Schalten Sie dies aus, um nur von %1$s abzuspielen, ohne Suche in Add-ons.</string>
+    <string name="servers_autoplay_first">Automatische Wiedergabe wählt zuerst diesen Server</string>
+    <string name="servers_autoplay_first_description">Wenn %1$s den Titel hat, spielt die automatische Wiedergabe ihn von %1$s ab, egal wie du zum Titel gekommen bist. Hat %1$s ihn nicht oder ist der Server nicht erreichbar, wählt die automatische Wiedergabe wie gewohnt.</string>
+    <string name="servers_autoplay_first_manual">Die automatische Wiedergabe ist aus, daher öffnet sich die Quellenliste wie gewohnt, mit %1$s oben.</string>
     <string name="servers_import_continue_watching">Weiter ansehen importieren</string>
     <string name="servers_import_continue_watching_description">Titel, die Sie auf %1$s begonnen haben, erscheinen auf der Startseite unter Weiter ansehen. Gesehen-Markierungen werden in jedem Fall abgeglichen.</string>
     <string name="servers_import_watch_state">Fortschritt importieren</string>

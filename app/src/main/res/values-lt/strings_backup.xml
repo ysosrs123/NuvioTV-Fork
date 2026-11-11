@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Jei vėliau prisijungsite prie „Nuvio“, sinchronizuoti nustatymai gali pakeisti atkurtus.</string>
     <string name="backup_restore_button">Atkurti</string>
     <string name="backup_pin_create_heading">Pasirinkite PIN kodą slaptažodžiams ir raktams</string>
-    <string name="backup_pin_create_support">Bent 6 skaitmenys. „Arc“ negali jo atkurti, bet visa kita iš kopijos atkuriama ir be jo.</string>
+    <string name="backup_pin_create_support">Nuo 6 iki 16 skaitmenų. Ilgesnis PIN kodas geriau apsaugo jūsų prisijungimo duomenis, jei kas nors nukopijuotų failą. „Arc“ negali atkurti PIN kodo, bet visa kita iš kopijos atkuriama ir be jo.</string>
     <string name="backup_pin_create_back">Paspauskite „Atgal“, kad kurtumėte kopiją be slaptažodžių</string>
     <string name="backup_pin_confirm_heading">Įveskite PIN kodą dar kartą</string>
     <string name="backup_pin_confirm_support">Tie patys skaitmenys, patikrinimui.</string>

@@ -289,7 +289,7 @@
     <string name="audio_lang_device">Enhetens språk</string>
     <string name="audio_preferred_lang">Föredraget ljudspråk</string>
     <string name="audio_skip_silence">Hoppa över tystnad</string>
-    <string name="audio_skip_silence_sub">Hoppa över tysta delar av ljudet under uppspelning. Ingen effekt när ljudet skickas vidare orört (bitstream)</string>
+    <string name="audio_skip_silence_sub">Hoppa över tysta delar av ljudet under uppspelning. Bilden kan hacka och ljudet kan verka osynkat medan tysta delar hoppas över. Ingen effekt när ljudet skickas vidare orört (bitstream)</string>
     <string name="audio_advanced_section">Avancerat ljud</string>
     <string name="audio_advanced_warning">Dessa inställningar kan orsaka problem på vissa enheter. Ändra bara om du vet vad du gör.</string>
     <string name="audio_decoder_device_only">Endast enhetens avkodare</string>

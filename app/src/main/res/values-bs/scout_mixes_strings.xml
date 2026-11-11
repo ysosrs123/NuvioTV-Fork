@@ -35,6 +35,7 @@
     <string name="scout_mixes_remix">Ponovo izmiješaj</string>
     <string name="scout_mixes_unwatched_only">Samo neodgledano</string>
     <string name="scout_mixes_keep_playing">Nastavi puštanje</string>
+    <string name="scout_mixes_pick_sources">Biraj izvore umjesto mene</string>
     <string name="scout_mixes_edit">Uredi miks</string>
     <string name="scout_mixes_in_this_mix">U ovom miksu</string>
     <string name="scout_mixes_next_in">Sljedeće u miksu %1$s</string>

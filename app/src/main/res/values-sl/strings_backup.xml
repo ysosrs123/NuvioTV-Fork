@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Če se pozneje prijavite v Nuvio, lahko sinhronizirane nastavitve zamenjajo obnovljene.</string>
     <string name="backup_restore_button">Obnovi</string>
     <string name="backup_pin_create_heading">Izberite kodo PIN za gesla in ključe</string>
-    <string name="backup_pin_create_support">Vsaj 6 števk. Arc je ne more obnoviti, vse drugo v kopiji pa se obnovi tudi brez nje.</string>
+    <string name="backup_pin_create_support">Od 6 do 16 števk. Daljša koda PIN bolje zaščiti vaše podatke za prijavo, če kdo kopira datoteko. Arc kode PIN ne more obnoviti, vse drugo v kopiji pa se obnovi tudi brez nje.</string>
     <string name="backup_pin_create_back">Pritisnite nazaj za kopijo brez gesel</string>
     <string name="backup_pin_confirm_heading">Znova vnesite kodo PIN</string>
     <string name="backup_pin_confirm_support">Iste števke, za preverjanje.</string>

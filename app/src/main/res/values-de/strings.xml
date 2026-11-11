@@ -612,7 +612,7 @@
     <string name="audio_lang_original_hint">Requires TMDB enrichment to be enabled</string>
     <string name="audio_preferred_lang">Bevorzugte Audiosprache</string>
     <string name="audio_skip_silence">Stille überspringen</string>
-    <string name="audio_skip_silence_sub">Stille Passagen während der Wiedergabe überspringen. Ohne Wirkung, solange Audio durchgeleitet wird (Bitstream)</string>
+    <string name="audio_skip_silence_sub">Stille Passagen während der Wiedergabe überspringen. Das Bild kann ruckeln und der Ton kann asynchron wirken, während stille Passagen übersprungen werden. Ohne Wirkung, solange Audio durchgeleitet wird (Bitstream)</string>
     <string name="audio_remember_delay_per_device">Audio-Verzögerung pro Gerät merken</string>
     <string name="audio_remember_delay_per_device_sub">Save and restore the in-player audio delay for the current audio output route</string>
     <string name="audio_advanced_section">Erweiterte Audioeinstellungen</string>

@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Jeśli potem zalogujesz się do Nuvio, zsynchronizowane ustawienia mogą zastąpić przywrócone.</string>
     <string name="backup_restore_button">Przywróć</string>
     <string name="backup_pin_create_heading">Wybierz PIN dla haseł i kluczy</string>
-    <string name="backup_pin_create_support">Co najmniej 6 cyfr. Arc nie może go odzyskać, ale reszta kopii i tak zostanie przywrócona bez niego.</string>
+    <string name="backup_pin_create_support">Od 6 do 16 cyfr. Dłuższy PIN lepiej chroni Twoje dane logowania, jeśli ktoś skopiuje plik. Arc nie może odzyskać PIN-u, ale reszta kopii i tak zostanie przywrócona bez niego.</string>
     <string name="backup_pin_create_back">Naciśnij wstecz, aby utworzyć kopię bez haseł</string>
     <string name="backup_pin_confirm_heading">Wprowadź PIN ponownie</string>
     <string name="backup_pin_confirm_support">Te same cyfry, dla pewności.</string>

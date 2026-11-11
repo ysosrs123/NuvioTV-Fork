@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">如果之后登录 Nuvio，您同步的设置可能会替换已恢复的设置。</string>
     <string name="backup_restore_button">恢复</string>
     <string name="backup_pin_create_heading">为密码和密钥设置 PIN</string>
-    <string name="backup_pin_create_support">至少 6 位数字。Arc 无法找回它，但备份中的其他内容不需要它也能恢复。</string>
+    <string name="backup_pin_create_support">6 到 16 位数字。如果有人复制了该文件，较长的 PIN 能更好地保护你的登录信息。Arc 无法找回它，但备份中的其他内容不需要它也能恢复。</string>
     <string name="backup_pin_create_back">按返回键可不含密码进行备份</string>
     <string name="backup_pin_confirm_heading">再次输入 PIN</string>
     <string name="backup_pin_confirm_support">输入相同的数字以确认。</string>

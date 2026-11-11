@@ -609,7 +609,7 @@
     <string name="audio_lang_original_hint">Kræver at TMDB-berigelse er aktiveret</string>
     <string name="audio_preferred_lang">Foretrukket lydsprog</string>
     <string name="audio_skip_silence">Spring stilhed over</string>
-    <string name="audio_skip_silence_sub">Spring stille dele af lyden over under afspilning. Ingen effekt, når lyden sendes urørt videre (bitstream)</string>
+    <string name="audio_skip_silence_sub">Spring stille dele af lyden over under afspilning. Billedet kan hakke, og lyden kan virke ude af synk, mens stille dele springes over. Ingen effekt, når lyden sendes urørt videre (bitstream)</string>
     <string name="audio_remember_delay_per_device">Husk lydforsinkelse pr. enhed</string>
     <string name="audio_remember_delay_per_device_sub">Gem og gendan lydforsinkelsen i afspilleren for den aktuelle lydudgangsrute</string>
     <string name="audio_advanced_section">Avanceret Lyd</string>

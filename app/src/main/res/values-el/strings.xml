@@ -711,7 +711,7 @@
   <string name="audio_lang_original_hint">Απαιτείται ενεργοποίηση εμπλουτισμού TMDB</string>
   <string name="audio_preferred_lang">Προτιμώμενη γλώσσα ήχου</string>
   <string name="audio_skip_silence">Παράλειψη σιγής</string>
-  <string name="audio_skip_silence_sub">Παράλειψη σιωπηλών τμημάτων ήχου κατά την αναπαραγωγή. Δεν έχει αποτέλεσμα όταν ο ήχος περνά με passthrough (bitstream)</string>
+  <string name="audio_skip_silence_sub">Παράλειψη σιωπηλών τμημάτων ήχου κατά την αναπαραγωγή. Η εικόνα μπορεί να κολλάει και ο ήχος να φαίνεται εκτός συγχρονισμού όσο παραλείπονται τα σιωπηλά τμήματα. Δεν έχει αποτέλεσμα όταν ο ήχος περνά με passthrough (bitstream)</string>
   <string name="audio_remember_delay_per_device">Απομνημόνευση καθυστέρησης ήχου ανά συσκευή</string>
   <string name="audio_remember_delay_per_device_sub">Αποθήκευση και επαναφορά της καθυστέρησης ήχου του προγράμματος αναπαραγωγής για την τρέχουσα έξοδο ήχου</string>
   <string name="audio_advanced_section">Για προχωρημένους ήχος</string>

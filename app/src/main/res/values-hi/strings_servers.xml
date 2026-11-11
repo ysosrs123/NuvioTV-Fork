@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">इस सर्वर को होम, खोज और स्ट्रीम नतीजों में दिखाएँ।</string>
     <string name="servers_catalog_metadata">ऐडऑन मेटाडेटा इस्तेमाल करें</string>
     <string name="servers_catalog_metadata_description">टाइटल आपके ऐडऑन के विवरण के साथ खुलते हैं और किसी भी कैटलॉग टाइटल की तरह सिंक होते हैं, जबकि प्लेबैक और देखे गए के निशान %1$s को भेजे जाते रहते हैं। अगर आपके ऐडऑन इन्हें अलग तरह से नंबर या पहचान देते हैं तो कुछ टाइटल मैच या प्ले नहीं हो सकते। केवल %1$s से चलाने के लिए इसे बंद करें, ऐड-ऑन में खोज नहीं होगी।</string>
+    <string name="servers_autoplay_first">ऑटो-प्ले पहले यह सर्वर चुनता है</string>
+    <string name="servers_autoplay_first_description">जब %1$s पर टाइटल हो, तो ऑटो-प्ले उसे %1$s से चलाता है, चाहे आप टाइटल तक कैसे भी पहुँचे हों। अगर %1$s पर यह न हो या वह उपलब्ध न हो, तो ऑटो-प्ले हमेशा की तरह चुनता है।</string>
+    <string name="servers_autoplay_first_manual">ऑटो-प्ले बंद है, इसलिए सोर्स सूची हमेशा की तरह खुलती है, सबसे ऊपर %1$s के साथ।</string>
     <string name="servers_import_continue_watching">\"देखना जारी रखें\" इंपोर्ट करें</string>
     <string name="servers_import_continue_watching_description">%1$s पर शुरू किए गए टाइटल होम पर \"देखना जारी रखें\" में दिखते हैं। देखे गए के निशान दोनों तरफ़ एक जैसे रखे जाते हैं।</string>
     <string name="servers_import_watch_state">देखने की प्रगति इंपोर्ट करें</string>

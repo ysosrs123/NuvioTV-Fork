@@ -22,6 +22,9 @@
     <string name="servers_enabled_description">Afficher ce serveur dans l’accueil, la recherche et les résultats de flux.</string>
     <string name="servers_catalog_metadata">Utiliser les métadonnées des addons</string>
     <string name="servers_catalog_metadata_description">Les titres s’ouvrent avec les détails de vos addons et se synchronisent comme n’importe quel autre titre de catalogue, la lecture et les marques «&#160;vu&#160;» étant toujours envoyées à %1$s. Certains titres peuvent ne pas correspondre ou ne pas se lire si vos addons les numérotent ou les identifient différemment. Désactivez ceci pour lire uniquement depuis %1$s, sans recherche dans les add-ons.</string>
+    <string name="servers_autoplay_first">La lecture automatique choisit d’abord ce serveur</string>
+    <string name="servers_autoplay_first_description">Quand %1$s a le titre, la lecture automatique le lit depuis %1$s, quelle que soit la façon dont vous l’avez trouvé. Si %1$s ne l’a pas ou ne répond pas, le choix se fait comme d’habitude.</string>
+    <string name="servers_autoplay_first_manual">La lecture automatique est désactivée : la liste des sources s’ouvre comme d’habitude, avec %1$s en tête.</string>
     <string name="servers_import_watch_state">Importer la progression de visionnage</string>
     <string name="servers_import_watch_state_description">Ajoutez les titres que vous regardez dans %1$s à Continuer à regarder, ainsi que ses marques «&#160;vu&#160;». La lecture reprend de toute façon depuis %1$s.</string>
     <string name="servers_sign_in_again">Se reconnecter</string>

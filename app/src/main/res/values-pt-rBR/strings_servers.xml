@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Exibe este servidor no Início, na busca e nos resultados de streams.</string>
     <string name="servers_catalog_metadata">Usar metadados dos addons</string>
     <string name="servers_catalog_metadata_description">Os títulos abrem com os detalhes dos seus addons e sincronizam como qualquer outro título de catálogo; a reprodução e as marcas de assistido continuam sendo enviadas ao %1$s. Alguns títulos podem não corresponder ou não reproduzir se seus addons os numerarem ou identificarem de outra forma. Desative para reproduzir apenas de %1$s, sem buscar nos addons.</string>
+    <string name="servers_autoplay_first">A reprodução automática prioriza este servidor</string>
+    <string name="servers_autoplay_first_description">Quando %1$s tem o título, a reprodução automática toca a partir de %1$s, não importa como você chegou ao título. Se %1$s não tiver ou não responder, a escolha segue como sempre.</string>
+    <string name="servers_autoplay_first_manual">A reprodução automática está desligada, então a lista de fontes abre como sempre, com %1$s no topo.</string>
     <string name="servers_import_continue_watching">Importar Continuar Assistindo</string>
     <string name="servers_import_continue_watching_description">Os títulos que você começou no %1$s aparecem em Continuar Assistindo no Início. As marcas de assistido ficam em sincronia nos dois sentidos.</string>
     <string name="servers_import_watch_state">Importar progresso</string>

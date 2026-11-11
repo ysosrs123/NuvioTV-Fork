@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Se depois iniciares sessão no Nuvio, as tuas definições sincronizadas podem substituir as restauradas.</string>
     <string name="backup_restore_button">Restaurar</string>
     <string name="backup_pin_create_heading">Escolhe um PIN para palavras-passe e chaves</string>
-    <string name="backup_pin_create_support">Pelo menos 6 dígitos. O Arc não o consegue recuperar, mas o resto da cópia restaura-se na mesma sem ele.</string>
+    <string name="backup_pin_create_support">De 6 a 16 dígitos. Um PIN mais longo protege melhor as tuas credenciais se alguém copiar o ficheiro. O Arc não consegue recuperar o PIN, mas o resto da cópia restaura-se na mesma sem ele.</string>
     <string name="backup_pin_create_back">Carrega em Voltar para fazer a cópia sem palavras-passe</string>
     <string name="backup_pin_confirm_heading">Introduz o PIN novamente</string>
     <string name="backup_pin_confirm_support">Os mesmos dígitos, para confirmar.</string>

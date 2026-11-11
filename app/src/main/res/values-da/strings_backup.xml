@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Hvis du logger ind på Nuvio bagefter, kan dine synkroniserede indstillinger erstatte de gendannede.</string>
     <string name="backup_restore_button">Gendan</string>
     <string name="backup_pin_create_heading">Vælg en PIN til adgangskoder og nøgler</string>
-    <string name="backup_pin_create_support">Mindst 6 cifre. Arc kan ikke genskabe den, men alt andet i sikkerhedskopien kan stadig gendannes uden den.</string>
+    <string name="backup_pin_create_support">6 til 16 cifre. En længere PIN-kode beskytter dine logins bedre, hvis nogen kopierer filen. Arc kan ikke genskabe PIN-koden, men alt andet i sikkerhedskopien kan stadig gendannes uden den.</string>
     <string name="backup_pin_create_back">Tryk tilbage for at sikkerhedskopiere uden adgangskoder</string>
     <string name="backup_pin_confirm_heading">Indtast PIN igen</string>
     <string name="backup_pin_confirm_support">De samme cifre, for en sikkerheds skyld.</string>

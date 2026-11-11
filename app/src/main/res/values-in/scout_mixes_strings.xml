@@ -31,6 +31,7 @@
     <string name="scout_mixes_remix">Campur ulang</string>
     <string name="scout_mixes_unwatched_only">Hanya belum ditonton</string>
     <string name="scout_mixes_keep_playing">Terus putar</string>
+    <string name="scout_mixes_pick_sources">Pilihkan sumber untuk saya</string>
     <string name="scout_mixes_edit">Edit campuran</string>
     <string name="scout_mixes_in_this_mix">Di campuran ini</string>
     <string name="scout_mixes_next_in">Berikutnya di %1$s</string>

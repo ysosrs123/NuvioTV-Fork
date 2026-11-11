@@ -37,6 +37,9 @@
     <string name="servers_enabled_description">Zobrazovať tento server na Domovskej obrazovke, vo vyhľadávaní a vo výsledkoch streamov.</string>
     <string name="servers_catalog_metadata">Použiť metadáta z doplnkov</string>
     <string name="servers_catalog_metadata_description">Tituly sa otvoria s podrobnosťami z vašich doplnkov a synchronizujú sa ako akýkoľvek iný titul z katalógu. Priebeh prehrávania a označenia o pozretí sa stále odosielajú do %1$s. Niektoré tituly sa nemusia zhodovať alebo prehrať, ak ich vaše doplnky číslujú alebo identifikujú odlišne. Vypnite to, ak chcete prehrávať len z %1$s, bez hľadania v doplnkoch.</string>
+    <string name="servers_autoplay_first">Automatické prehrávanie vyberá najprv tento server</string>
+    <string name="servers_autoplay_first_description">Keď má %1$s titul, automatické prehrávanie ho pustí z %1$s, nech ste sa k titulu dostali akokoľvek. Ak ho %1$s nemá alebo nie je dostupný, vyberá sa ako zvyčajne.</string>
+    <string name="servers_autoplay_first_manual">Automatické prehrávanie je vypnuté, takže sa zoznam zdrojov otvorí ako zvyčajne, s %1$s navrchu.</string>
     <string name="servers_import_watch_state">Importovať priebeh sledovania</string>
     <string name="servers_import_watch_state_description">Pridá tituly, ktoré sledujete v %1$s, do sekcie Pokračovať v sledovaní spolu s označením o pozretí. Prehrávanie bude v oboch prípadoch nadväzovať z %1$s.</string>
     <string name="servers_sign_in_again">Znova sa prihlásiť</string>

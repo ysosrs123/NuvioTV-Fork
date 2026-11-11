@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Dacă te conectezi ulterior la Nuvio, setările sincronizate pot înlocui setările restaurate.</string>
     <string name="backup_restore_button">Restaurează</string>
     <string name="backup_pin_create_heading">Alege un PIN pentru parole și chei</string>
-    <string name="backup_pin_create_support">Cel puțin 6 cifre. Arc nu îl poate recupera, dar restul backupului se restaurează și fără el.</string>
+    <string name="backup_pin_create_support">Între 6 și 16 cifre. Un PIN mai lung îți protejează mai bine datele de conectare dacă cineva copiază fișierul. Arc nu poate recupera PIN-ul, dar restul backupului se restaurează și fără el.</string>
     <string name="backup_pin_create_back">Apasă Înapoi pentru a face backup fără parole</string>
     <string name="backup_pin_confirm_heading">Introdu din nou PIN-ul</string>
     <string name="backup_pin_confirm_support">Aceleași cifre, pentru siguranță.</string>

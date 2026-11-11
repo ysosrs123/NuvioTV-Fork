@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Ak sa potom prihlásite do Nuvio, synchronizované nastavenia môžu nahradiť tie obnovené.</string>
     <string name="backup_restore_button">Obnoviť</string>
     <string name="backup_pin_create_heading">Zvoľte PIN pre heslá a kľúče</string>
-    <string name="backup_pin_create_support">Aspoň 6 číslic. Arc ho nedokáže získať späť, ale všetko ostatné v zálohe sa obnoví aj bez neho.</string>
+    <string name="backup_pin_create_support">6 až 16 číslic. Dlhší PIN lepšie chráni vaše prihlasovacie údaje, ak niekto súbor skopíruje. Arc PIN nedokáže získať späť, ale všetko ostatné v zálohe sa obnoví aj bez neho.</string>
     <string name="backup_pin_create_back">Stlačte späť pre zálohu bez hesiel</string>
     <string name="backup_pin_confirm_heading">Zadajte PIN znova</string>
     <string name="backup_pin_confirm_support">Rovnaké číslice, pre istotu.</string>

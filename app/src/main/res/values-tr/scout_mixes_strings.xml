@@ -31,6 +31,7 @@
     <string name="scout_mixes_remix">Yeniden karıştır</string>
     <string name="scout_mixes_unwatched_only">Yalnızca izlenmeyenler</string>
     <string name="scout_mixes_keep_playing">Oynatmaya devam et</string>
+    <string name="scout_mixes_pick_sources">Kaynakları benim için seç</string>
     <string name="scout_mixes_edit">Karışımı düzenle</string>
     <string name="scout_mixes_in_this_mix">Bu karışımda</string>
     <string name="scout_mixes_next_in">%1$s içinde sıradaki</string>

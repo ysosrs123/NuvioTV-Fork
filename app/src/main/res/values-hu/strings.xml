@@ -802,7 +802,7 @@
     <string name="audio_lang_original_hint">A TMDB metaadatok engedélyezése szükséges</string>
     <string name="audio_preferred_lang">Előnyben részesített hangsáv</string>
     <string name="audio_skip_silence">Csend átugrása</string>
-    <string name="audio_skip_silence_sub">Néma szakaszok átugrása lejátszás közben. Nincs hatása, amíg a hang passthrough-val (bitstream) megy ki</string>
+    <string name="audio_skip_silence_sub">Néma szakaszok átugrása lejátszás közben. A néma szakaszok átugrásakor a kép akadozhat, és a hang elcsúszottnak tűnhet. Nincs hatása, amíg a hang passthrough-val (bitstream) megy ki</string>
     <string name="audio_remember_delay_per_device">Késleltetés megjegyzése eszközönként</string>
     <string name="audio_remember_delay_per_device_sub">Menti és visszaállítja a lejátszón belüli hangkésleltetést az aktuális hangkimenethez</string>
     <string name="audio_advanced_section">Speciális hangbeállítások</string>

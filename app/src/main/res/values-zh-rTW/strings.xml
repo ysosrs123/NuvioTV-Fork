@@ -776,7 +776,7 @@
     <string name="audio_lang_original_hint">需要啟用 TMDB 增強</string>
     <string name="audio_preferred_lang">偏好音訊語言</string>
     <string name="audio_skip_silence">跳過靜音</string>
-    <string name="audio_skip_silence_sub">播放時跳過音訊中的靜音部分。音訊穿透 (位元流) 時無效</string>
+    <string name="audio_skip_silence_sub">播放時跳過音訊中的靜音部分。跳過靜音部分時，畫面可能卡頓，音訊可能顯得不同步。音訊穿透 (位元流) 時無效</string>
     <string name="audio_remember_delay_per_device">為每個裝置記住音訊延遲</string>
     <string name="audio_remember_delay_per_device_sub">為目前音訊輸出路線儲存並還原播放器內的音訊延遲</string>
     <string name="audio_advanced_section">進階音訊</string>

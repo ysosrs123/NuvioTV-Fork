@@ -33,6 +33,7 @@
     <string name="scout_mixes_remix">Bland igen</string>
     <string name="scout_mixes_unwatched_only">Kun usete</string>
     <string name="scout_mixes_keep_playing">Fortsæt afspilning</string>
+    <string name="scout_mixes_pick_sources">Vælg kilder for mig</string>
     <string name="scout_mixes_edit">Rediger mix</string>
     <string name="scout_mixes_in_this_mix">I dette mix</string>
     <string name="scout_mixes_next_in">Næste i %1$s</string>

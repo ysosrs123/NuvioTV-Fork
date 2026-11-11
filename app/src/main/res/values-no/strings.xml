@@ -325,7 +325,7 @@
     <string name="audio_lang_device">Enhetsspråk</string>
     <string name="audio_preferred_lang">Foretrukket lydspråk</string>
     <string name="audio_skip_silence">Hopp over stillhet</string>
-    <string name="audio_skip_silence_sub">Hopp over stille deler av lyden under avspilling. Ingen effekt når lyden sendes urørt videre (bitstream)</string>
+    <string name="audio_skip_silence_sub">Hopp over stille deler av lyden under avspilling. Bildet kan hakke, og lyden kan virke usynkronisert mens stille deler hoppes over. Ingen effekt når lyden sendes urørt videre (bitstream)</string>
     <string name="audio_advanced_section">Avansert lyd</string>
     <string name="audio_advanced_warning">Disse innstillingene kan forårsake problemer på noen enheter. Endre bare hvis du vet hva du gjør.</string>
     <string name="audio_decoder_device_only">Kun enhetsdekodere</string>

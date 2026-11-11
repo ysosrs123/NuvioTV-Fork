@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Ako se nakon toga prijaviš na Nuvio, sinhronizovane postavke mogu zamijeniti vraćene.</string>
     <string name="backup_restore_button">Vrati</string>
     <string name="backup_pin_create_heading">Odaberi PIN za lozinke i ključeve</string>
-    <string name="backup_pin_create_support">Najmanje 6 cifara. Arc ga ne može vratiti, ali sve ostalo iz kopije se vraća i bez njega.</string>
+    <string name="backup_pin_create_support">Od 6 do 16 cifara. Duži PIN bolje štiti tvoje prijave ako neko kopira datoteku. Arc ga ne može vratiti, ali sve ostalo iz kopije se vraća i bez njega.</string>
     <string name="backup_pin_create_back">Pritisni nazad za kopiju bez lozinki</string>
     <string name="backup_pin_confirm_heading">Ponovo unesi PIN</string>
     <string name="backup_pin_confirm_support">Iste cifre, radi provjere.</string>

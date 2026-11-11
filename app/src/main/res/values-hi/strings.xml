@@ -282,7 +282,7 @@
     <string name="audio_lang_device">डिवाइस भाषा</string>
     <string name="audio_preferred_lang">पसंदीदा ऑडियो भाषा</string>
     <string name="audio_skip_silence">साइलेंस स्किप करें</string>
-    <string name="audio_skip_silence_sub">प्लेबैक के दौरान ऑडियो के साइलेंट हिस्सों को स्किप करें। ऑडियो पासथ्रू (बिटस्ट्रीम) होने पर कोई असर नहीं</string>
+    <string name="audio_skip_silence_sub">प्लेबैक के दौरान ऑडियो के साइलेंट हिस्सों को स्किप करें। साइलेंट हिस्से स्किप होते समय पिक्चर अटक-अटक कर चल सकती है और ऑडियो सिंक से बाहर लग सकता है। ऑडियो पासथ्रू (बिटस्ट्रीम) होने पर कोई असर नहीं</string>
     <string name="audio_advanced_section">एडवांस्ड ऑडियो</string>
     <string name="audio_advanced_warning">ये सेटिंग्स कुछ डिवाइस पर समस्या पैदा कर सकती हैं। केवल तभी बदलें जब आपको पता हो कि आप क्या कर रहे हैं।</string>
     <string name="audio_decoder_device_only">केवल डिवाइस डिकोडर</string>

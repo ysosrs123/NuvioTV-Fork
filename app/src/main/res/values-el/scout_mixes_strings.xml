@@ -33,6 +33,7 @@
     <string name="scout_mixes_remix">Νέα ανάμειξη</string>
     <string name="scout_mixes_unwatched_only">Μόνο όσα δεν έχετε δει</string>
     <string name="scout_mixes_keep_playing">Συνέχιση αναπαραγωγής</string>
+    <string name="scout_mixes_pick_sources">Επιλογή πηγών για μένα</string>
     <string name="scout_mixes_edit">Επεξεργασία μείγματος</string>
     <string name="scout_mixes_in_this_mix">Σε αυτό το μείγμα</string>
     <string name="scout_mixes_next_in">Επόμενο στο %1$s</string>

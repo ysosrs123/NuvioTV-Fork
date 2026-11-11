@@ -37,6 +37,7 @@
     <string name="scout_mixes_remix">Maišyti iš naujo</string>
     <string name="scout_mixes_unwatched_only">Tik nežiūrėti</string>
     <string name="scout_mixes_keep_playing">Leisti toliau</string>
+    <string name="scout_mixes_pick_sources">Parinkti šaltinius už mane</string>
     <string name="scout_mixes_edit">Redaguoti miksą</string>
     <string name="scout_mixes_in_this_mix">Šiame mikse</string>
     <string name="scout_mixes_next_in">Toliau mikse %1$s</string>

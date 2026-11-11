@@ -613,7 +613,7 @@
     <string name="audio_lang_original_hint">Memerlukan pengayaan TMDB untuk diaktifkan</string>
     <string name="audio_preferred_lang">Bahasa Audio yang Diutamakan</string>
     <string name="audio_skip_silence">Lewati Kesunyian</string>
-    <string name="audio_skip_silence_sub">Lewati bagian sunyi audio saat pemutaran. Tidak berpengaruh saat audio diteruskan (bitstream)</string>
+    <string name="audio_skip_silence_sub">Lewati bagian sunyi audio saat pemutaran. Gambar bisa tersendat dan audio bisa terasa tidak sinkron saat bagian sunyi dilewati. Tidak berpengaruh saat audio diteruskan (bitstream)</string>
     <string name="audio_remember_delay_per_device">Ingat penundaan audio per perangkat</string>
     <string name="audio_remember_delay_per_device_sub">Simpan dan pulihkan penundaan audio dalam pemutar untuk rute output audio saat ini</string>
     <string name="audio_advanced_section">Audio Lanjutan</string>

@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">إذا سجّلت الدخول إلى Nuvio بعد ذلك، فقد تحل إعداداتك المتزامنة محل الإعدادات المستعادة.</string>
     <string name="backup_restore_button">استعادة</string>
     <string name="backup_pin_create_heading">اختر رمز PIN لكلمات المرور والمفاتيح</string>
-    <string name="backup_pin_create_support">6 أرقام على الأقل. لا يستطيع Arc استرجاعه، لكن باقي محتوى النسخة الاحتياطية يُستعاد بدونه.</string>
+    <string name="backup_pin_create_support">من 6 إلى 16 رقماً. رمز PIN الأطول يحمي بيانات تسجيل دخولك بشكل أفضل إذا نسخ أحدهم الملف. لا يستطيع Arc استرجاع رمز PIN، لكن باقي محتوى النسخة الاحتياطية يُستعاد بدونه.</string>
     <string name="backup_pin_create_back">اضغط رجوع للنسخ الاحتياطي بدون كلمات المرور</string>
     <string name="backup_pin_confirm_heading">أدخل رمز PIN مرة أخرى</string>
     <string name="backup_pin_confirm_support">الأرقام نفسها، للتأكد.</string>

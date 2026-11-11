@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Jika Anda masuk ke Nuvio setelahnya, pengaturan yang disinkronkan dapat menggantikan pengaturan yang dipulihkan.</string>
     <string name="backup_restore_button">Pulihkan</string>
     <string name="backup_pin_create_heading">Pilih PIN untuk kata sandi dan kunci</string>
-    <string name="backup_pin_create_support">Minimal 6 digit. Arc tidak dapat memulihkannya, tetapi isi cadangan lainnya tetap bisa dipulihkan tanpanya.</string>
+    <string name="backup_pin_create_support">6 hingga 16 digit. PIN yang lebih panjang lebih melindungi info masuk Anda jika seseorang menyalin file ini. Arc tidak dapat memulihkan PIN tersebut, tetapi isi cadangan lainnya tetap bisa dipulihkan tanpanya.</string>
     <string name="backup_pin_create_back">Tekan kembali untuk mencadangkan tanpa kata sandi</string>
     <string name="backup_pin_confirm_heading">Masukkan PIN lagi</string>
     <string name="backup_pin_confirm_support">Digit yang sama, untuk memastikan.</string>

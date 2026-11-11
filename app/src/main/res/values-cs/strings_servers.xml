@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Zobrazit tento server na domovské obrazovce, ve vyhledávání a ve výsledcích streamů.</string>
     <string name="servers_catalog_metadata">Použít metadata doplňků</string>
     <string name="servers_catalog_metadata_description">Tituly se otevírají s podrobnostmi z vašich doplňků a synchronizují se jako každý jiný titul z katalogu, přehrávání a označení zhlédnutí se dál odesílají do %1$s. Některé tituly se nemusí spárovat nebo přehrát, pokud je vaše doplňky číslují nebo identifikují jinak. Vypněte to, chcete-li přehrávat jen z %1$s, bez hledání v doplňcích.</string>
+    <string name="servers_autoplay_first">Automatické přehrávání vybírá nejdřív tento server</string>
+    <string name="servers_autoplay_first_description">Když má %1$s titul, automatické přehrávání ho pustí z %1$s, ať jste se k titulu dostali jakkoli. Pokud ho %1$s nemá nebo není dostupný, vybírá se jako obvykle.</string>
+    <string name="servers_autoplay_first_manual">Automatické přehrávání je vypnuté, takže se seznam zdrojů otevře jako obvykle, s %1$s nahoře.</string>
     <string name="servers_import_continue_watching">Importovat Pokračovat ve sledování</string>
     <string name="servers_import_continue_watching_description">Tituly rozkoukané na %1$s se zobrazí v Pokračovat ve sledování na domovské obrazovce. Označení zhlédnutí se sladí v obou případech.</string>
     <string name="servers_import_watch_state">Importovat průběh sledování</string>

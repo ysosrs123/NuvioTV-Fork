@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Daha sonra Nuvio hesabınızda oturum açarsanız, senkronize ayarlarınız geri yüklenen ayarların yerini alabilir.</string>
     <string name="backup_restore_button">Geri yükle</string>
     <string name="backup_pin_create_heading">Şifreler ve anahtarlar için bir PIN seçin</string>
-    <string name="backup_pin_create_support">En az 6 hane. Arc bunu kurtaramaz, ancak yedekteki diğer her şey onsuz da geri yüklenir.</string>
+    <string name="backup_pin_create_support">6 ile 16 hane arası. Daha uzun bir PIN, biri dosyayı kopyalarsa oturum bilgilerinizi daha iyi korur. Arc PIN\'i kurtaramaz, ancak yedekteki diğer her şey onsuz da geri yüklenir.</string>
     <string name="backup_pin_create_back">Şifreler olmadan yedeklemek için geri tuşuna basın</string>
     <string name="backup_pin_confirm_heading">PIN\'i tekrar girin</string>
     <string name="backup_pin_confirm_support">Emin olmak için aynı rakamlar.</string>

@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Ha ezután bejelentkezel a Nuvióba, a szinkronizált beállításaid felülírhatják a visszaállítottakat.</string>
     <string name="backup_restore_button">Visszaállítás</string>
     <string name="backup_pin_create_heading">Válassz PIN-kódot a jelszavakhoz és kulcsokhoz</string>
-    <string name="backup_pin_create_support">Legalább 6 számjegy. Az Arc nem tudja visszaszerezni, de a mentés minden más része nélküle is visszaállítható.</string>
+    <string name="backup_pin_create_support">6-16 számjegy. A hosszabb PIN-kód jobban védi a bejelentkezéseidet, ha valaki lemásolja a fájlt. Az Arc nem tudja visszaszerezni a PIN-kódot, de a mentés minden más része nélküle is visszaállítható.</string>
     <string name="backup_pin_create_back">A jelszavak nélküli mentéshez nyomd meg a Vissza gombot</string>
     <string name="backup_pin_confirm_heading">Add meg újra a PIN-kódot</string>
     <string name="backup_pin_confirm_support">Ugyanazok a számjegyek, a biztonság kedvéért.</string>

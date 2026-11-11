@@ -804,7 +804,7 @@
     <string name="audio_lang_original_hint">Zahtijeva uključeno TMDB obogaćivanje</string>
     <string name="audio_preferred_lang">Preferirani jezik zvuka</string>
     <string name="audio_skip_silence">Preskoči tišinu</string>
-    <string name="audio_skip_silence_sub">Preskoči tihe dijelove zvuka tijekom reprodukcije. Nema učinka dok zvuk ide kao passthrough (bitstream)</string>
+    <string name="audio_skip_silence_sub">Preskoči tihe dijelove zvuka tijekom reprodukcije. Slika može zastajkivati, a zvuk se može činiti neusklađenim dok se tihi dijelovi preskaču. Nema učinka dok zvuk ide kao passthrough (bitstream)</string>
     <string name="audio_remember_delay_per_device">Zapamti kašnjenje zvuka po uređaju</string>
     <string name="audio_remember_delay_per_device_sub">Spremi i vrati kašnjenje zvuka iz playera za trenutni audio izlaz</string>
     <string name="audio_advanced_section">Napredni zvuk</string>

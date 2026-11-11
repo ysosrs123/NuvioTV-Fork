@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Nếu sau đó bạn đăng nhập vào Nuvio, các cài đặt đã đồng bộ có thể thay thế các cài đặt vừa khôi phục.</string>
     <string name="backup_restore_button">Khôi phục</string>
     <string name="backup_pin_create_heading">Chọn mã PIN cho mật khẩu và khóa</string>
-    <string name="backup_pin_create_support">Ít nhất 6 chữ số. Arc không thể lấy lại mã này, nhưng mọi thứ khác trong bản sao lưu vẫn khôi phục được mà không cần nó.</string>
+    <string name="backup_pin_create_support">Từ 6 đến 16 chữ số. Mã PIN dài hơn giúp bảo vệ thông tin đăng nhập của bạn tốt hơn nếu ai đó sao chép tệp. Arc không thể lấy lại mã này, nhưng mọi thứ khác trong bản sao lưu vẫn khôi phục được mà không cần nó.</string>
     <string name="backup_pin_create_back">Nhấn quay lại để sao lưu không kèm mật khẩu</string>
     <string name="backup_pin_confirm_heading">Nhập lại mã PIN</string>
     <string name="backup_pin_confirm_support">Nhập lại các chữ số đó để chắc chắn.</string>

@@ -776,7 +776,7 @@
     <string name="audio_lang_original_hint">需要启用 TMDB 增强</string>
     <string name="audio_preferred_lang">偏好音频语言</string>
     <string name="audio_skip_silence">跳过静音</string>
-    <string name="audio_skip_silence_sub">播放时跳过音频中的静音部分。音频穿透 (比特流) 时无效</string>
+    <string name="audio_skip_silence_sub">播放时跳过音频中的静音部分。跳过静音部分时，画面可能卡顿，音频可能显得不同步。音频穿透 (比特流) 时无效</string>
     <string name="audio_remember_delay_per_device">为每个设备记住音频延迟</string>
     <string name="audio_remember_delay_per_device_sub">为当前音频输出路线保存并还原播放器内的音频延迟</string>
     <string name="audio_advanced_section">高级音频</string>

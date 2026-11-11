@@ -41,7 +41,7 @@
     <string name="backup_restore_signin_note">Wenn Sie sich danach bei Nuvio anmelden, können Ihre synchronisierten Einstellungen die wiederhergestellten ersetzen.</string>
     <string name="backup_restore_button">Wiederherstellen</string>
     <string name="backup_pin_create_heading">PIN für Passwörter und Schlüssel wählen</string>
-    <string name="backup_pin_create_support">Mindestens 6 Ziffern. Arc kann sie nicht wiederherstellen, aber alles andere in der Sicherung lässt sich auch ohne sie wiederherstellen.</string>
+    <string name="backup_pin_create_support">6 bis 16 Ziffern. Eine längere PIN schützt Ihre Anmeldedaten besser, falls jemand die Datei kopiert. Arc kann die PIN nicht wiederherstellen, aber alles andere in der Sicherung lässt sich auch ohne sie wiederherstellen.</string>
     <string name="backup_pin_create_back">Zurück drücken, um ohne Passwörter zu sichern</string>
     <string name="backup_pin_confirm_heading">PIN erneut eingeben</string>
     <string name="backup_pin_confirm_support">Dieselben Ziffern, zur Sicherheit.</string>

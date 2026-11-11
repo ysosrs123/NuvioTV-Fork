@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Hiển thị máy chủ này trong Trang chủ, tìm kiếm và kết quả luồng.</string>
     <string name="servers_catalog_metadata">Dùng siêu dữ liệu từ tiện ích</string>
     <string name="servers_catalog_metadata_description">Nội dung mở với thông tin chi tiết từ tiện ích của bạn và đồng bộ như mọi nội dung danh mục khác, còn việc phát và đánh dấu đã xem vẫn được gửi tới %1$s. Một số nội dung có thể không khớp hoặc không phát được nếu tiện ích đánh số hay nhận diện chúng theo cách khác. Tắt mục này để chỉ phát từ %1$s, không tìm trong tiện ích bổ sung.</string>
+    <string name="servers_autoplay_first">Tự động phát chọn máy chủ này trước</string>
+    <string name="servers_autoplay_first_description">Khi %1$s có nội dung này, tự động phát sẽ phát từ %1$s, dù bạn tìm thấy nội dung theo cách nào. Nếu %1$s không có hoặc không kết nối được, việc chọn diễn ra như bình thường.</string>
+    <string name="servers_autoplay_first_manual">Tự động phát đang tắt, nên danh sách nguồn mở như bình thường, với %1$s ở trên cùng.</string>
     <string name="servers_import_continue_watching">Nhập Tiếp tục xem</string>
     <string name="servers_import_continue_watching_description">Nội dung bạn đã bắt đầu xem trên %1$s xuất hiện trong Tiếp tục xem ở Trang chủ. Đánh dấu đã xem luôn được giữ khớp ở cả hai trường hợp.</string>
     <string name="servers_import_watch_state">Nhập tiến trình xem</string>

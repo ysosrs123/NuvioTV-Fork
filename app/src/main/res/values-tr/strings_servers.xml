@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Bu sunucuyu Ana Sayfa, arama ve yayın sonuçlarında göster.</string>
     <string name="servers_catalog_metadata">Eklenti bilgilerini kullan</string>
     <string name="servers_catalog_metadata_description">İçerikler eklentilerinizin detaylarıyla açılır ve diğer katalog içerikleri gibi senkronize edilir; oynatma ve izlendi işaretleri yine %1$s sunucusuna gönderilir. Eklentileriniz farklı numaralandırıyor veya tanımlıyorsa bazı içerikler eşleşmeyebilir veya oynatılamayabilir. Kapatırsanız yalnızca %1$s kullanılır, eklentilerde arama yapılmaz.</string>
+    <string name="servers_autoplay_first">Otomatik oynatma önce bu sunucuyu seçer</string>
+    <string name="servers_autoplay_first_description">%1$s içinde bu başlık varsa, başlığa nasıl ulaştığınızdan bağımsız olarak otomatik oynatma onu %1$s üzerinden oynatır. %1$s içinde yoksa veya ulaşılamıyorsa seçim her zamanki gibi yapılır.</string>
+    <string name="servers_autoplay_first_manual">Otomatik oynatma kapalı, bu yüzden kaynak listesi her zamanki gibi açılır ve %1$s en üstte olur.</string>
     <string name="servers_import_continue_watching">İzlemeye Devam Et\'i içe aktar</string>
     <string name="servers_import_continue_watching_description">%1$s sunucusunda başladığınız içerikler Ana Sayfa\'daki İzlemeye Devam Et\'te görünür. İzlendi işaretleri her iki durumda da eşitlenir.</string>
     <string name="servers_import_watch_state">İzleme ilerlemesini içe aktar</string>

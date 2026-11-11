@@ -54,6 +54,9 @@
     <string name="servers_enabled_description">Toon deze server op Home, bij zoeken en in streamresultaten.</string>
     <string name="servers_catalog_metadata">Add-onmetadata gebruiken</string>
     <string name="servers_catalog_metadata_description">Titels openen met de details van je add-ons en synchroniseren zoals elke andere catalogustitel, terwijl afspelen en bekeken-markeringen nog steeds naar %1$s gaan. Sommige titels komen mogelijk niet overeen of spelen niet af als je add-ons ze anders nummeren of herkennen. Zet dit uit om alleen vanaf %1$s af te spelen, zonder te zoeken in add-ons.</string>
+    <string name="servers_autoplay_first">Automatisch afspelen kiest eerst deze server</string>
+    <string name="servers_autoplay_first_description">Als %1$s de titel heeft, speelt automatisch afspelen hem af vanaf %1$s, hoe je de titel ook vond. Heeft %1$s hem niet of is hij onbereikbaar, dan wordt er gekozen zoals altijd.</string>
+    <string name="servers_autoplay_first_manual">Automatisch afspelen staat uit, dus de bronnenlijst opent zoals altijd, met %1$s bovenaan.</string>
     <string name="servers_import_continue_watching">Verder kijken importeren</string>
     <string name="servers_import_continue_watching_description">Titels die je op %1$s bent begonnen, verschijnen in Verder kijken op Home. Bekeken-markeringen worden hoe dan ook gesynchroniseerd.</string>
     <string name="servers_import_watch_state">Kijkvoortgang importeren</string>

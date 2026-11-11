@@ -618,7 +618,7 @@
     <string name="audio_lang_original_hint">Vyžaduje povolené TMDB obohatenie</string>
     <string name="audio_preferred_lang">Preferovaný jazyk audia</string>
     <string name="audio_skip_silence">Preskočiť ticho</string>
-    <string name="audio_skip_silence_sub">Preskočiť tiché časti audia počas prehrávania. Nemá vplyv, keď zvuk prechádza bez zmeny (bitstream)</string>
+    <string name="audio_skip_silence_sub">Preskočiť tiché časti audia počas prehrávania. Pri preskakovaní tichých častí sa obraz môže zadrhávať a zvuk sa môže zdať nesynchronizovaný. Nemá vplyv, keď zvuk prechádza bez zmeny (bitstream)</string>
     <string name="audio_remember_delay_per_device">Zapamätať oneskorenie audia pre zariadenie</string>
     <string name="audio_remember_delay_per_device_sub">Uložiť a obnoviť oneskorenie audia v prehrávači pre aktuálnu výstupnú audio trasu</string>
     <string name="audio_advanced_section">Pokročilé audio</string>

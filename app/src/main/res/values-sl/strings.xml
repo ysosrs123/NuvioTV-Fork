@@ -578,7 +578,7 @@
     <string name="audio_lang_original_hint">Zahteva omogočeno obogatitev s TMDB</string>															 
 	<string name="audio_preferred_lang">Prednostni jezik zvoka</string>
     <string name="audio_skip_silence">Preskoči tišino</string>
-    <string name="audio_skip_silence_sub">Preskoči tihe dele zvoka med predvajanjem. Brez učinka med prehodom zvoka (bitstream)</string>
+    <string name="audio_skip_silence_sub">Preskoči tihe dele zvoka med predvajanjem. Slika se lahko zatika, zvok pa se lahko zdi neusklajen, medtem ko se tihi deli preskakujejo. Brez učinka med prehodom zvoka (bitstream)</string>
 	<string name="audio_remember_delay_per_device">Zapomni si zamik zvoka za vsako napravo</string>
     <string name="audio_remember_delay_per_device_sub">Shrani in obnovi zamik zvoka v predvajalniku za trenutni zvočni izhod</string>																					   
 	<string name="audio_advanced_section">Napredni zvok</string>
