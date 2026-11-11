@@ -89,6 +89,15 @@ class ServerStreams @Inject constructor(
         }
     }
 
+    /** The sources auto-play takes first for this title, in the order of the servers list. */
+    fun autoPlayFirstNames(type: String, videoId: String): Set<String> {
+        if (ServerItemRef.isServerId(videoId)) return emptySet()
+        val request = matcher.request(type, videoId, season = null, episode = null) ?: return emptySet()
+        return repository.enabledConnections()
+            .filter { it.autoPlayFirst && matcher.supports(it, request.kind) }
+            .mapTo(LinkedHashSet()) { repository.sourceLabel(it) }
+    }
+
     fun preferredSourceNames(type: String, videoId: String): Set<String> =
         sources(type, videoId, season = null, episode = null)
             .filter { it.preferred }

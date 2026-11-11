@@ -60,6 +60,7 @@ internal fun MediaServerSettingsContent(
     viewModel: MediaServersViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val autoPlayManual by viewModel.autoPlayManual.collectAsStateWithLifecycle(initialValue = false)
     val refreshing by viewModel.refreshing.collectAsStateWithLifecycle()
     val connection = uiState.connections.firstOrNull { it.id == connectionId }
     if (connection == null) {
@@ -204,6 +205,20 @@ internal fun MediaServerSettingsContent(
                                 onToggle = { viewModel.setCatalogMetadata(connection.id, !connection.useCatalogMetadata) }
                             )
                         }
+                    }
+                    item(key = "server_autoplay_first") {
+                        val about = stringResource(R.string.servers_autoplay_first_description, connection.shownName)
+                        SettingsToggleRow(
+                            title = stringResource(R.string.servers_autoplay_first),
+                            subtitle = if (autoPlayManual) {
+                                about + "\n" + stringResource(R.string.servers_autoplay_first_manual, connection.shownName)
+                            } else {
+                                about
+                            },
+                            checked = connection.autoPlayFirst,
+                            enabled = connection.enabled,
+                            onToggle = { viewModel.setAutoPlayFirst(connection.id, !connection.autoPlayFirst) }
+                        )
                     }
                     if (provider?.supports(ServerCapability.USER_STATE_READ) == true) {
                         item(key = "server_import_continue_watching") {

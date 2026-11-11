@@ -389,6 +389,7 @@ class ServerRepository(
             enabled = true,
             useCatalogMetadata = existing?.useCatalogMetadata ?: true,
             importContinueWatching = existing?.importContinueWatching ?: true,
+            autoPlayFirst = existing?.autoPlayFirst ?: false,
             syncedImportWatchState = existing?.syncedImportWatchState,
             alternateAddress = existing?.alternateAddress,
             tlsPins = existing?.tlsPins.orEmpty() + listOfNotNull(acceptedCertificate),
@@ -471,6 +472,10 @@ class ServerRepository(
 
     fun setCatalogMetadata(connectionId: String, enabled: Boolean) {
         updateConnection(connectionId) { it.copy(useCatalogMetadata = enabled) }
+    }
+
+    fun setAutoPlayFirst(connectionId: String, enabled: Boolean) {
+        updateConnection(connectionId) { it.copy(autoPlayFirst = enabled) }
     }
 
     fun setImportContinueWatching(connectionId: String, enabled: Boolean) {
@@ -578,6 +583,7 @@ class ServerRepository(
             server.toConnection(id, credentialRef)
                 .copy(
                     importContinueWatching = local?.importContinueWatching ?: true,
+                    autoPlayFirst = local?.autoPlayFirst ?: false,
                     alternateAddress = local?.alternateAddress,
                     lastGoodAddress = local?.lastGoodAddress,
                     tlsPins = local?.tlsPins.orEmpty()

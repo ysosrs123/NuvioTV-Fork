@@ -34,6 +34,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
@@ -86,9 +87,14 @@ data class QuickConnectState(
 @HiltViewModel
 class MediaServersViewModel @Inject constructor(
     private val repository: ServerRepository,
-    private val syncService: MediaServerSyncService
+    private val syncService: MediaServerSyncService,
+    playerSettings: com.nuvio.tv.data.local.PlayerSettingsDataStore
 ) : ViewModel() {
     val uiState: StateFlow<ServersUiState> = repository.uiState
+
+    val autoPlayManual: kotlinx.coroutines.flow.Flow<Boolean> = playerSettings.playerSettings.map {
+        it.streamAutoPlayMode == com.nuvio.tv.data.local.StreamAutoPlayMode.MANUAL
+    }
 
     val providers: List<ServerProvider>
         get() = repository.providers
@@ -451,6 +457,8 @@ class MediaServersViewModel @Inject constructor(
     fun setShowHomeRows(connectionId: String, show: Boolean) = repository.setShowHomeRows(connectionId, show)
 
     fun setCatalogMetadata(connectionId: String, enabled: Boolean) = repository.setCatalogMetadata(connectionId, enabled)
+
+    fun setAutoPlayFirst(connectionId: String, enabled: Boolean) = repository.setAutoPlayFirst(connectionId, enabled)
 
     fun setImportContinueWatching(connectionId: String, enabled: Boolean) =
         repository.setImportContinueWatching(connectionId, enabled)

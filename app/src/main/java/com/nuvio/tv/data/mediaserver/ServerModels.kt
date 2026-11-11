@@ -66,6 +66,8 @@ data class ServerConnection(
     val libraries: List<ServerLibrary> = emptyList(),
     val enabled: Boolean = true,
     val useCatalogMetadata: Boolean = false,
+    /** Auto-play plays from this server first when it has the title. This device only. */
+    val autoPlayFirst: Boolean = false,
     val importContinueWatching: Boolean = true,
     val alternateAddress: String? = null,
     val lastGoodAddress: String? = null,

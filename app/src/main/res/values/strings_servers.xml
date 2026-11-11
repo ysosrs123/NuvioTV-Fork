@@ -51,6 +51,9 @@
     <string name="servers_enabled_description">Show this server in Home, search, and stream results.</string>
     <string name="servers_catalog_metadata">Use addon metadata</string>
     <string name="servers_catalog_metadata_description">Titles open with your addons\' details and sync like any other catalog title, with playback and watched marks still sent to %1$s. Some titles may not match or play if your addons number or identify them differently. Turn this off to play from %1$s only, with no addon search.</string>
+    <string name="servers_autoplay_first">Auto-play picks this server first</string>
+    <string name="servers_autoplay_first_description">When %1$s has the title, auto-play plays it from %1$s, however you found the title. If %1$s doesn\'t have it or can\'t be reached, auto-play picks as usual.</string>
+    <string name="servers_autoplay_first_manual">Auto-play is off, so the source list opens as usual, with %1$s at the top.</string>
     <string name="servers_import_continue_watching">Import Continue Watching</string>
     <string name="servers_import_continue_watching_description">Titles you have started on %1$s appear in Continue Watching on Home. Watched marks are kept in step either way.</string>
     <string name="servers_import_watch_state">Import watch progress</string>

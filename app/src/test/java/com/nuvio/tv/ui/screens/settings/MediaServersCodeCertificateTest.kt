@@ -67,7 +67,7 @@ class MediaServersCodeCertificateTest {
     private val requestsWithoutTrust = mutableListOf<String>()
     private val provider = CodeProvider()
     private val repository = ServerRepository(MemoryServerPersistence(), listOf(provider), CoroutineScope(Dispatchers.Unconfined))
-    private val viewModel = MediaServersViewModel(repository, mockk(relaxed = true))
+    private val viewModel = MediaServersViewModel(repository, mockk(relaxed = true), mockk(relaxed = true))
 
     @Before
     fun probe() {

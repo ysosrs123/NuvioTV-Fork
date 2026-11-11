@@ -204,6 +204,8 @@ class StreamScreenViewModel @Inject constructor(
     private val manualSelection: Boolean = savedStateHandle.get<String>("manualSelection")
         ?.toBooleanStrictOrNull()
         ?: false
+    private val pickForMe: Boolean = !manualSelection &&
+        savedStateHandle.get<String>("pickForMe")?.toBooleanStrictOrNull() == true
     private val streamCacheKey: String = "${contentType.lowercase()}|$videoId"
     private val partyHostMedia: com.nuvio.tv.core.party.PartyMedia? =
         partyRuntime.guestMediaFor(videoId, season, episode)
@@ -466,7 +468,7 @@ class StreamScreenViewModel @Inject constructor(
             // before the scrape is even built, and applySuccess does ordering,
             // badge-merge and chip-merge work on Main afterwards. Logging only.
             val loadSplitT0 = SystemClock.elapsedRealtime()
-            val playerSettings = playerSettingsDataStore.playerSettings.first()
+            val playerSettings = playerSettingsDataStore.playerSettings.first().forMixPick(pickForMe)
             listSortBestFirst = playerSettings.streamListSort == StreamListSort.BEST_QUALITY_FIRST
             android.util.Log.i(TAG, "LOAD_SPLIT playerSettings=${SystemClock.elapsedRealtime() - loadSplitT0}ms")
             if (latestDebridStreamPreferences == null) {
@@ -595,6 +597,9 @@ class StreamScreenViewModel @Inject constructor(
             val isNativeServerRequest = serverStreams.isNativeRequest(videoId)
             val serverSourceNames = serverStreams.sources(contentType, videoId, season, episode).map { it.name }
             val preferredServerNames = serverStreams.preferredSourceNames(contentType, videoId)
+            val serverFirstNames = if (playerSettings.streamAutoPlayMode != StreamAutoPlayMode.MANUAL) {
+                serverStreams.autoPlayFirstNames(contentType, videoId)
+            } else emptySet()
             val addonsSplitT0 = SystemClock.elapsedRealtime()
             val installedAddons = if (isNativeServerRequest) {
                 emptyList()
@@ -675,9 +680,14 @@ class StreamScreenViewModel @Inject constructor(
                 val applyBadgeMs = SystemClock.elapsedRealtime() - applyT0 - applyOrderMs
                 val availableAddons = mergedAddonStreams.map { it.addonName }
 
+                // A server set to go first gets its answer in before a binge group match can win.
+                val waitForServerFirst = directAutoPlayFlowEnabledForSession && serverFirstNames.isNotEmpty() && !isAllLoaded &&
+                    allStreams.none { it.addonName in serverFirstNames }
                 // Early binge group match: if we have a persisted binge group, try to
                 // match it immediately on every emission without waiting for all addons.
-                val earlyBingeGroupMatch = if (!autoPlayHandledForSession && !resolvedAutoPlayTarget && persistedBingeGroup != null) {
+                val earlyBingeGroupMatch = if (
+                    !autoPlayHandledForSession && !resolvedAutoPlayTarget && persistedBingeGroup != null && !waitForServerFirst
+                ) {
                     val debridPreferences = latestDebridStreamPreferences
                     withContext(Dispatchers.Default) {
                         bingeGroupFileMatch(
@@ -718,7 +728,19 @@ class StreamScreenViewModel @Inject constructor(
                     partyPickDone = true
                     updateUiStateIfChanged { it.copy(autoPlayPlaybackInfo = partySharedLinkPlayback(partyHostMedia)) }
                 }
-                val selectedAutoPlayStream = partyPick ?: earlyBingeGroupMatch ?: if (!shouldAutoSelect) {
+                // A server set to go first wins as soon as it answers with the title.
+                val serverFirst = if (
+                    directAutoPlayFlowEnabledForSession && serverFirstNames.isNotEmpty() &&
+                    !autoPlayHandledForSession && !resolvedAutoPlayTarget
+                ) {
+                    val debridPreferences = latestDebridStreamPreferences
+                    withContext(Dispatchers.Default) {
+                        com.nuvio.tv.core.player.serverFirstPick(allStreams, serverFirstNames) { own ->
+                            AutoPlaySelection.select(streams = own, inputs = autoPlayInputs, debridStreamPreferences = debridPreferences)
+                        }
+                    }.takeUnless { resolvedAutoPlayTarget || autoPlayHandledForSession }
+                } else null
+                val selectedAutoPlayStream = partyPick ?: serverFirst ?: earlyBingeGroupMatch ?: if (!shouldAutoSelect) {
                     null
                 } else {
                     val gateT0 = SystemClock.elapsedRealtime()
@@ -979,7 +1001,7 @@ class StreamScreenViewModel @Inject constructor(
                                         }
                                     }
                                 }
-                            } else if (directFlowActive && persistedBingeGroup != null) {
+                            } else if (directFlowActive && persistedBingeGroup != null && serverFirstNames.isEmpty()) {
                                 // Before timeout: eagerly check binge group only
                                 // (no fallback to FIRST_STREAM/REGEX yet). If a
                                 // match is found we can start playback immediately
