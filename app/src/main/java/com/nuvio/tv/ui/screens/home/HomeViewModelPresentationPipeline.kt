@@ -17,6 +17,7 @@ import com.nuvio.tv.data.trailer.isTrailerPreviewLinkExpired
 import com.nuvio.tv.data.trailer.isTrailerPreviewMissFresh
 import com.nuvio.tv.data.trailer.lookupTrailerPreview
 import com.nuvio.tv.data.trailer.shouldRetryTrailerPreviewAfterFailure
+import com.nuvio.tv.data.trailer.trailerPreviewLookupSettleMs
 import com.nuvio.tv.data.trailer.trailerPreviewMissTimestamp
 import com.nuvio.tv.data.trailer.trailerPreviewYtIds
 import com.nuvio.tv.domain.model.FocusedPosterTrailerPlaybackTarget
@@ -546,9 +547,9 @@ internal fun HomeViewModel.requestTrailerPreviewPipeline(
     // Keep bookkeeping on Main; repositories/extractors own their IO dispatchers.
     trailerPreviewJob = viewModelScope.launch {
         try {
-            // Debounce: wait for focus to settle before hitting network. 350ms starts prewarming
-            // ~250ms sooner than 600 on a deliberate pause, still past a scroll-flick (~<200ms).
-            delay(350)
+            // Wait for focus to settle before hitting network, as long as the trailer's own
+            // start delay allows.
+            delay(trailerPreviewLookupSettleMs(_uiState.value.focusedPosterBackdropExpandDelaySeconds * 1000L))
 
             // Only the LATEST request proceeds — all earlier ones are stale
             if (trailerPreviewRequestVersion != requestVersion) {

@@ -7,8 +7,19 @@ import kotlinx.coroutines.CancellationException
 internal const val TRAILER_PREVIEW_RETRY_WINDOW_MS = 10 * 60_000L
 internal const val TRAILER_PREVIEW_SHORT_MISS_WINDOW_MS = 2 * 60_000L
 private const val TRAILER_PREVIEW_MAX_YT_IDS = 3
+private const val TRAILER_PREVIEW_LOOKUP_HEAD_START_MS = 2_200L
+private const val TRAILER_PREVIEW_LOOKUP_MIN_SETTLE_MS = 350L
+private const val TRAILER_PREVIEW_LOOKUP_MAX_SETTLE_MS = 1_100L
 
-/** [rememberMiss] is only set when nothing exists to try, never for timeouts or rate limits. */
+/**
+ * How long a title stays focused before its trailer is looked up. The trailer can only show after
+ * [showAfterMs], so the lookup starts as late as still leaves it time to be ready by then.
+ */
+internal fun trailerPreviewLookupSettleMs(showAfterMs: Long): Long =
+    (showAfterMs - TRAILER_PREVIEW_LOOKUP_HEAD_START_MS)
+        .coerceIn(TRAILER_PREVIEW_LOOKUP_MIN_SETTLE_MS, TRAILER_PREVIEW_LOOKUP_MAX_SETTLE_MS)
+
+/** [rememberMiss] is set when nothing exists to try or YouTube refused it, never for timeouts or rate limits. */
 internal data class TrailerPreviewLookup(
     val source: TrailerPlaybackSource?,
     val rememberMiss: Boolean = false
@@ -23,7 +34,7 @@ internal fun isTrailerPreviewMissFresh(missedAtMs: Long, nowMs: Long): Boolean =
 internal fun isTrailerPreviewLinkExpired(videoUrl: String, audioUrl: String?, now: Instant): Boolean =
     isTrailerUrlExpired(videoUrl, now) || (audioUrl != null && isTrailerUrlExpired(audioUrl, now))
 
-/** The time to store for a miss: one that may pass (timeout, refusal) is tried again after two minutes. */
+/** The time to store for a miss: one that may pass (timeout, failed request) is tried again after two minutes. */
 internal fun trailerPreviewMissTimestamp(definite: Boolean, nowMs: Long): Long =
     if (definite) nowMs else nowMs - (TRAILER_PREVIEW_RETRY_WINDOW_MS - TRAILER_PREVIEW_SHORT_MISS_WINDOW_MS)
 
@@ -60,15 +71,22 @@ internal suspend fun lookupTrailerPreview(
     )
     if (!lookup.source?.videoUrl.isNullOrBlank()) return TrailerPreviewLookup(lookup.source)
 
-    val fallbackSource = ytIds.firstNotNullOfOrNull { ytId ->
-        trailerService.getTrailerPlaybackSourceFromYouTubeUrl(
+    var ownIdsRefused = true
+    val ownIds = if (trailerService.isYouTubeResting()) emptyList() else ytIds
+    val fallbackSource = ownIds.firstNotNullOfOrNull { ytId ->
+        val own = trailerService.lookupYouTubeTrailer(
             youtubeUrl = "https://www.youtube.com/watch?v=$ytId",
             title = title,
             year = year
-        )?.takeIf { it.videoUrl.isNotBlank() }
+        )
+        if (own.unplayable == null) ownIdsRefused = false
+        own.source?.takeIf { it.videoUrl.isNotBlank() }
     }
+    val nothingToTry = lookup.definiteMiss && ytIds.isEmpty()
+    val allRefused = (lookup.refused || lookup.definiteMiss) && ownIdsRefused &&
+        (lookup.refused || ytIds.isNotEmpty())
     return TrailerPreviewLookup(
         source = fallbackSource,
-        rememberMiss = fallbackSource == null && lookup.definiteMiss && ytIds.isEmpty()
+        rememberMiss = fallbackSource == null && (nothingToTry || allRefused)
     )
 }

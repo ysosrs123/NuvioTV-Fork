@@ -633,13 +633,13 @@ private fun ModernCatalogRowItem(
         }
     }
 
-    val isSidebarExpanded = LocalSidebarExpanded.current
-    val playTrailerInExpandedCard =
+    // Read by the one card that could play, so opening the menu does not rebuild every poster.
+    val mayPlayTrailerInExpandedCard =
         effectiveAutoplayEnabled &&
-            !isSidebarExpanded &&
             isCardFocused &&
             trailerPlaybackTarget == FocusedPosterTrailerPlaybackTarget.EXPANDED_CARD &&
             effectiveBackdropExpanded
+    val playTrailerInExpandedCard = mayPlayTrailerInExpandedCard && !LocalSidebarExpanded.current
     // Only the card playing the trailer reads its address, so a new trailer does not rebuild every poster.
     val trailerPreviewUrl = if (playTrailerInExpandedCard) expandedTrailerPreviewUrl() else null
     val trailerPreviewAudioUrl = if (playTrailerInExpandedCard) {

@@ -56,11 +56,11 @@ class TrailerPreviewLookupTest {
         coEvery { trailerService.lookupTrailer(any(), any(), any(), any(), any()) } returns
             TrailerLookupResult.DEFINITE_MISS
         coEvery {
-            trailerService.getTrailerPlaybackSourceFromYouTubeUrl("https://www.youtube.com/watch?v=aaaaaaaaaaa", any(), any())
-        } returns null
+            trailerService.lookupYouTubeTrailer("https://www.youtube.com/watch?v=aaaaaaaaaaa", any(), any())
+        } returns YouTubeTrailerLookup(null)
         coEvery {
-            trailerService.getTrailerPlaybackSourceFromYouTubeUrl("https://www.youtube.com/watch?v=bbbbbbbbbbb", any(), any())
-        } returns TrailerPlaybackSource("https://example.test/second-id.mp4")
+            trailerService.lookupYouTubeTrailer("https://www.youtube.com/watch?v=bbbbbbbbbbb", any(), any())
+        } returns YouTubeTrailerLookup(TrailerPlaybackSource("https://example.test/second-id.mp4"))
 
         val result = lookup(ytIds = listOf("aaaaaaaaaaa", "bbbbbbbbbbb"))
 
@@ -71,7 +71,7 @@ class TrailerPreviewLookupTest {
     @Test
     fun `only a definite miss with nothing left to try is remembered`() = runTest {
         coEvery { tmdbService.ensureTmdbId(any(), any(), any()) } returns "550"
-        coEvery { trailerService.getTrailerPlaybackSourceFromYouTubeUrl(any(), any(), any()) } returns null
+        coEvery { trailerService.lookupYouTubeTrailer(any(), any(), any()) } returns YouTubeTrailerLookup(null)
 
         coEvery { trailerService.lookupTrailer(any(), any(), any(), any(), any()) } returns
             TrailerLookupResult.DEFINITE_MISS
@@ -83,6 +83,37 @@ class TrailerPreviewLookupTest {
         val timedOut = lookup()
         assertNull(timedOut.source)
         assertFalse(timedOut.rememberMiss)
+    }
+
+    @Test
+    fun `a title YouTube refuses is remembered`() = runTest {
+        coEvery { tmdbService.ensureTmdbId(any(), any(), any()) } returns "550"
+        coEvery { trailerService.lookupTrailer(any(), any(), any(), any(), any()) } returns
+            TrailerLookupResult(null, refused = true)
+        assertTrue(lookup().rememberMiss)
+
+        coEvery { trailerService.lookupYouTubeTrailer(any(), any(), any()) } returns
+            YouTubeTrailerLookup(null, YouTubeUnplayableReason.SIGN_IN_REQUIRED)
+        assertTrue(lookup(ytIds = listOf("aaaaaaaaaaa")).rememberMiss)
+
+        coEvery { trailerService.lookupTrailer(any(), any(), any(), any(), any()) } returns
+            TrailerLookupResult.DEFINITE_MISS
+        assertTrue(lookup(ytIds = listOf("aaaaaaaaaaa")).rememberMiss)
+    }
+
+    @Test
+    fun `a refusal next to a failed request is not remembered`() = runTest {
+        coEvery { tmdbService.ensureTmdbId(any(), any(), any()) } returns "550"
+        coEvery { trailerService.lookupTrailer(any(), any(), any(), any(), any()) } returns
+            TrailerLookupResult(null, refused = true)
+        coEvery { trailerService.lookupYouTubeTrailer(any(), any(), any()) } returns YouTubeTrailerLookup(null)
+        assertFalse(lookup(ytIds = listOf("aaaaaaaaaaa")).rememberMiss)
+
+        coEvery { trailerService.lookupTrailer(any(), any(), any(), any(), any()) } returns
+            TrailerLookupResult(null, definiteMiss = false)
+        coEvery { trailerService.lookupYouTubeTrailer(any(), any(), any()) } returns
+            YouTubeTrailerLookup(null, YouTubeUnplayableReason.UNAVAILABLE)
+        assertFalse(lookup(ytIds = listOf("aaaaaaaaaaa")).rememberMiss)
     }
 
     @Test
@@ -109,6 +140,15 @@ class TrailerPreviewLookupTest {
         val stored = trailerPreviewMissTimestamp(definite = false, nowMs = now)
         assertTrue(isTrailerPreviewMissFresh(stored, now + 119_000L))
         assertFalse(isTrailerPreviewMissFresh(stored, now + 120_000L))
+    }
+
+    @Test
+    fun `the lookup waits longer when the trailer shows later`() {
+        assertEquals(350L, trailerPreviewLookupSettleMs(showAfterMs = 0L))
+        assertEquals(350L, trailerPreviewLookupSettleMs(showAfterMs = 2_000L))
+        assertEquals(800L, trailerPreviewLookupSettleMs(showAfterMs = 3_000L))
+        assertEquals(1_100L, trailerPreviewLookupSettleMs(showAfterMs = 5_000L))
+        assertEquals(1_100L, trailerPreviewLookupSettleMs(showAfterMs = 30_000L))
     }
 
     @Test

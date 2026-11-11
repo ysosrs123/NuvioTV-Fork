@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.translate
 
 private const val PLACEHOLDER_SHIMMER_DISTANCE_PX = 1000f
 private const val PLACEHOLDER_SHIMMER_WIDTH_FRACTION = 0.6f
@@ -42,18 +43,17 @@ fun Modifier.placeholderCardShimmer(
     shimmerOffsetState: State<Float>,
     backgroundColor: Color? = null
 ): Modifier = drawWithCache {
+    // One band, built once and slid across: a new gradient per frame is a new native shader per frame.
+    val band = Brush.linearGradient(
+        colorStops = PLACEHOLDER_SHIMMER_COLOR_STOPS,
+        start = Offset.Zero,
+        end = Offset(PLACEHOLDER_SHIMMER_WIDTH_FRACTION * PLACEHOLDER_SHIMMER_DISTANCE_PX, 0f)
+    )
     onDrawBehind {
         backgroundColor?.let { drawRect(color = it) }
-        val shimmerOffset = shimmerOffsetState.value
-        drawRect(
-            brush = Brush.linearGradient(
-                colorStops = PLACEHOLDER_SHIMMER_COLOR_STOPS,
-                start = Offset(shimmerOffset * PLACEHOLDER_SHIMMER_DISTANCE_PX, 0f),
-                end = Offset(
-                    (shimmerOffset + PLACEHOLDER_SHIMMER_WIDTH_FRACTION) * PLACEHOLDER_SHIMMER_DISTANCE_PX,
-                    0f
-                )
-            )
-        )
+        val left = shimmerOffsetState.value * PLACEHOLDER_SHIMMER_DISTANCE_PX
+        translate(left = left) {
+            drawRect(brush = band, topLeft = Offset(-left, 0f), size = size)
+        }
     }
 }

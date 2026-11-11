@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.trailer
 
 import android.util.Log
+import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.data.local.TmdbSettingsDataStore
 import com.nuvio.tv.data.remote.api.TmdbApi
@@ -28,6 +29,7 @@ import kotlinx.coroutines.withContext
 private const val TAG = "TrailerService"
 private const val TMDB_TRAILER_FALLBACK_LANGUAGE = "en-US"
 private const val TMDB_TRAILER_MAX_CANDIDATES = 3
+private const val YOUTUBE_REFUSAL_REST_MS = 10 * 60_000L
 
 @Singleton
 class TrailerService(
@@ -39,7 +41,8 @@ class TrailerService(
     private val imdbTrailerResolver: ImdbTrailerResolver,
     private val trailerSettingsDataStore: TrailerSettingsDataStore,
     private val clock: Clock,
-    private val mediaCache: TrailerMediaCache? = null
+    private val mediaCache: TrailerMediaCache? = null,
+    private val backendConfigured: Boolean = BuildConfig.TRAILER_API_URL.isNotBlank()
 ) {
     @Inject
     constructor(
@@ -64,6 +67,7 @@ class TrailerService(
     )
 
     private val cache = TrailerSourceCache(clock)
+    @Volatile private var youTubeRefusedUntilMs = 0L
     private val lookupLocks = Array(32) { Mutex() }
     // youtubeVideoId -> resolved playback source (success-only)
     private val youtubeSourceCache = ConcurrentHashMap<String, CachedTrailerPlaybackSource>()
@@ -75,6 +79,9 @@ class TrailerService(
      * title, so callers should not remember it as "no trailer".
      */
     fun isRateLimited(): Boolean = inAppYouTubeExtractor.isRateLimited()
+
+    /** True for ten minutes after YouTube asked this device to sign in; it is not asked meanwhile. */
+    fun isYouTubeResting(): Boolean = clock.millis() < youTubeRefusedUntilMs
 
     /**
      * Search for a trailer by title, year, tmdbId, and type.
@@ -143,16 +150,45 @@ class TrailerService(
                 }
                 if (!useYouTube) return@withLock TrailerLookupResult(null, definiteMiss = !imdbFailed)
                 val resolvedTmdb = numericId ?: suppliedImdb?.let { tmdbService.ensureTmdbId(it, type ?: "movie") }
-                val lookup = lookupTmdbTrailer(resolvedTmdb, type, title, year, language)
+                // While YouTube turns this device away, IMDb stands in and YouTube is left alone.
+                val youTubeFirst = provider != TrailerSource.IMDB
+                val youTubeResting = youTubeFirst && clock.millis() < youTubeRefusedUntilMs
+                val lookup = if (youTubeResting) TrailerLookupResult(null, youTubeBlocked = true)
+                else lookupTmdbTrailer(resolvedTmdb, type, title, year, language)
+                if (youTubeFirst && !youTubeResting) {
+                    if (lookup.signInDemanded) youTubeRefusedUntilMs = clock.millis() + YOUTUBE_REFUSAL_REST_MS
+                    else if (lookup.source != null) youTubeRefusedUntilMs = 0L
+                }
+                if (youTubeFirst && lookup.source == null && lookup.youTubeBlocked) {
+                    val standIn = try {
+                        val imdb = suppliedImdb ?: numericId?.toInt()?.let {
+                            tmdbService.tmdbToImdb(it, mediaType ?: "movie")
+                        }
+                        imdb?.let { imdbTrailerResolver.resolveFromDataService(it) }
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (_: Exception) {
+                        null
+                    }
+                    if (standIn != null && TrailerSourceExpiry.isUsable(standIn, clock.millis())) {
+                        mediaCache?.initialize()
+                        val fresh = standIn.copy(
+                            validUntilMs = minOf(clock.millis() + YOUTUBE_REFUSAL_REST_MS, TrailerSourceExpiry.expiresAtMs(standIn))
+                        )
+                        cache.put(key, fresh, YOUTUBE_REFUSAL_REST_MS)
+                        return@withLock TrailerLookupResult(fresh)
+                    }
+                }
                 val ttl = if (provider == TrailerSource.IMDB) 30_000L else 30 * 60_000L
                 val source = lookup.source?.let {
                     it.copy(validUntilMs = minOf(clock.millis() + ttl, TrailerSourceExpiry.expiresAtMs(it)))
                 }
                 val definiteMiss = lookup.definiteMiss && !imdbFailed
+                val refused = lookup.refused && !imdbFailed
                 // Retry the preferred provider soon after a YouTube fallback.
                 if (source != null) cache.put(key, source, ttl)
                 else if (resolvedTmdb != null && definiteMiss) cache.put(key, null, 30_000L)
-                TrailerLookupResult(source, definiteMiss)
+                TrailerLookupResult(source, definiteMiss, refused)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
@@ -238,9 +274,14 @@ class TrailerService(
         val candidates = rankTmdbVideoCandidates(tmdbResults, preferredLanguageCode = tmdbLanguage)
         Log.d(TAG, "TMDB candidate count: ${candidates.size}")
 
+        var tried = 0
+        var refused = 0
+        var blocked = false
+        var signIn = false
         for (candidate in candidates.take(TMDB_TRAILER_MAX_CANDIDATES)) {
             if (inAppYouTubeExtractor.isRateLimited()) {
                 Log.w(TAG, "YouTube is rate limiting, not trying the remaining TMDB candidates")
+                blocked = true
                 break
             }
             val key = candidate.key?.trim().orEmpty()
@@ -260,15 +301,28 @@ class TrailerService(
             if (source != null) {
                 return@withContext TrailerLookupResult(source)
             }
+            tried++
+            val reason = inAppYouTubeExtractor.unplayableReason(youtubeUrl)
+            if (reason != null) refused++
 
             Log.d(
                 TAG,
                 "TMDB candidate extraction failed, trying next: key=${obfuscateYoutubeKey(key)}"
             )
-            if (inAppYouTubeExtractor.unplayableReason(youtubeUrl) == YouTubeUnplayableReason.SIGN_IN_REQUIRED) break
+            if (reason == YouTubeUnplayableReason.SIGN_IN_REQUIRED || inAppYouTubeExtractor.isRateLimited()) {
+                blocked = true
+                signIn = reason == YouTubeUnplayableReason.SIGN_IN_REQUIRED
+                break
+            }
         }
 
-        TrailerLookupResult(null, definiteMiss = candidates.isEmpty())
+        TrailerLookupResult(
+            null,
+            definiteMiss = candidates.isEmpty(),
+            refused = tried > 0 && refused == tried && !inAppYouTubeExtractor.isRateLimited(),
+            youTubeBlocked = blocked,
+            signInDemanded = signIn
+        )
     }
 
     /**
@@ -350,6 +404,8 @@ class TrailerService(
             )
             return localSource
         }
+
+        if (!backendConfigured) return null
 
         // Fallback to remote trailer resolver if in-app extraction fails.
         Log.w(TAG, "In-app extraction failed, falling back to backend resolver for ${summarizeUrl(youtubeUrl)}")
@@ -540,7 +596,12 @@ class TrailerService(
 
 data class TrailerLookupResult(
     val source: TrailerPlaybackSource?,
-    val definiteMiss: Boolean = false
+    val definiteMiss: Boolean = false,
+    /** YouTube itself turned down every video that was tried (sign-in, age limit, removed). */
+    val refused: Boolean = false,
+    /** YouTube asked this device to sign in or is rate limiting it: nothing about the title itself. */
+    val youTubeBlocked: Boolean = false,
+    val signInDemanded: Boolean = false
 ) {
     companion object {
         val DEFINITE_MISS = TrailerLookupResult(null, definiteMiss = true)

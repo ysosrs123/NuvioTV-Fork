@@ -42,7 +42,7 @@ class HomeTrailerCancellationTest {
         coEvery { vm.trailerService.preload(any()) } coAnswers {
             try { awaitCancellation() } finally { cancelled = true }
         }
-        vm.request("A"); advanceTimeBy(400); runCurrent()
+        vm.request("A"); advanceTimeBy(900); runCurrent()
         assertNotNull(vm.trailerPreviewUrlsState["A"])
         vm.setTrailerPreviewActive(false); runCurrent()
         assertTrue(cancelled)
@@ -53,7 +53,7 @@ class HomeTrailerCancellationTest {
         val vm = newViewModel(); vm.stubSource()
         vm.trailerPreviewUrlsState["A"] = "https://example.test/expired.mp4"
         vm.trailerPreviewValidUntil["A"] = 1L
-        vm.request("A"); advanceTimeBy(400); runCurrent()
+        vm.request("A"); advanceTimeBy(900); runCurrent()
         assertEquals("https://example.test/trailer.mp4", vm.trailerPreviewUrlsState["A"])
         coVerify(exactly = 1) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
     }
@@ -63,7 +63,7 @@ class HomeTrailerCancellationTest {
         vm.request("A")
         advanceTimeBy(100)
         vm.request("A")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         assertEquals("https://example.test/trailer.mp4", vm.trailerPreviewUrlsState["A"])
         coVerify(exactly = 1) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
     }
@@ -74,7 +74,7 @@ class HomeTrailerCancellationTest {
         coEvery { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) } coAnswers {
             try { awaitCancellation() } finally { cancelled = true }
         }
-        vm.request("A"); advanceTimeBy(400); runCurrent()
+        vm.request("A"); advanceTimeBy(900); runCurrent()
         vm.trailerPreviewUrlsState["B"] = "https://example.test/cached.mp4"
         vm.request("B"); runCurrent()
         assertTrue(cancelled)
@@ -91,7 +91,7 @@ class HomeTrailerCancellationTest {
         coVerify(exactly = 0) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
         assertTrue(vm.trailerPreviewLoadingIds.isEmpty())
         vm.setTrailerPreviewActive(true)
-        vm.request("B"); advanceTimeBy(400); runCurrent()
+        vm.request("B"); advanceTimeBy(900); runCurrent()
         assertNotNull(vm.trailerPreviewUrlsState["B"])
     }
 
@@ -101,7 +101,7 @@ class HomeTrailerCancellationTest {
         vm.request("B")
         vm.request("A"); runCurrent()
         assertTrue(vm.trailerPreviewLoadingIds.contains("A"))
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         assertNotNull(vm.trailerPreviewUrlsState["A"])
         assertNull(vm.trailerPreviewUrlsState["B"])
     }

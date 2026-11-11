@@ -94,6 +94,15 @@ class ImdbTrailerResolver @Inject constructor(
         return result?.source
     }
 
+    /** IMDb's data service answer only. The title page is never loaded, so this stays off the main thread. */
+    suspend fun resolveFromDataService(imdbId: String): TrailerPlaybackSource? {
+        if (!Regex("tt\\d+").matches(imdbId)) return null
+        sourceCache.get(imdbId)?.let { return it.source }
+        val resolved = resolveFromApi(imdbId) ?: return null
+        sourceCache.put(imdbId, resolved.source, if (resolved.source == null) 5 * 60_000L else 30 * 60_000L)
+        return resolved.source
+    }
+
     fun invalidate(videoUrl: String) = sourceCache.invalidate(videoUrl)
 
     // Null when IMDb's data service gave no clear answer: the title page decides then.

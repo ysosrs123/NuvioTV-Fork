@@ -27,14 +27,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 /** Per-profile, opt-in source listing cache. Provider resolution and media access are playback-only.
- * One cancellable search runs at a time; two completed metadata entries live for at most five minutes.
+ * One cancellable search runs at a time; four completed metadata entries live for at most five minutes.
  * Explicit Play reuses metadata where possible and falls back to its normal repository search.
  */
 object StreamPrefetchCache {
 
     private const val TAG = "StreamPrefetch"
     private const val TTL_MS = 5L * 60L * 1000L
-    private const val MAX_ENTRIES = 2
+    private const val MAX_ENTRIES = 4
     private const val JOIN_TIMEOUT_MS = 20_000L
     private const val EMPTY_CAP_WAIT_MS = 20_000L
     private const val EMPTY_CAP_POLL_MS = 100L

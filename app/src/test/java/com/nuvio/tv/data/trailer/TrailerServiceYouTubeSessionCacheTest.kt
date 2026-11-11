@@ -72,7 +72,10 @@ class TrailerServiceYouTubeSessionCacheTest {
         val tmdbService = mockk<TmdbService>()
         every { tmdbSettingsDataStore.settings } returns MutableStateFlow(TmdbSettings(language = "en"))
         every { tmdbService.apiKey() } returns "tmdb-key"
-        val service = TrailerService(trailerApi, tmdbApi, extractor, tmdbSettingsDataStore, tmdbService, mockk(relaxed = true), mockk(relaxed = true))
+        val service = TrailerService(
+            trailerApi, tmdbApi, extractor, tmdbSettingsDataStore, tmdbService, mockk(relaxed = true), mockk(relaxed = true),
+            java.time.Clock.systemUTC(), backendConfigured = true
+        )
 
         coEvery { extractor.extractPlaybackSource("https://www.youtube.com/watch?v=dQw4w9WgXcQ") } returnsMany listOf(
             null,
@@ -87,6 +90,24 @@ class TrailerServiceYouTubeSessionCacheTest {
         assertEquals("https://cdn.example/video-after-retry.mp4", second?.videoUrl)
         coVerify(exactly = 2) { extractor.extractPlaybackSource("https://www.youtube.com/watch?v=dQw4w9WgXcQ") }
         coVerify(exactly = 1) { trailerApi.getTrailer(any(), any(), any()) }
+    }
+
+    @Test
+    fun `no backend is asked when none is set up`() = runTest {
+        val trailerApi = mockk<TrailerApi>()
+        val extractor = mockk<InAppYouTubeExtractor>()
+        val tmdbSettingsDataStore = mockk<TmdbSettingsDataStore>()
+        val tmdbService = mockk<TmdbService>()
+        every { tmdbSettingsDataStore.settings } returns MutableStateFlow(TmdbSettings(language = "en"))
+        every { tmdbService.apiKey() } returns "tmdb-key"
+        val service = TrailerService(
+            trailerApi, mockk(), extractor, tmdbSettingsDataStore, tmdbService, mockk(relaxed = true), mockk(relaxed = true),
+            java.time.Clock.systemUTC(), backendConfigured = false
+        )
+        coEvery { extractor.extractPlaybackSource(any()) } returns null
+
+        assertNull(service.getTrailerPlaybackSourceFromYouTubeUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ"))
+        coVerify(exactly = 0) { trailerApi.getTrailer(any(), any(), any()) }
     }
 
     @Test

@@ -32,6 +32,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 
 /** One request at a time for already-loaded catalogues, independent of lazy row lifetime. */
 @OptIn(coil3.annotation.ExperimentalCoilApi::class)
@@ -61,6 +62,10 @@ internal fun ProgressiveHomePosterWarmup(
                 android.util.Log.d("HomePosterCache", message)
         }
         var previousFirstRow = -1
+        // Posters already seen on disk in this visit to Home. A pass starts again after every
+        // scroll; these are not opened, or waited for, a second time.
+        val onDisk = HashSet<String>()
+        var skipped = 0
         while (isActive) {
             snapshotFlow { idle() }.first { it }
             delay(700)
@@ -138,6 +143,10 @@ internal fun ProgressiveHomePosterWarmup(
                             val memoryExtras = item.customPosterCacheExtras(url, landscape)
                             val toMemory = scan.row in memoryRows && index in scan.memoryColumns &&
                                 memoryBudget >= width.toLong() * height * 4
+                            if (!toMemory && diskKey in onDisk) {
+                                if (++skipped % 16 == 0) yield()
+                                continue
+                            }
                             viewport.warmWhenIdle(::unchanged) {
                                 val cached = if (toMemory) {
                                     loader.memoryCache?.get(MemoryCache.Key(memoryKey, memoryExtras)) != null
@@ -146,6 +155,7 @@ internal fun ProgressiveHomePosterWarmup(
                                 }
                                 scan.checked++
                                 if (cached) scan.hits++
+                                if (cached && !toMemory) rememberOnDisk(onDisk, diskKey)
                                 val (first, last) = bounds[row.key] ?: (0 to -1)
                                 scan.furthest = maxOf(scan.furthest, if (index > last) index - last else first - index)
                                 if (!cached && unchanged()) {
@@ -163,6 +173,7 @@ internal fun ProgressiveHomePosterWarmup(
                                         .homePosterPriority(HomePosterPriority(viewport, scan.row, prefetch = true, progressive = true))
                                         .build())
                                     if (toMemory) memoryBudget -= (result as? SuccessResult)?.image?.size ?: 0L
+                                    else if (result is SuccessResult) rememberOnDisk(onDisk, diskKey)
                                 }
                             }
                             if (scan.checked > 0 && scan.checked % 10 == 0)
@@ -178,6 +189,13 @@ internal fun ProgressiveHomePosterWarmup(
             if (unchanged()) snapshotFlow { unchanged() }.first { !it }
         }
     }
+}
+
+private const val ON_DISK_REMEMBERED = 4_000
+
+private fun rememberOnDisk(onDisk: HashSet<String>, diskKey: String) {
+    if (onDisk.size >= ON_DISK_REMEMBERED) onDisk.clear()
+    onDisk += diskKey
 }
 
 private fun visibleRowColumns(

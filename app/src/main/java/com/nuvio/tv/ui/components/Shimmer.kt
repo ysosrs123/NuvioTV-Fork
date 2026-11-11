@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
@@ -34,17 +35,17 @@ fun Modifier.shimmer(active: Boolean = true): Modifier {
                 0.5f to Color.Black,
                 1f to dim
             )
+            val band = Brush.linearGradient(
+                colorStops = stops,
+                start = Offset.Zero,
+                end = Offset(bandWidth, 0f)
+            )
             onDrawWithContent {
                 drawContent()
                 val start = (size.width + bandWidth) * progress.value - bandWidth
-                drawRect(
-                    brush = Brush.linearGradient(
-                        colorStops = stops,
-                        start = Offset(start, 0f),
-                        end = Offset(start + bandWidth, 0f)
-                    ),
-                    blendMode = BlendMode.DstIn
-                )
+                translate(left = start) {
+                    drawRect(brush = band, topLeft = Offset(-start, 0f), size = size, blendMode = BlendMode.DstIn)
+                }
             }
         }
 }

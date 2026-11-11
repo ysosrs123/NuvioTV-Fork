@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.data.trailer.TrailerLookupResult
 import com.nuvio.tv.data.trailer.TrailerPlaybackFailures
 import com.nuvio.tv.data.trailer.TrailerPlaybackSource
+import com.nuvio.tv.data.trailer.YouTubeTrailerLookup
 import com.nuvio.tv.domain.model.CatalogRow
 import com.nuvio.tv.domain.model.ContentType
 import com.nuvio.tv.domain.model.MetaPreview
@@ -47,7 +48,7 @@ class HomeTrailerLookupTest {
             TrailerLookupResult(TrailerPlaybackSource("https://example.test/trailer.mp4"))
 
         vm.requestTrailerPreviewPipeline(preview("kitsu:1", imdbId = "tt0137523"))
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
 
         coVerify(exactly = 0) { vm.tmdbService.ensureTmdbId(any(), any(), any()) }
         coVerify { vm.trailerService.lookupTrailer(any(), any(), "tt0137523", any(), any()) }
@@ -63,9 +64,9 @@ class HomeTrailerLookupTest {
         vm.trailerPreviewUrlsState["B"] = "https://rr1.googlevideo.com/videoplayback?expire=9000000000"
 
         vm.requestTrailerPreviewPipeline("A", "A", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         vm.requestTrailerPreviewPipeline("B", "B", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
 
         assertEquals("https://example.test/fresh.mp4", vm.trailerPreviewUrlsState["A"])
         assertEquals("https://rr1.googlevideo.com/videoplayback?expire=9000000000", vm.trailerPreviewUrlsState["B"])
@@ -84,15 +85,15 @@ class HomeTrailerLookupTest {
         )
 
         vm.requestTrailerPreviewPipeline(item)
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         assertEquals("https://example.test/fail-A-1.mp4", vm.trailerPreviewUrlsState["fail-A"])
 
         TrailerPlaybackFailures.report("https://example.test/fail-A-1.mp4")
-        runCurrent(); advanceTimeBy(400); runCurrent()
+        runCurrent(); advanceTimeBy(900); runCurrent()
         assertEquals("https://example.test/fail-A-2.mp4", vm.trailerPreviewUrlsState["fail-A"])
 
         TrailerPlaybackFailures.report("https://example.test/fail-A-2.mp4")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         assertNull(vm.trailerPreviewUrlsState["fail-A"])
         assertTrue(vm.trailerPreviewNegativeCache.contains("fail-A"))
         coVerify(exactly = 2) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
@@ -107,16 +108,16 @@ class HomeTrailerLookupTest {
         )
 
         vm.requestTrailerPreviewPipeline("T", "T", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         vm.requestTrailerPreviewPipeline("U", "U", "2026", "movie")
         vm.requestTrailerPreviewPipeline("T", "T", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         coVerify(exactly = 1) { vm.trailerService.lookupTrailer("T", any(), any(), any(), any()) }
 
         vm.trailerPreviewNegativeCache["T"] = vm.trailerPreviewNegativeCache.getValue("T") - 2 * 60_000L
         vm.requestTrailerPreviewPipeline("U", "U", "2026", "movie")
         vm.requestTrailerPreviewPipeline("T", "T", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
 
         assertEquals("https://example.test/after-timeout.mp4", vm.trailerPreviewUrlsState["T"])
     }
@@ -128,17 +129,17 @@ class HomeTrailerLookupTest {
             TrailerLookupResult.DEFINITE_MISS
 
         vm.requestTrailerPreviewPipeline("M", "M", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         assertTrue(vm.trailerPreviewNegativeCache.contains("M"))
         vm.requestTrailerPreviewPipeline("U", "U", "2026", "movie")
         vm.requestTrailerPreviewPipeline("M", "M", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         coVerify(exactly = 1) { vm.trailerService.lookupTrailer("M", any(), any(), any(), any()) }
 
         vm.trailerPreviewNegativeCache["M"] = System.currentTimeMillis() - 11 * 60_000L
         vm.requestTrailerPreviewPipeline("U", "U", "2026", "movie")
         vm.requestTrailerPreviewPipeline("M", "M", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         coVerify(exactly = 2) { vm.trailerService.lookupTrailer("M", any(), any(), any(), any()) }
     }
 
@@ -150,18 +151,18 @@ class HomeTrailerLookupTest {
         coEvery { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) } returns
             TrailerLookupResult.DEFINITE_MISS
         coEvery {
-            vm.trailerService.getTrailerPlaybackSourceFromYouTubeUrl("https://www.youtube.com/watch?v=aaaaaaaaaaa", any(), any())
-        } returns null
+            vm.trailerService.lookupYouTubeTrailer("https://www.youtube.com/watch?v=aaaaaaaaaaa", any(), any())
+        } returns YouTubeTrailerLookup(null)
         coEvery {
-            vm.trailerService.getTrailerPlaybackSourceFromYouTubeUrl("https://www.youtube.com/watch?v=bbbbbbbbbbb", any(), any())
-        } returns TrailerPlaybackSource("https://example.test/second-id.mp4")
+            vm.trailerService.lookupYouTubeTrailer("https://www.youtube.com/watch?v=bbbbbbbbbbb", any(), any())
+        } returns YouTubeTrailerLookup(TrailerPlaybackSource("https://example.test/second-id.mp4"))
 
         vm.requestTrailerPreviewPipeline(item)
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
 
         assertEquals("https://example.test/second-id.mp4", vm.trailerPreviewUrlsState["yt-A"])
         coVerify(exactly = 0) {
-            vm.trailerService.getTrailerPlaybackSourceFromYouTubeUrl("https://www.youtube.com/watch?v=vi1234567890", any(), any())
+            vm.trailerService.lookupYouTubeTrailer("https://www.youtube.com/watch?v=vi1234567890", any(), any())
         }
     }
 
@@ -174,10 +175,10 @@ class HomeTrailerLookupTest {
 
         vm.requestTrailerPreviewPipeline("early", "early", "2026", "movie")
         vm.requestTrailerPreviewPipeline("first", "first", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         coVerify(exactly = 0) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
 
-        advanceTimeBy(HomeViewModel.STARTUP_GRACE_PERIOD_MS + 400); runCurrent()
+        advanceTimeBy(HomeViewModel.STARTUP_GRACE_PERIOD_MS + 900); runCurrent()
 
         assertEquals("https://example.test/after-grace.mp4", vm.trailerPreviewUrlsState["first"])
         assertNull(vm.trailerPreviewUrlsState["early"])
@@ -195,11 +196,11 @@ class HomeTrailerLookupTest {
 
         vm.requestTrailerPreviewPipeline(item)
         vm.setTrailerPreviewActive(false)
-        advanceTimeBy(HomeViewModel.STARTUP_GRACE_PERIOD_MS + 400); runCurrent()
+        advanceTimeBy(HomeViewModel.STARTUP_GRACE_PERIOD_MS + 900); runCurrent()
         coVerify(exactly = 0) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
 
         vm.setTrailerPreviewActive(true)
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
 
         assertEquals("https://example.test/back-home.mp4", vm.trailerPreviewUrlsState["first"])
     }
@@ -213,7 +214,7 @@ class HomeTrailerLookupTest {
         }
 
         vm.requestTrailerPreviewPipeline("A", "A", "2026", "movie")
-        advanceTimeBy(400); runCurrent()
+        advanceTimeBy(900); runCurrent()
         vm.requestTrailerPreviewPipeline("srv1:1:abc", "S", "2026", "movie")
         runCurrent()
 

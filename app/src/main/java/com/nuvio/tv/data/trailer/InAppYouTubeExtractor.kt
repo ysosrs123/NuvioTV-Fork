@@ -7,28 +7,38 @@ import com.google.gson.Gson
 import com.nuvio.tv.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.job
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withTimeout
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import java.io.IOException
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resumeWithException
 
 private const val TAG = "InAppYouTubeExtractor"
 private const val EXTRACTOR_TIMEOUT_MS = 30_000L
+private const val PROBES_AT_ONCE = 2
+private const val PROBE_ALTERNATE_HEAD_START_MS = 400L
 private const val DEFAULT_USER_AGENT =
     "Mozilla/5.0 (Linux; Android 12; Android TV) AppleWebKit/537.36 " +
         "(KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
@@ -113,6 +123,11 @@ private val DEFAULT_HEADERS = mapOf(
     "user-agent" to DEFAULT_USER_AGENT
 )
 
+/**
+ * The app identities YouTube is asked as, taken from yt-dlp's INNERTUBE_CLIENTS table. Check them
+ * against that table at each release: an outdated identity is refused. The first one needs no
+ * extra token and is asked alone; the others are asked only when it has nothing playable.
+ */
 private val CLIENTS = listOf(
     YouTubeClient(
         key = "visionos",
@@ -135,15 +150,15 @@ private val CLIENTS = listOf(
     YouTubeClient(
         key = "android",
         id = "3",
-        version = "20.10.35",
-        userAgent = "com.google.android.youtube/20.10.35 (Linux; U; Android 14; en_US) gzip",
+        version = "21.26.364",
+        userAgent = "com.google.android.youtube/21.26.364 (Linux; U; Android 11) gzip",
         context = mapOf(
             "clientName" to "ANDROID",
-            "clientVersion" to "20.10.35",
+            "clientVersion" to "21.26.364",
             "osName" to "Android",
-            "osVersion" to "14",
+            "osVersion" to "11",
             "platform" to "MOBILE",
-            "androidSdkVersion" to 34,
+            "androidSdkVersion" to 30,
             "hl" to "en",
             "gl" to "US"
         ),
@@ -152,14 +167,15 @@ private val CLIENTS = listOf(
     YouTubeClient(
         key = "ios",
         id = "5",
-        version = "20.10.1",
-        userAgent = "com.google.ios.youtube/20.10.1 (iPhone16,2; U; CPU iOS 17_4 like Mac OS X)",
+        version = "21.26.4",
+        userAgent = "com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)",
         context = mapOf(
             "clientName" to "IOS",
-            "clientVersion" to "20.10.1",
+            "clientVersion" to "21.26.4",
+            "deviceMake" to "Apple",
             "deviceModel" to "iPhone16,2",
             "osName" to "iPhone",
-            "osVersion" to "17.4.0.21E219",
+            "osVersion" to "18.3.2.22D82",
             "platform" to "MOBILE",
             "hl" to "en",
             "gl" to "US"
@@ -176,6 +192,7 @@ class InAppYouTubeExtractor internal constructor(
     constructor(@ApplicationContext context: Context) : this({ deviceTrailerVideoLimits(context) })
 
     private val gson = Gson()
+    private val youTubeTlsTest by lazy { com.nuvio.tv.core.runtime.PluginRuntimeHooks.youTubeTlsTest() }
     private val trailerVideoLimits by lazy(videoLimits)
 
     private val httpClient by lazy {
@@ -187,6 +204,7 @@ class InAppYouTubeExtractor internal constructor(
             .writeTimeout(20, TimeUnit.SECONDS)
             .followRedirects(true)
             .followSslRedirects(true)
+            .apply { youTubeTlsTest?.let { (factory, trust) -> sslSocketFactory(factory, trust) } }
             .build()
     }
 
@@ -327,15 +345,22 @@ class InAppYouTubeExtractor internal constructor(
         var attempt: ExtractionAttempt? = null
         try {
             attempt = withTimeout(EXTRACTOR_TIMEOUT_MS) {
-                extractPlaybackSourceInternal(youtubeUrl, forceRefreshConfig = false, singleUrl = singleUrl)
+                extractPlaybackSourceInternal(youtubeUrl, forceRefreshConfig = false, singleUrl = singleUrl, clients = CLIENTS.take(1))
             }
             // Only a stale visitor id is fixed by a fresh watch page. Other failures would fail the
             // same way again, and every extra request counts toward YouTube's limit.
             if (attempt?.source == null && attempt?.staleConfig == true) {
                 Log.d(TAG, "Every client asked to sign in, retrying with a fresh watch config")
                 attempt = withTimeout(EXTRACTOR_TIMEOUT_MS) {
-                    extractPlaybackSourceInternal(youtubeUrl, forceRefreshConfig = true, singleUrl = singleUrl)
+                    extractPlaybackSourceInternal(youtubeUrl, forceRefreshConfig = true, singleUrl = singleUrl, clients = CLIENTS.take(1))
                 }
+            }
+            // A sign-in demand is about this device or address, so the other identities get the same answer.
+            if (attempt?.source == null && attempt?.unplayable != YouTubeUnplayableReason.SIGN_IN_REQUIRED) {
+                val others = withTimeout(EXTRACTOR_TIMEOUT_MS) {
+                    extractPlaybackSourceInternal(youtubeUrl, forceRefreshConfig = false, singleUrl = singleUrl, clients = CLIENTS.drop(1))
+                }
+                if (others.source != null || attempt?.unplayable == null) attempt = others
             }
         } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
             // A timeout is a failed attempt, not a cancellation of the caller.
@@ -380,7 +405,8 @@ class InAppYouTubeExtractor internal constructor(
     private suspend fun extractPlaybackSourceInternal(
         youtubeUrl: String,
         forceRefreshConfig: Boolean,
-        singleUrl: Boolean
+        singleUrl: Boolean,
+        clients: List<YouTubeClient>
     ): ExtractionAttempt {
         val videoId = extractVideoId(youtubeUrl) ?: return ExtractionAttempt(null)
 
@@ -397,7 +423,7 @@ class InAppYouTubeExtractor internal constructor(
         var playableCount = 0
         val refusals = mutableListOf<YouTubeUnplayableReason>()
 
-        for (client in CLIENTS) {
+        for (client in clients) {
             kotlinx.coroutines.yield()
             try {
                 val playerResponse = fetchPlayerResponse(
@@ -420,7 +446,11 @@ class InAppYouTubeExtractor internal constructor(
                         Log.w(TAG, "Client ${client.key}: bot check ($reason)")
                     } else {
                         loginRequiredCount++
-                        Log.w(TAG, "Client ${client.key}: LOGIN_REQUIRED (visitor may be stale)")
+                        Log.w(
+                            TAG,
+                            "Client ${client.key}: LOGIN_REQUIRED (${reason.take(120)}) " +
+                                "visitor=${!config.visitorData.isNullOrBlank()} freshConfig=$forceRefreshConfig"
+                        )
                     }
                     continue
                 }
@@ -524,6 +554,8 @@ class InAppYouTubeExtractor internal constructor(
                 }
             } catch (e: RateLimitedException) {
                 throw e
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (error: Exception) {
                 if (BuildConfig.DEBUG) {
                     Log.w(TAG, "Client ${client.key} failed: ${error.message}")
@@ -533,15 +565,15 @@ class InAppYouTubeExtractor internal constructor(
         }
 
         // If all clients returned LOGIN_REQUIRED, invalidate config for next attempt
-        if (loginRequiredCount == CLIENTS.size) {
-            Log.w(TAG, "All ${CLIENTS.size} clients returned LOGIN_REQUIRED, invalidating config")
+        if (loginRequiredCount == clients.size) {
+            Log.w(TAG, "All ${clients.size} clients returned LOGIN_REQUIRED, invalidating config")
             invalidateConfig()
             return ExtractionAttempt(null, combineYouTubeUnplayableReasons(refusals), staleConfig = true)
         }
 
         if (manifestUrls.isEmpty() && progressive.isEmpty() && adaptiveVideo.isEmpty() && adaptiveAudio.isEmpty()) {
             if (botCheckCount > 0) {
-                throw RateLimitedException("$botCheckCount of ${CLIENTS.size} clients hit the bot check")
+                throw RateLimitedException("$botCheckCount of ${clients.size} clients hit the bot check")
             }
             return ExtractionAttempt(
                 null,
@@ -568,6 +600,8 @@ class InAppYouTubeExtractor internal constructor(
                 ) {
                     bestManifest = candidate
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (error: Exception) {
                 if (BuildConfig.DEBUG) {
                     Log.w(TAG, "Manifest parse failed: ${error.message}")
@@ -658,7 +692,7 @@ class InAppYouTubeExtractor internal constructor(
         return WatchConfig(apiKey = apiKey, visitorData = visitorData)
     }
 
-    private fun fetchPlayerResponse(
+    private suspend fun fetchPlayerResponse(
         apiKey: String,
         videoId: String,
         client: YouTubeClient,
@@ -705,7 +739,7 @@ class InAppYouTubeExtractor internal constructor(
         return parsed ?: emptyMap<String, Any>()
     }
 
-    private fun parseHlsManifest(manifestUrl: String): ManifestBestVariant? {
+    private suspend fun parseHlsManifest(manifestUrl: String): ManifestBestVariant? {
         val response = performRequest(
             url = manifestUrl,
             method = "GET",
@@ -871,33 +905,28 @@ class InAppYouTubeExtractor internal constructor(
         preferClient: String? = null,
         perClientDepth: Int = 2
     ): StreamCandidate? {
-        val toProbe = candidates.groupBy { it.client }
+        val toProbe = probeOrder(candidates, preferClient, perClientDepth)
+        return firstAcceptedInOrder(toProbe, PROBES_AT_ONCE, 2_500L) { cand ->
+            resolveReachableUrl(cand.url)?.let { cand.copy(url = it) }
+        }
+    }
+
+    /** Each client's best candidates, the preferred client's first, then by quality. */
+    internal fun probeOrder(
+        candidates: List<StreamCandidate>,
+        preferClient: String?,
+        perClientDepth: Int
+    ): List<StreamCandidate> {
+        val perClient = candidates.groupBy { it.client }
             .flatMap { (_, list) -> sortCandidates(list).take(perClientDepth) }
-        if (toProbe.isEmpty()) return null
-        val results = java.util.Collections.synchronizedList(mutableListOf<StreamCandidate>())
-        val probeScope = CoroutineScope(Dispatchers.IO)
-        try {
-            val jobs = toProbe.map { cand ->
-                probeScope.launch {
-                    val resolved = resolveReachableUrl(cand.url)
-                    if (resolved != null) results.add(cand.copy(url = resolved))
-                }
-            }
-            withTimeoutOrNull(2_500L) { jobs.forEach { it.join() } }
-        } finally {
-            probeScope.cancel()
-        }
-        val reachable = results.toList()
-        if (reachable.isEmpty()) return null
-        if (preferClient != null) {
-            sortCandidates(reachable.filter { it.client == preferClient }).firstOrNull()?.let { return it }
-        }
-        return sortCandidates(reachable).firstOrNull()
+        if (preferClient == null) return sortCandidates(perClient)
+        val (preferred, others) = perClient.partition { it.client == preferClient }
+        return sortCandidates(preferred) + sortCandidates(others)
     }
 
     /**
-     * Probes CDN nodes for the given googlevideo URL and returns the first reachable one.
-     * Returns null if no CDN node responds successfully (all return 403/timeout).
+     * The googlevideo URL itself when it answers, otherwise the same file on another server
+     * named in its `mn` parameter. Null when none answers (all return 403/timeout).
      */
     private suspend fun resolveReachableUrl(url: String): String? {
         if (!url.contains("googlevideo.com")) return url
@@ -906,7 +935,7 @@ class InAppYouTubeExtractor internal constructor(
         val servers = mnParam.split(",").map { it.trim() }.filter { it.isNotBlank() }
         if (servers.size < 2) return url
 
-        val candidates = mutableListOf(url)
+        val alternates = mutableListOf<String>()
         for (server in servers) {
             val mviIndex = servers.indexOf(server)
             val altHost = uri.host?.replaceFirst(
@@ -917,26 +946,26 @@ class InAppYouTubeExtractor internal constructor(
                 server
             ) ?: continue
             if (altHost == uri.host) continue
-            candidates += url.replace(uri.host!!, altHost)
+            alternates += url.replace(uri.host!!, altHost)
         }
 
-        if (candidates.size == 1) {
-            // Single candidate — verify it's reachable
-            return if (isUrlReachable(candidates[0])) candidates[0] else null
-        }
-
-        val result = CompletableDeferred<String>()
-        val probeScope = CoroutineScope(Dispatchers.IO)
-        candidates.forEach { candidate ->
-            probeScope.launch {
-                val reachable = isUrlReachable(candidate)
-                if (reachable) result.complete(candidate)
+        return withTimeoutOrNull(2_000L) {
+            coroutineScope {
+                val result = CompletableDeferred<String?>()
+                val own = launch { if (isUrlReachable(url)) result.complete(url) }
+                launch {
+                    // The other servers are asked only when the listed one fails or is slow.
+                    withTimeoutOrNull(PROBE_ALTERNATE_HEAD_START_MS) { own.join() }
+                    if (!result.isCompleted) {
+                        alternates.map { alternate ->
+                            launch { if (isUrlReachable(alternate)) result.complete(alternate) }
+                        }.joinAll()
+                    }
+                    own.join()
+                    result.complete(null)
+                }
+                result.await().also { coroutineContext.job.cancelChildren() }
             }
-        }
-        return try {
-            withTimeoutOrNull(2_000L) { result.await() }
-        } finally {
-            probeScope.cancel()
         }
     }
 
@@ -948,21 +977,43 @@ class InAppYouTubeExtractor internal constructor(
             .readTimeout(2, TimeUnit.SECONDS)
             .followRedirects(true)
             .followSslRedirects(true)
+            .apply { youTubeTlsTest?.let { (factory, trust) -> sslSocketFactory(factory, trust) } }
             .build()
     }
 
-    private fun isUrlReachable(url: String): Boolean {
-        return runCatching {
-            val request = Request.Builder()
+    private suspend fun isUrlReachable(url: String): Boolean {
+        val request = runCatching {
+            Request.Builder()
                 .url(url)
                 .get()
                 .header("Range", "bytes=0-0")
                 .headers(buildHeaders(DEFAULT_HEADERS))
                 .build()
-            probeClient.newCall(request).execute().use { response ->
+        }.getOrNull() ?: return false
+        return try {
+            probeClient.newCall(request).awaitResponse().use { response ->
                 response.code == 200 || response.code == 206
             }
-        }.getOrDefault(false)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** Runs the call off the caller's thread and cancels it when the caller is cancelled. */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private suspend fun Call.awaitResponse(): Response = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { cancel() }
+        enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                if (continuation.isActive) continuation.resumeWithException(e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                continuation.resume(response) { response.close() }
+            }
+        })
     }
 
     private fun absolutizeUrl(baseUrl: String, maybeRelative: String): String {
@@ -980,7 +1031,7 @@ class InAppYouTubeExtractor internal constructor(
         }.getOrDefault(url.take(80))
     }
 
-    private fun performRequest(
+    private suspend fun performRequest(
         url: String,
         method: String,
         headers: Map<String, String>,
@@ -997,7 +1048,7 @@ class InAppYouTubeExtractor internal constructor(
             else -> requestBuilder.get()
         }
 
-        httpClient.newCall(requestBuilder.build()).execute().use { response ->
+        httpClient.newCall(requestBuilder.build()).awaitResponse().use { response ->
             return RequestResponse(
                 ok = response.isSuccessful,
                 status = response.code,
