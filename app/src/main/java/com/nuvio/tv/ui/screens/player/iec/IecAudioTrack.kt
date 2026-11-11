@@ -31,6 +31,7 @@ internal interface IecAudioTrack {
     fun play()
     fun pause()
     fun flush()
+    fun finishStream() = Unit
     fun release()
     fun playbackHeadFrames(): Long
     fun setVolume(volume: Float)
@@ -576,6 +577,13 @@ private class PlatformIecAudioTrack(
         track.flush()
         headTracker.onFlush()
         settleGate.onFlush()
+    }
+
+    override fun finishStream() {
+        try {
+            track.stop()
+        } catch (_: IllegalStateException) {
+        }
     }
 
     override fun underrunCount(): Int = track.underrunCount

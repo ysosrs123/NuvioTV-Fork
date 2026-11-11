@@ -425,6 +425,64 @@ class IecKeepAliveTest {
         assertTrue("a new pause keeps the output alive again", track.written > writtenAtRelease)
     }
 
+    @Test
+    fun aDeepQueueThatOpens_runsWithoutTheKeepAlive() {
+        val asked = mutableListOf<Int>()
+        val sink = deepSink(asked) { FillTrack(capacityBytes = DEEP_BYTES) }
+        sink.configure(trueHdFormat(), 0, null)
+        sink.play()
+        assertEquals(listOf(DEEP_BYTES), asked)
+        assertFalse(sink.isKeepAliveActive)
+    }
+
+    @Test
+    fun aRefusedDeepQueue_reopensAtTheUsualSizeWithTheKeepAlive() {
+        val asked = mutableListOf<Int>()
+        val sink = deepSink(asked) { size -> if (size == DEEP_BYTES) FillTrack(capacityBytes = 61_440) else HeadTrack() }
+        sink.configure(trueHdFormat(), 0, null)
+        sink.play()
+        assertEquals(listOf(DEEP_BYTES, 3_072_000), asked)
+        assertTrue(sink.isKeepAliveActive)
+    }
+
+    @Test
+    fun aPartFullTrackAtTheEnd_isFinishedAndEndsByTime() {
+        val track = FillTrack(capacityBytes = DEEP_BYTES)
+        val sink = deepSink(mutableListOf()) { track }
+        sink.configure(trueHdFormat(), 0, null)
+        sink.play()
+        feed(sink, 0 until 48, ptsStartUs = 0L)
+        assertTrue(track.written in 1 until DEEP_BYTES)
+        sink.playToEndOfStream()
+        assertFalse(sink.isEnded)
+        assertEquals(1, track.finishes)
+        assertTrue(sink.hasPendingData())
+        clock[0] += 2_000_000_000L
+        assertFalse(sink.hasPendingData())
+        assertTrue(sink.isEnded)
+        assertEquals(1, track.finishes)
+    }
+
+    private fun deepSink(asked: MutableList<Int>, tracks: (Int) -> IecAudioTrack): IecPassthroughAudioSink =
+        IecPassthroughAudioSink(
+            sink = RecordingSink(),
+            trackFactory = object : IecAudioTrackFactory {
+                override fun open(
+                    sampleRate: Int,
+                    channelCount: Int,
+                    bufferSizeBytes: Int,
+                    sessionId: Int
+                ): IecAudioTrack {
+                    if (bufferSizeBytes > 0) asked.add(bufferSizeBytes)
+                    return tracks(bufferSizeBytes)
+                }
+                override fun iec61937Ready(): Boolean = true
+            },
+            nanoTime = { clock[0] },
+            keepAliveThreadEnabled = false,
+            trueHdBufferTargetMs = IecStallMargin.SMALL_BOX_TRUEHD_BUFFER_MS
+        )
+
     private fun sink(
         track: IecAudioTrack,
         events: MutableList<String> = mutableListOf(),
@@ -562,7 +620,12 @@ class IecKeepAliveTest {
             running = false
         }
 
+        var finishes = 0
+
         override fun flush() = Unit
+        override fun finishStream() {
+            finishes++
+        }
         override fun release() = Unit
         override fun playbackHeadFrames(): Long = (head / frameSizeBytes).toLong()
         override fun setVolume(volume: Float) = Unit
@@ -607,6 +670,7 @@ class IecKeepAliveTest {
     private companion object {
         const val FRAME = Iec61937Packer.TRUEHD_IEC_SIZE
         const val AU_US = 833L
+        const val DEEP_BYTES = IecStallMargin.SMALL_BOX_TRUEHD_BUFFER_MS * 192 * 16
         const val CAP_BYTES = IecPassthroughAudioSink.KEEP_ALIVE_CAP_MS * 192_000L / 1000L * 16L
     }
 }

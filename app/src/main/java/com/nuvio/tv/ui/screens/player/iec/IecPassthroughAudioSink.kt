@@ -25,6 +25,7 @@ internal class IecPassthroughAudioSink(
     private val keepAliveThreadEnabled: Boolean = true,
     private val audioOutputReady: () -> Boolean = { true },
     private val dtsHdIecEnabled: Boolean = true,
+    private val trueHdBufferTargetMs: Int = IEC_BUFFER_TARGET_MS,
     private val outputRouteKey: (() -> String?)? = null,
     private val onIecBecameReady: (() -> Unit)? = null
 ) : ForwardingAudioSink(sink) {
@@ -52,6 +53,9 @@ internal class IecPassthroughAudioSink(
     private var headAnchorFrames: Long = 0L
     private var playing: Boolean = false
     private var handledEndOfStream: Boolean = false
+    private var shortEndStartedNanos: Long = NEVER
+    private var shortEndNanos: Long = 0L
+    private var keepAliveForTrack: Boolean = keepAliveEnabled
     private var audioSessionId: Int = 0
     private var volume: Float = 1f
     private var dtsChannelCount: Int = 8
@@ -155,7 +159,7 @@ internal class IecPassthroughAudioSink(
 
     /** The track plays on through pauses and seeks; see [keepAliveTick]. */
     val isKeepAliveActive: Boolean
-        get() = keepAliveEnabled && mode == Mode.TRUEHD && iecTrack != null && trackStarted
+        get() = keepAliveForTrack && mode == Mode.TRUEHD && iecTrack != null && trackStarted
 
     fun claimsHbr(format: Format): Boolean {
         return hbrIecAllowed() && !iecFailedThisSession && iecCarries(format) && iecAvailable(format)
@@ -450,14 +454,31 @@ internal class IecPassthroughAudioSink(
             }
         }
         if (!isIecActive) return forwardIsEnded()
+        if (handledEndOfStream) finishShortStream()
         return handledEndOfStream && !hasPendingData()
     }
 
     override fun hasPendingData(): Boolean {
         if (!isIecActive) return replays.isNotEmpty() || super.hasPendingData()
         val track = iecTrack ?: return false
-        return pendingFrames.isNotEmpty() || leftover.isNotEmpty() ||
-            synchronized(writeLock) { realEndFrames > track.playbackHeadFrames() }
+        if (pendingFrames.isNotEmpty() || leftover.isNotEmpty()) return true
+        if (shortEndStartedNanos != NEVER) return nanoTime() - shortEndStartedNanos < shortEndNanos
+        return synchronized(writeLock) { realEndFrames > track.playbackHeadFrames() }
+    }
+
+    // A track holding less than its buffer never starts by itself, so the end of the stream would never play out.
+    private fun finishShortStream() {
+        if (shortEndStartedNanos != NEVER || isKeepAliveActive || !playing) return
+        val track = iecTrack ?: return
+        if (pendingFrames.isNotEmpty() || track.isPlayHeld()) return
+        val written = synchronized(writeLock) { writtenBytes }
+        if (written <= 0L || written >= iecBufferSizeBytes || track.playbackHeadFrames() != 0L) return
+        track.finishStream()
+        shortEndStartedNanos = nanoTime()
+        shortEndNanos = written / track.frameSizeBytes * 1_000_000_000L / track.sampleRate + SHORT_END_MARGIN_NANOS
+        val line = "iec_short_end written=$written buffer=$iecBufferSizeBytes waitMs=${shortEndNanos / 1_000_000L}"
+        android.util.Log.i("IecPassthrough", line)
+        onDiagnosticEvent?.invoke(line)
     }
 
     override fun setAudioSessionId(audioSessionId: Int) {
@@ -588,16 +609,45 @@ internal class IecPassthroughAudioSink(
         } else {
             Iec61937Packer.dtsHdIecPeriod(channelCount, 512) shl 2
         }
-        val bufferBytes = frameBytes * if (format.sampleMimeType == MimeTypes.AUDIO_TRUEHD) 2 else 4
-        val targetBufferBytes = IEC_BUFFER_TARGET_MS * sampleRate / 1000 * channelCount * 2
-        val requestedBytes = maxOf(bufferBytes, targetBufferBytes)
-        val track = trackFactory.openHbr(
+        val trueHd = format.sampleMimeType == MimeTypes.AUDIO_TRUEHD
+        val bufferBytes = frameBytes * if (trueHd) 2 else 4
+        val bytesPerMs = sampleRate / 1000 * channelCount * 2
+        val standardBytes = maxOf(bufferBytes, IEC_BUFFER_TARGET_MS * bytesPerMs)
+        val deepBytes = if (trueHd && trueHdBufferTargetMs > IEC_BUFFER_TARGET_MS) {
+            maxOf(bufferBytes, trueHdBufferTargetMs * bytesPerMs)
+        } else {
+            0
+        }
+        fun open(bytes: Int) = trackFactory.openHbr(
             sampleRate = sampleRate,
             channelCount = channelCount,
-            bufferSizeBytes = requestedBytes,
+            bufferSizeBytes = bytes,
             sessionId = audioSessionId,
-            trueHd = format.sampleMimeType == MimeTypes.AUDIO_TRUEHD
-        ) ?: return false
+            trueHd = trueHd
+        )
+        var deep = false
+        var track: IecAudioTrack? = null
+        if (deepBytes > 0) {
+            val candidate = open(deepBytes) ?: return false
+            if (candidate.bufferSizeBytes >= deepBytes) {
+                deep = true
+                track = candidate
+            } else {
+                val got = candidate.bufferSizeBytes
+                candidate.release()
+                track = open(standardBytes) ?: return false
+                val line = "iec_deep_queue_refused asked=$deepBytes got=$got now=${track.bufferSizeBytes} keepAlive=on"
+                android.util.Log.w("IecPassthrough", line)
+                onDiagnosticEvent?.invoke(line)
+            }
+        }
+        if (track == null) track = open(standardBytes) ?: return false
+        keepAliveForTrack = keepAliveEnabled && !deep
+        if (deep) {
+            val line = "iec_deep_queue buffer=${track.bufferSizeBytes} ms=$trueHdBufferTargetMs keepAlive=off"
+            android.util.Log.i("IecPassthrough", line)
+            onDiagnosticEvent?.invoke(line)
+        }
         track.setVolume(volume)
         iecTrack = track
         LiveDirectAudioPlayback.noteOwnTrackOpened()
@@ -967,7 +1017,7 @@ internal class IecPassthroughAudioSink(
         if (trackStarted || track.isPlayHeld()) return
         trackStarted = true
         awaitHeadMove()
-        if (!keepAliveEnabled || mode != Mode.TRUEHD) return
+        if (!keepAliveForTrack || mode != Mode.TRUEHD) return
         val frame = TrueHdMatPacker.paddingOnlyFrame()
         fillerFrame = if (track.payload == HbrPayload.MAT) frame else Iec61937Packer.packTrueHdInPlace(frame)
         fillerOffset = 0
@@ -1309,6 +1359,7 @@ internal class IecPassthroughAudioSink(
             }
         }
         handledEndOfStream = false
+        shortEndStartedNanos = NEVER
         writeStallStartedNanos = WRITE_STALL_NOT_STARTED
         timestampClock.reset()
         if (!keepTrack) {
@@ -1384,6 +1435,7 @@ internal class IecPassthroughAudioSink(
         internal const val IEC_REOPEN_POLL_NANOS = 500_000_000L
         internal const val MAX_REOPENS_PER_FORMAT = 5
         private const val NEVER = Long.MIN_VALUE
+        private const val SHORT_END_MARGIN_NANOS = 200_000_000L
         private const val ROUTE_RECHECK_NANOS = 1_000_000_000L
         private const val HEALTH_INTERVAL_NANOS = 5_000_000_000L
         private const val FRAME_POOL_LIMIT = 8
