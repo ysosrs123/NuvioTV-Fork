@@ -138,6 +138,10 @@ android {
             applicationIdSuffix = it
         }
 
+        val gitCommit = providers.gradleProperty("arcGitCommit").orNull ?: runCatching {
+            providers.exec { commandLine("git", "rev-parse", "--short=9", "HEAD") }.standardOutput.asText.get().trim()
+        }.getOrDefault("")
+        buildConfigField("String", "GIT_COMMIT", "\"$gitCommit\"")
         buildConfigField("String", "PARENTAL_GUIDE_API_URL", "\"${localProperties.getProperty("PARENTAL_GUIDE_API_URL", "")}\"")
         buildConfigField("String", "INTRODB_API_URL", "\"${localProperties.getProperty("INTRODB_API_URL", "")}\"")
         buildConfigField("String", "TRAILER_API_URL", "\"${localProperties.getProperty("TRAILER_API_URL", "")}\"")
