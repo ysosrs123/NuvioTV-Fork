@@ -16,22 +16,26 @@ data class TrackingProgressRefreshFailure(
 class TrackingProgressRefreshCoordinator @Inject constructor(
     private val providers: TrackingProgressProviderRegistry
 ) {
-    suspend fun refreshConnected(intent: TrackingRefreshIntent): List<TrackingProgressRefreshFailure> =
+    /** [oneAtATime] runs the trackers one after another, for refreshes nobody is waiting on. */
+    suspend fun refreshConnected(
+        intent: TrackingRefreshIntent,
+        oneAtATime: Boolean = false
+    ): List<TrackingProgressRefreshFailure> =
         supervisorScope {
-            providers.providers()
-                .filter { provider -> provider.isAuthenticated.first() }
-                .map { provider ->
-                    async {
-                        try {
-                            provider.refresh(intent)
-                            null
-                        } catch (error: CancellationException) {
-                            throw error
-                        } catch (error: Throwable) {
-                            TrackingProgressRefreshFailure(provider.providerId, error)
-                        }
-                    }
+            val connected = providers.providers().filter { provider -> provider.isAuthenticated.first() }
+            suspend fun refresh(provider: TrackingProgressProvider): TrackingProgressRefreshFailure? =
+                try {
+                    provider.refresh(intent)
+                    null
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Throwable) {
+                    TrackingProgressRefreshFailure(provider.providerId, error)
                 }
-                .mapNotNull { operation -> operation.await() }
+            if (oneAtATime) {
+                connected.mapNotNull { refresh(it) }
+            } else {
+                connected.map { provider -> async { refresh(provider) } }.mapNotNull { operation -> operation.await() }
+            }
         }
 }

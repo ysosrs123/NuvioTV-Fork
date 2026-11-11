@@ -64,6 +64,7 @@ class ScreensaverController @Inject constructor(
         val was = _playbackActive.value
         if (was == active) return
         _playbackActive.value = active
+        com.nuvio.tv.data.repository.ArcBreadcrumbs.note(if (active) "playing" else "not playing")
         if (active) {
             // Resume can arrive via MediaSession without a key ever reaching the Activity.
             notifyWake()

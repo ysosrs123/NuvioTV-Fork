@@ -33,6 +33,7 @@
     <string name="scout_mixes_remix">Remix</string>
     <string name="scout_mixes_unwatched_only">Unwatched only</string>
     <string name="scout_mixes_keep_playing">Keep playing</string>
+    <string name="scout_mixes_pick_sources">Pick sources for me</string>
     <string name="scout_mixes_edit">Edit mix</string>
     <string name="scout_mixes_in_this_mix">In this mix</string>
     <string name="scout_mixes_next_in">Next in %1$s</string>

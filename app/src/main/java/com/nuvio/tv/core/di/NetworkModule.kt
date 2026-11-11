@@ -129,8 +129,9 @@ object NetworkModule {
             }
             // An application interceptor sees cache hits; a network interceptor
             // never does. Logs whether the HTTP cache served each API call, one
-            // line per call.
+            // line per call, in debug builds only.
             .addInterceptor { chain ->
+                if (!BuildConfig.DEBUG) return@addInterceptor chain.proceed(chain.request())
                 val response = chain.proceed(chain.request())
                 val served = when {
                     response.cacheResponse != null && response.networkResponse != null -> "validated"

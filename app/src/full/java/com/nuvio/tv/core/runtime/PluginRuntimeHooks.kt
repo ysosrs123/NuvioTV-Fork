@@ -12,10 +12,36 @@ import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.conscrypt.Conscrypt
 import java.io.File
+import java.security.KeyStore
 import java.security.Security
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 
 object PluginRuntimeHooks {
     @Volatile private var application: Application? = null
+
+    /**
+     * Test switch, off unless `log.tag.ArcYouTubeTls` is set to VERBOSE on the box: a socket factory
+     * from the bundled Conscrypt for the YouTube trailer connections only, with the box's own trust
+     * store. Nothing is installed process-wide.
+     */
+    fun youTubeTlsTest(): Pair<SSLSocketFactory, X509TrustManager>? {
+        if (!Log.isLoggable("ArcYouTubeTls", Log.VERBOSE)) return null
+        return try {
+            val trust = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+                .apply { init(null as KeyStore?) }
+                .trustManagers.filterIsInstance<X509TrustManager>().first()
+            val context = SSLContext.getInstance("TLS", Conscrypt.newProvider())
+            context.init(null, arrayOf(trust), null)
+            Log.i("ArcYouTubeTls", "YouTube trailer connections use bundled Conscrypt ${Conscrypt.version().let { "${it.major()}.${it.minor()}.${it.patch()}" }}")
+            context.socketFactory to trust
+        } catch (e: Exception) {
+            Log.w("ArcYouTubeTls", "Bundled Conscrypt not usable: ${e.message}")
+            null
+        }
+    }
 
     fun onApplicationCreate(application: Application) {
         // Defer heavy Conscrypt + baseClient init until a cloudstream extension is

@@ -145,4 +145,12 @@ class PrepareHandoverTest {
         assertEquals(20, PrepareHandover.shownDone(done = 20, total = 50, copyMade = 5))
         assertEquals(50, PrepareHandover.shownDone(done = 50, total = 50, copyMade = 5))
     }
+
+    @Test
+    fun `a copy still on trial does not count, so a turned-down copy cannot pull the count back to zero`() {
+        assertFalse(PrepareHandover.copyCounts(copyEnded = false, confirmed = false, failed = false))
+        assertTrue(PrepareHandover.copyCounts(copyEnded = false, confirmed = true, failed = false))
+        assertFalse(PrepareHandover.copyCounts(copyEnded = false, confirmed = true, failed = true))
+        assertFalse(PrepareHandover.copyCounts(copyEnded = true, confirmed = true, failed = false))
+    }
 }

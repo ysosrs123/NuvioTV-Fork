@@ -38,6 +38,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -88,6 +90,8 @@ internal fun ReturnFocusWhenClosed(state: BackupUiState, opener: FocusRequester?
 @Composable
 internal fun BackupPhoneOverlay(state: BackupUiState, viewModel: BackupViewModel, modifier: Modifier = Modifier) {
     val phone = state.dialog as? BackupDialog.Phone ?: return
+    // The page closes when Arc leaves the screen, not only when the code is closed.
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.dismissDialog() }
     QrCodeOverlay(
         qrBitmap = phone.qr,
         serverUrl = phone.url,

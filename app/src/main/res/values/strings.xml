@@ -906,7 +906,7 @@
     <string name="audio_lang_original_hint">Requires TMDB enrichment to be enabled</string>
     <string name="audio_preferred_lang">Preferred audio language</string>
     <string name="audio_skip_silence">Skip silence</string>
-    <string name="audio_skip_silence_sub">Skip silent portions of audio during playback. No effect while audio is passed through (bitstream)</string>
+    <string name="audio_skip_silence_sub">Skip silent portions of audio during playback. The picture can stutter and the sound can seem out of sync while quiet parts are skipped. No effect while audio is passed through (bitstream)</string>
     <string name="audio_remember_delay_per_device">Remember audio delay per device</string>
     <string name="audio_remember_delay_per_device_sub">Save and restore the in-player audio delay for the current audio output route</string>
     <string name="audio_advanced_section">Advanced audio</string>

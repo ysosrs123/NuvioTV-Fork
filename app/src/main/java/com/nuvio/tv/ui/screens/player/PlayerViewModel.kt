@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.MimeTypes
-import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -779,7 +778,7 @@ class PlayerViewModel @Inject constructor(
 
         // Audio: format + passthrough state + bitrate.
         player?.audioFormat?.let { format ->
-            val codec = DtsStreamType.of(format)?.label ?: audioCodecLabel(format.sampleMimeType)
+            val codec = bitstreamAudioLabel(format) ?: audioCodecLabel(format.sampleMimeType)
             val srcChannels = format.channelCount.takeIf { it > 0 }
             // Output channel count: for a PCM decode (incl. FFmpeg downmix) the sink's
             // configured input IS the decoder's PCM output, so its channelCount is the

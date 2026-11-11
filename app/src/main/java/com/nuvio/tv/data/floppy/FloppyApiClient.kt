@@ -57,7 +57,8 @@ class FloppyApiClient(
 
     /**
      * Floppy answers 403 both for a dead credential and for a missing permission; a low-permission call tells them
-     * apart. A proxy in front of the server can refuse that too, so only Floppy's own JSON refusal counts.
+     * apart. A proxy in front of the server can refuse that too, so a 403 counts only with Floppy's own JSON
+     * refusal. Older servers answer a dead credential with an empty 401; a proxy's own sign-in page does not count.
      */
     private suspend fun credentialIsDead(credentials: FloppyCredentials): Boolean {
         val probe = execute(
@@ -68,7 +69,8 @@ class FloppyApiClient(
                 credentials.accessToken
             )
         )
-        return (probe.status == 401 || probe.status == 403) && floppyErrorDetail(probe.body) != null
+        if (probe.status != 401 && probe.status != 403) return false
+        return floppyErrorDetail(probe.body) != null || (probe.status == 401 && probe.body.isBlank())
     }
 
     private suspend fun execute(request: FloppyHttpRequest): FloppyHttpResponse = try {

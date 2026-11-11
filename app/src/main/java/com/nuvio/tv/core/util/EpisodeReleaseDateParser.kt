@@ -10,6 +10,7 @@ import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 private val ISO_DATE_PATTERN = Regex("(?<!\\d)\\d{4}-\\d{2}-\\d{2}(?!\\d)")
+private const val PLAIN_DATE_LENGTH = 10
 // Every java.time ISO parser used below needs this start; anything else would only throw.
 private val ISO_DATE_START = Regex("^[+-]?\\d{4,}-\\d{2}-\\d{2}")
 
@@ -19,13 +20,13 @@ private val ISO_DATE_START = Regex("^[+-]?\\d{4,}-\\d{2}-\\d{2}")
  */
 internal fun parseEpisodeReleaseLocalDate(
     raw: String?,
-    zoneId: ZoneId = ZoneId.systemDefault()
+    zoneId: ZoneId? = null
 ): LocalDate? {
     val value = raw?.trim()?.takeIf { it.isNotEmpty() } ?: return null
     if (!ISO_DATE_START.containsMatchIn(value)) return parseEmbeddedReleaseDate(value)
 
     return runCatching { LocalDate.parse(value) }.getOrNull()
-        ?: parseExplicitReleaseInstant(value)?.atZone(zoneId)?.toLocalDate()
+        ?: parseExplicitReleaseInstant(value)?.atZone(zoneId ?: ZoneId.systemDefault())?.toLocalDate()
         ?: runCatching { LocalDateTime.parse(value).toLocalDate() }.getOrNull()
         ?: parseEmbeddedReleaseDate(value)
 }
@@ -45,15 +46,18 @@ internal fun isEpisodeReleaseAired(
 
 internal fun parseEpisodeReleaseInstant(
     raw: String?,
-    zoneId: ZoneId = ZoneId.systemDefault()
+    zoneId: ZoneId? = null
 ): Instant? {
     val value = raw?.trim()?.takeIf { it.isNotEmpty() } ?: return null
     if (!ISO_DATE_START.containsMatchIn(value)) {
         return parseEmbeddedReleaseDate(value)?.atStartOfDay(ZoneOffset.UTC)?.toInstant()
     }
+    if (value.length == PLAIN_DATE_LENGTH) {
+        runCatching { LocalDate.parse(value) }.getOrNull()?.let { return it.atStartOfDay(ZoneOffset.UTC).toInstant() }
+    }
 
     return parseExplicitReleaseInstant(value)
-        ?: runCatching { LocalDateTime.parse(value).atZone(zoneId).toInstant() }.getOrNull()
+        ?: runCatching { LocalDateTime.parse(value).atZone(zoneId ?: ZoneId.systemDefault()).toInstant() }.getOrNull()
         ?: runCatching { LocalDate.parse(value).atStartOfDay(ZoneOffset.UTC).toInstant() }.getOrNull()
         ?: parseEmbeddedReleaseDate(value)?.atStartOfDay(ZoneOffset.UTC)?.toInstant()
 }

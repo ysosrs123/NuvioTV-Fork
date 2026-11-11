@@ -51,8 +51,11 @@ internal fun PlayerRuntimeController.attemptStartupRecovery(
     error: PlaybackException,
     detailedError: String
 ): Boolean {
-    if (currentVideoTrackIsLikelyVc1 ||
-        Vc1VideoFormatHeuristics.isLikelyVc1(streamName = _uiState.value.currentStreamName ?: streamName)
+    if (Vc1VideoFormatHeuristics.isVc1PlaybackFailure(
+            error,
+            currentVideoTrackIsLikelyVc1,
+            _uiState.value.currentStreamName ?: streamName
+        )
     ) {
         return false
     }
@@ -350,8 +353,11 @@ internal fun PlayerRuntimeController.attemptAutoRetry(
     error: PlaybackException,
     detailedError: String
 ): Boolean {
-    if (currentVideoTrackIsLikelyVc1 ||
-        Vc1VideoFormatHeuristics.isLikelyVc1(streamName = _uiState.value.currentStreamName ?: streamName)
+    if (Vc1VideoFormatHeuristics.isVc1PlaybackFailure(
+            error,
+            currentVideoTrackIsLikelyVc1,
+            _uiState.value.currentStreamName ?: streamName
+        )
     ) {
         return false
     }
@@ -820,8 +826,11 @@ internal fun PlayerRuntimeController.tryParsingErrorProbeFallback(
     savedPosition: Long = 0L,
     paused: Boolean = pausedByUser
 ): Boolean {
-    if (currentVideoTrackIsLikelyVc1 ||
-        Vc1VideoFormatHeuristics.isLikelyVc1(streamName = _uiState.value.currentStreamName ?: streamName)
+    if (Vc1VideoFormatHeuristics.isVc1PlaybackFailure(
+            error,
+            currentVideoTrackIsLikelyVc1,
+            _uiState.value.currentStreamName ?: streamName
+        )
     ) {
         return false
     }

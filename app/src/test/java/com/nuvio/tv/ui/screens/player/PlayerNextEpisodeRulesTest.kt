@@ -183,6 +183,41 @@ class PlayerNextEpisodeRulesTest {
     }
 
     @Test
+    fun `a short gap after the outro still shows the card at the user's threshold`() {
+        val durationMs = 45 * 60_000L
+        val outro = listOf(SkipInterval(2580.0, 2680.0, "outro", "server"))
+        fun showsAt(positionMs: Long) = PlayerNextEpisodeRules.shouldShowNextEpisodeCard(
+            positionMs = positionMs,
+            durationMs = durationMs,
+            skipIntervals = outro,
+            thresholdMode = NextEpisodeThresholdMode.MINUTES_BEFORE_END,
+            thresholdPercent = 99f,
+            thresholdMinutesBeforeEnd = 2f
+        )
+        assertFalse(showsAt(durationMs - 150_000L))
+        assertTrue(showsAt(durationMs - 110_000L))
+    }
+
+    @Test
+    fun `an explicit post-credits scene still holds the card until it ends`() {
+        val durationMs = 45 * 60_000L
+        val intervals = listOf(
+            SkipInterval(2500.0, 2600.0, "outro", "introdb"),
+            SkipInterval(2600.0, 2680.0, "post-credits", "introdb")
+        )
+        fun showsAt(positionMs: Long) = PlayerNextEpisodeRules.shouldShowNextEpisodeCard(
+            positionMs = positionMs,
+            durationMs = durationMs,
+            skipIntervals = intervals,
+            thresholdMode = NextEpisodeThresholdMode.MINUTES_BEFORE_END,
+            thresholdPercent = 99f,
+            thresholdMinutesBeforeEnd = 2f
+        )
+        assertFalse(showsAt(2_650_000L))
+        assertTrue(showsAt(2_680_000L))
+    }
+
+    @Test
     fun `an unknown duration never fires`() {
         assertFalse(shouldShow(positionMs = 25 * 60_000L, durationMs = 0L))
     }

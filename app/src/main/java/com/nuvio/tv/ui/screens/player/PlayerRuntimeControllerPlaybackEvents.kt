@@ -1218,6 +1218,7 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
 
     val progress = currentWatchProgress(parentContentId, parentContentType, position, duration, System.currentTimeMillis())
         .copy(progressPercent = fallbackPercent)
+    val inMix = episodeShufflePlayback.inMix(profileId, contentId, currentVideoId)
 
     scope.launch(kotlinx.coroutines.NonCancellable) {
         try {
@@ -1227,6 +1228,9 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
                 profileId = profileId
             )
             val normalizedProgress = progress.copy(contentId = effectiveContentId)
+            runCatching {
+                episodeShufflePlayback.noteMixPlay(profileId, normalizedProgress, inMix)
+            }
             if (normalizedProgress.isCompleted()) {
                 if (!hasMarkedCurrentEpisodeCompleted) {
                     hasMarkedCurrentEpisodeCompleted = true

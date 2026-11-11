@@ -274,6 +274,8 @@ class PluginManager @Inject constructor(
     private fun runKey(tmdbId: String, mediaType: String, season: Int?, episode: Int?) =
         "$tmdbId:${mediaType.lowercase()}:${season ?: ""}:${episode ?: ""}"
 
+    private val summaryRuns = java.util.concurrent.ConcurrentHashMap<String, Any>()
+
     private fun startSummary(key: String, total: Int) {
         _searchSummaries.update { current ->
             (current - key).entries.toList().takeLast(MAX_SEARCH_SUMMARIES - 1).associate { it.key to it.value } +
@@ -907,6 +909,7 @@ class PluginManager @Inject constructor(
         val preferred = plan.preferred
         val summaryKey = runKey(tmdbId, mediaType, season, episode)
         startSummary(summaryKey, plan.others.size + if (preferred != null) 1 else 0)
+        val run = Any().also { summaryRuns[summaryKey] = it }
         val linksDueAtMs = linkTimeLimitMs?.let { System.currentTimeMillis() + it }
         try {
             if (preferred != null) {
@@ -947,10 +950,13 @@ class PluginManager @Inject constructor(
                 }
             }
         } finally {
-            val planned = listOfNotNull(preferred?.id) + plan.others.map { it.id }
-            _searchSummaries.update { current ->
-                val summary = current[summaryKey] ?: return@update current
-                current + (summaryKey to summary.withUnfinishedStopped(planned))
+            // A newer search for the same title owns the summary now.
+            if (summaryRuns.remove(summaryKey, run)) {
+                val planned = listOfNotNull(preferred?.id) + plan.others.map { it.id }
+                _searchSummaries.update { current ->
+                    val summary = current[summaryKey] ?: return@update current
+                    current + (summaryKey to summary.withUnfinishedStopped(planned))
+                }
             }
         }
     }

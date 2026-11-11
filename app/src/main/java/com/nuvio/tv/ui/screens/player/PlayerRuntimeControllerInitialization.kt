@@ -1,7 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
 import com.nuvio.tv.core.build.IssueReports
-import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.core.util.TtffTrace
 import com.nuvio.tv.core.logging.diagnosticStreamUrl
 import com.nuvio.tv.core.logging.redactedUrlForLog
@@ -2674,7 +2673,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         // Records whether audio is passed through, decoded to PCM,
                         // or transcoded, for the Audio Path row.
                         val sourceMime = this@apply.audioFormat?.sampleMimeType
-                        val sourceCodec = DtsStreamType.of(this@apply.audioFormat)?.label
+                        val sourceCodec = bitstreamAudioLabel(this@apply.audioFormat)
                             ?: describeAudioMime(sourceMime)
                         // The only transcode this app performs is
                         // x -> AC-3 (denied-codec handling / Force AC-3). When the
@@ -2783,7 +2782,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                                 val source = this@apply.audioFormat
                                 val sinkFormat = playbackSpeedAwareAudioSink?.activeInputFormat
                                 if (source?.sampleMimeType != null && sinkFormat?.sampleMimeType != null) {
-                                    val src = DtsStreamType.of(source)?.label
+                                    val src = bitstreamAudioLabel(source)
                                         ?: describeAudioMime(source.sampleMimeType)
                                     val detail = buildString {
                                         when {
@@ -3522,8 +3521,10 @@ private class SubtitleOffsetRenderersFactory(
             Log.w(PlayerRuntimeController.TAG, "STHRESH: DIRECT start threshold -> $reducedStartThresholdFrames frames")
         }
         var speedAwareSink: PlaybackSpeedAwareAudioSink? = null
+        val smallBox = BufferSizing.isSmallBox(NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context))
         val iecAudioSink = IecPassthroughAudioSink(
             sink = baseAudioSink,
+            trueHdBufferTargetMs = com.nuvio.tv.ui.screens.player.iec.IecStallMargin.trueHdBufferMs(smallBox),
             hbrIecEnabled = !useSystemPassthrough && !forceOpticalPassthrough && !bluetoothForcePcm && !iecOff,
             onIecBecameReady = {
                 Handler(Looper.getMainLooper()).post {
@@ -4024,6 +4025,9 @@ private fun friendlyVideoHdrType(
     dvConversionOccurred: Boolean
 ): String? {
     val isDolbyVisionMime = mimeType?.lowercase() == MimeTypes.VIDEO_DOLBY_VISION
+    val baseLayerDefault = "HDR10".takeIf {
+        isDolbyVisionMime || mimeType?.lowercase() == MimeTypes.VIDEO_H265
+    }
     fun fromTransfer(): String? = when (colorTransfer) {
         C.COLOR_TRANSFER_ST2084 -> "HDR10"
         C.COLOR_TRANSFER_HLG -> "HLG"
@@ -4032,9 +4036,9 @@ private fun friendlyVideoHdrType(
     }
     return when {
         // Ignore DV data: output is HDR10/SDR, never Dolby Vision.
-        effectiveModeName == "HDR10_BASE_LAYER" -> fromTransfer() ?: "HDR10"
+        effectiveModeName == "HDR10_BASE_LAYER" -> fromTransfer() ?: baseLayerDefault
         // DV RPU stripped: output is HDR10 base layer, never Dolby Vision.
-        effectiveModeName == "STRIP_DV" -> fromTransfer() ?: "HDR10"
+        effectiveModeName == "STRIP_DV" -> fromTransfer() ?: baseLayerDefault
         // DV8.1 conversion, but only label it DV if a conversion actually ran. AUTO arms
         // this mode for every file on a DV display, so plain SDR/HDR10 lands here too.
         effectiveModeName == "DV81_LIBDOVI" && dvConversionOccurred -> "Dolby Vision"

@@ -66,6 +66,20 @@ class FloppyTrackingProviderTest {
     }
 
     @Test
+    fun `an older server's empty 401 signs out so sign-in is asked for`() = runTest {
+        val h = manualToken()
+        h.engine.onceFirst(FloppyHttpMethod.POST, scrobblePath, 401, "")
+        h.engine.onceFirst(FloppyHttpMethod.GET, FloppyAuthRepository.CONNECTION_CHECK_PATH, 401, "")
+        try {
+            h.api.scrobble(h.store.scope(), floppyScrobbleBody(TrackingScrobbleAction.START, TrackingScrobbleEvent(movie, 5.0))!!)
+            fail("expected sign-out")
+        } catch (error: FloppyAuthException) {
+            assertEquals(FloppyAuthError.AUTHORIZATION_REVOKED, error.error)
+        }
+        assertFalse(h.store.state.value.isAuthenticated)
+    }
+
+    @Test
     fun `a proxy refusing the call and the check keeps a hand-entered token`() = runTest {
         listOf(401 to "<html>Sign in</html>", 403 to "", 403 to """{"message":"Forbidden"}""").forEach { (status, body) ->
             val h = manualToken()

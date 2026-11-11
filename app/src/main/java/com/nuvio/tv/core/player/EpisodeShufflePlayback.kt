@@ -36,6 +36,18 @@ class EpisodeShufflePlayback @Inject constructor(
     fun mixUpNext(profileId: Int, contentId: String?, videoId: String?): ScoutMixUpNext? =
         mixSession.upNextFor(profileId, contentId, videoId)
 
+    private var lastNoted: Pair<String, Boolean>? = null
+
+    /** Remembers whether this episode's latest play was in a Mix, once per change. */
+    suspend fun noteMixPlay(profileId: Int, progress: WatchProgress, inMix: Boolean) {
+        if (progress.season == null && progress.episode == null) return
+        val key = com.nuvio.tv.data.local.mixPlayKey(progress.contentId, progress.season, progress.episode)
+        val noted = "$profileId/$key" to inMix
+        if (noted == lastNoted) return
+        lastNoted = noted
+        store.setMixPlayed(profileId, key, inMix)
+    }
+
     fun pressedMixNext(profileId: Int, contentId: String?, videoId: String?) =
         mixSession.pressedNext(profileId, contentId, videoId)
 

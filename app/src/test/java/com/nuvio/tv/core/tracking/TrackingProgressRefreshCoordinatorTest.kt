@@ -42,6 +42,21 @@ class TrackingProgressRefreshCoordinatorTest {
     }
 
     @Test
+    fun `one at a time refreshes every connected provider and still isolates failures`() = runTest {
+        val traktFailure = IllegalStateException("trakt unavailable")
+        val trakt = FakeProgressProvider(TrackingProviderId.TRAKT, authenticated = true, refreshFailure = traktFailure)
+        val simkl = FakeProgressProvider(TrackingProviderId.SIMKL, authenticated = true)
+        val coordinator = TrackingProgressRefreshCoordinator(TrackingProgressProviderRegistry(setOf(simkl, trakt)))
+
+        val failures = coordinator.refreshConnected(TrackingRefreshIntent.AUTOMATIC, oneAtATime = true)
+
+        assertEquals(1, trakt.refreshCount)
+        assertEquals(1, simkl.refreshCount)
+        assertEquals(TrackingRefreshIntent.AUTOMATIC, simkl.lastIntent)
+        assertEquals(listOf(TrackingProviderId.TRAKT), failures.map { it.providerId })
+    }
+
+    @Test
     fun `skips disconnected providers`() = runTest {
         val trakt = FakeProgressProvider(TrackingProviderId.TRAKT, authenticated = false)
         val simkl = FakeProgressProvider(TrackingProviderId.SIMKL, authenticated = true)

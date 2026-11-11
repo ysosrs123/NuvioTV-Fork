@@ -22,6 +22,7 @@ import com.nuvio.tv.domain.model.RottenTomatoesStatus
 import com.nuvio.tv.ui.theme.NuvioTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
+import kotlin.math.roundToInt
 
 @Composable
 fun MDBListRatingsRow(
@@ -114,7 +115,9 @@ private fun RatingBadge(
         Text(
             text = formatMDBListRating(provider, rating),
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.extendedColors.textSecondary
+            color = NuvioTheme.extendedColors.textSecondary,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
@@ -131,9 +134,11 @@ private fun getRatingValue(ratings: MDBListRatings, provider: String): Double? =
     else -> null
 }
 
-private fun formatMDBListRating(provider: String, rating: Double): String {
+internal fun formatMDBListRating(provider: String, rating: Double): String {
     return when (provider) {
-        "imdb", "tmdb", "letterboxd" -> String.format("%.1f", rating)
+        // MDBList sends TMDB out of 100; a fractional value under 10 is out of 10. Whole number like the details hero.
+        "tmdb" -> (if (rating < 10.0 && rating % 1.0 != 0.0) rating * 10.0 else rating).roundToInt().toString()
+        "imdb", "letterboxd" -> String.format("%.1f", rating)
         else -> {
             if (rating % 1.0 == 0.0) rating.toInt().toString() else String.format("%.1f", rating)
         }

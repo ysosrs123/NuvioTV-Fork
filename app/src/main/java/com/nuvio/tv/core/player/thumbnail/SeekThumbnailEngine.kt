@@ -4550,7 +4550,11 @@ object SeekThumbnails {
             val (recent, endSeq) = synchronized(recentMade) { recentMade.toList() to madeSeq }
             val left = (maxOf(latticeWorkLeft, total - done, 0) * perThumb).toInt()
             val shownTotal = maxOf(screenTotal, total)
-            val copyCounts = copy?.ended != true && borrow?.failed != true
+            val copyCounts = PrepareHandover.copyCounts(
+                copyEnded = copy?.ended != false,
+                confirmed = borrow?.let { it.copy === copy && it.confirmed } == true,
+                failed = borrow?.failed == true,
+            )
             val shownDone = PrepareHandover.shownDone(
                 done = if (done >= total) shownTotal else minOf(maxOf(screenDone, done), shownTotal),
                 total = shownTotal,

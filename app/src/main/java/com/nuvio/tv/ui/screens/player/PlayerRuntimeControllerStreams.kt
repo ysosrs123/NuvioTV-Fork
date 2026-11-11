@@ -2281,6 +2281,11 @@ internal fun PlayerRuntimeController.playNextEpisode(userInitiated: Boolean = fa
             val installedAddons = streamAddonsFor(nextVideo.id)
             val installedAddonOrder = installedAddons.map { it.displayName }
             val preferredServerNames = serverStreams.preferredSourceNames(type, nextVideo.id)
+            val serverFirstNames = if (playerSettings.streamAutoPlayMode != StreamAutoPlayMode.MANUAL) {
+                serverStreams.autoPlayFirstNames(type, nextVideo.id)
+            } else {
+                emptySet()
+            }
             val effectiveMode = if (shouldAutoSelectInManualMode) {
                 StreamAutoPlayMode.FIRST_STREAM
             } else {
@@ -2364,6 +2369,7 @@ internal fun PlayerRuntimeController.playNextEpisode(userInitiated: Boolean = fa
                     debridStreamPreferences = debridStreamPreferences,
                     bingeGroupOnly = bingeGroupOnlyManualMode
                 )
+                com.nuvio.tv.core.player.serverFirstPick(allStreams, serverFirstNames, ::select)?.let { return it }
                 // A pick made for Manual mode tries the current add-on and service first.
                 return if (shouldAutoSelectInManualMode) {
                     pickSameSourceFirst(allStreams, currentSource, !sameSourceOnly, ::select)
@@ -2373,6 +2379,9 @@ internal fun PlayerRuntimeController.playNextEpisode(userInitiated: Boolean = fa
             }
 
             fun tryBingeGroupOnlyInner(data: List<AddonStreams>): Stream? {
+                if (data.any { group -> group.addonName in serverFirstNames && group.streams.isNotEmpty() }) {
+                    return trySelectStreamInner(data)
+                }
                 if (currentStreamBingeGroup == null || !playerSettings.streamAutoPlayPreferBingeGroupForNextEpisode) return null
                 val orderedStreams = StreamAutoPlaySelector.orderAddonStreams(
                     data.withoutAddonsWhenContinuingPlugin(currentStreamBingeGroup),

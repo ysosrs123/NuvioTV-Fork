@@ -34,11 +34,11 @@ class BackupCryptoTest {
     }
 
     @Test
-    fun `PINs are 6 to 10 digits`() {
+    fun `PINs are 6 to 16 digits`() {
         assertFalse(BackupCrypto.isValidPin("12345"))
         assertTrue(BackupCrypto.isValidPin("123456"))
-        assertTrue(BackupCrypto.isValidPin("1234567890"))
-        assertFalse(BackupCrypto.isValidPin("12345678901"))
+        assertTrue(BackupCrypto.isValidPin("1234567890123456"))
+        assertFalse(BackupCrypto.isValidPin("12345678901234567"))
         assertFalse(BackupCrypto.isValidPin("12345a"))
     }
 

@@ -77,7 +77,14 @@ internal object PrepareHandover {
         }
     }
 
-    /** The count on the screen: the copy's own pictures count from the first one, and never read as finished. */
+    /**
+     * Whether the copy's pictures go into the count. Only a confirmed copy counts: one still on trial can be
+     * turned down, and the count would then fall back to the title's own.
+     */
+    fun copyCounts(copyEnded: Boolean, confirmed: Boolean, failed: Boolean): Boolean =
+        !copyEnded && confirmed && !failed
+
+    /** The count on the screen: a confirmed copy's pictures count, and never read as finished. */
     fun shownDone(done: Int, total: Int, copyMade: Int): Int =
         if (done >= total) done else maxOf(done, minOf(copyMade, total - 1)).coerceAtLeast(0)
 }

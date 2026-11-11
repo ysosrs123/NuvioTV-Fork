@@ -14,7 +14,7 @@ class WrongBackupPinException : Exception("wrong PIN")
 /** Seals the passwords and keys with the viewer's PIN: a slow key from the PIN, then AES-GCM. */
 object BackupCrypto {
     const val MIN_PIN_LENGTH = 6
-    const val MAX_PIN_LENGTH = 10
+    const val MAX_PIN_LENGTH = 16
     private const val PREFERRED_KDF = "PBKDF2WithHmacSHA256"
     private const val FALLBACK_KDF = "PBKDF2WithHmacSHA1"
     private const val ITERATIONS = 600_000

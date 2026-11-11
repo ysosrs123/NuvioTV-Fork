@@ -88,14 +88,8 @@ object PlayerNextEpisodeRules {
                 val userTriggerMs = userThresholdPositionMs(
                     durationMs, thresholdMode, thresholdPercent, thresholdMinutesBeforeEnd
                 )
-                val isHeuristic = postCreditsScene.provider == "heuristic"
-                val sceneDurationMs = sceneEndMs - (postCreditsScene.startTime * 1_000.0).toLong()
-                val userThresholdFromEndMs = durationMs - userTriggerMs
-                return if (isHeuristic && sceneDurationMs < userThresholdFromEndMs) {
-                    // Short heuristic scene (shorter than user threshold window):
-                    // card is not needed - autoplay will handle it at playback end.
-                    false
-                } else if (isHeuristic) {
+                // A guessed scene is only the time left after the credits, so the user's threshold decides.
+                return if (postCreditsScene.provider == "heuristic") {
                     positionMs >= userTriggerMs
                 } else {
                     positionMs >= maxOf(sceneEndMs, userTriggerMs)
