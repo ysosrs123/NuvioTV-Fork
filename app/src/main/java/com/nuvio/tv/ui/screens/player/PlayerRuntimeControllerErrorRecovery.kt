@@ -451,6 +451,9 @@ internal fun PlayerRuntimeController.scheduleStableProgressReset() {
         if (player.playbackState == Player.STATE_READY && player.isPlaying) {
             resetErrorRetryState()
             delay(PlaybackRecoveryGate.AUDIO_RETRY_STABLE_RESET_MS - STABLE_PROGRESS_RESET_DELAY_MS)
+            if (_exoPlayer === player && player.playbackState == Player.STATE_READY && player.isPlaying) {
+                autoRecoveryCountForCurrentStream = 0
+            }
             if (_exoPlayer === player && player.playbackState == Player.STATE_READY && player.isPlaying &&
                 playbackRecoveryGate.noteStablePlayback(playingSinceMs, android.os.SystemClock.elapsedRealtime())
             ) {

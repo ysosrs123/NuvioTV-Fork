@@ -84,7 +84,7 @@ class FilenameEpisodeMatcherTest {
     @Test
     fun `movie filename returns null`() {
         val result = FilenameEpisodeMatcher.buildNextFilename(
-            "The.Matrix.1999.2160p.UHD.BluRay.mkv", null, 0, null, 0
+            "Example.Movie.1999.2160p.UHD.BluRay.mkv", null, 0, null, 0
         )
         assertNull(result)
     }
@@ -133,7 +133,7 @@ class FilenameEpisodeMatcherTest {
 
     @Test
     fun `extract returns null for movie`() {
-        assertNull(FilenameEpisodeMatcher.extractSeasonEpisode("The.Matrix.1999.mkv"))
+        assertNull(FilenameEpisodeMatcher.extractSeasonEpisode("Example.Movie.1999.mkv"))
     }
 
     @Test

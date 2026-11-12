@@ -84,10 +84,10 @@ class BufferSizingTest {
 
     @Test
     fun `4K is read from the name or from a bitrate only 4K carries`() {
-        assertTrue(BufferSizing.looksFourK(0L, "Jaws.1975.2160p.UHD.BluRay.REMUX.DV.HDR.TrueHD.Atmos.7.1.mkv"))
+        assertTrue(BufferSizing.looksFourK(0L, "Example.Movie.1975.2160p.UHD.BluRay.REMUX.DV.HDR.TrueHD.Atmos.7.1.mkv"))
         assertTrue(BufferSizing.looksFourK(0L, null, "TorBox 4K"))
-        assertTrue(BufferSizing.looksFourK(81_700_000L, "jaws.mkv"))
-        assertFalse(BufferSizing.looksFourK(35_000_000L, "Law.and.Order.S01E01.1080p.BluRay.REMUX.AVC.DTS-HD.MA.2.0.mkv"))
+        assertTrue(BufferSizing.looksFourK(81_700_000L, "movie.mkv"))
+        assertFalse(BufferSizing.looksFourK(35_000_000L, "Example.Show.S01E01.1080p.BluRay.REMUX.AVC.DTS-HD.MA.2.0.mkv"))
         assertFalse(BufferSizing.looksFourK(0L, "The.4Kids.Show.S01E01.720p.mkv"))
         assertFalse(BufferSizing.looksFourK(0L, null, null))
     }

@@ -429,7 +429,8 @@ fun PlayerScreen(
         if (postPlayRecommendationState.canReturnToPlayer && !uiState.playbackEnded) {
             returnToPlayerFromPostPlay()
             viewModel.hideControls()
-        } else if (postPlayRecommendationState.isVisible || postPlayRecommendationState.isLoadingRecommendation) {
+        } else if (postPlayRecommendationState.isVisible ||
+            (postPlayRecommendationState.isLoadingRecommendation && uiState.playbackEnded)) {
             exitPlayer()
         } else if (shouldConfirmNextEpisodeOnEnd) {
             returnToDetailsFromEndPrompt()
@@ -889,7 +890,7 @@ fun PlayerScreen(
         !shouldConfirmNextEpisodeOnEnd &&
         uiState.postPlayMode !is PostPlayMode.StillWatching &&
         !postPlayRecommendationState.isVisible &&
-        !postPlayRecommendationState.isLoadingRecommendation &&
+        !(postPlayRecommendationState.isLoadingRecommendation && uiState.playbackEnded) &&
         !postPlayRecommendationState.isTrailerPlaying
     val showSubtitleNudge: (Int) -> Unit = { offset ->
         viewModel.onEvent(PlayerEvent.OnSetSubtitleVerticalOffset(offset))
@@ -1192,7 +1193,7 @@ fun PlayerScreen(
                 }
 
                 val postPlayHandlesBack = postPlayRecommendationState.isVisible ||
-                    postPlayRecommendationState.isLoadingRecommendation ||
+                    (postPlayRecommendationState.isLoadingRecommendation && uiState.playbackEnded) ||
                     postPlayRecommendationState.isTrailerPlaying
                 if (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ESCAPE ||
                     (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_BACK && !postPlayHandlesBack)
@@ -2264,6 +2265,14 @@ fun PlayerScreen(
                 },
                 modifier = Modifier.align(Alignment.TopStart)
             )
+
+            uiState.qmsHint?.let { reading ->
+                QmsHintDialog(
+                    reading = reading,
+                    onTurnOff = { viewModel.onEvent(PlayerEvent.OnQmsHintTurnOff) },
+                    onKeep = { viewModel.onEvent(PlayerEvent.OnQmsHintKeep) }
+                )
+            }
 
             DisplayModeOverlay(
                 info = uiState.displayModeInfo,

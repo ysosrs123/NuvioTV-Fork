@@ -11,7 +11,7 @@ class PlayerBadgeTierTest {
     private val web3 = "(?i)(?:(?<![A-Za-z0-9])(?:(?:radarr|sonarr)\\s+web\\s+t3|web\\s+t3|anime\\s+web\\s+t3)(?![A-Za-z0-9])|(?<![\\s\\S])(?=[\\s\\S]*?(?:(?<![A-Za-z0-9])(?:web(?:[-_. ]?dl(?:mux)?|[-_. ]?rip|mux)?|webdl|webrip|webmux|amazonhd|amazonsd|ituneshd|maxdomehd|netflixu?hd|hbomaxhd|disneyhd|amzn|dsnp|hmax|hulu|nf)(?![A-Za-z0-9])))(?![\\s\\S]*?(?:(?<![A-Za-z0-9])(?:(?:(?:bd|uhd)[-_. ]?)?remux|bdremux|uhdremux)(?![A-Za-z0-9])|(?<![A-Za-z0-9])(?:blu[-_. ]?ray|bluray|b[dr]rip|bdmux|bd(?:720|1080|2160)p?|hd[-_. ]?dvd|hddvd|dvdrip|ntsc|pal|xvidvd)(?![A-Za-z0-9])))(?=[\\s\\S]*?(?:(?:(?:^|[\\s._\\-\\[(])(?:NINJACENTRAL|GNOMiSSiON|SwAgLaNdEr|SLiGNOME|DRACULA|ViSiON|AnoZu|BLOOM|Dooky|HHWEB|T4H|ZR)(?=\$|[\\s._\\-\\])]|\\.(?:mkv|mp4|avi|m2ts|ts|wmv|mov|m4v|mpg|mpeg|webm|iso)(?:\$|[?#\\s]))))))"
     private val dolbyVision = "(?is)^(?=.*?(?:(?:(?<![a-z0-9])(?:dv|dovi|dolby[-_. ]?vision)(?![a-z0-9]))))(?:(?=.*\\.(?:mkv|mp4|avi|m2ts|webm|mov|m4v)\\s+\\S)|(?=(?:.*(?:2160|1440|1080|720|576|480)[pi]?){2})|(?=.*[\\r\\n])|(?=^[a-f0-9]{40,64}\\s+\\S))(?!.*(?:(?:(?:(?<![a-z0-9])(?:hdr[-_. ]?10(?:[-_. ]?(?:\\+|p)|[-_. ]?plus))(?![a-z0-9]))|(?:(?<![a-z0-9])(?:hdr[-_. ]?10(?![-_. ]?(?:\\+|p(?:lus)?|bit|hi)))(?![a-z0-9]))|(?:(?<![a-z0-9])(?:hdr(?![-_. ]?(?:10(?![-_. ]?bit)|\\+|p(?:lus)?)))(?![a-z0-9])))))"
 
-    private val file = "Verity.2026.REPACK.2160p.AMZN.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-BYNDR.mkv"
+    private val file = "Film.2026.REPACK.2160p.AMZN.WEB-DL.DDP5.1.Atmos.DV.HDR.H.265-BYNDR.mkv"
     private val info = PlayerMediaInfo(videoCodec = "dolby-vision", videoWidth = 3840, videoHeight = 1600, audioCodec = "E-AC-3", audioChannels = 6, hdr = listOf("DV"), hdrKnown = true, bitDepth = 10)
 
     @Test

@@ -154,7 +154,7 @@ class AutoSpeedupLimitsTest {
         assertEquals(true, AutoSpeedup.guessBitrate(60 * gb, 120) in 66_000_000L..67_000_000L)
         assertEquals(true, AutoSpeedup.guessBitrate(26 * gb, 125) < 30_000_000L)
         assertEquals(80_000_000L, AutoSpeedup.guessBitrate(null, null,
-            "No.Country.for.Old.Men.2007.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.REMUX-FraMeSToR.mkv"))
+            "Example.Movie.2007.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.REMUX-FraMeSToR.mkv"))
         assertEquals(80_000_000L, AutoSpeedup.guessBitrate(null, 120, "Film 2160p BluRay TrueHD Atmos 7.1"))
         assertEquals(0L, AutoSpeedup.guessBitrate(null, null, "Tenzing.2160p.WEB-DL.DV.HDR10.DDP5.1"))
         assertEquals(0L, AutoSpeedup.guessBitrate(null, null, "Film 2160p WEB-DL TrueHD 7.1"))

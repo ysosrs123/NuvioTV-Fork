@@ -53,7 +53,7 @@ class PlayerBadgeDtsTest {
     fun `dts-hd master audio shows one dts badge`() {
         val info = PlayerMediaInfo(audioCodec = "DTS-HD", audioChannels = 6)
         assertEquals(listOf("DTS-HD MA", "5.1"),
-            names(info, "The.Pianist.2002.2160p.Blu-ray.Remux.DV.HDR.DTS-HD.MA.5.1-GRP.mkv"))
+            names(info, "Film.2002.2160p.Blu-ray.Remux.DV.HDR.DTS-HD.MA.5.1-GRP.mkv"))
     }
 
     @Test
@@ -77,7 +77,7 @@ class PlayerBadgeDtsTest {
     @Test
     fun `a loose dts rule is left out next to dts-hd ma`() {
         val info = PlayerMediaInfo(audioCodec = "DTS-HD", audioChannels = 6)
-        val file = "The.Pianist.2002.2160p.Blu-ray.Remux.DV.HDR.DTS-HD.MA.5.1-CiNEPHiLES.mkv"
+        val file = "Film.2002.2160p.Blu-ray.Remux.DV.HDR.DTS-HD.MA.5.1-CiNEPHiLES.mkv"
         val playing = playerBadgePlayingText(info, emptyList(), file, file, audioFromRelease = true)
         val text = playerBadgeMatchText(info, emptyList(), file, file, audioFromRelease = true)
         assertEquals(listOf("DTS-HD MA"), StreamBadgeMatcher.matchedPlayerBadges(playing, listOf(text), loose).map { it.name })
@@ -85,7 +85,7 @@ class PlayerBadgeDtsTest {
 
     @Test
     fun `the stream list and details page show one dts badge too`() {
-        val file = "The.Pianist.2002.2160p.Blu-ray.Remux.DV.HDR.DTS-HD.MA.5.1-GRP.mkv"
+        val file = "Film.2002.2160p.Blu-ray.Remux.DV.HDR.DTS-HD.MA.5.1-GRP.mkv"
         assertEquals(listOf("DTS-HD MA"), StreamBadgeMatcher.matchedBadges(listOf(file), loose).map { it.name })
         val stream = com.nuvio.tv.domain.model.Stream(
             name = "4K", title = file, description = null, url = "https://example.com/a.mkv", ytId = null,

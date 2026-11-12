@@ -24,6 +24,38 @@ internal class AutoSyncTimelineTimeMapper(private val timeline: AutoSyncTimeline
 
     fun mapEndMs(originalMs: Long): Long = mapTime(originalMs, endBoundaries)
 
+    /**
+     * Start and end of one event. An event that is not a timeline cue moves as a whole by the shift
+     * of the nearest cue start, so it keeps its length.
+     */
+    fun mapEventMs(originalStartMs: Long, originalEndMs: Long): Pair<Long, Long> {
+        val nearestStart = nearestBoundary(startBoundaries, originalStartMs)
+        if (nearestStart?.originalMs == originalStartMs &&
+            nearestBoundary(endBoundaries, originalEndMs)?.originalMs == originalEndMs
+        ) {
+            return mapStartMs(originalStartMs) to mapEndMs(originalEndMs)
+        }
+        val startMs = if (nearestStart == null) {
+            mapStartMs(originalStartMs)
+        } else {
+            boundaryMapped++
+            (originalStartMs + nearestStart.retimedMs - nearestStart.originalMs).coerceAtLeast(0L)
+        }
+        return startMs to startMs + (originalEndMs - originalStartMs)
+    }
+
+    private fun nearestBoundary(boundaries: List<TimingBoundary>, originalMs: Long): TimingBoundary? {
+        var low = 0
+        var high = boundaries.size
+        while (low < high) {
+            val mid = (low + high) ushr 1
+            if (boundaries[mid].originalMs < originalMs) low = mid + 1 else high = mid
+        }
+        return listOfNotNull(boundaries.getOrNull(low - 1), boundaries.getOrNull(low))
+            .minByOrNull { abs(it.originalMs - originalMs) }
+            ?.takeIf { abs(it.originalMs - originalMs) <= BOUNDARY_TOLERANCE_MS }
+    }
+
     private fun mapTime(originalMs: Long, boundaries: List<TimingBoundary>): Long {
         if (boundaries.isNotEmpty()) {
             var low = 0

@@ -238,6 +238,32 @@ class BufferMemoryKeeperTest {
     }
 
     @Test
+    fun `swap staying used up beside little free memory steps the cut up like low memory does`() {
+        val k = keeper(customControl(budgetMb = 100))
+        free = BufferSizing.FreeMemory(188 * mb, 144 * mb, false)
+        swapFree = 0
+        k.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_LOW, k.pressureLevel)
+        now += BufferMemoryKeeper.ESCALATE_AFTER_MS - 1
+        k.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_LOW, k.pressureLevel)
+        now += 1
+        k.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, k.pressureLevel)
+    }
+
+    @Test
+    fun `swap used up with room left above the line stays at the first cut`() {
+        val k = keeper(customControl(budgetMb = 100))
+        free = BufferSizing.FreeMemory(230 * mb, 144 * mb, false)
+        swapFree = 4
+        k.check()
+        now += BufferMemoryKeeper.ESCALATE_AFTER_MS * 3
+        k.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_LOW, k.pressureLevel)
+    }
+
+    @Test
     fun `the budget comes back once the box has room again`() {
         val lc = customControl(budgetMb = 100)
         val k = keeper(lc)
@@ -663,5 +689,40 @@ class BufferMemoryKeeperTest {
         val thin = BufferSizing.FreeMemory(276 * mb, 144 * mb, false)
         assertFalse(BufferMemoryKeeper.swapRunsOut(thin, -1L))
         assertTrue(BufferMemoryKeeper.swapRunsOut(thin, 0L))
+    }
+
+    @Test
+    fun `a budget that is not filled yet does not grow on memory the fill will use`() {
+        val lc = performanceControl(budgetMb = 731)
+        val k = keeper(lc, ceilingMb = 1000)
+        // An AM9 at the start of a 4K film: 891 MB available against a 216 MB line, the buffer nearly empty.
+        free = BufferSizing.FreeMemory(891 * mb, 216 * mb, false)
+        take(10)
+        k.check()
+        assertEquals(0L, k.grownBytes)
+        assertEquals(731 * mb, lc.uncappedBudgetBytes)
+    }
+
+    @Test
+    fun `a filled budget grows while the box has room beside it`() {
+        val lc = performanceControl(budgetMb = 100)
+        val k = keeper(lc, ceilingMb = 200)
+        free = BufferSizing.FreeMemory(700 * mb, 216 * mb, false)
+        take(100)
+        k.check()
+        assertEquals(32 * mb, k.grownBytes)
+        k.check()
+        assertEquals(64 * mb, k.grownBytes)
+    }
+
+    @Test
+    fun `growth stops when the unfilled steps would take the room`() {
+        val lc = performanceControl(budgetMb = 100)
+        val k = keeper(lc, ceilingMb = 400)
+        // Room above the line and margin: 180 MB. Each step adds 32 MB that is not filled.
+        free = BufferSizing.FreeMemory(496 * mb, 216 * mb, false)
+        take(100)
+        repeat(6) { k.check() }
+        assertEquals(96 * mb, k.grownBytes)
     }
 }

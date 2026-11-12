@@ -253,13 +253,17 @@ internal fun PlayerRuntimeController.prefetchSourceStreamsWhenSettled() {
     sourcePrefetchJob = scope.launch {
         PlayerSessionTracker.settled.first { it }
         if (_uiState.value.sourceAllStreams.isEmpty() || sourceStreamsCacheRequestKey != currentSourceRequestKey()) {
-            loadSourceStreams(forceRefresh = false)
+            loadSourceStreams(forceRefresh = false, background = true)
         }
     }
 }
 
-internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean) {
-    streamRepository.setLocalPluginSearchPaused(false)
+/**
+ * [background] is the fill behind a playing film: it leaves local plugin searches paused, so they wait for the sources
+ * panel or a failover instead of running against playback.
+ */
+internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean, background: Boolean = false) {
+    if (!background) streamRepository.setLocalPluginSearchPaused(false)
     val request = currentSourceStreamsRequest() ?: return
     val type = request.type
     val vid = request.videoId
@@ -1873,6 +1877,7 @@ internal fun PlayerRuntimeController.switchToEpisodeStream(
     serverDeadAnswerRetried.clear()
     serverAudioChosenByUser = false
     clearSourceStreams()
+    carrySubtitleDelayTo(targetVideoId)
     currentVideoId = targetVideoId
     currentSeason = targetVideo?.season ?: _uiState.value.episodeStreamsSeason ?: currentSeason
     currentEpisode = targetVideo?.episode ?: _uiState.value.episodeStreamsEpisode ?: currentEpisode
@@ -1966,6 +1971,14 @@ internal fun PlayerRuntimeController.switchToEpisodeStream(
     )
 }
 
+private fun PlayerRuntimeController.carrySubtitleDelayTo(nextVideoId: String?) {
+    val currentDelayMs = _uiState.value.subtitleDelayMs
+    val delayMs = subtitleDelayMsAfterSwitch(currentDelayMs, currentVideoId, nextVideoId)
+    if (delayMs == currentDelayMs) return
+    subtitleDelayUs.set(delayMs.toLong() * 1000L)
+    _uiState.update { it.copy(subtitleDelayMs = delayMs) }
+}
+
 private fun String.safeStreamTraceHost(): String {
     return runCatching {
         Uri.parse(this).host ?: substringBefore("://").takeIf { it.isNotBlank() } ?: "unknown"
@@ -2015,6 +2028,7 @@ private fun PlayerRuntimeController.switchToEpisodeStreamCommon(
     serverAudioChosenByUser = false
     clearSourceStreams()
 
+    carrySubtitleDelayTo(targetVideo?.id ?: _uiState.value.episodeStreamsForVideoId ?: currentVideoId)
     currentVideoId = targetVideo?.id ?: _uiState.value.episodeStreamsForVideoId ?: currentVideoId
     currentSeason = targetVideo?.season ?: _uiState.value.episodeStreamsSeason ?: currentSeason
     currentEpisode = targetVideo?.episode ?: _uiState.value.episodeStreamsEpisode ?: currentEpisode

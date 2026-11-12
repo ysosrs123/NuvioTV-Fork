@@ -53,22 +53,22 @@ class PlayerBadgeWhatPlaysTest {
         return StreamBadgeMatcher.matchedPlayerBadges(playing, listOf(text), pack).map { it.name }
     }
 
-    private val mobLand = "MobLand S02E07 Ace of Spades 2160p ATV WEB-DL DDP5 1 Atmos DV HDR H 265-FLUX.mkv"
+    private val testShow = "TestShow S02E07 An Example Title 2160p ATV WEB-DL DDP5 1 Atmos DV HDR H 265-FLUX.mkv"
 
     // What the AM9 reported: Dolby Vision profile 8 out, E-AC-3 (no JOC flag) 6 channels.
-    private val mobLandInfo = PlayerMediaInfo(
+    private val testShowInfo = PlayerMediaInfo(
         videoCodec = "HEVC", videoWidth = 3840, videoHeight = 1600, audioCodec = "E-AC-3", audioChannels = 6,
         hdr = listOf("DV", "HDR10"), hdrKnown = true, bitDepth = 10
     )
 
     @Test
-    fun `mobland reads as it plays`() {
-        assertEquals(listOf("WEB-DL", "4K", "DV", "HEVC", "10-bit", "DD+", "Atmos", "5.1"), names(mobLandInfo, mobLand))
+    fun `the test show reads as it plays`() {
+        assertEquals(listOf("WEB-DL", "4K", "DV", "HEVC", "10-bit", "DD+", "Atmos", "5.1"), names(testShowInfo, testShow))
     }
 
     @Test
-    fun `mobland with the kingsizew picture and audio rules`() {
-        val text = playerBadgeMatchText(mobLandInfo, emptyList(), mobLand, mobLand, audioFromRelease = true)
+    fun `the test show with the kingsizew picture and audio rules`() {
+        val text = playerBadgeMatchText(testShowInfo, emptyList(), testShow, testShow, audioFromRelease = true)
         assertTrue("a-dv finds in: $text", Pattern.compile(KW_DV).matcher(text).find())
         assertFalse("v-dv-hdr10 does not in: $text", Pattern.compile(KW_DV_HDR10).matcher(text).find())
         assertTrue("a-atmos-ddplus finds in: $text", Pattern.compile(KW_ATMOS_DDPLUS).matcher(text).find())
@@ -77,14 +77,14 @@ class PlayerBadgeWhatPlaysTest {
 
     @Test
     fun `the file name's own words for what plays are gone`() {
-        val file = playbackFileName(mobLand, mobLandInfo)
+        val file = playbackFileName(testShow, testShowInfo)
         listOf("DDP5", "Atmos", "DV", "HDR", "265").forEach { assertFalse("$it left in: $file", it in file) }
-        listOf("MobLand", "S02E07", "2160p", "ATV", "WEB-DL", "FLUX.mkv").forEach { assertTrue("$it gone from: $file", it in file) }
+        listOf("TestShow", "S02E07", "2160p", "ATV", "WEB-DL", "FLUX.mkv").forEach { assertTrue("$it gone from: $file", it in file) }
     }
 
     @Test
     fun `dolby digital plus is spelt so plain dolby digital rules miss it`() {
-        val playing = playbackMatchText(mobLandInfo, emptyList(), mobLand).split(" ")
+        val playing = playbackMatchText(testShowInfo, emptyList(), testShow).split(" ")
         assertFalse(playing.any { "AC3" in it.uppercase() || "AC-3" in it.uppercase() || it.startsWith("DD+") })
         assertFalse(playing.any { it.equals("HDR", true) || it.startsWith("HDR10") })
         assertTrue("DDP5.1" in playing)
@@ -102,7 +102,7 @@ class PlayerBadgeWhatPlaysTest {
 
     @Test
     fun `truehd atmos 7-1 remux`() {
-        val file = "Oppenheimer.2023.1080p.BluRay.REMUX.AVC.TrueHD.Atmos.7.1-FraMeSToR.mkv"
+        val file = "Movie.2023.1080p.BluRay.REMUX.AVC.TrueHD.Atmos.7.1-FraMeSToR.mkv"
         val info = PlayerMediaInfo(
             videoCodec = "AVC", videoWidth = 1920, videoHeight = 1080, audioCodec = "TrueHD", audioChannels = 8,
             hdrKnown = true, bitDepth = 8
@@ -122,26 +122,26 @@ class PlayerBadgeWhatPlaysTest {
 
     @Test
     fun `before the tracks are read the file name speaks`() {
-        val shown = names(PlayerMediaInfo(), mobLand)
+        val shown = names(PlayerMediaInfo(), testShow)
         assertTrue(shown.containsAll(listOf("WEB-DL", "4K", "DV", "HEVC", "DD+", "Atmos")))
     }
 
     @Test
     fun `atmos from the track without atmos in the name`() {
-        val info = mobLandInfo.copy(audioCodec = "E-AC-3-JOC")
+        val info = testShowInfo.copy(audioCodec = "E-AC-3-JOC")
         val file = "Show.S01E01.2160p.WEB-DL.DDP5.1.DV.H.265-GRP.mkv"
         assertTrue("Atmos" in names(info, file))
-        assertFalse("Atmos" in names(mobLandInfo, file))
+        assertFalse("Atmos" in names(testShowInfo, file))
     }
 
     @Test
-    fun `built-in badges for mobland`() {
+    fun `built-in badges for the test show`() {
         assertEquals(
             listOf(
                 R.drawable.badge_res_2160, R.drawable.badge_webdl, R.drawable.badge_dv,
                 R.drawable.badge_ddp, R.drawable.badge_atmos, R.drawable.badge_ch_5_1
             ),
-            builtInPlayerBadges(mobLandInfo, mobLand)
+            builtInPlayerBadges(testShowInfo, testShow)
         )
     }
 

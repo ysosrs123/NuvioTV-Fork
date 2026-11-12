@@ -7,7 +7,7 @@ import org.junit.Test
 /** Which stream servers get the long first-data wait and no warm-up requests. */
 class SlowStartServerTest {
     @Test fun aNasOnTheHomeNetworkMayTakeItsTime() {
-        assertTrue(SlowStartServer.matches("http://192.168.1.10:3100/api/v1/debrid/playback/abc/Lone.Survivor.mkv"))
+        assertTrue(SlowStartServer.matches("http://192.168.1.10:3100/api/v1/debrid/playback/abc/Example.Movie.mkv"))
         assertTrue(SlowStartServer.matches("http://10.0.0.5:3000/x.mkv"))
         assertTrue(SlowStartServer.matches("http://172.16.1.2/x.mkv"))
         assertTrue(SlowStartServer.matches("http://172.31.255.1/x.mkv"))
@@ -51,7 +51,7 @@ class SlowStartServerTest {
 
     @Test fun publicCdnsKeepTheNormalLimits() {
         assertFalse(SlowStartServer.matches("https://nexus-114.japn.tb-cdn.pw/dl/abc"))
-        assertFalse(SlowStartServer.matches("https://stremthrufortheweebs.midnightignite.me/stremio/torz/strem/tb/x"))
+        assertFalse(SlowStartServer.matches("https://stremthru.example.org/stremio/torz/strem/tb/x"))
         assertFalse(SlowStartServer.matches("http://172.32.0.1/x.mkv"))
         assertFalse(SlowStartServer.matches("http://192.169.0.1/x.mkv"))
         assertFalse(SlowStartServer.matches("http://8.8.8.8/x.mkv"))

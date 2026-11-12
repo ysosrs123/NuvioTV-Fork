@@ -245,6 +245,9 @@ class PlayerRuntimeController(
         }
     }
 
+    /** The screen was timed at another rate than Android reported for this film. */
+    internal var refreshMismatch: com.nuvio.tv.core.player.DisplayRefreshMeter.Reading? = null
+
     init {
         PlayerMemoryReporter.bufferedAheadProvider = bufferedAheadProvider
         PlayerMediaSourceFactory.vodCachePlayheadBytesProvider = vodCachePlayheadBytesProvider
@@ -407,6 +410,7 @@ class PlayerRuntimeController(
     val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
 
     init {
+        observeDisplayRefresh()
         scope.launch {
             _uiState
                 .map { it.isPlaying }

@@ -11,7 +11,7 @@ class ServerFirstPickTest {
         fileIdx = null, externalUrl = null, behaviorHints = null, addonName = addon, addonLogo = null
     )
 
-    private val big = stream("Torrentio", "2160p remux")
+    private val big = stream("Tortoise", "2160p remux")
     private val homeHd = stream("Home", "1080p")
     private val home4k = stream("Home", "2160p")
     private val nas = stream("NAS", "720p")

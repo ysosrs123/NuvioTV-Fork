@@ -1010,7 +1010,7 @@ private fun ColorChipRow(
             val focusKey = "$focusKeyPrefix:${color.toArgb()}"
             ColorChip(
                 color = if (enabled) color else color.copy(alpha = 0.35f),
-                isSelected = color.toArgb() == selectedColor,
+                isSelected = (color.toArgb() and 0xFFFFFF) == (selectedColor and 0xFFFFFF),
                 enabled = enabled,
                 onMoveLeft = if (color == colors.firstOrNull()) onMoveLeft else null,
                 focusRequester = focusRequesters[focusKey],

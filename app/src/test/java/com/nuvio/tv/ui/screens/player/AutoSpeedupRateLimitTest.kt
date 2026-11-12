@@ -99,13 +99,13 @@ class AutoSpeedupRateLimitTest {
 
     @Test
     fun `a server's limit is remembered for its next films and eases back after half an hour each`() {
-        HostSpeeds.noteLimit("cee.copycase.com", 7, nowMs = 1_000L)
+        HostSpeeds.noteLimit("cee.cdn.example.com", 7, nowMs = 1_000L)
         // 10:31:53: refused again at 6 in flight.
-        HostSpeeds.noteLimit("cee.copycase.com", 5, nowMs = 2_000L)
-        HostSpeeds.noteLimit("cee.copycase.com", 7, nowMs = 3_000L)
-        assertEquals(5, HostSpeeds.limitOf("cee.copycase.com", nowMs = 3_000L))
-        assertEquals(6, HostSpeeds.limitOf("cee.copycase.com", nowMs = 3_000L + HostSpeeds.LIMIT_EASE_MS))
-        assertNull(HostSpeeds.limitOf("cee.copycase.com", nowMs = 3_000L + 3 * HostSpeeds.LIMIT_EASE_MS))
+        HostSpeeds.noteLimit("cee.cdn.example.com", 5, nowMs = 2_000L)
+        HostSpeeds.noteLimit("cee.cdn.example.com", 7, nowMs = 3_000L)
+        assertEquals(5, HostSpeeds.limitOf("cee.cdn.example.com", nowMs = 3_000L))
+        assertEquals(6, HostSpeeds.limitOf("cee.cdn.example.com", nowMs = 3_000L + HostSpeeds.LIMIT_EASE_MS))
+        assertNull(HostSpeeds.limitOf("cee.cdn.example.com", nowMs = 3_000L + 3 * HostSpeeds.LIMIT_EASE_MS))
         assertNull(HostSpeeds.limitOf("other.example.com", nowMs = 3_000L))
     }
 

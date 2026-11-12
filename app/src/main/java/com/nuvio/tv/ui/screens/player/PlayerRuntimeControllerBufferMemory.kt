@@ -6,6 +6,7 @@ import com.nuvio.tv.core.player.BufferBudgetControl
 import com.nuvio.tv.core.player.BufferMemoryKeeper
 import com.nuvio.tv.core.player.BufferSizing
 import com.nuvio.tv.core.player.MemoryPressure
+import com.nuvio.tv.core.player.PlaybackMemoryFacts
 
 /** One keeper per load control; null (stock buffers, or no player) detaches it. */
 @OptIn(UnstableApi::class)
@@ -18,6 +19,7 @@ internal fun PlayerRuntimeController.attachBufferMemoryKeeper(
     val current = bufferMemoryKeeper
     if (current != null && current.control === control) {
         current.setBudgetManaged(budgetManaged)
+        PlaybackMemoryFacts.onKeeper(current)
         return
     }
     current?.detach()
@@ -35,4 +37,5 @@ internal fun PlayerRuntimeController.attachBufferMemoryKeeper(
             },
         ).also { it.attach() }
     }
+    PlaybackMemoryFacts.onKeeper(bufferMemoryKeeper)
 }

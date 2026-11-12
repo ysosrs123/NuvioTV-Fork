@@ -145,6 +145,7 @@ internal fun PlayerRuntimeController.releasePlayer(
     _exoPlayer = null
     nativeVideoSelection.clear()
     attachBufferMemoryKeeper(null)
+    com.nuvio.tv.core.player.PlaybackMemoryFacts.clear()
     activeAssVideoEffect = null
     _loadControl = null
     currentBitrateAwareLoadControl = null

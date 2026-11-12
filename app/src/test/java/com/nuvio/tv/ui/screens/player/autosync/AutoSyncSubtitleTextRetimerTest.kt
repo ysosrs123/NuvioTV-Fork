@@ -107,6 +107,59 @@ class AutoSyncSubtitleTextRetimerTest {
     }
 
     @Test
+    fun assSignNearADialogueLineKeepsItsOffsetFromIt() {
+        val body = """
+            [Events]
+            Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+            Dialogue: 0,0:01:40.00,0:01:42.00,Default,,0,0,0,,Spoken line
+            Dialogue: 0,0:01:40.20,0:01:45.20,Signs,,0,0,0,,{\pos(320,60)}SHOP
+        """.trimIndent()
+        val timeline = timeline(
+            cues = listOf(AutoSyncRetimedCue(100_000L, 102_000L, 101_500L, 103_500L)),
+            interceptMs = 1_500.0,
+        )
+
+        val retimed = AutoSyncSubtitleTextRetimer.retime(body, timeline)
+
+        assertEquals(
+            body
+                .replace("0:01:40.00,0:01:42.00", "0:01:41.50,0:01:43.50")
+                .replace("0:01:40.20,0:01:45.20", "0:01:41.70,0:01:46.70"),
+            retimed,
+        )
+    }
+
+    @Test
+    fun assOneFrameEventsKeepTheirLengthBetweenUnevenlyMovedLines() {
+        val body = """
+            [Events]
+            Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+            Dialogue: 0,0:01:38.00,0:01:40.03,Default,,0,0,0,,First line
+            Dialogue: 0,0:01:39.99,0:01:43.00,Default,,0,0,0,,Second line
+            Dialogue: 1,0:01:40.00,0:01:40.04,Signs,,0,0,0,,{\pos(100,100)}A
+            Dialogue: 1,0:01:40.04,0:01:40.08,Signs,,0,0,0,,{\pos(102,100)}A
+        """.trimIndent()
+        val timeline = timeline(
+            cues = listOf(
+                AutoSyncRetimedCue(98_000L, 100_030L, 99_500L, 101_000L),
+                AutoSyncRetimedCue(99_990L, 103_000L, 101_490L, 104_500L),
+            ),
+            interceptMs = 1_500.0,
+        )
+
+        val retimed = AutoSyncSubtitleTextRetimer.retime(body, timeline)
+
+        assertEquals(
+            body
+                .replace("0:01:38.00,0:01:40.03", "0:01:39.50,0:01:41.00")
+                .replace("0:01:39.99,0:01:43.00", "0:01:41.49,0:01:44.50")
+                .replace("0:01:40.00,0:01:40.04", "0:01:41.50,0:01:41.54")
+                .replace("0:01:40.04,0:01:40.08", "0:01:41.54,0:01:41.58"),
+            retimed,
+        )
+    }
+
+    @Test
     fun timesWithoutANearbyCueUseTheWholeFilmTransform() {
         val body = """
             1

@@ -34,6 +34,8 @@ class BufferMemoryKeeper(
         private set
     @Volatile private var lastPressureAtMs = 0L
     @Volatile private var levelSetAtMs = 0L
+    /** When [pressureLevel] last changed, on [clock]; 0 while it never has. */
+    val levelChangedAtMs: Long get() = levelSetAtMs
     @Volatile private var lastSeekAtMs = 0L
     @Volatile private var seekTrimQueued = false
     @Volatile private var detached = false
@@ -189,7 +191,13 @@ class BufferMemoryKeeper(
         }
         val swap = swapFreeMb()
         if (free != null && swapRunsOut(free, swap)) {
-            raise(maxOf(pressureLevel, LEVEL_LOW), "swap availMb=${free.availMb} thresholdMb=${free.thresholdMb} swapFreeMb=$swap")
+            // Swap used up is the last stop before Android closes the app on a small box, so it steps up like lowMemory does.
+            // A Fire Stick plays for minutes with swap used up and 70 to 90 MB above its line, so only the last
+            // stretch above the line steps up.
+            val nearLine = free.availMb - free.thresholdMb < SWAP_ESCALATE_ROOM_MB
+            val level = if (nearLine && pressureLevel == LEVEL_LOW && now - levelSetAtMs >= ESCALATE_AFTER_MS) LEVEL_CRITICAL
+                else maxOf(pressureLevel, LEVEL_LOW)
+            raise(level, "swap availMb=${free.availMb} thresholdMb=${free.thresholdMb} swapFreeMb=$swap")
             return
         }
         if (pressureLevel == LEVEL_NONE) {
@@ -232,7 +240,9 @@ class BufferMemoryKeeper(
                 "budgetMb=${control.uncappedBudgetBytes / MB} freedMb=${freed / MB}")
             return
         }
-        if (gap <= 0L || roomMb - GROW_RESERVE_MB < GROW_STEP_MB) return
+        // Budget that is not filled yet still comes out of the box's free memory once the buffer fills, on a pause for instance.
+        val unfilledMb = (control.uncappedBudgetBytes - control.bufferAllocator.totalBytesAllocated).coerceAtLeast(0L) / MB
+        if (gap <= 0L || roomMb - GROW_RESERVE_MB - unfilledMb < GROW_STEP_MB) return
         val swap = swapFreeMb()
         if (swap in 0 until GROW_MIN_SWAP_MB && roomMb < GROW_ROOM_BESIDE_SWAP_MB) return
         grownBytes += minOf(GROW_STEP_MB * MB, gap)
@@ -376,6 +386,8 @@ class BufferMemoryKeeper(
         const val RESTORE_QUIET_MS = 60_000L
         /** Still short of memory this long after the first cut: cut further. */
         const val ESCALATE_AFTER_MS = 30_000L
+        /** With swap gone, the cut steps up only this close to the low-memory line. */
+        const val SWAP_ESCALATE_ROOM_MB = 60L
         /** One growth step per check (about every 10 s while playing). */
         const val GROW_STEP_MB = 32L
         /** Room the box keeps above its margin after a step, so a software thumbnail decode (25-35 MB) still fits. */

@@ -19,7 +19,7 @@ class NextEpisodeSourceTest {
 
     private val torBox1080 = stream("AIOStreams", "[TB⚡] AIOStreams 1080p", nextFile, "aio|group", 2_000_000_000L)
     private val easyNews2160 = stream("AIOStreams", "[EN] AIOStreams 2160p", nextFile, "aio|group", 9_000_000_000L)
-    private val otherAddonTorBox2160 = stream("Torrentio", "[TB+] Torrentio\n2160p", nextFile, "torrentio|tb", 9_000_000_000L)
+    private val otherAddonTorBox2160 = stream("Tortoise", "[TB+] Tortoise\n2160p", nextFile, "tortoise|tb", 9_000_000_000L)
 
     private val playedOnTorBox = NextEpisodeSource.of(
         addonName = "AIOStreams",
@@ -39,7 +39,7 @@ class NextEpisodeSourceTest {
             mode = StreamAutoPlayMode.FIRST_STREAM,
             regexPattern = "",
             source = StreamAutoPlaySource.ALL_SOURCES,
-            installedAddonNames = setOf("AIOStreams", "Torrentio"),
+            installedAddonNames = setOf("AIOStreams", "Tortoise"),
             selectedAddons = emptySet(),
             selectedPlugins = emptySet(),
             preferredBingeGroup = "aio|group",
@@ -122,20 +122,20 @@ class NextEpisodeSourceTest {
     @Test
     fun `the add-on has responded once its results are in`() {
         val aio = AddonStreams(addonName = "AIOStreams", addonLogo = null, streams = emptyList())
-        val torrentio = AddonStreams(addonName = "Torrentio", addonLogo = null, streams = listOf(otherAddonTorBox2160))
-        assertFalse(playedOnTorBox.hasResponded(listOf(torrentio)))
-        assertTrue(playedOnTorBox.hasResponded(listOf(torrentio, aio)))
+        val tortoise = AddonStreams(addonName = "Tortoise", addonLogo = null, streams = listOf(otherAddonTorBox2160))
+        assertFalse(playedOnTorBox.hasResponded(listOf(tortoise)))
+        assertTrue(playedOnTorBox.hasResponded(listOf(tortoise, aio)))
         assertTrue(NextEpisodeSource(null, "TorBox").hasResponded(emptyList()))
     }
 
     @Test
     fun `a service named only in the description still counts`() {
-        val torrentio = stream("Torrentio", "Torrentio\n1080p", nextFile, "torrentio|tb", 2_000_000_000L)
+        val tortoise = stream("Tortoise", "Tortoise\n1080p", nextFile, "tortoise|tb", 2_000_000_000L)
             .copy(description = "Show S01E03\n[TB+] cached")
-        val source = NextEpisodeSource.of("Torrentio", "Torrentio\n1080p", "Show S01E02\n[TB+] cached")
+        val source = NextEpisodeSource.of("Tortoise", "Tortoise\n1080p", "Show S01E02\n[TB+] cached")
         assertEquals("TorBox", source.service)
-        assertTrue(source.matches(torrentio))
-        assertFalse(source.matches(torrentio.copy(description = "Show S01E03\n[RD+] cached")))
+        assertTrue(source.matches(tortoise))
+        assertFalse(source.matches(tortoise.copy(description = "Show S01E03\n[RD+] cached")))
     }
 
     @Test

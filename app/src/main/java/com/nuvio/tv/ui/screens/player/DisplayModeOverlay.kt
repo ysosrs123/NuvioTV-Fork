@@ -47,10 +47,16 @@ fun DisplayModeOverlay(
 ) {
     if (info == null) return
 
-    val items = listOf(
-        stringResource(R.string.display_mode_refresh) to formatHz(info.refreshRate),
-        stringResource(R.string.display_mode_resolution) to "${info.width}x${info.height}"
-    )
+    val items = buildList {
+        add(stringResource(R.string.display_mode_refresh) to formatHz(info.refreshRate))
+        info.measuredHz?.let { hz ->
+            add(stringResource(R.string.display_mode_measured) to
+                String.format(java.util.Locale.US, "%.3f Hz", hz) + if (info.seamless) " · QMS" else "")
+        }
+        if (info.width > 0 && info.height > 0) {
+            add(stringResource(R.string.display_mode_resolution) to "${info.width}x${info.height}")
+        }
+    }
     val count = items.size
     val totalLineHeight = (ROW_HEIGHT.value * count) + (ROW_GAP.value * (count - 1))
 

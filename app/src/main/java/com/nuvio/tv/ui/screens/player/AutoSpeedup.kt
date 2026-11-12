@@ -515,7 +515,7 @@ internal object AutoSpeedup {
         remembered = null
         PlaybackLine.clear()
         planLoggedLent = -1L
-        if (wasOn) ParallelRangeDataSource.releaseRetainedSessionIfIdle()
+        if (wasOn) ParallelRangeDataSource.handOffRetainedSessionIfIdle()
     }
 
     /**

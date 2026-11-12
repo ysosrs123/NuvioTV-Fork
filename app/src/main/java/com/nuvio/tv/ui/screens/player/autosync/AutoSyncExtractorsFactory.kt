@@ -101,7 +101,7 @@ private class ObservingTextTrackOutput(
     }
 
     override fun sampleData(input: DataReader, length: Int, allowEndOfInput: Boolean, sampleDataPart: Int): Int {
-        if (sampleDataPart != TrackOutput.SAMPLE_DATA_PART_MAIN) {
+        if (sampleDataPart != TrackOutput.SAMPLE_DATA_PART_MAIN || isPgs()) {
             return delegate.sampleData(input, length, allowEndOfInput, sampleDataPart)
         }
         val bytes = ByteArray(length)
@@ -117,7 +117,7 @@ private class ObservingTextTrackOutput(
     }
 
     override fun sampleData(data: ParsableByteArray, length: Int, sampleDataPart: Int) {
-        if (sampleDataPart == TrackOutput.SAMPLE_DATA_PART_MAIN) append(data.data, data.position, length)
+        if (sampleDataPart == TrackOutput.SAMPLE_DATA_PART_MAIN && !isPgs()) append(data.data, data.position, length)
         delegate.sampleData(data, length, sampleDataPart)
     }
 
@@ -130,6 +130,8 @@ private class ObservingTextTrackOutput(
             end = 0
         }
     }
+
+    private fun isPgs(): Boolean = format?.sampleMimeType.equals("application/pgs", ignoreCase = true)
 
     private fun observe(timeUs: Long, size: Int, offset: Int) {
         if (timeUs == C.TIME_UNSET || size <= 0) return

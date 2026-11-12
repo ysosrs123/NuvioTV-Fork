@@ -22,7 +22,7 @@ class StreamProviderLabelTest {
     @Test
     fun stremthruTorz_resolvesTorBox() = assertEquals(
         "TorBox",
-        provider("\u26a1 [TB]", "Torz\n4320p\nObsession (2025) 4320p HDR Ai Upscale -Mesc.mkv")
+        provider("\u26a1 [TB]", "Torz\n4320p\nExample Movie (2025) 4320p HDR Ai Upscale -Mesc.mkv")
     )
 
     @Test
@@ -38,11 +38,11 @@ class StreamProviderLabelTest {
     )
 
     @Test
-    fun torrentio_resolvesAllDebrid_notDebridLinkFromWebDl() = assertEquals(
+    fun tortoise_resolvesAllDebrid_notDebridLinkFromWebDl() = assertEquals(
         "AllDebrid",
         provider(
-            "[AD+] Torrentio",
-            "4k DV | HDR10+\nBackrooms.2026.2160p.iT.WEB-DL.DV.HDR10+.DDP5.1.Atmos.H265.MP4-BTM"
+            "[AD+] Tortoise",
+            "4k DV | HDR10+\nExample.Movie.2026.2160p.iT.WEB-DL.DV.HDR10+.DDP5.1.Atmos.H265.MP4-BTM"
         )
     )
 
@@ -80,7 +80,7 @@ class StreamProviderLabelTest {
     @Test
     fun packSizeInTerabytes_doesNotMatchTorBox() = assertEquals(
         "Real-Debrid",
-        provider("[RD⚡] AIOStreams 2160p", "Game of Thrones S01-S08\n1.7 TB · FraMeSToR")
+        provider("[RD⚡] AIOStreams 2160p", "Example Show S01-S08\n1.7 TB · FraMeSToR")
     )
 
     @Test

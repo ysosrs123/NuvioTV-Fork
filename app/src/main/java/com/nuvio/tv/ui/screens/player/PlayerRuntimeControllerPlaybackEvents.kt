@@ -630,6 +630,13 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                             Log.d("ExoMemory", "Off-heap OS ahead: $footprintMb MB, active: $activeMb MB")
                         }
                     }
+                } else if (bufferMemoryKeeper != null) {
+                    // A paused film keeps loading until its buffer is full, so the box's memory is watched then too.
+                    val now = System.currentTimeMillis()
+                    if (now - lastBufferLogTimeMs >= 10_000) {
+                        lastBufferLogTimeMs = now
+                        bufferMemoryKeeper?.onTick()
+                    }
                 }
             }
             reportServerPlayback()
@@ -1669,6 +1676,7 @@ internal fun PlayerRuntimeController.scheduleHideSubtitleDelayOverlay() {
 }
 
 internal fun PlayerRuntimeController.schedulePauseOverlay() {
+    maybeShowQmsHint()
     if (pauseDetails.holdsOverlay(_uiState.value.showPauseOverlay)) return
     pauseOverlayJob?.cancel()
 
@@ -2462,6 +2470,8 @@ fun PlayerRuntimeController.onEvent(
         PlayerEvent.OnHideDisplayModeInfo -> {
             _uiState.update { it.copy(showDisplayModeInfo = false) }
         }
+        PlayerEvent.OnQmsHintTurnOff -> qmsHintAnswered(turnOff = true)
+        PlayerEvent.OnQmsHintKeep -> qmsHintAnswered(turnOff = false)
         PlayerEvent.OnDismissPauseOverlay -> {
             cancelPauseOverlay()
         }

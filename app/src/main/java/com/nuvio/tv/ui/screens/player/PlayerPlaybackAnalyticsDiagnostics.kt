@@ -96,6 +96,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
     private var totalBytesLoaded: Long = 0L
     private var lastLoad: PlaybackIssuePlaybackLoadInput? = null
     private var lastLoadError: PlaybackIssuePlaybackLoadErrorInput? = null
+    val lastLoadErrorHttpStatus: Int? get() = lastLoadError?.httpStatus
     // Last COMPLETED load of dataType MEDIA only. The HUD's Request row
     // reads this instead of lastLoad: on progressive streams the single long
     // read only ever ends by CANCELLATION (seek/stop/track change), and its

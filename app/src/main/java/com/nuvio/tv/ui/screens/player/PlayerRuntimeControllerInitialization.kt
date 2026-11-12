@@ -281,7 +281,10 @@ private fun PlayerRuntimeController.disposeExoPlayerBeforeRebuild(): Boolean {
         runCatching { player.clearVideoSurface() }
         runCatching { player.releaseAssHandlerCompat() }
         val releaseStartMs = android.os.SystemClock.elapsedRealtime()
+        // A release that runs out of time reports a timeout error from inside release(); it belongs to this player.
+        isReleasingPlayer = true
         runCatching { player.release() }
+        isReleasingPlayer = false
         val releaseMs = android.os.SystemClock.elapsedRealtime() - releaseStartMs
         Log.i(
             PlayerRuntimeController.TAG,
@@ -1674,6 +1677,9 @@ internal fun PlayerRuntimeController.initializePlayer(
             if (disposeExoPlayerBeforeRebuild()) {
                 delay(PLAYER_REBUILD_SETTLE_DELAY_MS)
             }
+            // A player released a moment ago, here or by the last player screen, may still be closing with its
+            // decoder and buffer. Building on top of it is how failing sources pile players up.
+            com.nuvio.tv.core.player.PlayerStrays.awaitGone()
 
             if (initializationGeneration != playbackRecoveryGate.generation) return@launch
             // Left the foreground while preparing: build on return instead of claiming a decoder
@@ -1708,6 +1714,16 @@ internal fun PlayerRuntimeController.initializePlayer(
             }
             } // end rebuild branch of the reuse fork
             lastExoConstructionFingerprint = constructionFingerprint
+            com.nuvio.tv.core.player.PlaybackMemoryFacts.onExoBuilt(
+                nativeMemory = playerSettings.nuvioPerformanceModeEnabled,
+                buffer = when {
+                    playerSettings.nuvioPerformanceModeEnabled ->
+                        if (NuvioExoPlayerPerformanceHelper.targetIsAutomatic) "automatic" else "custom"
+                    playerSettings.bufferEngineEnabled -> if (playerSettings.bufferBudgetManaged) "automatic" else "custom"
+                    else -> "stock"
+                },
+                allocator = _loadControl?.allocator as? androidx.media3.exoplayer.upstream.DefaultAllocator,
+            )
             attachBufferMemoryKeeper(
                 if (reuseLivePlayer) bufferMemoryKeeper?.control?.takeIf { it === _loadControl } else builtBudgetControl,
                 BufferMemoryKeeper.budgetManaged(
@@ -2728,6 +2744,13 @@ internal fun PlayerRuntimeController.initializePlayer(
                             C.ENCODING_PCM_FLOAT -> false
                             else -> true
                         }
+                        com.nuvio.tv.core.player.PlaybackMemoryFacts.onAudioOutput(
+                            when {
+                                sinkPath == "AC-3 transcode" -> "ac3 transcode"
+                                bypassing -> "passthrough"
+                                else -> null
+                            }
+                        )
                         if (bypassing != isAudioOutputBypassing) {
                             isAudioOutputBypassing = bypassing
                             updateAudioControlAvailability()
@@ -2851,6 +2874,9 @@ internal fun PlayerRuntimeController.initializePlayer(
                         initializationDurationMs: Long
                     ) {
                         if (_exoPlayer !== this@apply) return
+                        com.nuvio.tv.core.player.PlaybackMemoryFacts.onVideoDecoder(
+                            decoderName, isSoftwareVideoDecoderName(decoderName, softwareOnlyDecoderNames)
+                        )
                         com.nuvio.tv.core.formatcheck.FormatCheckSession.onDecoder(decoderName)
                         currentDiagnostics = currentDiagnostics.copy(dv81DecoderName = decoderName)
                         playbackAnalyticsDiagnostics.onVideoDecoderInitialized(
@@ -2880,6 +2906,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         // Ignore callbacks from an already replaced player.
                         if (_exoPlayer === this@apply) {
                             _uiState.update { it.copy(isHdrVideo = isHdrVideoFormat(format)) }
+                            com.nuvio.tv.core.player.PlaybackMemoryFacts.onVideoFormat(format.sampleMimeType, format.width, format.height)
                         }
                         playbackAnalyticsDiagnostics.onVideoInputFormatChanged(
                             eventTime = eventTime,
@@ -2929,6 +2956,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         initializedTimestampMs: Long,
                         initializationDurationMs: Long
                     ) {
+                        if (_exoPlayer === this@apply) com.nuvio.tv.core.player.PlaybackMemoryFacts.onAudioDecoder(decoderName)
                         playbackAnalyticsDiagnostics.onAudioDecoderInitialized(
                             eventTime = eventTime,
                             decoderName = decoderName,
@@ -2945,6 +2973,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         format: Format,
                         decoderReuseEvaluation: DecoderReuseEvaluation?
                     ) {
+                        if (_exoPlayer === this@apply) com.nuvio.tv.core.player.PlaybackMemoryFacts.onAudioFormat(format.sampleMimeType)
                         playbackAnalyticsDiagnostics.onAudioInputFormatChanged(
                             eventTime = eventTime,
                             format = format,

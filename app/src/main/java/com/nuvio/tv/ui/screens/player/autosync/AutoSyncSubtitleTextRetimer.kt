@@ -114,9 +114,8 @@ internal object AutoSyncSubtitleTextRetimer {
                     if (parts.size <= maxOf(startIndex, endIndex)) continue
                     val start = parseTimestamp(parts[startIndex].trim()) ?: continue
                     val end = parseTimestamp(parts[endIndex].trim()) ?: continue
-                    val startMs = mapper.mapStartMs(start.ms)
-                    val endMs = mapper.mapEndMs(end.ms.coerceAtLeast(start.ms + 1L))
-                        .coerceAtLeast(startMs + ASS_MIN_DURATION_MS)
+                    val (startMs, mappedEndMs) = mapper.mapEventMs(start.ms, end.ms.coerceAtLeast(start.ms + 1L))
+                    val endMs = mappedEndMs.coerceAtLeast(startMs + ASS_MIN_DURATION_MS)
                     parts[startIndex] = parts[startIndex].leadingWhitespace() + formatAss(startMs)
                     parts[endIndex] = parts[endIndex].leadingWhitespace() + formatAss(endMs)
                     lines[index] = line.substring(0, colon + 1) + parts.joinToString(",")

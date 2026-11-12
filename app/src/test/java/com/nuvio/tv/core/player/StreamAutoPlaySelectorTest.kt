@@ -925,7 +925,7 @@ class StreamAutoPlaySelectorTest {
     fun `best quality inside a binge group still drops excluded files`() {
         val excludedLarge = aioStream("g-large", "5.71 GiB", gib(5.71), bingeGroup = "aio|FLUX")
         val keptSmall = aioStream("g-small", "1.44 GiB", gib(1.44), bingeGroup = "aio|FLUX").copy(
-            description = "Lanterns S01E06 2160p WEB-DL DV HDR DDP5.1 Atmos HEVC-NTb\n1.44 GiB"
+            description = "Testshow S01E06 2160p WEB-DL DV HDR DDP5.1 Atmos HEVC-NTb\n1.44 GiB"
         )
 
         assertEquals(
@@ -986,7 +986,7 @@ class StreamAutoPlaySelectorTest {
     ): Stream = Stream(
         name = name,
         title = null,
-        description = "Lanterns S01E06 2160p WEB-DL DV HDR DDP5.1 Atmos HEVC-FLUX\n$sizeText",
+        description = "Testshow S01E06 2160p WEB-DL DV HDR DDP5.1 Atmos HEVC-FLUX\n$sizeText",
         url = "https://example.com/$id.mkv",
         ytId = null,
         infoHash = null,

@@ -36,8 +36,8 @@ class StreamRowTextTest {
     }
 
     @Test fun usesTheLegacyTitleFieldAsDescriptionLikeTheSourcesPage() {
-        val text = rowText(stream("Torrentio\n4k", "Movie.2160p.mkv\n👤 12 💾 5 GB\nMulti Audio", null))
-        assertEquals("Torrentio\n4k", text.title)
+        val text = rowText(stream("Tortoise\n4k", "Movie.2160p.mkv\n👤 12 💾 5 GB\nMulti Audio", null))
+        assertEquals("Tortoise\n4k", text.title)
         assertEquals("Movie.2160p.mkv\n👤 12 💾 5 GB\nMulti Audio", text.subtitle)
     }
 

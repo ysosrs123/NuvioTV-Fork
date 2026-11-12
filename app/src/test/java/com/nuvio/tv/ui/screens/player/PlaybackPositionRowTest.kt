@@ -35,7 +35,7 @@ class PlaybackPositionRowTest {
 
     @Test fun `the row sits first in its own section and survives compact mode`() {
         val sections = buildStatsSections(listOf(
-            StatsRow("Add-on", "Torrentio"), positionStatsRow(245_000L, 2_550_000L, isLive = false),
+            StatsRow("Add-on", "Tortoise"), positionStatsRow(245_000L, 2_550_000L, isLive = false),
             StatsRow("Video", "HEVC"), StatsRow("Buffer", "20s")))
         assertEquals(StatsGroup.PLAYBACK, sections.first().group)
         assertEquals(listOf("Position"), sections.first().rows.map { it.label })

@@ -554,7 +554,7 @@ private class NativeOptimizedVideoTrackOutput(
         val rewriteSamples = converting && !(profile == 5 && !config.convertDv5Rpu)
         val shouldStripDovi = stripDvRpu && strippedCodecs != null && strippedCodecs != format.codecs
         
-        shouldProcess = rewriteSamples || shouldStripDovi || stripHdr10PlusSei
+        shouldProcess = carriesHevc(format) && (rewriteSamples || shouldStripDovi || stripHdr10PlusSei)
         codecs = outFormat.codecs
         delegate.format(outFormat)
     }
@@ -727,6 +727,14 @@ private class NativeOptimizedVideoTrackOutput(
             val m = Regex("^(?:dvhe|dvav|dvh1|dva1)\\.(\\d+)\\.")
                 .find(codecs.trim().lowercase()) ?: return null
             return m.groupValues[1].toIntOrNull()
+        }
+
+        // The sample rewrite reads every NAL as HEVC.
+        fun carriesHevc(format: Format): Boolean = when (format.sampleMimeType) {
+            MimeTypes.VIDEO_H265 -> true
+            MimeTypes.VIDEO_DOLBY_VISION ->
+                Regex("^(?:dvhe|dvh1)\\.").containsMatchIn(format.codecs.orEmpty().trim().lowercase())
+            else -> false
         }
 
         fun rewriteDvCodecString(codecs: String?): String? {

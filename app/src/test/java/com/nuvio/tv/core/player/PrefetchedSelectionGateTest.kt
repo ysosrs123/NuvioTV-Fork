@@ -25,7 +25,7 @@ class PrefetchedSelectionGateTest {
         mode = mode,
         regexPattern = "",
         source = StreamAutoPlaySource.ALL_SOURCES,
-        installedAddonNames = setOf("Torrentio"),
+        installedAddonNames = setOf("Tortoise"),
         selectedAddons = emptySet(),
         selectedPlugins = emptySet(),
         preferredBingeGroup = bingeGroup
@@ -33,7 +33,7 @@ class PrefetchedSelectionGateTest {
 
     private fun snapshot(
         mode: StreamAutoPlayMode = StreamAutoPlayMode.QUALITY_RANK,
-        order: List<String> = listOf("Torrentio"),
+        order: List<String> = listOf("Tortoise"),
         prefs: DebridStreamPreferences? = DebridStreamPreferences()
     ) = SelectionSnapshot(
         inputs = inputs(mode),
@@ -59,7 +59,7 @@ class PrefetchedSelectionGateTest {
                 videoSize = it
             )
         },
-        addonName = "Torrentio",
+        addonName = "Tortoise",
         addonLogo = null
     )
 
@@ -161,13 +161,13 @@ class PrefetchedSelectionGateTest {
         // sort, so a reorder can change which stream wins a tie.
         val winner = stream("4K TB Instant")
         val prefetched = PrefetchedSelection(
-            snapshot(order = listOf("Torrentio", "Comet")),
+            snapshot(order = listOf("Tortoise", "Comet")),
             winner,
             listOf(winner)
         )
         val outcome = PrefetchedSelectionGate.resolve(
             prefetched = prefetched,
-            snapshot = snapshot(order = listOf("Comet", "Torrentio")),
+            snapshot = snapshot(order = listOf("Comet", "Tortoise")),
             streams = listOf(winner),
             identityOf = identity
         )

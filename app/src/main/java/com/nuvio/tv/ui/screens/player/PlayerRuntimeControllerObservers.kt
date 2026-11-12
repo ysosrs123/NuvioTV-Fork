@@ -1025,6 +1025,8 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
             val positionMs = livePlayer.currentPosition
             val ceilingMs =
                 if (slowStart) SlowStartServer.STARTUP_CEILING_MS else PlayerRuntimeController.STARTUP_WATCHDOG_CEILING_MS
+            val nothingBuffered = bufferedAheadMs == 0L && livePlayer.playbackState != Player.STATE_READY
+            val playbackThreadAnswers = !nothingBuffered || playbackThreadAnswers(livePlayer.playbackLooper)
             val step = StartupWatchdogDecision.next(
                 elapsedMs = elapsedMs,
                 intervalMs = PlayerRuntimeController.STARTUP_WATCHDOG_TIMEOUT_MS,
@@ -1040,6 +1042,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                 tracksRead = hasScannedTextTracksOnce,
                 hasVideoTrack = currentStreamHasVideoTrack,
                 videoSelected = currentVideoTrackSelected,
+                playbackThreadAnswers = playbackThreadAnswers,
             )
             lastPositionMs = positionMs
             when (step) {
@@ -1088,7 +1091,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                 "video_track_unsupported" ->
                     context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unsupported)
                 "tracks_not_read", "no_video_track", "no_data_buffered" ->
-                    context.getString(com.nuvio.tv.R.string.player_error_startup_no_stream_data)
+                    startupNoDataMessage(context, playbackAnalyticsDiagnostics.lastLoadErrorHttpStatus)
                 else ->
                     context.getString(com.nuvio.tv.R.string.player_error_startup_timeout)
             }
@@ -1098,7 +1101,8 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                     "after starting_stream (state=$stateName bufferedAheadMs=${bufferedAheadMs} " +
                     "pos=${livePlayer.currentPosition} reason=$fireReason " +
                     "scannedTracks=$hasScannedTextTracksOnce hasVideoTrack=$currentStreamHasVideoTrack " +
-                    "videoSelected=$currentVideoTrackSelected); " +
+                    "videoSelected=$currentVideoTrackSelected playbackThreadAnswers=$playbackThreadAnswers " +
+                    "loadHttpStatus=${playbackAnalyticsDiagnostics.lastLoadErrorHttpStatus}); " +
                     "surfacing error"
             )
             com.nuvio.tv.core.util.TtffTrace.mark("startup_watchdog_fired")
@@ -1114,6 +1118,25 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
             }
             return@launch
         }
+    }
+}
+
+/** False when the player's own thread is stuck, as it is while a decoder never finishes opening. */
+private suspend fun playbackThreadAnswers(looper: android.os.Looper): Boolean {
+    val answered = kotlinx.coroutines.CompletableDeferred<Unit>()
+    android.os.Handler(looper).post { answered.complete(Unit) }
+    return withTimeoutOrNull(PLAYBACK_THREAD_ANSWER_MS) { answered.await() } != null
+}
+
+private const val PLAYBACK_THREAD_ANSWER_MS = 3_000L
+
+/** The server's own answer when it refused the stream, the general text when it stayed silent. */
+internal fun startupNoDataMessage(context: android.content.Context, httpStatus: Int?): String {
+    val hint = httpStatus?.let { httpStatusExplanation(context, it) }.orEmpty()
+    return if (httpStatus != null && hint.isNotEmpty()) {
+        "HTTP $httpStatus$hint"
+    } else {
+        context.getString(com.nuvio.tv.R.string.player_error_startup_no_stream_data)
     }
 }
 
@@ -1513,8 +1536,9 @@ internal fun PlayerRuntimeController.scheduleDeferredPlayerReinitialize(
     scope.launch {
         yield()
         runCatching {
+            val paused = pausedByUser
             releasePlayer(flushPlaybackState = true, keepTorrentStream = true)
-            reinitializeCurrentStream()
+            reinitializeCurrentStream(startPaused = paused)
         }.onFailure { e ->
             _uiState.update {
                 it.copy(

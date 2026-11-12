@@ -247,6 +247,7 @@ data class PlayerUiState(
     val libassRenderMode: LibassRenderMode = LibassRenderMode.DEFAULT,
     val displayModeInfo: DisplayModeInfo? = null,
     val showDisplayModeInfo: Boolean = false,
+    val qmsHint: com.nuvio.tv.core.player.DisplayRefreshMeter.Reading? = null,
     // Aspect ratio / resize mode
     val resizeMode: Int = AspectRatioFrameLayout.RESIZE_MODE_FIT,
     val aspectMode: AspectMode = AspectMode.ORIGINAL,
@@ -431,6 +432,8 @@ sealed class PlayerEvent {
     data object OnParentalGuideHide : PlayerEvent()
     data class OnShowDisplayModeInfo(val info: DisplayModeInfo) : PlayerEvent()
     data object OnHideDisplayModeInfo : PlayerEvent()
+    data object OnQmsHintTurnOff : PlayerEvent()
+    data object OnQmsHintKeep : PlayerEvent()
     data object OnDismissPauseOverlay : PlayerEvent()
     data object OnToggleDetails : PlayerEvent()
     data object OnCloseDetails : PlayerEvent()
@@ -475,7 +478,9 @@ data class DisplayModeInfo(
     val width: Int,
     val height: Int,
     val refreshRate: Float,
-    val statusMessage: String? = null
+    val statusMessage: String? = null,
+    val measuredHz: Float? = null,
+    val seamless: Boolean = false
 )
 
 enum class FrameRateSource {

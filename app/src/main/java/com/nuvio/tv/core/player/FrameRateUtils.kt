@@ -646,10 +646,13 @@ object FrameRateUtils {
             return null
         }
 
+        var seamless: Boolean? = null
+        var fromHz: Float? = null
         val switchPlan = withContext(Dispatchers.Main) {
             val window = activity.window ?: return@withContext null
             val display = window.decorView.display ?: return@withContext null
             val activeMode = display.mode
+            fromHz = activeMode.refreshRate
             val supportedModes = display.supportedModes.toList()
             val activeSpec = activeMode.toSpec()
 
@@ -669,6 +672,7 @@ object FrameRateUtils {
                         "from=${activeSpec.width}x${activeSpec.height}@${activeSpec.refreshRate} " +
                         "picked=${choice.mode.refreshRate} seamless=${isSeamlessFrom(activeSpec, choice.mode)}"
                 )
+                if (choice.mode.modeId != activeSpec.modeId) seamless = isSeamlessFrom(activeSpec, choice.mode)
             }
             val modeBest = plan.choice?.let { choice ->
                 supportedModes.firstOrNull { it.modeId == choice.mode.modeId }
@@ -712,7 +716,7 @@ object FrameRateUtils {
             com.nuvio.tv.core.report.PlaybackRecorder.event(
                 com.nuvio.tv.core.report.RecorderEvent.DISPLAY_MODE,
                 "asked fromHz=${activeMode.refreshRate} toHz=${modeBest.refreshRate} " +
-                    "${modeBest.physicalWidth}x${modeBest.physicalHeight} videoFps=$frameRate"
+                    "${modeBest.physicalWidth}x${modeBest.physicalHeight} videoFps=$frameRate seamless=$seamless"
             )
 
             val layoutParams = window.attributes
@@ -722,7 +726,10 @@ object FrameRateUtils {
         } ?: return null
 
         val immediateResult = switchPlan.second
-        if (immediateResult != null) return immediateResult
+        if (immediateResult != null) {
+            DisplayRefreshMeter.measure(immediateResult.appliedMode.refreshRate, seamless = null)
+            return immediateResult
+        }
 
         val expectedMode = switchPlan.first ?: return null
         var stablePolls = 0
@@ -749,6 +756,7 @@ object FrameRateUtils {
                         com.nuvio.tv.core.report.RecorderEvent.DISPLAY_MODE,
                         "android_reports hz=${mode.refreshRate}"
                     )
+                    DisplayRefreshMeter.measure(mode.refreshRate, seamless, fromHz = fromHz)
                     return DisplayModeSwitchResult(mode)
                 }
             } else {
@@ -779,6 +787,7 @@ object FrameRateUtils {
 
     fun restoreOriginalDisplayMode(activity: Activity): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
+        DisplayRefreshMeter.clear()
         val targetModeId = originalModeId ?: return false
 
         return try {

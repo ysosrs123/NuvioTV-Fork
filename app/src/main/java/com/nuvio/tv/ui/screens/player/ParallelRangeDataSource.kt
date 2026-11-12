@@ -206,6 +206,10 @@ internal class ParallelRangeDataSource(
         internal fun releaseRetainedSession() = playbackResources.releaseRetainedSession()
         /** Frees the retained session when no playback instance still reads from it. */
         internal fun releaseRetainedSessionIfIdle() = playbackResources.releaseRetainedSessionIfIdle()
+        /** [releaseRetainedSession] for the main thread: the sessions are out of reach at once, a worker closes them. */
+        internal fun handOffRetainedSession() = playbackResources.handOffRetainedSession()
+        /** [releaseRetainedSessionIfIdle] for the main thread. */
+        internal fun handOffRetainedSessionIfIdle() = playbackResources.handOffRetainedSessionIfIdle()
         /** Drops retained pieces outside reader..reader+[keepAhead] and the idle buffers behind them. */
         internal fun trimRetainedSession(keepAhead: Int) = playbackResources.trimRetainedSession(keepAhead)
         internal fun drainIdleBuffers(chunkSize: Long) = playbackResources.drainIdleBuffers(chunkSize)
@@ -462,6 +466,7 @@ internal class ParallelRangeDataSource(
             val futures = ConcurrentHashMap<Long, CompletableFuture<DownloadedChunk>>()
             val lastTouch = ConcurrentHashMap<Long, Long>()
             val abandoned = AtomicBoolean(false)
+            val steadySlow = SteadySlowSource()
             // Chunks already escalated by the reader-blocked path (once per chunk).
             val escalatedChunks: MutableSet<Long> = ConcurrentHashMap.newKeySet()
             // AIMD rate-limit state. rateLimitDepthCap is the
@@ -835,6 +840,42 @@ internal class ParallelRangeDataSource(
                 pendingChunkSession = null
             }
             clearGlobalPool()
+        }
+
+        internal fun handOffRetainedSessionIfIdle() {
+            closeOnWorker(synchronized(sessionLock) {
+                if (activeInstances.get() > 0) return
+                listOfNotNull(currentChunkSession).also { currentChunkSession = null }
+            })
+        }
+
+        internal fun handOffRetainedSession() {
+            closeOnWorker(synchronized(sessionLock) {
+                listOfNotNull(currentChunkSession, pendingChunkSession).also {
+                    currentChunkSession = null
+                    pendingChunkSession = null
+                }
+            })
+        }
+
+        // Closing a response mid-body reads from its socket, which the main thread may not do.
+        private fun closeOnWorker(sessions: List<ChunkSession>) {
+            if (sessions.isEmpty()) {
+                clearGlobalPool()
+                return
+            }
+            sessions.forEach {
+                it.abandoned.set(true)
+                it.signalHeld()
+            }
+            sharedExecutor.execute {
+                try {
+                    sessions.forEach { teardownSessionLocked(it, poolCap = 0) }
+                    clearGlobalPool()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Retained session release failed: ${e.message}")
+                }
+            }
         }
 
         /**
@@ -1837,6 +1878,8 @@ internal class ParallelRangeDataSource(
         // Reader-blocked escalation state for this wait.
         var escalatedThisWait = false
         var baselineWatermark = Int.MIN_VALUE
+        var lastWatermark = Int.MIN_VALUE
+        var watermarkMovedAt = waitT0
         while (true) {
             // Completion is the caller's business: its future.get() is then
             // instant, and a FAILED download completes here too, so its
@@ -1870,6 +1913,10 @@ internal class ParallelRangeDataSource(
             // Progressing-but-slow chunks (watermark moving) belong to the
             // body-stall watchdog and are never escalated here.
             val wmNow = inFlight?.watermark ?: -1
+            if (wmNow != lastWatermark) {
+                lastWatermark = wmNow
+                watermarkMovedAt = SystemClock.elapsedRealtime()
+            }
             // The reader may arrive before the body registers its watermark.
             // Adopt its first zero baseline so a stationary registered body
             // still gets the existing hedge; positive progress stays with the watchdog.
@@ -1887,7 +1934,9 @@ internal class ParallelRangeDataSource(
                 )
                 escalatedThisWait = true
             }
-            if (SystemClock.elapsedRealtime() - waitT0 >=
+            val slowButArriving = activeSession.steadySlow.known &&
+                SystemClock.elapsedRealtime() - watermarkMovedAt < SteadySlowSource.QUIET_MS
+            if (!slowButArriving && SystemClock.elapsedRealtime() - waitT0 >=
                 IN_FLIGHT_WAIT_CAP_MS.toLong() +
                     (if (escalatedThisWait) ESCALATE_POLL_EXTENSION_MS else 0L)
             ) {
@@ -2077,7 +2126,8 @@ internal class ParallelRangeDataSource(
         chunkIndex: Long,
         future: CompletableFuture<*>,
         allowStallRestart: Boolean = true,
-        startedAtMs: Long = activeSession.rateGate.now()
+        startedAtMs: Long = activeSession.rateGate.now(),
+        restartedAfterRateBps: Long = -1L
     ): DownloadedChunk {
         val sessionLength = activeSession.totalLength
         val start = chunkIndex * chunkSize
@@ -2115,7 +2165,9 @@ internal class ParallelRangeDataSource(
             // requested range is exact, so a chunk that comes back short must
             // fail (and retry) rather than be cached as if complete.
             val expectedBytes = if (sessionLength > 0L) end - start else -1L
-            val chunk = readIntoChunk(activeSession, chunkIndex, ds, future, expectedBytes, allowStallRestart)
+            val chunk = readIntoChunk(
+                activeSession, chunkIndex, ds, future, expectedBytes, allowStallRestart, restartedAfterRateBps
+            )
             Log.d(TAG, "Successfully downloaded chunk $chunkIndex, size=${chunk.size} bytes")
             reportPiece(sent, chunk, ds.uri)
             return chunk
@@ -2259,7 +2311,9 @@ internal class ParallelRangeDataSource(
             Log.w(TAG, "HEDGE_RESTART chunk=$chunkIndex attempt=${attempt + 1}/$HEDGE_MAX_RESTARTS " +
                 "prevRateBps=${lastStall.rateBps} atWatermark=${lastStall.watermark}")
             try {
-                return downloadChunkOnce(activeSession, chunkIndex, future)
+                return downloadChunkOnce(
+                    activeSession, chunkIndex, future, restartedAfterRateBps = lastStall.rateBps
+                )
             } catch (e: Exception) {
                 if (activeSession.abandoned.get() || future.isDone) throw IOException("Session abandoned or cancelled")
                 if (e !is StalledChunkException) throw e
@@ -2445,7 +2499,8 @@ internal class ParallelRangeDataSource(
         ds: DataSource,
         future: CompletableFuture<*>,
         expectedBytes: Long,
-        allowStallRestart: Boolean = true
+        allowStallRestart: Boolean = true,
+        restartedAfterRateBps: Long = -1L
     ): DownloadedChunk {
         val buffer = acquireBuffer(activeSession)
         val segmented = buffer as? SegmentedBuffer
@@ -2553,13 +2608,20 @@ internal class ParallelRangeDataSource(
                     val hedgeWindowBytes = totalRead - hedgeLastCheckBytes
                     val hedgeRateBps = if (hedgeWindowMs > 0L)
                         hedgeWindowBytes.toLong() * 1000L / hedgeWindowMs else Long.MAX_VALUE
-                    val hedgeStalled = hedgeRateBps < hedgeStallRateBps
+                    var hedgeStalled = hedgeRateBps < activeSession.steadySlow.stallRateBps(hedgeStallRateBps)
+                    if (hedgeStalled && restartedAfterRateBps >= 0L && !activeSession.steadySlow.known &&
+                        activeSession.steadySlow.noteAfterRestart(restartedAfterRateBps, hedgeRateBps)
+                    ) {
+                        hedgeStalled = false
+                        Log.w(TAG, "HEDGE_SLOW_SOURCE chunk=$chunkIndex rateBps=$hedgeRateBps " +
+                            "prevRateBps=$restartedAfterRateBps")
+                    }
                     if (hedgeStalled) hedgeConsecutiveStalled++ else hedgeConsecutiveStalled = 0
                     Log.w(TAG, "HEDGE_SAMPLE chunk=$chunkIndex watermark=$totalRead " +
                         "windowBytes=$hedgeWindowBytes windowMs=$hedgeWindowMs " +
                         "rateBps=$hedgeRateBps stalled=$hedgeStalled " +
                         "consec=$hedgeConsecutiveStalled/$hedgeWindowsRequired " +
-                        "usenet=$hedgeIsUsenet clamp=$resources.hudClampLatched " +
+                        "usenet=$hedgeIsUsenet clamp=${resources.hudClampLatched} " +
                         "restartable=$allowStallRestart")
                     if (hedgeConsecutiveStalled >= hedgeWindowsRequired &&
                         allowStallRestart && !resources.hudClampLatched) {

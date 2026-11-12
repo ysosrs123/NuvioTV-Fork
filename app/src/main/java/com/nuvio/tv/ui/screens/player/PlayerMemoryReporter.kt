@@ -50,6 +50,13 @@ object PlayerMemoryReporter {
             "deviceAvailMb=${system.availMem / (1024L * 1024L)} deviceLow=${system.lowMemory}"
     }
 
+    /** Logs [prefix] with a snapshot behind it; the memory map read runs off the caller's thread. */
+    fun logWithSnapshot(tag: String, prefix: String, context: Context) {
+        val appContext = context.applicationContext
+        val allocStats = allocatorStats()
+        scope.launch { Log.i(tag, prefix + snapshot(appContext, allocStats)) }
+    }
+
     // Peak is what matters for calibration, and a single reading at playback start misses it.
     fun startSampling(context: Context) {
         if (samplerJob?.isActive == true) return

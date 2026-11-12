@@ -648,6 +648,19 @@ class PlayerViewModel @Inject constructor(
             } else ""
             rows += StatsRow("Display", modeSize + String.format("%.2f Hz", hz) + suffix, dot)
         }
+        // What the screen really ticks at, timed after the switch: Android only reports the mode it selected.
+        com.nuvio.tv.core.player.DisplayRefreshMeter.latest?.takeIf { it.reliable }?.let { reading ->
+            val how = when (reading.seamless) {
+                true -> " · no mode change (QMS/VRR)"
+                false -> " · mode change"
+                null -> ""
+            }
+            rows += StatsRow(
+                "Measured",
+                com.nuvio.tv.core.player.DisplayRefreshMeter.format(reading.measuredHz) + " Hz" + how,
+                if (com.nuvio.tv.core.player.DisplayRefreshMeter.differs(reading)) StatsDot.BAD else StatsDot.NONE
+            )
+        }
 
         // Buffer health with startup grace and end-of-file guard.
         player?.let {

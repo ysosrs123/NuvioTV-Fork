@@ -2044,6 +2044,8 @@ internal object EmbeddedSubtitleCueStore {
     private const val SEEK_DEDUP_WINDOW_MS = 1_500L
     private const val SEEK_TARGET_TOLERANCE_MS = 1_000L
     private const val MAX_RETAINED_GENERATIONS = 6
+    // The stream playing and one prepared ahead of it.
+    private const val MAX_SOURCES = 2
 
     private data class Track(
         var language: String?,
@@ -2071,11 +2073,18 @@ internal object EmbeddedSubtitleCueStore {
         var generation = 0L
         synchronized(lock) {
             generation = (generations[sourceKey] ?: 0L) + 1L
+            sources.remove(sourceKey)
             sources[sourceKey] = linkedMapOf()
             retainedGenerations.remove(sourceKey)
             generations[sourceKey] = generation
             lastSeekTargetMs.remove(sourceKey)
             lastSeekWallMs.remove(sourceKey)
+            sources.keys.take((sources.size - MAX_SOURCES).coerceAtLeast(0)).forEach { staleKey ->
+                sources.remove(staleKey)
+                retainedGenerations.remove(staleKey)
+                lastSeekTargetMs.remove(staleKey)
+                lastSeekWallMs.remove(staleKey)
+            }
         }
 
     }

@@ -9,25 +9,25 @@ import org.junit.Test
 
 class StreamListOrderTest {
     private val server1080 = stream("Jellyfin", "Movie.2023.1080p.WEB-DL.DDP5.1-FLUX.mkv")
-    private val torrentio720 = stream("Torrentio", "Movie.2023.720p.WEB-DL.DDP5.1-FLUX.mkv")
-    private val torrentioRemux = stream("Torrentio", "Movie.2023.2160p.UHD.BluRay.REMUX.TrueHD.7.1-FraMeSToR.mkv")
-    private val torrentioYify = stream("Torrentio", "Movie.2023.2160p.BluRay.x265-YIFY.mkv")
+    private val tortoise720 = stream("Tortoise", "Movie.2023.720p.WEB-DL.DDP5.1-FLUX.mkv")
+    private val tortoiseRemux = stream("Tortoise", "Movie.2023.2160p.UHD.BluRay.REMUX.TrueHD.7.1-FraMeSToR.mkv")
+    private val tortoiseYify = stream("Tortoise", "Movie.2023.2160p.BluRay.x265-YIFY.mkv")
     private val aioWeb4k = stream("AIOStreams", "Movie.2023.2160p.WEB-DL.DDP5.1-FLUX.mkv")
-    private val sourceOrder = listOf(server1080, torrentio720, torrentioRemux, torrentioYify, aioWeb4k)
+    private val sourceOrder = listOf(server1080, tortoise720, tortoiseRemux, tortoiseYify, aioWeb4k)
 
     private fun order(streams: List<Stream> = sourceOrder) = StreamListOrder.of(streams, null) { it.key() }
 
     @Test fun allIsOneRankedListWithMediaServersRankedWithTheRest() {
-        assertEquals(listOf(torrentioRemux, aioWeb4k, server1080, torrentio720), order().apply(sourceOrder))
+        assertEquals(listOf(tortoiseRemux, aioWeb4k, server1080, tortoise720), order().apply(sourceOrder))
     }
 
     @Test fun linksTheQualityRulesExcludeAreHidden() {
-        assertFalse(torrentioYify in order().apply(sourceOrder))
+        assertFalse(tortoiseYify in order().apply(sourceOrder))
     }
 
     @Test fun eachSourceIsRankedOnItsOwn() {
-        val torrentio = sourceOrder.filter { it.addonName == "Torrentio" }
-        assertEquals(listOf(torrentioRemux, torrentio720), order().apply(torrentio))
+        val tortoise = sourceOrder.filter { it.addonName == "Tortoise" }
+        assertEquals(listOf(tortoiseRemux, tortoise720), order().apply(tortoise))
         assertEquals(listOf(server1080), order().apply(sourceOrder.filter { it.addonName == "Jellyfin" }))
     }
 
@@ -36,7 +36,7 @@ class StreamListOrderTest {
     }
 
     @Test fun aViewWithOnlyExcludedLinksStillShowsThem() {
-        val yifyOnly = listOf(torrentioYify)
+        val yifyOnly = listOf(tortoiseYify)
         assertEquals(yifyOnly, order().apply(yifyOnly))
     }
 
@@ -45,8 +45,8 @@ class StreamListOrderTest {
         val withLate = sourceOrder
         assertFalse(ranked.covers(withLate))
         val shown = ranked.apply(withLate)
-        assertEquals(listOf(torrentioRemux, server1080, torrentio720), shown.take(3))
-        assertEquals(setOf(torrentioYify, aioWeb4k), shown.drop(3).toSet())
+        assertEquals(listOf(tortoiseRemux, server1080, tortoise720), shown.take(3))
+        assertEquals(setOf(tortoiseYify, aioWeb4k), shown.drop(3).toSet())
         assertTrue(order().covers(withLate))
     }
 

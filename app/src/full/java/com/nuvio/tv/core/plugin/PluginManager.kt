@@ -133,7 +133,7 @@ class PluginManager @Inject constructor(
     /**
      * Check if the input looks like a short code rather than a URL.
      * Short codes are alphanumeric strings without slashes, dots (other than in a domain),
-     * or protocol schemes — e.g. "cspr", "0094", "megarepo".
+     * or protocol schemes — e.g. "abcd", "1234".
      */
     private fun isShortCode(input: String): Boolean {
         val trimmed = input.trim()
@@ -393,7 +393,7 @@ class PluginManager @Inject constructor(
         providers: NewRepoProviders = NewRepoProviders.NORMAL
     ): Result<PluginRepository> = withContext(Dispatchers.IO) {
         try {
-            // Resolve short codes (e.g. "cspr", "0094") via cutt.ly redirect
+            // Resolve short codes (e.g. "abcd", "1234") via cutt.ly redirect
             val resolvedUrl = if (isShortCode(manifestUrl)) {
                 Log.d(TAG, "Input looks like a short code: '$manifestUrl'")
                 resolveShortCode(manifestUrl.trim())

@@ -51,6 +51,7 @@ class ParallelRangeProductionWorkloadTest {
         val openHolds=ConcurrentHashMap<Long,Hold>()
         val bodyAttempts=ConcurrentHashMap<Long,AtomicInteger>()
         val workerOpens=CopyOnWriteArrayList<Pair<String,Long>>()
+        val closers=CopyOnWriteArrayList<Thread>()
         val sources=mutableListOf<ParallelRangeDataSource>()
         val allHolds=mutableListOf<Hold>()
         val openAttempts=ConcurrentHashMap<Long,AtomicInteger>()
@@ -118,7 +119,7 @@ class ParallelRangeProductionWorkloadTest {
                         cursor+=count;count
                     }
                 }
-                every { ds.close() } answers { closed=true;if(bodyHold?.ignoreClose!=true) bodyHold?.release?.countDown();Unit }
+                every { ds.close() } answers { closers+=Thread.currentThread();closed=true;if(bodyHold?.ignoreClose!=true) bodyHold?.release?.countDown();Unit }
                 ds
             }
         }
@@ -289,6 +290,22 @@ class ParallelRangeProductionWorkloadTest {
             assertSame(freshFuture,f.futures(freshSession)[1]);assertFalse(freshFuture.isCancelled)
             fresh.close();fresh.open(f.spec(1,freshUri))
             assertEquals("late old bytes must not overwrite fresh retained bytes",((CHUNK+17)%127).toByte(),f.readAsync(fresh).get(5,TimeUnit.SECONDS))
+        }
+    }
+    @Test fun `handed off session is out of reach at once and a worker closes its download`() {
+        manualClock.set(1000)
+        Fixture().use { f ->
+            val old=f.source();f.bootstrap(old);val hold=f.hold(1)
+            old.open(f.spec(1));invoke(old,"ensureChunkScheduled",1L)
+            assertTrue(hold.entered.await(5,TimeUnit.SECONDS))
+            val oldSession=f.session(old);val oldFuture=f.futures(oldSession).getValue(1)
+            old.close();f.closers.clear()
+            invoke(f.resources,"handOffRetainedSession")
+            assertNull(field(f.resources,"currentChunkSession"))
+            assertTrue("the held download is closed",hold.release.await(5,TimeUnit.SECONDS))
+            awaitCondition("old session drains") { oldFuture.isDone && f.pool.activeCount==0 }
+            assertTrue(f.closers.isNotEmpty());assertFalse(Thread.currentThread() in f.closers)
+            assertTrue(f.futures(oldSession).isEmpty())
         }
     }
     @Test fun `late original rate limit after hedge success cannot start a new clamp or request`() {

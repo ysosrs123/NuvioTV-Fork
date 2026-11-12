@@ -30,6 +30,7 @@ internal object StartupWatchdogDecision {
         tracksRead: Boolean,
         hasVideoTrack: Boolean,
         videoSelected: Boolean,
+        playbackThreadAnswers: Boolean = true,
     ): Step {
         val anotherIntervalFits = elapsedMs + intervalMs <= ceilingMs
         if (slowStart && bufferedAheadMs == 0L && !ready && anotherIntervalFits) return Step.WaitForData
@@ -42,7 +43,7 @@ internal object StartupWatchdogDecision {
                 !tracksRead -> "tracks_not_read"
                 hasVideoTrack && !videoSelected -> "video_track_unsupported"
                 !hasVideoTrack -> "no_video_track"
-                bufferedAheadMs == 0L && !ready -> "no_data_buffered"
+                bufferedAheadMs == 0L && !ready && playbackThreadAnswers -> "no_data_buffered"
                 else -> "decoder_unresponsive"
             }
         )

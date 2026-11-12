@@ -47,7 +47,7 @@ class Vc1VideoFormatHeuristicsTest {
             Vc1VideoFormatHeuristics.isLikelyVc1Stream(
                 null,
                 "Regular Title",
-                "The.Dark.Knight.2008.1080p.VC-1.mkv",
+                "Example.Movie.2008.1080p.VC-1.mkv",
                 null
             )
         )

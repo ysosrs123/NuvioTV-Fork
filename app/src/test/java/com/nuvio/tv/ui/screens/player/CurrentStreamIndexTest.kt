@@ -99,7 +99,7 @@ class CurrentStreamIndexTest {
 
     @Test
     fun `same name from another addon does not match`() {
-        assertEquals(-1, find(listOf(stream(addonName = "Torrentio"))))
+        assertEquals(-1, find(listOf(stream(addonName = "Tortoise"))))
     }
 
     @Test
@@ -121,7 +121,7 @@ class CurrentStreamIndexTest {
 
     @Test
     fun `filename from another addon does not match`() {
-        val streams = listOf(stream(name = "720P", addonName = "Torrentio", filename = "a.mkv"))
+        val streams = listOf(stream(name = "720P", addonName = "Tortoise", filename = "a.mkv"))
 
         assertEquals(-1, find(streams, filename = "a.mkv"))
     }

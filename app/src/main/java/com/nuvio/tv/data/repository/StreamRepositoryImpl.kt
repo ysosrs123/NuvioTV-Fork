@@ -778,10 +778,16 @@ class StreamRepositoryImpl @Inject constructor(
             val merged = existing.copy(
                 streams = mergeStreams(existing.streams + existing.thumbnailCopyStreams, result.streams)
             )
-            accumulatedResults[existingIndex] = presentStreams(merged, debridSettings)
+            accumulatedResults[existingIndex] = keptPerSource(presentStreams(merged, debridSettings))
         } else {
-            accumulatedResults.add(presentStreams(result, debridSettings))
+            accumulatedResults.add(keptPerSource(presentStreams(result, debridSettings)))
         }
+    }
+
+    private fun keptPerSource(group: AddonStreams): AddonStreams {
+        if (group.streams.size <= MAX_STREAMS_PER_SOURCE) return group
+        Log.i(TAG, "STREAM_CAP source=${group.addonName} streams=${group.streams.size} kept=$MAX_STREAMS_PER_SOURCE")
+        return group.copy(streams = capStreamsPerSource(group.streams))
     }
 
     private fun presentStreams(result: AddonStreams, debridSettings: DebridSettings): AddonStreams {
@@ -1188,3 +1194,12 @@ private val FINAL_DEBRID_STATES = setOf(
     com.nuvio.tv.domain.model.StreamDebridCacheState.CACHED,
     com.nuvio.tv.domain.model.StreamDebridCacheState.NOT_CACHED
 )
+
+/**
+ * One source answering with thousands of streams for a title costs every later step (matching, sorting, drawing) and
+ * the memory to hold them twice, for entries nobody scrolls to. Sources list their best first, so the head is kept.
+ */
+internal const val MAX_STREAMS_PER_SOURCE = 300
+
+internal fun <T> capStreamsPerSource(streams: List<T>, limit: Int = MAX_STREAMS_PER_SOURCE): List<T> =
+    if (streams.size > limit) streams.subList(0, limit).toList() else streams

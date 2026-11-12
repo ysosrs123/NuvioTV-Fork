@@ -78,7 +78,7 @@ private val STATS_GROUP_BY_LABEL: Map<String, StatsGroup> = buildMap {
     listOf("Add-on", "Provider", "Server", "Source host", "File", "Size", "File bitrate")
         .forEach { put(it, StatsGroup.SOURCE) }
     listOf("Video", "HDR", "V bitrate", "DV", "DV HDR", "DV CM", "DV levels", "DV L1", "DV L5", "Format",
-        "Decoder", "Dropped", "Frame lead", "Display")
+        "Decoder", "Dropped", "Frame lead", "Display", "Measured")
         .forEach { put(it, StatsGroup.VIDEO) }
     listOf("Audio", "A bitrate", "Underruns", "Route", "A jitter", "A filler", "A clock")
         .forEach { put(it, StatsGroup.AUDIO) }

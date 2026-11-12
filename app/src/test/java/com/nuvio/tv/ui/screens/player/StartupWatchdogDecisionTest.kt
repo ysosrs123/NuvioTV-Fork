@@ -19,9 +19,10 @@ class StartupWatchdogDecisionTest {
         tracksRead: Boolean = true,
         hasVideoTrack: Boolean = true,
         videoSelected: Boolean = true,
+        playbackThreadAnswers: Boolean = true,
     ) = StartupWatchdogDecision.next(
         elapsedMs, 20_000L, ceilingMs, slowStart, bufferedAheadMs, lastBufferedAheadMs, ready, playing,
-        positionMs, lastPositionMs, videoRestarted, tracksRead, hasVideoTrack, videoSelected,
+        positionMs, lastPositionMs, videoRestarted, tracksRead, hasVideoTrack, videoSelected, playbackThreadAnswers,
     )
 
     @Test
@@ -37,6 +38,13 @@ class StartupWatchdogDecisionTest {
         assertEquals(Step.Fire("no_data_buffered"), step())
         assertEquals(Step.Fire("tracks_not_read"), step(tracksRead = false))
         assertEquals(Step.Fire("decoder_unresponsive"), step(bufferedAheadMs = 5_000L, lastBufferedAheadMs = 5_000L, ready = true))
+    }
+
+    @Test
+    fun aStuckPlayerThreadIsADecoderProblemEvenWithNothingBuffered() {
+        // Dolby Vision file at its resume point: data arrived, the decoder never opened, nothing counted as buffered.
+        assertEquals(Step.Fire("decoder_unresponsive"), step(positionMs = 392_000L, lastPositionMs = 392_000L, playbackThreadAnswers = false))
+        assertEquals(Step.Fire("tracks_not_read"), step(tracksRead = false, playbackThreadAnswers = false))
     }
 
     @Test

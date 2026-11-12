@@ -49,8 +49,8 @@ class PlayerBuiltInBadgesTest {
     fun `dts-hd ma from the release name whatever the separator`() {
         val exo = PlayerMediaInfo(audioCodec = "DTS-HD", audioChannels = 6)
         listOf(
-            "Suzume.2022.2160p.UHD.BluRay.REMUX.HDR.HEVC.DTS-HD.MA.5.1-GRP",
-            "Suzume 2022 2160p UHD BluRay REMUX HDR HEVC DTS-HD MA 5.1",
+            "Film.2022.2160p.UHD.BluRay.REMUX.HDR.HEVC.DTS-HD.MA.5.1-GRP",
+            "Film 2022 2160p UHD BluRay REMUX HDR HEVC DTS-HD MA 5.1",
             "Film.2019.1080p.BluRay.REMUX.AVC.DTS-HD-MA.5.1-GRP",
             "Film 2019 1080p BluRay DTSHD MA 5.1 x264",
             "Film.2019.1080p.BluRay.x264.DTS-HDMA.5.1",

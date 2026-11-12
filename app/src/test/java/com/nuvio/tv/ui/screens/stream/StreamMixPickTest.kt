@@ -11,7 +11,7 @@ class StreamMixPickTest {
     private val manual = PlayerSettings(
         streamAutoPlayMode = StreamAutoPlayMode.MANUAL,
         streamAutoPlaySource = StreamAutoPlaySource.INSTALLED_ADDONS_ONLY,
-        streamAutoPlaySelectedAddons = setOf("Torrentio"),
+        streamAutoPlaySelectedAddons = setOf("Tortoise"),
         streamAutoPlayRegex = "2160p"
     )
 
