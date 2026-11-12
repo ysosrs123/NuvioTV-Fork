@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.mdblist
 
+import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
@@ -107,21 +108,56 @@ class MdbListAuthRepository(
         if (rejectedAccessToken == null && current.tokens.expiresAtEpochMs - nowEpochMs() > 60_000L) {
             return@withLock current
         }
+        Log.d(
+            TAG,
+            "refresh start profile=${scope.profileId} gen=${scope.generation} " +
+                "reason=${if (rejectedAccessToken != null) "rejected" else "expiring"} " +
+                "secondsLeft=${(current.tokens.expiresAtEpochMs - nowEpochMs()) / 1_000L}"
+        )
         withContext(NonCancellable) {
-            val response = oauth(
-                "/oauth/token/",
-                mapOf("grant_type" to "refresh_token", "refresh_token" to current.tokens.refreshToken),
-                scope
-            )
+            val response = try {
+                oauth(
+                    "/oauth/token/",
+                    mapOf("grant_type" to "refresh_token", "refresh_token" to current.tokens.refreshToken),
+                    scope
+                )
+            } catch (error: CancellationException) {
+                Log.w(TAG, "refresh dropped reason=${if (store.isCurrent(scope)) "cancelled" else "scope-changed"}")
+                throw error
+            } catch (error: MdbListApiException) {
+                Log.w(TAG, "refresh failed status=${error.status} code=${error.code} result=kept")
+                throw error
+            }
             if (response.status !in 200..299) {
                 if (response.errorCode() in setOf("invalid_grant", "invalid_token")) {
-                    store.clearAuth(scope, MdbListAuthError.AUTHORIZATION_REVOKED, current.tokens.accessToken)
+                    val cleared =
+                        store.clearAuth(scope, MdbListAuthError.AUTHORIZATION_REVOKED, current.tokens.accessToken)
+                    Log.w(
+                        TAG,
+                        "refresh failed status=${response.status} code=${response.errorCode()} " +
+                            "result=${if (cleared) "signed-out" else "kept"}"
+                    )
                     throw MdbListAuthException(MdbListAuthError.AUTHORIZATION_REVOKED)
                 }
+                Log.w(TAG, "refresh failed status=${response.status} code=${response.errorCode()} result=kept")
                 throw MdbListApiException(response.status, response.errorCode())
             }
-            val tokens = tokensFrom(response, current.tokens.refreshToken)
-            if (!store.refreshTokens(tokens, current)) scopeChanged()
+            val tokens = try {
+                tokensFrom(response, current.tokens.refreshToken)
+            } catch (error: MdbListAuthException) {
+                Log.w(TAG, "refresh dropped reason=invalid-response:${rejectedTokenField(response.body)}")
+                throw error
+            }
+            if (!store.refreshTokens(tokens, current)) {
+                Log.w(TAG, "refresh dropped reason=${if (store.isCurrent(scope)) "token-changed" else "scope-changed"}")
+                scopeChanged()
+            }
+            Log.d(
+                TAG,
+                "refresh stored profile=${scope.profileId} " +
+                    "expiresIn=${(tokens.expiresAtEpochMs - nowEpochMs() + 500L) / 1_000L} " +
+                    "newRefreshToken=${tokens.refreshToken != current.tokens.refreshToken}"
+            )
             MdbListAuthorization(scope, tokens)
         }
     }
@@ -174,6 +210,16 @@ class MdbListAuthRepository(
         return MdbListTokens(accessToken, refreshToken, expiresAt(payload.expiresIn, nowEpochMs()))
     }
 
+    private fun rejectedTokenField(body: String): String {
+        val payload = runCatching { json.decodeFromString<MdbListTokenResponse>(body) }.getOrNull() ?: return "body"
+        return when {
+            payload.accessToken.isNullOrBlank() -> "access_token"
+            !payload.tokenType.equals("Bearer", ignoreCase = true) -> "token_type"
+            payload.scope != null && "write" !in payload.scope.split(Regex("\\s+")) -> "scope"
+            else -> "expires_in"
+        }
+    }
+
     private fun verificationUrl(value: String?) = value?.toHttpUrlOrNull()
         ?.takeIf { it.isHttps && it.host == "mdblist.com" && it.username.isEmpty() && it.password.isEmpty() }
         ?: invalidResponse()
@@ -187,4 +233,8 @@ class MdbListAuthRepository(
 
     private fun invalidResponse(): Nothing = throw MdbListAuthException(MdbListAuthError.INVALID_RESPONSE)
     private fun scopeChanged(): Nothing = throw CancellationException("MDBList account changed")
+
+    private companion object {
+        const val TAG = "MdbListAuth"
+    }
 }

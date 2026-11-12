@@ -275,6 +275,11 @@ class AuthManager @Inject constructor(
             else -> null
         }
 
+    fun hasLiveSession(): Boolean {
+        val userId = currentUserId ?: return false
+        return auth.currentUserOrNull()?.id == userId
+    }
+
     /**
      * Returns the effective user ID for data operations.
      * For sync-linked devices, this returns the sync owner's user ID.
@@ -448,14 +453,14 @@ class AuthManager @Inject constructor(
         val refreshToken = auth.currentSessionOrNull()?.refreshToken?.takeIf { it.isNotBlank() }
             ?: run {
                 Log.w(TAG, "JWT expired but no refresh token available; cannot refresh session")
-                clearInvalidRemoteSession(error)
                 return false
             }
         val outcome = refreshCurrentSessionSerialized(
             observedRefreshToken = refreshToken,
             reason = "JWT expired"
         )
-        if (outcome.result == SessionRefreshResult.INVALID_SESSION) {
+        // Only a refusal from the server ends the session; a session the library is not holding right now is kept.
+        if (outcome.result == SessionRefreshResult.INVALID_SESSION && outcome.error != null) {
             clearInvalidRemoteSession(outcome.error)
         }
         return outcome.result == SessionRefreshResult.REFRESHED

@@ -109,6 +109,7 @@ class StartupSyncService @Inject constructor(
             authManager.authState.collect { state ->
                 when (state) {
                     is AuthState.FullAccount -> {
+                        profileManager.activeProfileReady.first { it }
                         val force = forceSyncRequested
                         val includeProfileSettings = if (force) forceSyncIncludesProfileSettings else true
                         val started = scheduleStartupPull(

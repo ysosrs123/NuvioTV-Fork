@@ -1327,6 +1327,11 @@ class WatchProgressRepositoryImpl @Inject constructor(
             ?.let(trackingProgressProviders::provider)
             ?.ownsCompletedHistoryProjection == true
 
+    override fun activeProviderLoadedEpisodeProgress(contentId: String): Map<Pair<Int, Int>, WatchProgress>? =
+        activeProgressProviderId
+            ?.let(trackingProgressProviders::provider)
+            ?.loadedEpisodeProgress(contentId)
+
     override fun activeProviderContinueWatchingCutoffEpochMs(
         daysCap: Int,
         nowEpochMs: Long

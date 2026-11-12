@@ -194,6 +194,7 @@ interface WatchProgressRepository {
 
     fun hasActiveTrackingProgressProvider(): Boolean
     fun activeProviderOwnsCompletedHistoryProjection(): Boolean
+    fun activeProviderLoadedEpisodeProgress(contentId: String): Map<Pair<Int, Int>, WatchProgress>? = null
     fun activeProviderContinueWatchingCutoffEpochMs(daysCap: Int, nowEpochMs: Long): Long?
     fun shouldUseAsNextUpSeed(progress: WatchProgress, nowEpochMs: Long): Boolean
     suspend fun normalizeParentContentId(parentContentId: String, videoId: String?): String

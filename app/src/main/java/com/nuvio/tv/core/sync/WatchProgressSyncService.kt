@@ -61,6 +61,8 @@ class WatchProgressSyncService @Inject constructor(
         watchProgressPreferences.advanceLastSuccessfulPushMs(now, profileId)
     }
     private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T {
+        // Without a session the request would go out as an anonymous caller.
+        if (!authManager.hasLiveSession()) throw IllegalStateException("No signed-in session for watch progress sync")
         return try {
             block()
         } catch (e: Exception) {

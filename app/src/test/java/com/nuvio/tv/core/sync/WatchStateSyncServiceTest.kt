@@ -5,6 +5,7 @@ import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tracking.TrackingProgressProviderRegistry
 import com.nuvio.tv.data.local.TraktSettingsDataStore
 import com.nuvio.tv.data.local.WatchProgressPreferences
+import com.nuvio.tv.data.local.WatchProgressSource
 import com.nuvio.tv.data.local.WatchedItemsPreferences
 import com.nuvio.tv.domain.model.WatchProgress
 import com.nuvio.tv.domain.model.WatchedItem
@@ -134,20 +135,92 @@ class WatchStateSyncServiceTest {
         }
     }
 
+    @Test
+    fun `progress push without a live session sends nothing and keeps its pending mutation`() = runTest {
+        val postgrest = mockk<Postgrest>()
+        val mutationStore = mockk<WatchStateMutationStore>(relaxed = true)
+        val calls = recordCalls(postgrest)
+        coEvery { mutationStore.pendingProgressDeletes(5) } returns setOf("removed")
+        coEvery { mutationStore.pendingProgressUpserts(5) } returns mapOf("pending" to progress("pending"))
+        val service = progressService(postgrest, mockk(relaxed = true), mutationStore, liveSession = false)
+
+        assertTrue(service.pushToRemote(5).isFailure)
+        assertTrue(service.pushSingleToRemote("pending", progress("pending"), 5).isFailure)
+
+        assertTrue(calls.isEmpty())
+        coVerify(exactly = 0) { mutationStore.acknowledgeProgressUpserts(any(), any()) }
+        coVerify(exactly = 0) { mutationStore.acknowledgeProgressDeletes(any(), any()) }
+    }
+
+    @Test
+    fun `progress pulls without a live session ask nothing and leave local entries alone`() = runTest {
+        val postgrest = mockk<Postgrest>()
+        val preferences = mockk<WatchProgressPreferences>(relaxed = true)
+        val calls = recordCalls(postgrest)
+        val service = progressService(postgrest, preferences, mockk(relaxed = true), liveSession = false)
+
+        assertTrue(service.syncSnapshotFromRemote(1).isFailure)
+        assertTrue(service.syncDeltaFromRemote(1).isFailure)
+
+        assertTrue(calls.isEmpty())
+        coVerify(exactly = 0) { preferences.setDeltaState(any(), any(), any()) }
+    }
+
+    @Test
+    fun `watched push without a live session sends nothing and keeps its pending mutation`() = runTest {
+        val postgrest = mockk<Postgrest>()
+        val mutationStore = mockk<WatchStateMutationStore>(relaxed = true)
+        val calls = recordCalls(postgrest)
+        val pending = watched("pending")
+        coEvery { mutationStore.pendingWatchedDeletes(5) } returns emptySet()
+        coEvery { mutationStore.pendingWatchedUpserts(5) } returns mapOf(pending.mutationKey() to pending)
+        val service = watchedService(postgrest, mockk(relaxed = true), mutationStore, liveSession = false)
+
+        assertTrue(service.pushToRemote(5).isFailure)
+
+        assertTrue(calls.isEmpty())
+        coVerify(exactly = 0) { mutationStore.acknowledgeWatchedUpserts(any(), any()) }
+    }
+
+    @Test
+    fun `watched pulls without a live session ask nothing and leave local ticks alone`() = runTest {
+        val postgrest = mockk<Postgrest>()
+        val preferences = mockk<WatchedItemsPreferences>(relaxed = true)
+        val calls = recordCalls(postgrest)
+        val service = watchedService(postgrest, preferences, mockk(relaxed = true), liveSession = false)
+
+        assertTrue(service.syncSnapshotFromRemote(1).isFailure)
+        assertTrue(service.syncDeltaFromRemote(1).isFailure)
+
+        assertTrue(calls.isEmpty())
+        coVerify(exactly = 0) { preferences.replaceWithRemoteItems(any(), any(), any(), any(), any(), any()) }
+    }
+
+    private fun recordCalls(postgrest: Postgrest): List<String> {
+        val calls = mutableListOf<String>()
+        coEvery { postgrest.rpc(any(), any<JsonObject>()) } coAnswers {
+            calls += firstArg<String>()
+            mockk<PostgrestResult>(relaxed = true)
+        }
+        return calls
+    }
+
     private fun progressService(
         postgrest: Postgrest,
         preferences: WatchProgressPreferences,
         mutationStore: WatchStateMutationStore,
-        canRefreshJwt: Boolean = false
+        canRefreshJwt: Boolean = false,
+        liveSession: Boolean = true
     ): WatchProgressSyncService {
         val authManager = mockk<AuthManager>(relaxed = true)
         coEvery { authManager.refreshSessionIfJwtExpired(any()) } returns canRefreshJwt
+        every { authManager.hasLiveSession() } returns liveSession
         return WatchProgressSyncService(
             authManager = authManager,
             postgrest = postgrest,
             watchProgressPreferences = preferences,
             trackingProviderRegistry = TrackingProgressProviderRegistry(emptySet()),
-            traktSettingsDataStore = mockk(relaxed = true),
+            traktSettingsDataStore = nuvioSyncSettings(),
             profileManager = profileManager(),
             syncClientIdentity = syncClientIdentity(),
             mutationStore = mutationStore
@@ -157,20 +230,26 @@ class WatchStateSyncServiceTest {
     private fun watchedService(
         postgrest: Postgrest,
         preferences: WatchedItemsPreferences,
-        mutationStore: WatchStateMutationStore
+        mutationStore: WatchStateMutationStore,
+        liveSession: Boolean = true
     ): WatchedItemsSyncService {
         val authManager = mockk<AuthManager>(relaxed = true)
         coEvery { authManager.refreshSessionIfJwtExpired(any()) } returns false
+        every { authManager.hasLiveSession() } returns liveSession
         return WatchedItemsSyncService(
             authManager = authManager,
             postgrest = postgrest,
             watchedItemsPreferences = preferences,
             trackingProviderRegistry = TrackingProgressProviderRegistry(emptySet()),
-            traktSettingsDataStore = mockk(relaxed = true),
+            traktSettingsDataStore = nuvioSyncSettings(),
             profileManager = profileManager(),
             syncClientIdentity = syncClientIdentity(),
             mutationStore = mutationStore
         )
+    }
+
+    private fun nuvioSyncSettings(): TraktSettingsDataStore = mockk<TraktSettingsDataStore>(relaxed = true).also {
+        coEvery { it.getWatchProgressSource(any()) } returns WatchProgressSource.NUVIO_SYNC
     }
 
     private fun profileManager(): ProfileManager = mockk<ProfileManager>().also {
