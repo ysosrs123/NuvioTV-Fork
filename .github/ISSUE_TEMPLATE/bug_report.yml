@@ -7,6 +7,7 @@ body:
       value: |
         Nuvio Arc is a one-person hobby project. I read every issue but can't promise a reply or a fix.
         Please don't report problems from this build to the official Nuvio GitHub or Discord.
+        I can't help with finding content, add-ons or providers, and issues that ask for or share links are closed.
   - type: input
     id: box
     attributes:
@@ -25,8 +26,8 @@ body:
   - type: textarea
     id: playing
     attributes:
-      label: What were you playing?
-      description: The title, and the source type (debrid, Usenet, torrent, Jellyfin, Emby, Silo, plain link). Picture and sound format if you know them (e.g. 4K Dolby Vision, TrueHD Atmos).
+      label: What kind of file and source?
+      description: The kind of source (media server, debrid, Usenet, peer-to-peer, plain link) and the picture and sound format if you know them (e.g. 4K Dolby Vision, TrueHD Atmos). Please leave out titles, file names, links and add-on addresses.
   - type: textarea
     id: what
     attributes:

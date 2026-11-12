@@ -18,7 +18,7 @@
 
 **Nuvio Arc** is my hobby fork of [NuvioTV](https://github.com/NuvioMedia/NuvioTV) for Android TV: a test bench for new ideas, built around picture quality, lossless sound, your own libraries and finding something to watch. It isn't a competitor to Nuvio and isn't meant to replace it. It's for people who like Nuvio and are happy to try new, largely untested features. If you want the dependable everyday app, use the official Nuvio.
 
-Nuvio Arc is a media player. It doesn't host, provide or link to any content. You add your own sources, and you're responsible for making sure you're allowed to play what you add.
+Nuvio Arc is a media player. It doesn't host, provide or link to any content. You add your own sources, and you're responsible for making sure you're allowed to play what you add. See the [disclaimer](#disclaimer).
 
 ## Install
 
@@ -75,7 +75,7 @@ Meet Scout, your personal film curator. It's on for everyone and doesn't need an
 <p><img src="docs/readme/head-watching.svg" width="100%" alt="While you watch"></p>
 
 <table>
-<tr><td colspan="1" valign="top"><b>Seek thumbnails</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Hold left or right for a picture strip, even on a 4K Dolby Vision remux. On ExoPlayer.</td><td colspan="1" valign="top"><b>Thumbnails before the film</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Have them ready before it starts, with a choice of Full, Faster or Fastest wait.</td><td colspan="1" valign="top"><b>Thumbnails from a copy</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Makes 4K thumbnails from a lighter copy in your sources, on the hardware decoder.</td></tr>
+<tr><td colspan="1" valign="top"><b>Seek thumbnails</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Hold left or right for a picture strip, even on a 4K Dolby Vision film. On ExoPlayer.</td><td colspan="1" valign="top"><b>Thumbnails before the film</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Have them ready before it starts, with a choice of Full, Faster or Fastest wait.</td><td colspan="1" valign="top"><b>Thumbnails from a copy</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Makes 4K thumbnails from a lighter copy in your sources, on the hardware decoder.</td></tr>
 <tr><td colspan="1" valign="top"><b>Your server's own thumbnails</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>When Jellyfin, Emby, Silo or Plex has already made thumbnails, the player uses those.</td><td colspan="1" valign="top"><b>Seeking your way</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Gentle, Balanced, Fast or Confirm with OK.</td><td colspan="1" valign="top"><b>Remote buttons</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Give any button a press job and a hold job in the player.</td></tr>
 <tr><td colspan="1" valign="top"><b>Player button editor</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Show, hide and move the player's buttons, with icons or labels.</td><td colspan="1" valign="top"><b>Chapters from more files</b><br>MP4 and media-server chapters too, recaps left out, with a remote button.</td><td colspan="1" valign="top"><b>Subtitle look</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Choice of fonts, outline size and a separate shadow, on both players.</td></tr>
 <tr><td colspan="1" valign="top"><b>Subtitle languages</b><br>A third preferred language, and the panel opens language first.</td><td colspan="1" valign="top"><b>Image subtitle size</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Picture subtitles (PGS, VobSub) get their own size.</td><td colspan="1" valign="top"><b>Stats panel</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>The audio path, Dolby Vision layers, connections, requests and server replies, as your film plays.</td></tr>
@@ -97,9 +97,9 @@ Meet Scout, your personal film curator. It's on for everyone and doesn't need an
 
 <table>
 <tr><td colspan="1" valign="top"><b>Automatic speed-up</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Adds downloads when a film needs them and remembers each server.</td><td colspan="1" valign="top"><b>Dead links skipped</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>A dead link moves on to the next ready source.</td><td colspan="1" valign="top"><b>Search before Play</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Finds and ranks sources while you browse, so Play starts sooner. Off to start.</td></tr>
-<tr><td colspan="1" valign="top"><b>Buffers sized to your box</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>One Buffer ahead setting, sized from your memory, with honest numbers.</td><td colspan="1" valign="top"><b>Encrypted DNS</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>For add-ons, debrid, servers and ExoPlayer, so a provider that blocks or fakes addresses can't get in the way.</td><td colspan="1" valign="top"><b>Polite to TorBox</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Thumbnails wait near TorBox's limit, and a refused source moves straight on.</td></tr>
+<tr><td colspan="1" valign="top"><b>Buffers sized to your box</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>One Buffer ahead setting, sized from your memory, with honest numbers.</td><td colspan="1" valign="top"><b>Encrypted DNS</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Private address look-ups for add-ons, debrid, servers and ExoPlayer, through Cloudflare, Google, Quad9, AdGuard or your own.</td><td colspan="1" valign="top"><b>Polite to TorBox</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Thumbnails wait near TorBox's limit, and a refused source moves straight on.</td></tr>
 <tr><td colspan="1" valign="top"><b>Device assessment</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Measures your box and link, suggests settings, applies them in one press.</td><td colspan="1" valign="top"><b>Format check</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Plays tiny test clips to find which video, HDR and audio formats your box really handles, then suggests settings. Test any clip again from the results.</td><td colspan="1" valign="top"><b>Smarter speed test</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Tries connection and piece sizes on your last stream and says what to use.</td></tr>
-<tr><td colspan="2" valign="top"><b>Add-on health</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Marks each add-on and debrid service OK, Slow or Down.</td><td colspan="1" valign="top"><b>Add-on timeout</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Give a slow add-on such as AIOStreams longer to answer.</td></tr>
+<tr><td colspan="2" valign="top"><b>Add-on health</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Marks each add-on and debrid service OK, Slow or Down.</td><td colspan="1" valign="top"><b>Add-on timeout</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Give a slow add-on longer to answer.</td></tr>
 </table>
 
 <p><img src="docs/readme/head-together.svg" width="100%" alt="Together and keeping up"></p>
@@ -123,12 +123,8 @@ The details, more screenshots and what's been removed are on the **[full feature
 
 <table>
 <tr>
-<td width="50%"><img alt="Seek thumbnails" src="https://github.com/user-attachments/assets/7ad837f7-a18a-4f1a-993c-be474099ea9c" /><br><b>Seek thumbnails</b></td>
 <td width="50%"><img alt="Plex, Jellyfin, Emby and Silo" src="docs/readme/shots/media-servers.jpg" /><br><b>Your own media server</b></td>
-</tr>
-<tr>
-<td><img alt="Stats panel" src="https://github.com/user-attachments/assets/0107b69c-a463-43ad-9a5f-e3b8162abc07" /><br><b>Stats panel</b></td>
-<td><img alt="Calendar" src="docs/screenshots/nt5/02-calendar-list.jpg" /><br><b>Calendar</b></td>
+<td width="50%"><img alt="Calendar" src="docs/screenshots/nt5/02-calendar-list.jpg" /><br><b>Calendar</b></td>
 </tr>
 <tr>
 <td><img alt="Trakt, Simkl, MDBList, Floppy and WeTrakr" src="docs/readme/shots/tracking.jpg" /><br><b>All your trackers</b></td>
@@ -142,13 +138,29 @@ Nuvio Arc is a one-person hobby, with no Discord and no support team.
 
 **The best way to report a problem is from inside Arc.** Press Report in the player, or on the loading and error screens, or open Report a problem in Settings. You see exactly what will be sent before you press Send, links, keys and addresses are taken out first, and you get a short code for your report. For faults that come and go, Record a problem keeps up to 30 minutes of playback numbers while you mark the moments it goes wrong. You can send ideas the same way. Reports go to a private inbox for this project, never to the official team.
 
-Can't use that, or want to talk it through? Open an [Issue](https://github.com/ysosrs123/NuvioTV-Fork/issues) with your box, the Arc version (Settings > About) and what you were playing, or chat with other users at [r/NuvioForks](https://www.reddit.com/r/NuvioForks/). No promises on replies or fixes.
+Can't use that, or want to talk it through? Open an [Issue](https://github.com/ysosrs123/NuvioTV-Fork/issues) with your box, the Arc version (Settings > About) and the kind of source and format you were playing (for example 4K Dolby Vision from a media server), or chat with other users at [r/NuvioForks](https://www.reddit.com/r/NuvioForks/). No promises on replies or fixes.
 
 Nuvio Arc is not affiliated with or endorsed by the NuvioTV project. **Please don't report problems from this build to the official Nuvio GitHub or Discord.** They can't help with changes they didn't make.
 
 ## Supporting Nuvio
 
 Nuvio Arc is completely free, and I don't take donations. It's built on Nuvio, so if you enjoy it, please support the Nuvio team at [nuvio.tv/support](https://nuvio.tv/support). Every supporter membership and donation in the app goes straight to the official team, and none of it comes to me.
+
+## Disclaimer
+
+**What Nuvio Arc is.** Nuvio Arc is a media player and library browser. It comes with no films, shows, channels, streams, playlists or stream add-ons, and I don't host, index, provide or link to any. As installed it shows catalogue information (titles, artwork, ratings, subtitles) from public metadata services, and it plays nothing until you connect a source of your own.
+
+**Your sources.** Everything you play comes from something you chose to connect: your own media server, an account you hold with another service, or an add-on or extension you installed. Those are made and run by other people. I don't control them, can't see what they offer, don't check or endorse them, and am not responsible for what they return. Questions about what a source provides belong with that source.
+
+**Your responsibility.** You are responsible for making sure you have the right to play what you play, and that your use follows the law where you live and the terms of the services you use. Don't use Nuvio Arc to get content you aren't entitled to. Peer-to-peer playback is off until you turn it on, and it shows your address to other peers.
+
+**No help with sources.** I can't help with finding content, add-ons or providers. Issues that ask for or share links to unauthorised content are closed and removed.
+
+**Copyright concerns.** This repository holds the app's source code and its own artwork and screenshots. If you believe something here infringes your rights, please write to me first at [arc_issues@mailbox.org](mailto:arc_issues@mailbox.org), naming the file or link, and I will deal with it promptly.
+
+**Names and logos.** Service names and logos belong to their owners and only show which service the app can connect to. Nuvio Arc is not affiliated with, endorsed by or certified by any of them, or by the NuvioTV project. This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+**No warranty.** Nuvio Arc is provided as is, without warranty of any kind, under the [GNU General Public License v3.0](./LICENSE).
 
 ## Licence
 
@@ -175,7 +187,7 @@ Parts from other projects keep their own licences:
   They are credited in the app under Settings > About > Licenses & attribution and are not covered by the GPL.
 - Calendar episode times come from TVmaze's schedule service and TheTVDB (metadata provided by TheTVDB),
   credited in the app under Settings > About > Licenses & attribution.
-- The film in the screenshots is *Tears of Steel*, (CC) Blender Foundation, mango.blender.org, under CC BY 3.0.
+- Posters and artwork in the screenshots are catalogue artwork from TMDB and belong to their owners. They show the app's own pages only.
 - Other service logos and names belong to their owners and only show which service the app connects to.
 - Prebuilt libraries that come unchanged from the official app are covered by the official project's
   sources and notices.

@@ -2,7 +2,7 @@
 
 [Back to the main page](../README.md)
 
-Optimisation and playback-quality work, most of it aimed at high-bitrate remux and lossless audio, plus a few features I've always wanted in a TV player.
+Optimisation and playback-quality work, most of it aimed at high-bitrate video and lossless audio, plus a few features I've always wanted in a TV player.
 
 ## Scout: your personal film curator
 
@@ -35,7 +35,7 @@ Built into Arc, with no website, external add-on or key to set up for the picks.
 - **Dolby Vision Auto** -- Arc converts Profile 7 on every Dolby Vision TV by itself, including TVs with
   Android built in whose decoder claims it can play Profile 7 and then shows nothing. The Profile 7 and
   Profile 5 conversion itself comes from official Nuvio; Arc adds the Auto behaviour, no per-frame stutter
-  and correct enhancement-layer handling for single-track remuxes.
+  and correct enhancement-layer handling for single-track files.
 - **Playback that holds up** --
   - *Fewer stalls, less wasted bandwidth:* Arc keeps the pipeline properly fed and avoids downloading
     the same pieces twice, which mattered a lot on early builds. The official app has improved here too,
@@ -53,7 +53,7 @@ Built into Arc, with no website, external add-on or key to set up for the picks.
 - **Automatic speed-up** -- for films that keep buffering from far-away servers. On by default, nothing to
   tune: the bigger download window is in official Nuvio too, and on boxes with enough memory Arc adds extra
   downloads when a film needs them and hands them back when it doesn't. It remembers what each server
-  can do, starts heavy 4K remuxes on more than one download and gets the buffer back quickly after a seek
+  can do, starts heavy 4K films on more than one download and gets the buffer back quickly after a seek
   or a stall. Measured on a Fire TV Stick 4K Max from a server on the other side of the world: 28 Mbit/s
   became 86 Mbit/s and 23 stops in three minutes became 6.
 - **Trailers that start quickly** -- with Trailer source set to IMDb, the trailer is found in under a
@@ -62,7 +62,7 @@ Built into Arc, with no website, external add-on or key to set up for the picks.
 ## Seek thumbnails and subtitles
 
 - **Seek thumbnails made by the app itself** -- hold left or right and a strip of pictures shows
-  exactly where you will land, from an old AVI to a 4K Dolby Vision remux. On by default on boxes with 3 GB of memory or more. A new
+  exactly where you will land, from an old AVI to a 4K Dolby Vision film. On by default on boxes with 3 GB of memory or more. A new
   thumbnail every 10 seconds, sharp enough to read the scene, ready straight away for anything
   you've played before, and carried over to another release of the same film. When your Jellyfin,
   Emby, Silo or Plex server has made its own thumbnails, the player uses those. Turn on **Thumbnails from a
@@ -94,17 +94,17 @@ Built into Arc, with no website, external add-on or key to set up for the picks.
   Plex's rule, not Arc's.
 - **Real-Debrid and AllDebrid** -- they join TorBox and Premiumize in Integrations, with sign-in on the TV
   (scan the code, done) and their cloud libraries, and all your debrid accounts now work at once. A result
-  meant for one account goes to that account, plain torrents get checked on TorBox and Premiumize together
-  and play from whichever has them, and a source that isn't cached moves on to the next cached one instead
+  meant for one account goes to that account, a result that names no account is checked on TorBox and
+  Premiumize together and plays from whichever has it, and a source that isn't cached moves on to the next cached one instead
   of showing an error.
 - **More trackers: WeTrakr and Floppy** -- they join Trakt, Simkl and MDBList in Settings > Tracking.
   Sign in with a code on your phone. WeTrakr gets scrobbling, watched marks both ways, Continue Watching,
   your lists in the Library and a one-press "Send my history to WeTrakr". Floppy shows what you're
   watching, keeps a resume point when you stop and adds finished titles to your history.
 - **Encrypted DNS (DNS over HTTPS)** -- pick Cloudflare, Google, Quad9, AdGuard or your own address under
-  Settings > Advanced, so an internet provider that blocks or fakes addresses can't get in the way of
-  add-ons, TMDB, images, debrid, media servers and ExoPlayer streams. System stays the default. MPV,
-  trailers and torrents still use the box's own DNS.
+  Settings > Advanced, so the address look-ups for add-ons, TMDB, images, debrid, media servers and
+  ExoPlayer streams stay private and can't be changed on the way. System stays the default. MPV,
+  trailers and peer-to-peer playback still use the box's own DNS.
 - **Better streams picked for you, automatically** -- source filtering and sorting re-baselined
   around TRaSH-guides-aligned release-group quality tiers, so the best-quality trustworthy release
   floats to the top and auto-play grabs the right one without you reading twenty filenames.
@@ -205,15 +205,6 @@ For now this needs a Ugoos AM9 Pro on Android 14 running my own test kernel, plu
 
 
 
-**Seek thumbnails** -- the strip and the framed picture while holding left or right.
-
-<img width="100%" alt="Seek thumbnails strip" src="https://github.com/user-attachments/assets/7ad837f7-a18a-4f1a-993c-be474099ea9c" />
-<img width="100%" alt="Seek thumbnails, framed picture" src="https://github.com/user-attachments/assets/17dbaca2-f569-4362-a625-0b195a87ce31" />
-
-The "Generating thumbnails" screen -- the thumbnails being made before play, the strip filling in as they come. Start watching now skips the wait.
-
-<img width="100%" alt="Generating thumbnails" src="screenshots/nt5/07-generating-screen.jpg" />
-
 
 
 **Calendar** -- what just aired and what's coming, in your own time zone.
@@ -261,10 +252,6 @@ The "Generating thumbnails" screen -- the thumbnails being made before play, the
 
 <img width="100%" alt="Surround format settings" src="https://github.com/user-attachments/assets/be46a0c2-7b62-4370-b270-c70fcee583b3" />
 
-
-**Stats overlay** -- what your box is really doing as the film plays.
-
-<img width="100%" alt="Stats overlay" src="https://github.com/user-attachments/assets/0107b69c-a463-43ad-9a5f-e3b8162abc07" />
 
 **Source & hardware** -- Settings > Advanced after a Profile 7 FEL title on the AM9, with the DV7 decoder and DV7 EL type rows.
 
