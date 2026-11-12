@@ -133,8 +133,8 @@ class CopyShiftTest {
     @Test
     fun `a length within three minutes leaves the decision to the keyframes`() {
         fun offer(ms: Long) = CopyOffer("a", "a", CopyKind.LINK, 720, CopyCodec.H264, false, true, 950_000_000L, "mkv",
-            ms, "Parasite.2019.720p.WEB-DL.H264-GRP")
-        val playing = "Parasite.2019.2160p.UHD.BluRay.REMUX.DV.HEVC.TrueHD-GRP"
+            ms, "Film.2019.720p.WEB-DL.H264-GRP")
+        val playing = "Film.2019.2160p.UHD.BluRay.REMUX.DV.HEVC.TrueHD-GRP"
         assertNull(CopyChoice.rejection(offer(7_922_000L), playing, 7_912_000L))
         assertNotNull(CopyChoice.rejection(offer(8_200_000L), playing, 7_912_000L))
     }

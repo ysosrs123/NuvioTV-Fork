@@ -69,7 +69,7 @@ class ConnectionLedgerTest {
         assertEquals(LedgerKey.TORBOX, LedgerKey.of(tb))
         assertEquals(LedgerKey.TORBOX, LedgerKey.of(tb2))
         assertEquals(LedgerKey.TORBOX, LedgerKey.of("https://api.torbox.app/v1/api/torrents/requestdl?x=1"))
-        assertEquals(LedgerKey.TORBOX, LedgerKey.of("https://torrentio.strem.fun/resolve/torbox/key/hash/1/file.mkv"))
+        assertEquals(LedgerKey.TORBOX, LedgerKey.of("https://addon.example.com/resolve/torbox/key/hash/1/file.mkv"))
     }
 
     @Test fun otherServersAreKeyedByHostAndPort() {

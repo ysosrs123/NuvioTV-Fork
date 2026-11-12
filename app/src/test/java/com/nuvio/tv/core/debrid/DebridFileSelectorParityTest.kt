@@ -15,12 +15,12 @@ class DebridFileSelectorParityTest {
             torboxFile(id = 0, name = "Request High Bitrate Stuff in Here.txt", size = 1),
             torboxFile(
                 id = 85,
-                name = "The Office US S01-S09/The.Office.US.S01E01.Pilot.1080p.BluRay.Remux.mkv",
+                name = "The Example Show S01-S09/The.Example.Show.S01E01.Pilot.1080p.BluRay.Remux.mkv",
                 size = 5_303_936_915
             ),
             torboxFile(
                 id = 1,
-                name = "The Office US S01-S09/The.Office.US.S08E13.Jury.Duty.1080p.BluRay.Remux.mkv",
+                name = "The Example Show S01-S09/The.Example.Show.S08E13.Part.Two.1080p.BluRay.Remux.mkv",
                 size = 5_859_312_140
             )
         )
@@ -31,7 +31,7 @@ class DebridFileSelectorParityTest {
                 fileIdx = 1,
                 season = 1,
                 episode = 1,
-                filename = "The.Office.US.S01E01.Pilot.1080p.BluRay.Remux.mkv"
+                filename = "The.Example.Show.S01E01.Pilot.1080p.BluRay.Remux.mkv"
             ),
             season = 1,
             episode = 1
@@ -61,8 +61,8 @@ class DebridFileSelectorParityTest {
     @Test
     fun `torbox selector uses episode pattern before broad title`() {
         val files = listOf(
-            torboxFile(id = 1, name = "The.Office.US.S08E13.Jury.Duty.mkv", size = 900),
-            torboxFile(id = 85, name = "The.Office.US.S01E01.Pilot.mkv", size = 500)
+            torboxFile(id = 1, name = "The.Example.Show.S08E13.Part.Two.mkv", size = 900),
+            torboxFile(id = 85, name = "The.Example.Show.S01E01.Pilot.mkv", size = 500)
         )
 
         val selected = TorboxFileSelector().selectFile(
@@ -70,7 +70,7 @@ class DebridFileSelectorParityTest {
             resolve = resolve(
                 season = 1,
                 episode = 1,
-                title = "The Office"
+                title = "The Example"
             ),
             season = 1,
             episode = 1

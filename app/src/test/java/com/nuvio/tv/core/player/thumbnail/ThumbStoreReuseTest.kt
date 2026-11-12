@@ -96,6 +96,58 @@ class ThumbStoreReuseTest {
         assertEquals(64, reopened.cachedKeyframeIndex()?.size)
     }
 
+    /** Last-used time and watched share as the index file has them. */
+    private fun savedUse(dir: java.io.File, key: String): Pair<Long, Float> =
+        java.io.DataInputStream(java.io.File(dir, "$key.idx").inputStream()).use { s ->
+            s.readInt()
+            s.readInt()
+            s.readLong() to s.readFloat()
+        }
+
+    private fun onePicture() = listOf(ThumbStore.Compressed(longArrayOf(slotUs(1)), 10_000_000L, byteArrayOf(1)))
+
+    @Test fun aSessionThatOnlyReadsSavesItsDateAndWatchedShare() {
+        val dir = tmp.newFolder("store")
+        ThumbStore.openIn(dir, "used", memoryOnly = false).putCompressed(onePicture())
+        assertEquals(0f, savedUse(dir, "used").second, 0f)
+        val before = System.currentTimeMillis()
+        ThumbStore.openIn(dir, "used", memoryOnly = false).apply {
+            noteUsed(0.5f)
+            flush()
+        }
+        val (usedAt, watched) = savedUse(dir, "used")
+        assertEquals(0.5f, watched, 0f)
+        assertTrue(usedAt >= before)
+    }
+
+    @Test fun theLargerWatchedShareIsKept() {
+        val dir = tmp.newFolder("store")
+        ThumbStore.openIn(dir, "share", memoryOnly = false).apply {
+            putCompressed(onePicture())
+            noteUsed(0.6f)
+            flush()
+        }
+        ThumbStore.openIn(dir, "share", memoryOnly = false).apply {
+            noteUsed(0f)
+            flush()
+        }
+        assertEquals(0.6f, savedUse(dir, "share").second, 0f)
+        ThumbStore.openIn(dir, "share", memoryOnly = false).apply {
+            noteUsed(0.95f)
+            flush()
+        }
+        assertEquals(0.95f, savedUse(dir, "share").second, 0f)
+    }
+
+    @Test fun aStoreWithoutPicturesIsNotWrittenForItsDate() {
+        val dir = tmp.newFolder("store")
+        ThumbStore.openIn(dir, "empty", memoryOnly = false).apply {
+            noteUsed(0.4f)
+            flush()
+        }
+        assertFalse(java.io.File(dir, "empty.idx").exists())
+    }
+
     @Test fun aMemoryOnlyStoreTakesNoCopies() {
         val dir = tmp.newFolder("store")
         val store = ThumbStore.openIn(dir, "mem", memoryOnly = true)

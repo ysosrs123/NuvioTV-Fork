@@ -9,11 +9,11 @@ import org.junit.Test
 class StreamTextSizeParserTest {
 
     @Test
-    fun `parses torrentio style size line`() {
-        val torrentioTitle = "Movie.Name.2024.1080p.WEB-DL\n👤 12 💾 1.81 GB ⚙️ ThePirateBay"
+    fun `parses emoji style size line`() {
+        val streamTitle = "Movie.Name.2024.1080p.WEB-DL\n👤 12 💾 1.81 GB ⚙️ ExampleIndexer"
         assertEquals(
             (1.81 * 1024 * 1024 * 1024).toLong(),
-            StreamTextSizeParser.sizeBytesFromText(torrentioTitle)
+            StreamTextSizeParser.sizeBytesFromText(streamTitle)
         )
     }
 
@@ -79,13 +79,13 @@ class StreamTextSizeParserTest {
     @Test
     fun `stream text lookup prefers description then title then name`() {
         val stream = sampleStream(
-            name = "Torrentio 4k",
+            name = "Tortoise 4k",
             title = "Movie\n💾 2 GB",
             description = "💾 1 GB"
         )
         assertEquals(1024L * 1024 * 1024, StreamTextSizeParser.sizeBytesFromStreamText(stream))
 
-        val titleOnly = sampleStream(name = "Torrentio 4k", title = "Movie\n💾 2 GB", description = null)
+        val titleOnly = sampleStream(name = "Tortoise 4k", title = "Movie\n💾 2 GB", description = null)
         assertEquals(2048L * 1024 * 1024, StreamTextSizeParser.sizeBytesFromStreamText(titleOnly))
     }
 
@@ -120,7 +120,7 @@ class StreamTextSizeParserTest {
         fileIdx = null,
         externalUrl = null,
         behaviorHints = null,
-        addonName = "Torrentio",
+        addonName = "Tortoise",
         addonLogo = null
     )
 }

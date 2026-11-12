@@ -200,7 +200,10 @@ class ThumbnailCopyDebrid @Inject constructor(
         Log.i(TAG, "TorBox: thumbnail copy kept, playback moved to a source that does not name its torrent (id $id)")
     }
 
-    /** Items left from an earlier pass or run: removed, at most once every [SWEEP_EVERY_MS]. */
+    /**
+     * Items left from an earlier pass or run: removed, at most once every [SWEEP_EVERY_MS]. One that is old and still
+     * could not be removed is given up after the try.
+     */
     internal fun sweepLeftovers(): Job? {
         val now = SystemClock.elapsedRealtime()
         synchronized(this) {
@@ -209,10 +212,10 @@ class ThumbnailCopyDebrid @Inject constructor(
         }
         return scope.launch {
             val wall = System.currentTimeMillis()
-            giveUpOld(wall)
             val left = runCatching { records.leftovers(wall, busy()) }.getOrDefault(emptyList())
             if (left.isNotEmpty()) Log.i(TAG, "TorBox: ${left.size} thumbnail copies left from before, removing them")
             for (r in left) remove(r.torrentId)
+            giveUpOld(wall)
         }
     }
 
@@ -541,11 +544,13 @@ class ThumbnailCopyDebrid @Inject constructor(
 
     /** A TorBox request, counted in the connection ledger like the copy's own reads. */
     private suspend fun <T> counted(waitMs: Long = ConnectionLedger.START_SLOT_WAIT_MS, block: suspend () -> T): T {
-        val slot = withContext(Dispatchers.IO) { ConnectionLedger.app.acquire(TORBOX_API, waitMs) }
+        // Set inside the block: a caller cancelled while it waits never gets the block's result.
+        var slot: ConnectionLedger.Slot? = null
         try {
+            withContext(Dispatchers.IO) { slot = ConnectionLedger.app.acquire(TORBOX_API, waitMs) }
             return block()
         } finally {
-            slot.close()
+            slot?.close()
         }
     }
 
@@ -596,6 +601,7 @@ class ThumbnailCopyDebrid @Inject constructor(
 @InstallIn(SingletonComponent::class)
 internal interface ThumbnailCopyDebridEntryPoint {
     fun thumbnailCopyDebrid(): ThumbnailCopyDebrid
+    fun thumbnailCopyAdded(): ThumbnailCopyAdded
 }
 
 internal fun streamText(stream: Stream): String =

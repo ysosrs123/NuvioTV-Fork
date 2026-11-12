@@ -42,6 +42,7 @@ class DirectDebridResolverClaimTest {
             mockk(relaxed = true),
             copies,
             mockk(relaxed = true),
+            mockk(relaxed = true),
             mockk(relaxed = true)
         )
     }

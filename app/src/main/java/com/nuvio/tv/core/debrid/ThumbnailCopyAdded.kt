@@ -290,6 +290,9 @@ class ThumbnailCopyAdded internal constructor(internal val records: AddedCopyRec
 
     private val io = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    /** Any item added for thumbnails is still recorded. Reads the disk the first time: never on the main thread. */
+    fun hasRecords(): Boolean = runCatching { records.all().isNotEmpty() }.getOrDefault(false)
+
     /** Playback is on [hash] or TorBox item [torrentId]: a thumbnail copy of it stays in the user's list. */
     fun claim(hash: String?, torrentId: Int? = null) {
         if (AddedCopyRecords.normal(hash) == null && torrentId == null) return

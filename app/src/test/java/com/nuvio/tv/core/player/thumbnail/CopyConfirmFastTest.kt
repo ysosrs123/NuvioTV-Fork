@@ -19,7 +19,7 @@ class CopyConfirmFastTest {
         }
     }
 
-    private val addons = listOf("AIOS", "StremThru Torz", "Debridio", "Comet", "Eagle", "Torrentio", "MediaFusion")
+    private val addons = listOf("AIOS", "StremThru Torz", "Debridio", "Comet", "Eagle", "Tortoise", "MediaFusion")
     private val heights = listOf(2160, 1080, 720, 480, 0)
 
     /** A source list like a busy one: [n] sources of five sizes, most of them 4K or 1080p remuxes and WEB copies. */
@@ -30,7 +30,7 @@ class CopyConfirmFastTest {
             val kind = CopyKind.entries[rnd.nextInt(CopyKind.entries.size)]
             val web = rnd.nextBoolean()
             val tags = buildString {
-                append("Jaws.1975.").append(if (h > 0) "${h}p." else "")
+                append("Film.1975.").append(if (h > 0) "${h}p." else "")
                 append(if (web) "WEB-DL." else "BluRay.REMUX.")
                 append(if (rnd.nextBoolean()) "H264" else "HEVC")
                 if (rnd.nextInt(10) == 0) append(".REMASTERED")
@@ -49,8 +49,8 @@ class CopyConfirmFastTest {
             )
         }
         val playing = CopyOffer("playing", "playing", CopyKind.DEBRID, 2160, CopyCodec.HEVC, true, false, 75_989_174_022L,
-            "mkv", ownMs, "Jaws.1975.2160p.UHD.Blu-ray.Remux.DV.HDR10P.HEVC.TrueHD.Atmos.7.1-CiNEPHiLES", source = "AIOS")
-        return CopyOffers("Jaws.1975.2160p.UHD.Blu-ray.Remux.DV.HDR10P.HEVC.TrueHD.Atmos.7.1-CiNEPHiLES", offers,
+            "mkv", ownMs, "Film.1975.2160p.UHD.Blu-ray.Remux.DV.HDR10P.HEVC.TrueHD.Atmos.7.1-CiNEPHiLES", source = "AIOS")
+        return CopyOffers("Film.1975.2160p.UHD.Blu-ray.Remux.DV.HDR10P.HEVC.TrueHD.Atmos.7.1-CiNEPHiLES", offers,
             playing = playing)
     }
 
@@ -127,7 +127,7 @@ class CopyConfirmFastTest {
                 CopyChoice.rejection(o, list.playingText, ownMs, fourKCopies = true, ownEditions = editions),
             )
         }
-        val extended = "Jaws.1975.Extended.2160p.REMUX"
+        val extended = "Film.1975.Extended.2160p.REMUX"
         val e = CopyChoice.editions(extended)
         for (o in list.offers) {
             assertEquals(CopyChoice.rejection(o, extended, 0L), CopyChoice.rejection(o, extended, 0L, ownEditions = e))

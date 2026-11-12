@@ -65,13 +65,13 @@ class DebridFileSelectionTest(private val provider: String) {
     @Test
     fun `exact filename case wins before case insensitive fallback`() {
         val files = listOf(
-            file(1, "Season 4/Attack on Titan - 02.mkv"),
-            file(2, "Season 1/Attack On Titan - 02.mkv"),
+            file(1, "Season 4/Sample on Screen - 02.mkv"),
+            file(2, "Season 1/Sample On Screen - 02.mkv"),
         )
 
-        assertSelected(2, files, resolve(filename = "Attack On Titan - 02.mkv"))
-        assertSelected(null, files, resolve(filename = "ATTACK ON TITAN - 02.MKV"))
-        assertSelected(2, files.takeLast(1), resolve(filename = "ATTACK ON TITAN - 02.MKV"))
+        assertSelected(2, files, resolve(filename = "Sample On Screen - 02.mkv"))
+        assertSelected(null, files, resolve(filename = "SAMPLE ON SCREEN - 02.MKV"))
+        assertSelected(2, files.takeLast(1), resolve(filename = "SAMPLE ON SCREEN - 02.MKV"))
     }
 
     @Test

@@ -34,6 +34,14 @@ class ThumbnailCopyAddedTest {
     }
 
     @Test
+    fun recordsLeftOnDiskAreSeenAtTheNextStart() {
+        val disk = MemoryStorage()
+        assertFalse(ThumbnailCopyAdded(AddedCopyRecords(disk)).hasRecords())
+        AddedCopyRecords(disk).add(AddedCopy(41, "abcdef", 1_000L))
+        assertTrue(ThumbnailCopyAdded(AddedCopyRecords(disk)).hasRecords())
+    }
+
+    @Test
     fun aRecordThatCannotBeWrittenSaysSo() {
         val records = AddedCopyRecords(MemoryStorage(ok = false))
         assertFalse(records.add(AddedCopy(41, "abcdef", 1_000L)))

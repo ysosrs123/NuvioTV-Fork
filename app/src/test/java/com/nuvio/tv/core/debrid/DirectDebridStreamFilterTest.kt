@@ -224,7 +224,7 @@ class DirectDebridStreamFilterTest {
         val response = Moshi.Builder()
             .build()
             .adapter(StreamResponseDto::class.java)
-            .fromJson(torboxMegamindResponse)
+            .fromJson(torboxDemoFilmResponse)
             ?: error("response not parsed")
         val streams = response.streams.orEmpty()
             .map { it.toDomain(DirectDebridStreamFilter.FALLBACK_SOURCE_NAME, null) }
@@ -404,8 +404,8 @@ class DirectDebridStreamFilterTest {
     }
 
     @Test
-    fun `applies every stream preference category to provided oppenheimer response`() {
-        val streams = oppenheimerStreams()
+    fun `applies every stream preference category to provided example movie response`() {
+        val streams = exampleMovieStreams()
 
         assertEquals(22, streams.size)
         assertEquals(22, DirectDebridStreamFilter.filterInstant(streams, DebridSettings(streamPreferences = unfiltered)).size)
@@ -663,15 +663,15 @@ class DirectDebridStreamFilterTest {
 
         assertEquals(
             emptyList<DebridStreamLanguage>(),
-            languages("The.French.Dispatch.2021.1080p.BluRay.x264-GRP.mkv", "The French Dispatch")
+            languages("The.French.Example.2021.1080p.BluRay.x264-GRP.mkv", "The French Example")
         )
         assertEquals(
             listOf(DebridStreamLanguage.EN),
-            languages("The.Italian.Job.2003.1080p.BluRay.ENG.x264-GRP.mkv", "The Italian Job")
+            languages("The.Italian.Example.2003.1080p.BluRay.ENG.x264-GRP.mkv", "The Italian Example")
         )
         assertEquals(
             listOf(DebridStreamLanguage.IT),
-            languages("The Italian Job (2003) 1080p BluRay ITA AC3.mkv", "The Italian Job")
+            languages("The Italian Example (2003) 1080p BluRay ITA AC3.mkv", "The Italian Example")
         )
         assertEquals(listOf(DebridStreamLanguage.FR), languages("French.2020.FRENCH.1080p.WEB-DL.x264-GRP.mkv", "French"))
     }
@@ -679,10 +679,10 @@ class DirectDebridStreamFilterTest {
     @Test
     fun `does not read the parsed title as the stream language`() {
         val resolve = resolve()
-        val parsed = resolve.stream?.raw?.parsed?.copy(parsedTitle = "The French Dispatch")
+        val parsed = resolve.stream?.raw?.parsed?.copy(parsedTitle = "The French Example")
         val facts = DirectDebridStreamFilter.facts(
             stream(resolve = resolve.copy(stream = StreamClientResolveStream(resolve.stream?.raw?.copy(parsed = parsed))))
-                .copy(description = "The.French.Dispatch.2021.1080p.BluRay.ITA.x264-GRP.mkv"),
+                .copy(description = "The.French.Example.2021.1080p.BluRay.ITA.x264-GRP.mkv"),
             DebridSettings()
         )
 
@@ -691,10 +691,10 @@ class DirectDebridStreamFilterTest {
 
     @Test
     fun `required language hides streams whose title only has the language word`() {
-        val italianTitle = stream(resolve = resolve(size = 1).copy(title = "The Italian Job"))
-            .copy(description = "The.Italian.Job.2003.1080p.BluRay.ENG.x264-GRP.mkv")
-        val italianAudio = stream(resolve = resolve(size = 2).copy(title = "The Italian Job"))
-            .copy(description = "The.Italian.Job.2003.1080p.BluRay.ITA.x264-GRP.mkv")
+        val italianTitle = stream(resolve = resolve(size = 1).copy(title = "The Italian Example"))
+            .copy(description = "The.Italian.Example.2003.1080p.BluRay.ENG.x264-GRP.mkv")
+        val italianAudio = stream(resolve = resolve(size = 2).copy(title = "The Italian Example"))
+            .copy(description = "The.Italian.Example.2003.1080p.BluRay.ITA.x264-GRP.mkv")
 
         val result = DirectDebridStreamFilter.filterInstant(
             listOf(italianTitle, italianAudio),
@@ -706,11 +706,11 @@ class DirectDebridStreamFilterTest {
 
     private fun Stream.streamSize(): Long? = clientResolve?.stream?.raw?.size ?: behaviorHints?.videoSize
 
-    private fun oppenheimerStreams(): List<Stream> {
+    private fun exampleMovieStreams(): List<Stream> {
         val response = Moshi.Builder()
             .build()
             .adapter(StreamResponseDto::class.java)
-            .fromJson(oppenheimerResponse)
+            .fromJson(exampleMovieResponse)
             ?: error("response not parsed")
         return response.streams.orEmpty()
             .map { it.toDomain(DirectDebridStreamFilter.FALLBACK_SOURCE_NAME, null) }
@@ -801,53 +801,53 @@ class DirectDebridStreamFilterTest {
         )
     )
 
-    private val oppenheimerResponse = """
+    private val exampleMovieResponse = """
         {
           "streams": [
-            {"name":"TB 2160p cached","description":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"b12e2ad004742ae1348e4e22eebe8fcac07c88d7","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"REMUX","codec":"hevc","audio":["DTS Lossless","Dolby Digital Plus"],"channels":["5.1"],"hdr":["DV","HDR10+"],"languages":["multi","en","la","it"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","videoSize":92910562472}},
-            {"name":"TB 2160p cached","description":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"ce1bdd5cf0fa18def9264ecfae3815ed5eba61bc","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"BluRay REMUX","codec":"hevc","audio":["DTS Lossless"],"hdr":["DV","HDR"],"languages":["multi","en","fr","es","it","de","pl","cs"],"group":"SGF","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","videoSize":96867354460}},
-            {"name":"TB 2160p cached","description":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"e977543316017189e6ea8d6e729d1fd6d7b04bc9","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","title":"Oppenheimer","torrentName":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"REMUX","codec":"hevc","audio":["Dolby Digital Plus"],"channels":["5.1"],"hdr":["DV","HDR10+"],"languages":["multi","en","la","it"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","videoSize":87052038851}},
-            {"name":"TB 2160p cached","description":"Oppenheimer.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"972572ea1d90a6cf8a488fb38de4e439ef20c38a","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"BluRay REMUX","codec":"hevc","hdr":["DV","HDR"],"languages":["multi","en","it"],"group":"NAHOM","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","videoSize":89079717868}},
-            {"name":"TB 2160p cached","description":"Oppenheimer.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"3cddcfafc904a8a7c6449e2fe1f24877d3eacf1f","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"BluRay REMUX","codec":"hevc","audio":["DTS Lossless"],"channels":["5.1"],"hdr":["DV"],"group":"FraMeSToR","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","videoSize":89100999892}},
-            {"name":"TB 1440p cached","description":"Oppenheimer.2023.1440p.HDR.DTS-HD.AV1.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"ecf30429dffab21493b001fbae9e1c69ac86fef7","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.1440p.HDR.DTS-HD.AV1.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.1440p.HDR.DTS-HD.AV1.mkv","stream":{"raw":{"parsed":{"resolution":"1440p","quality":"HDTV","codec":"av1","audio":["DTS Lossy"],"hdr":["HDR"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.1440p.HDR.DTS-HD.AV1.mkv","videoSize":14559208901}},
-            {"name":"TB 1080p cached","description":"Oppenheimer.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"e4336787b03acd5e030902df8c2b33aefcda6c4c","sources":[],"filename":"Oppenheimer.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"languages":["fr"],"group":"Slay3R","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","videoSize":41891055382}},
-            {"name":"TB 1080p cached","description":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"9a71fed91185ee611995c2a8ce374928cf64b575","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"languages":["multi","en","fr","es","it","de","pl","cs"],"group":"SGF","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","videoSize":51056367324}},
-            {"name":"TB 1080p cached","description":"Oppenheimer.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"4718d09f3c5f3c5a578d1ec61416de7a3747ef97","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"group":"FraMeSToR","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","videoSize":42601767435}},
-            {"name":"TB 1080p cached","description":"Oppenheimer.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"ba977cf57b3bae48f73b312e6b715cb48265794d","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"languages":["multi","en","es","pl","cs"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","videoSize":48286797994}},
-            {"name":"TB 1080p cached","description":"Oppenheimer.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1e5fee8ca23ec735789e2323fdab6f809ae0c302","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"languages":["multi","fr"],"group":"HYPERION","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","videoSize":44082903325}},
-            {"name":"TB 720p cached","description":"Oppenheimer.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"70af8f3beac7b8d9fd9b1538c2bf7242dbffb7c6","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","stream":{"raw":{"parsed":{"resolution":"720p","quality":"WEB-DL","codec":"avc","audio":["Dolby Digital Plus"],"channels":["5.1"],"languages":["multi"],"group":"TheBiscuitMan","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","videoSize":13916786260}},
-            {"name":"TB 720p cached","description":"Oppenheimer.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"7d2e222138aef25ffe38577e4cb9ad04e7d30356","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","title":"Oppenheimer","torrentName":"Oppenheimer.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","stream":{"raw":{"parsed":{"resolution":"720p","quality":"BluRay","codec":"avc","audio":["AAC"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","videoSize":1741975811}},
-            {"name":"TB 720p cached","description":"Oppenheimer.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"b7b0179a26199b018e0542c635655d49f8292347","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","stream":{"raw":{"parsed":{"resolution":"720p","quality":"BluRay","codec":"hevc","group":"PSA","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","videoSize":1112357595}},
-            {"name":"TB 720p cached","description":"[ Torrent911.io ] Oppenheimer.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"f19604e63fe4f880177b0b4463f326e01f8657ce","sources":[],"fileIdx":0,"filename":"[ Torrent911.io ] Oppenheimer.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","title":"Oppenheimer","torrentName":"[ Torrent911.io ] Oppenheimer.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","stream":{"raw":{"parsed":{"resolution":"720p","quality":"BluRay","codec":"avc","languages":["fr"],"group":"Slay3R","year":2023}}}},"behaviorHints":{"filename":"[ Torrent911.io ] Oppenheimer.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","videoSize":8401763164}},
-            {"name":"TB 720p cached","description":"Oppenheimer (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"5f40224807d0642859246f89510c41921528b61c","sources":[],"fileIdx":0,"filename":"Oppenheimer (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","title":"Oppenheimer","torrentName":"Oppenheimer (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","stream":{"raw":{"parsed":{"resolution":"720p","codec":"avc","audio":["Dolby Digital"],"channels":["5.1"],"languages":["multi","en","it"],"group":"MIRCrew","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","videoSize":3951560261}},
-            {"name":"TB 480p cached","description":"Oppenheimer.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"4fceb37f8a7f528bd01b526329e9bc02bacc2f9e","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","title":"Oppenheimer","torrentName":"Oppenheimer.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","stream":{"raw":{"parsed":{"resolution":"480p","quality":"BDRip","codec":"xvid","languages":["pl"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","videoSize":1468475610}},
-            {"name":"TB unknown cached","description":"Oppenheimer.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1ebd4a76ccdf04ceb3bedd5ba08000c9cfbf779f","sources":[],"filename":"Oppenheimer.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","stream":{"raw":{"parsed":{"resolution":"unknown","quality":"REMUX","audio":["DTS Lossless"],"languages":["multi"],"group":"TABGPT"}}}},"behaviorHints":{"filename":"Oppenheimer.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","videoSize":89021342424}},
-            {"name":"TB unknown cached","description":"Oppenheimer (2023) - UHD BD-Remux by Wild_Cat.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"53c49f467121b3fccadb95ce098e84f80e052180","sources":[],"fileIdx":0,"filename":"Oppenheimer (2023) - UHD BD-Remux by Wild_Cat.mkv","title":"Oppenheimer","torrentName":"Oppenheimer (2023) - UHD BD-Remux by Wild_Cat.mkv","stream":{"raw":{"parsed":{"resolution":"unknown","quality":"BluRay REMUX","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer (2023) - UHD BD-Remux by Wild_Cat.mkv","videoSize":104700022239}},
-            {"name":"TB unknown cached","description":"Oppenheimer (2023) [Bluray][Esp](wolfmax4k.com).avi","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"e9f0213e614fc1b76a50637571e8b9c732933bbf","sources":[],"fileIdx":0,"filename":"Oppenheimer (2023) [Bluray][Esp](wolfmax4k.com).avi","title":"Oppenheimer","torrentName":"Oppenheimer (2023) [Bluray][Esp](wolfmax4k.com).avi","stream":{"raw":{"parsed":{"resolution":"unknown","quality":"BluRay","languages":["es"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer (2023) [Bluray][Esp](wolfmax4k.com).avi","videoSize":2163519374}},
-            {"name":"TB unknown cached","description":"Oppenheimer.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"f0da1448c8d29c9d0f1d5d9b374542a1b2c5a1b5","sources":[],"fileIdx":0,"filename":"Oppenheimer.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","title":"Oppenheimer","torrentName":"Oppenheimer.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","stream":{"raw":{"parsed":{"resolution":"unknown","languages":["multi","en","fr","it","de"],"year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","videoSize":4622252199}},
-            {"name":"TB unknown cached","description":"Oppenheimer.(2023).[tmdbId=872585].mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"ec50800ca611355438fa429ad60b4b1e6a93def0","sources":[],"filename":"Oppenheimer.(2023).[tmdbId=872585].mkv","title":"Oppenheimer","torrentName":"Oppenheimer.(2023).[tmdbId=872585].mkv","stream":{"raw":{"parsed":{"resolution":"unknown","year":2023}}}},"behaviorHints":{"filename":"Oppenheimer.(2023).[tmdbId=872585].mkv","videoSize":5371431742}}
+            {"name":"TB 2160p cached","description":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0101010101010101010101010101010101010101","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"REMUX","codec":"hevc","audio":["DTS Lossless","Dolby Digital Plus"],"channels":["5.1"],"hdr":["DV","HDR10+"],"languages":["multi","en","la","it"],"year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DTS-HD.Master.DDP5.1.DV.x265.mkv","videoSize":92910562472}},
+            {"name":"TB 2160p cached","description":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0202020202020202020202020202020202020202","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"BluRay REMUX","codec":"hevc","audio":["DTS Lossless"],"hdr":["DV","HDR"],"languages":["multi","en","fr","es","it","de","pl","cs"],"group":"SGF","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.2160p.BluRay.Hybrid.Remux.DV.HDR.HEVC.DTS-HD.MA-SGF.mkv","videoSize":96867354460}},
+            {"name":"TB 2160p cached","description":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0303030303030303030303030303030303030303","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","title":"Example Movie","torrentName":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"REMUX","codec":"hevc","audio":["Dolby Digital Plus"],"channels":["5.1"],"hdr":["DV","HDR10+"],"languages":["multi","en","la","it"],"year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.2160p.REMUX.IMAX.Dolby.Vision.And.HDR10.PLUS.ENG.ITA.LATINO.DDP5.1.DV.x265.MP4-BEN.THE.MEN.mp4","videoSize":87052038851}},
+            {"name":"TB 2160p cached","description":"Example.Movie.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0404040404040404040404040404040404040404","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"BluRay REMUX","codec":"hevc","hdr":["DV","HDR"],"languages":["multi","en","it"],"group":"NAHOM","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.IMAX.4K.HDR.DV.2160p BDRemux Ita Eng x265-NAHOM.mkv","videoSize":89079717868}},
+            {"name":"TB 2160p cached","description":"Example.Movie.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0505050505050505050505050505050505050505","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","stream":{"raw":{"parsed":{"resolution":"2160p","quality":"BluRay REMUX","codec":"hevc","audio":["DTS Lossless"],"channels":["5.1"],"hdr":["DV"],"group":"FraMeSToR","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.UHD.BluRay.2160p.DTS-HD.MA.5.1.DV.HEVC.HYBRID.REMUX-FraMeSToR.mkv","videoSize":89100999892}},
+            {"name":"TB 1440p cached","description":"Example.Movie.2023.1440p.HDR.DTS-HD.AV1.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0606060606060606060606060606060606060606","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.1440p.HDR.DTS-HD.AV1.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.1440p.HDR.DTS-HD.AV1.mkv","stream":{"raw":{"parsed":{"resolution":"1440p","quality":"HDTV","codec":"av1","audio":["DTS Lossy"],"hdr":["HDR"],"year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.1440p.HDR.DTS-HD.AV1.mkv","videoSize":14559208901}},
+            {"name":"TB 1080p cached","description":"Example.Movie.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0707070707070707070707070707070707070707","sources":[],"filename":"Example.Movie.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"languages":["fr"],"group":"Slay3R","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.FANSUB.VOSTFR.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-Slay3R.mkv","videoSize":41891055382}},
+            {"name":"TB 1080p cached","description":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0808080808080808080808080808080808080808","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"languages":["multi","en","fr","es","it","de","pl","cs"],"group":"SGF","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.Eng.Fre.Ger.Ita.Spa.Cze.Pol.1080p.BluRay.Remux.AVC.DTS-HD.MA-SGF.mkv","videoSize":51056367324}},
+            {"name":"TB 1080p cached","description":"Example.Movie.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"0909090909090909090909090909090909090909","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"group":"FraMeSToR","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.BluRay.1080p.DTS-HD.MA.5.1.AVC.REMUX-FraMeSToR.mkv","videoSize":42601767435}},
+            {"name":"TB 1080p cached","description":"Example.Movie.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1010101010101010101010101010101010101010","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"languages":["multi","en","es","pl","cs"],"year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.CZ.EN.ES.PL.1080p.Blu-Ray.Remux.AVC.DTS-HD.MA 5.1.mkv","videoSize":48286797994}},
+            {"name":"TB 1080p cached","description":"Example.Movie.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1111111111111111111111111111111111111111","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","stream":{"raw":{"parsed":{"resolution":"1080p","quality":"BluRay REMUX","codec":"avc","audio":["DTS Lossless"],"channels":["5.1"],"languages":["multi","fr"],"group":"HYPERION","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.MULTI.VF2.1080p.BluRay.Remux.DTS-HD.MA.5.1.AVC-HYPERION.mkv","videoSize":44082903325}},
+            {"name":"TB 720p cached","description":"Example.Movie.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1212121212121212121212121212121212121212","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","stream":{"raw":{"parsed":{"resolution":"720p","quality":"WEB-DL","codec":"avc","audio":["Dolby Digital Plus"],"channels":["5.1"],"languages":["multi"],"group":"TheBiscuitMan","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.720p.MA.WEB-DL.DUAL.DD+5.1.H.264-TheBiscuitMan.mkv","videoSize":13916786260}},
+            {"name":"TB 720p cached","description":"Example.Movie.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1313131313131313131313131313131313131313","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","title":"Example Movie","torrentName":"Example.Movie.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","stream":{"raw":{"parsed":{"resolution":"720p","quality":"BluRay","codec":"avc","audio":["AAC"],"year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.720p.BluRay.x264.AAC-[YTS.MX].mp4","videoSize":1741975811}},
+            {"name":"TB 720p cached","description":"Example.Movie.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1414141414141414141414141414141414141414","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","stream":{"raw":{"parsed":{"resolution":"720p","quality":"BluRay","codec":"hevc","group":"PSA","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.720p.10bit.BluRay.6CH.x265.HEVC-PSA.mkv","videoSize":1112357595}},
+            {"name":"TB 720p cached","description":"[ Example.org ] Example.Movie.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1515151515151515151515151515151515151515","sources":[],"fileIdx":0,"filename":"[ Example.org ] Example.Movie.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","title":"Example Movie","torrentName":"[ Example.org ] Example.Movie.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","stream":{"raw":{"parsed":{"resolution":"720p","quality":"BluRay","codec":"avc","languages":["fr"],"group":"Slay3R","year":2023}}}},"behaviorHints":{"filename":"[ Example.org ] Example.Movie.2023.VFQ.720p.BluRay.x264-Slay3R.mkv","videoSize":8401763164}},
+            {"name":"TB 720p cached","description":"Example Movie (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1616161616161616161616161616161616161616","sources":[],"fileIdx":0,"filename":"Example Movie (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","title":"Example Movie","torrentName":"Example Movie (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","stream":{"raw":{"parsed":{"resolution":"720p","codec":"avc","audio":["Dolby Digital"],"channels":["5.1"],"languages":["multi","en","it"],"group":"MIRCrew","year":2023}}}},"behaviorHints":{"filename":"Example Movie (2023) 720p h264 Ac3 5.1 Ita Eng Sub Ita Emg-MIRCrew.mkv","videoSize":3951560261}},
+            {"name":"TB 480p cached","description":"Example.Movie.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1717171717171717171717171717171717171717","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","title":"Example Movie","torrentName":"Example.Movie.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","stream":{"raw":{"parsed":{"resolution":"480p","quality":"BDRip","codec":"xvid","languages":["pl"],"year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.PL.480p.IMAX.BDRip.XviD-K83.avi","videoSize":1468475610}},
+            {"name":"TB unknown cached","description":"Example.Movie.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1818181818181818181818181818181818181818","sources":[],"filename":"Example.Movie.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","title":"Example Movie","torrentName":"Example.Movie.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","stream":{"raw":{"parsed":{"resolution":"unknown","quality":"REMUX","audio":["DTS Lossless"],"languages":["multi"],"group":"TABGPT"}}}},"behaviorHints":{"filename":"Example.Movie.UHD.REMUX.MULTI.DTS.HD.MA-TABGPT.mkv","videoSize":89021342424}},
+            {"name":"TB unknown cached","description":"Example Movie (2023) - UHD BD-Remux by Wild_Cat.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"1919191919191919191919191919191919191919","sources":[],"fileIdx":0,"filename":"Example Movie (2023) - UHD BD-Remux by Wild_Cat.mkv","title":"Example Movie","torrentName":"Example Movie (2023) - UHD BD-Remux by Wild_Cat.mkv","stream":{"raw":{"parsed":{"resolution":"unknown","quality":"BluRay REMUX","year":2023}}}},"behaviorHints":{"filename":"Example Movie (2023) - UHD BD-Remux by Wild_Cat.mkv","videoSize":104700022239}},
+            {"name":"TB unknown cached","description":"Example Movie (2023) [Bluray][Esp](example.com).avi","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"2020202020202020202020202020202020202020","sources":[],"fileIdx":0,"filename":"Example Movie (2023) [Bluray][Esp](example.com).avi","title":"Example Movie","torrentName":"Example Movie (2023) [Bluray][Esp](example.com).avi","stream":{"raw":{"parsed":{"resolution":"unknown","quality":"BluRay","languages":["es"],"year":2023}}}},"behaviorHints":{"filename":"Example Movie (2023) [Bluray][Esp](example.com).avi","videoSize":2163519374}},
+            {"name":"TB unknown cached","description":"Example.Movie.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"2121212121212121212121212121212121212121","sources":[],"fileIdx":0,"filename":"Example.Movie.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","title":"Example Movie","torrentName":"Example.Movie.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","stream":{"raw":{"parsed":{"resolution":"unknown","languages":["multi","en","fr","it","de"],"year":2023}}}},"behaviorHints":{"filename":"Example.Movie.2023.2K.HLG.Eng.Fre.Ger.Ita.mkv","videoSize":4622252199}},
+            {"name":"TB unknown cached","description":"Example.Movie.(2023).[tmdbId=12345].mkv","clientResolve":{"type":"debrid","service":"torbox","isCached":true,"infoHash":"2222222222222222222222222222222222222222","sources":[],"filename":"Example.Movie.(2023).[tmdbId=12345].mkv","title":"Example Movie","torrentName":"Example.Movie.(2023).[tmdbId=12345].mkv","stream":{"raw":{"parsed":{"resolution":"unknown","year":2023}}}},"behaviorHints":{"filename":"Example.Movie.(2023).[tmdbId=12345].mkv","videoSize":5371431742}}
           ],
           "resolveMode": "client"
         }
     """.trimIndent()
 
-    private val torboxMegamindResponse = """
+    private val torboxDemoFilmResponse = """
         {
           "streams": [
             {
               "name": "TB 2160p cached",
-              "description": "Megamind (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
+              "description": "Demo Film (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
               "clientResolve": {
                 "type": "debrid",
                 "service": "torbox",
                 "isCached": true,
-                "magnetUri": "magnet:?xt=urn:btih:c7a807331e1dcdd08e4527f6363cd1e8a109fe01&dn=Megamind%20%282010%29%20UpScaled%202160p%20H265%2010%20bit%20DV%20HDR10%2B%20ita%20eng%20AC3%205.1%20sub%20ita%20eng%20Licdom.mkv",
-                "infoHash": "c7a807331e1dcdd08e4527f6363cd1e8a109fe01",
+                "magnetUri": "magnet:?xt=urn:btih:2323232323232323232323232323232323232323&dn=Demo%20Film%20%282010%29%20UpScaled%202160p%20H265%2010%20bit%20DV%20HDR10%2B%20ita%20eng%20AC3%205.1%20sub%20ita%20eng%20Licdom.mkv",
+                "infoHash": "2323232323232323232323232323232323232323",
                 "sources": [],
                 "fileIdx": 0,
-                "filename": "Megamind (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
-                "title": "Megamind",
-                "torrentName": "Megamind (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
+                "filename": "Demo Film (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
+                "title": "Demo Film",
+                "torrentName": "Demo Film (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
                 "stream": {
                   "raw": {
                     "parsed": {
@@ -858,30 +858,30 @@ class DirectDebridStreamFilterTest {
                       "hdr": ["DV", "HDR10+"],
                       "languages": ["multi", "en", "it"],
                       "year": 2010,
-                      "raw_title": "Megamind (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv"
+                      "raw_title": "Demo Film (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv"
                     }
                   }
                 }
               },
               "behaviorHints": {
-                "filename": "Megamind (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
+                "filename": "Demo Film (2010) UpScaled 2160p H265 10 bit DV HDR10+ ita eng AC3 5.1 sub ita eng Licdom.mkv",
                 "videoSize": 4571523542
               }
             },
             {
               "name": "TB 1080p cached",
-              "description": "Megamind.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
+              "description": "Demo.Film.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
               "clientResolve": {
                 "type": "debrid",
                 "service": "torbox",
                 "isCached": true,
-                "magnetUri": "magnet:?xt=urn:btih:6744954d89d8190643cb80653cf9b5c4b482409f&dn=Megamind.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
-                "infoHash": "6744954d89d8190643cb80653cf9b5c4b482409f",
+                "magnetUri": "magnet:?xt=urn:btih:2424242424242424242424242424242424242424&dn=Demo.Film.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
+                "infoHash": "2424242424242424242424242424242424242424",
                 "sources": [],
                 "fileIdx": 0,
-                "filename": "Megamind.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
-                "title": "Megamind",
-                "torrentName": "Megamind.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
+                "filename": "Demo.Film.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
+                "title": "Demo Film",
+                "torrentName": "Demo.Film.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
                 "stream": {
                   "raw": {
                     "parsed": {
@@ -892,30 +892,30 @@ class DirectDebridStreamFilterTest {
                       "channels": ["7.1"],
                       "group": "FiBERHD",
                       "year": 2010,
-                      "raw_title": "Megamind.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv"
+                      "raw_title": "Demo.Film.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv"
                     }
                   }
                 }
               },
               "behaviorHints": {
-                "filename": "Megamind.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
+                "filename": "Demo.Film.2010.1080p.BluRay.REMUX.AVC.TRUEHD.7.1-FiBERHD.mkv",
                 "videoSize": 24201782274
               }
             },
             {
               "name": "TB 1080p cached",
-              "description": "Megamind.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
+              "description": "Demo.Film.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
               "clientResolve": {
                 "type": "debrid",
                 "service": "torbox",
                 "isCached": true,
-                "magnetUri": "magnet:?xt=urn:btih:dbbbe7da95f9bac639af2d182746d33d0cea51fb&dn=Megamind.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
-                "infoHash": "dbbbe7da95f9bac639af2d182746d33d0cea51fb",
+                "magnetUri": "magnet:?xt=urn:btih:2525252525252525252525252525252525252525&dn=Demo.Film.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
+                "infoHash": "2525252525252525252525252525252525252525",
                 "sources": [],
                 "fileIdx": 0,
-                "filename": "Megamind.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
-                "title": "Megamind",
-                "torrentName": "Megamind.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
+                "filename": "Demo.Film.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
+                "title": "Demo Film",
+                "torrentName": "Demo.Film.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
                 "stream": {
                   "raw": {
                     "parsed": {
@@ -926,30 +926,30 @@ class DirectDebridStreamFilterTest {
                       "channels": ["7.1"],
                       "group": "NOGRP",
                       "year": 2010,
-                      "raw_title": "Megamind.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv"
+                      "raw_title": "Demo.Film.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv"
                     }
                   }
                 }
               },
               "behaviorHints": {
-                "filename": "Megamind.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
+                "filename": "Demo.Film.2010.1080p.BluRay.Remux.AVC.TrueHD.7.1-NOGRP.mkv",
                 "videoSize": 22719933168
               }
             },
             {
               "name": "TB 1080p cached",
-              "description": "Megamind.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-PiRaTeS.mkv",
+              "description": "Demo.Film.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-EXAMPLE.mkv",
               "clientResolve": {
                 "type": "debrid",
                 "service": "torbox",
                 "isCached": true,
-                "magnetUri": "magnet:?xt=urn:btih:11802541a66f717fbc58dd72cd267d55a6df0477&dn=Megamind.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-PiRaTeS.mkv",
-                "infoHash": "11802541a66f717fbc58dd72cd267d55a6df0477",
+                "magnetUri": "magnet:?xt=urn:btih:2626262626262626262626262626262626262626&dn=Demo.Film.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-EXAMPLE.mkv",
+                "infoHash": "2626262626262626262626262626262626262626",
                 "sources": [],
                 "fileIdx": 0,
-                "filename": "Megamind.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-PiRaTeS.mkv",
-                "title": "Megamind",
-                "torrentName": "Megamind.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-PiRaTeS.mkv",
+                "filename": "Demo.Film.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-EXAMPLE.mkv",
+                "title": "Demo Film",
+                "torrentName": "Demo.Film.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-EXAMPLE.mkv",
                 "stream": {
                   "raw": {
                     "parsed": {
@@ -958,32 +958,32 @@ class DirectDebridStreamFilterTest {
                       "codec": "avc",
                       "audio": ["AAC"],
                       "channels": ["2.0"],
-                      "group": "PiRaTeS",
+                      "group": "EXAMPLE",
                       "year": 2010,
-                      "raw_title": "Megamind.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-PiRaTeS.mkv"
+                      "raw_title": "Demo.Film.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-EXAMPLE.mkv"
                     }
                   }
                 }
               },
               "behaviorHints": {
-                "filename": "Megamind.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-PiRaTeS.mkv",
+                "filename": "Demo.Film.2010.1080p.ROKU.WEB-DL.AAC.2.0.H.264-EXAMPLE.mkv",
                 "videoSize": 3079386380
               }
             },
             {
               "name": "TB 1080p cached",
-              "description": "Megamind (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
+              "description": "Demo Film (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
               "clientResolve": {
                 "type": "debrid",
                 "service": "torbox",
                 "isCached": true,
-                "magnetUri": "magnet:?xt=urn:btih:3fa25f80fb3eddf076c9002cc16c2a9801233e4b&dn=Megamind%20%282010%29%201080p%2010bit%20Bluray%20x265%20HEVC%20%5BOrg%20DD%205.1%20Hindi%20%2B%20DD%205.1%20English%5D%20MSubs%20~%20TombDoc.mkv",
-                "infoHash": "3fa25f80fb3eddf076c9002cc16c2a9801233e4b",
+                "magnetUri": "magnet:?xt=urn:btih:2727272727272727272727272727272727272727&dn=Demo%20Film%20%282010%29%201080p%2010bit%20Bluray%20x265%20HEVC%20%5BOrg%20DD%205.1%20Hindi%20%2B%20DD%205.1%20English%5D%20MSubs%20~%20TombDoc.mkv",
+                "infoHash": "2727272727272727272727272727272727272727",
                 "sources": [],
                 "fileIdx": 0,
-                "filename": "Megamind (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
-                "title": "Megamind",
-                "torrentName": "Megamind (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
+                "filename": "Demo Film (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
+                "title": "Demo Film",
+                "torrentName": "Demo Film (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
                 "stream": {
                   "raw": {
                     "parsed": {
@@ -994,30 +994,30 @@ class DirectDebridStreamFilterTest {
                       "channels": ["5.1"],
                       "languages": ["multi", "en", "hi"],
                       "year": 2010,
-                      "raw_title": "Megamind (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv"
+                      "raw_title": "Demo Film (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv"
                     }
                   }
                 }
               },
               "behaviorHints": {
-                "filename": "Megamind (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
+                "filename": "Demo Film (2010) 1080p 10bit Bluray x265 HEVC [Org DD 5.1 Hindi + DD 5.1 English] MSubs ~ TombDoc.mkv",
                 "videoSize": 3859136613
               }
             },
             {
               "name": "TB 1080p cached",
-              "description": "Megamind.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
+              "description": "Demo.Film.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
               "clientResolve": {
                 "type": "debrid",
                 "service": "torbox",
                 "isCached": true,
-                "magnetUri": "magnet:?xt=urn:btih:e4d12499cf481aeee9007b806c609917d3799e43&dn=Megamind.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
-                "infoHash": "e4d12499cf481aeee9007b806c609917d3799e43",
+                "magnetUri": "magnet:?xt=urn:btih:2828282828282828282828282828282828282828&dn=Demo.Film.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
+                "infoHash": "2828282828282828282828282828282828282828",
                 "sources": [],
                 "fileIdx": 0,
-                "filename": "Megamind.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
-                "title": "Megamind",
-                "torrentName": "Megamind.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
+                "filename": "Demo.Film.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
+                "title": "Demo Film",
+                "torrentName": "Demo.Film.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
                 "stream": {
                   "raw": {
                     "parsed": {
@@ -1028,30 +1028,30 @@ class DirectDebridStreamFilterTest {
                       "channels": ["7.1"],
                       "group": "EDGE2020",
                       "year": 2010,
-                      "raw_title": "Megamind.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv"
+                      "raw_title": "Demo.Film.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv"
                     }
                   }
                 }
               },
               "behaviorHints": {
-                "filename": "Megamind.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
+                "filename": "Demo.Film.2010.1080p.BluRay.DDP.7.1.x265-EDGE2020.mkv",
                 "videoSize": 2946516232
               }
             },
             {
               "name": "TB 720p cached",
-              "description": "Megamind 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
+              "description": "Demo Film 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
               "clientResolve": {
                 "type": "debrid",
                 "service": "torbox",
                 "isCached": true,
-                "magnetUri": "magnet:?xt=urn:btih:52c6341e0e4cc4eb0e23bd16f93a00dcad93490c&dn=Megamind%202010%20x264%20720p%20Esub%20BluRay%20Dual%20Audio%20English%20Hindi%20GOPI%20SAHI.mkv",
-                "infoHash": "52c6341e0e4cc4eb0e23bd16f93a00dcad93490c",
+                "magnetUri": "magnet:?xt=urn:btih:2929292929292929292929292929292929292929&dn=Demo%20Film%202010%20x264%20720p%20Esub%20BluRay%20Dual%20Audio%20English%20Hindi%20GOPI%20SAHI.mkv",
+                "infoHash": "2929292929292929292929292929292929292929",
                 "sources": [],
                 "fileIdx": 0,
-                "filename": "Megamind 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
-                "title": "Megamind",
-                "torrentName": "Megamind 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
+                "filename": "Demo Film 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
+                "title": "Demo Film",
+                "torrentName": "Demo Film 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
                 "stream": {
                   "raw": {
                     "parsed": {
@@ -1060,13 +1060,13 @@ class DirectDebridStreamFilterTest {
                       "codec": "avc",
                       "languages": ["multi", "en", "hi"],
                       "year": 2010,
-                      "raw_title": "Megamind 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv"
+                      "raw_title": "Demo Film 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv"
                     }
                   }
                 }
               },
               "behaviorHints": {
-                "filename": "Megamind 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
+                "filename": "Demo Film 2010 x264 720p Esub BluRay Dual Audio English Hindi GOPI SAHI.mkv",
                 "videoSize": 796639202
               }
             }

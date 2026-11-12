@@ -295,6 +295,16 @@ internal class ThumbStore private constructor(
         dirty++
     }
 
+    /**
+     * A session with this store ends: the larger watched share is kept, and a store with saved pictures has its
+     * last-used time and share written by the next [flush], also when the session only read it.
+     */
+    @Synchronized fun noteUsed(watched: Float) {
+        if (watched > watchedFraction) watchedFraction = watched
+        lastAccessMs = System.currentTimeMillis()
+        if (entries.isNotEmpty()) dirty++
+    }
+
     /** True = same picture timing as release [otherKey], false = different, null = not checked. */
     @Synchronized fun verdictOn(otherKey: String): Boolean? = verdicts[otherKey]
 

@@ -124,11 +124,11 @@ class TorboxDirectDebridResolverTest {
         assertTrue(hasCheckCached)
     }
 
-    private val pmrFilename = "Sentenced to Be a Hero - S01E02 (BD 1080p x265 Opus) [Dual Audio] [PMR].mkv"
+    private val pmrFilename = "Example of a Show - S01E02 (BD 1080p x265 Opus) [Dual Audio] [PMR].mkv"
     private val pmrFiles = listOf(
         TorboxTorrentFileDto(
             id = 3,
-            name = "Sentenced to Be a Hero - S01E01 (BD 1080p x265 Opus) [Dual Audio] [PMR].mkv",
+            name = "Example of a Show - S01E01 (BD 1080p x265 Opus) [Dual Audio] [PMR].mkv",
             size = 12_359_794_201L,
         ),
         TorboxTorrentFileDto(id = 4, name = pmrFilename, size = 4_817_912_734L),
@@ -138,9 +138,9 @@ class TorboxDirectDebridResolverTest {
         val stream = stream(fileIdx = 1)
         return stream.copy(
             clientResolve = stream.clientResolve?.copy(
-                infoHash = "439733a4816b34543c33f010c98b098aa916dca2",
-                magnetUri = "magnet:?xt=urn:btih:439733a4816b34543c33f010c98b098aa916dca2",
-                torrentName = "[PMR] Sentenced to Be a Hero Season 1\n$pmrFilename\nDubbed / Dual Audio",
+                infoHash = "1111111111111111111111111111111111111111",
+                magnetUri = "magnet:?xt=urn:btih:1111111111111111111111111111111111111111",
+                torrentName = "[PMR] Example of a Show Season 1\n$pmrFilename\nDubbed / Dual Audio",
                 filename = pmrFilename,
                 mediaType = "series",
                 season = 1,

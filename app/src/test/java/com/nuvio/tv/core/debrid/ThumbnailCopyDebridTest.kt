@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.debrid
 
+import com.nuvio.tv.core.player.thumbnail.ConnectionLedger
 import com.nuvio.tv.data.local.DebridSettingsDataStore
 import com.nuvio.tv.data.remote.api.PremiumizeApi
 import com.nuvio.tv.data.remote.api.TorboxApi
@@ -22,7 +23,10 @@ import com.nuvio.tv.domain.model.StreamClientResolve
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody
@@ -43,6 +47,9 @@ import java.time.Instant
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class ThumbnailCopyDebridTest {
     private val hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -214,12 +221,38 @@ class ThumbnailCopyDebridTest {
     }
 
     @Test
-    fun aLeftoverOlderThanSixHoursIsLeftInTheList() = runBlocking {
+    fun aLeftoverOlderThanSixHoursIsStillRemoved() = runBlocking {
         val now = System.currentTimeMillis()
         val api = FakeTorbox().apply { inList(77, hash, createdAtMs = now - 7 * 3_600_000L) }
         val disk = MemoryStorage(AddedCopyRecords.encode(listOf(AddedCopy(77, hash, now - 7 * 3_600_000L, 1L, now))))
         debrid(api, disk).sweepLeftovers()!!.join()
-        assertFalse(api.calls.any { it.startsWith("get") || it.startsWith("delete") })
+        assertTrue("delete 77" in api.calls)
+        assertTrue(AddedCopyRecords.decode(disk.value).isEmpty())
+    }
+
+    @Test
+    fun aLeftoverOlderThanSixHoursIsGivenUpAfterAFailedRemoval() = runBlocking {
+        val now = System.currentTimeMillis()
+        val api = FakeTorbox().apply {
+            inList(77, hash, createdAtMs = now - 7 * 3_600_000L)
+            deleteCode = 500
+        }
+        val disk = MemoryStorage(AddedCopyRecords.encode(listOf(AddedCopy(77, hash, now - 7 * 3_600_000L, 1L, now))))
+        debrid(api, disk).sweepLeftovers()!!.join()
+        assertEquals(1, api.calls.count { it == "delete 77" })
+        assertTrue(77 in api.items)
+        assertTrue(AddedCopyRecords.decode(disk.value).isEmpty())
+    }
+
+    @Test
+    fun anOldLeftoverTorboxMadeAtAnotherTimeIsLeftInTheList() = runBlocking {
+        val now = System.currentTimeMillis()
+        val addedAt = now - 7 * 3_600_000L
+        val api = FakeTorbox().apply { inList(77, hash, createdAtMs = addedAt - 3_600_000L) }
+        val disk = MemoryStorage(AddedCopyRecords.encode(listOf(AddedCopy(77, hash, addedAt, addedAt - 60_000L, addedAt))))
+        debrid(api, disk).sweepLeftovers()!!.join()
+        assertTrue("get 77" in api.calls)
+        assertFalse(api.calls.any { it.startsWith("delete") })
         assertTrue(AddedCopyRecords.decode(disk.value).isEmpty())
     }
 
@@ -273,6 +306,47 @@ class ThumbnailCopyDebridTest {
         debrid(api, disk).sweepLeftovers()!!.join()
         assertTrue("delete 77" in api.calls)
         assertTrue(AddedCopyRecords.decode(disk.value).isEmpty())
+    }
+
+    @Test
+    fun aCallCancelledWhileItsRequestIsCountedGivesTheSlotBack() {
+        val torbox = "https://api.torbox.app/v1/api"
+        val ledger = ConnectionLedger.app
+        val before = ledger.inFlight(torbox)
+        val thread = Executors.newSingleThreadExecutor()
+        try {
+            val held = CountDownLatch(1)
+            val blocked = CountDownLatch(1)
+            val resume = CountDownLatch(1)
+            thread.execute { held.await() }
+            val debrid = debrid(FakeTorbox(), MemoryStorage())
+            val job = CoroutineScope(thread.asCoroutineDispatcher()).launch {
+                debrid.openTorbox(direct(hash), null, null, "film")
+            }
+            // Queued behind the call's start: the caller's thread is busy when the counted slot comes back.
+            thread.execute {
+                blocked.countDown()
+                resume.await()
+            }
+            held.countDown()
+            assertTrue(blocked.await(5, TimeUnit.SECONDS))
+            assertTrue(waitFor { ledger.inFlight(torbox) == before + 1 })
+            job.cancel()
+            resume.countDown()
+            runBlocking { job.join() }
+            assertTrue(waitFor { ledger.inFlight(torbox) == before })
+        } finally {
+            thread.shutdownNow()
+        }
+    }
+
+    private fun waitFor(what: () -> Boolean): Boolean {
+        val end = System.nanoTime() + 5_000_000_000L
+        while (System.nanoTime() < end) {
+            if (what()) return true
+            Thread.sleep(10)
+        }
+        return what()
     }
 
     @Test
@@ -333,7 +407,7 @@ class ThumbnailCopyDebridTest {
         assertNull(d.routeOf(addon(null, "https://cdn.example/Film.1080p.mkv"), tb))
         assertNull(d.routeOf(addon(hash), tb.copy(enabled = false)))
         val linked = "0123456789abcdef0123456789abcdef01234567"
-        val resolve = addon(null, "https://torrentio.strem.fun/resolve/torbox/key/$linked/null/1/Film.mkv")
+        val resolve = addon(null, "https://addon.example.com/resolve/torbox/key/$linked/null/1/Film.mkv")
         assertEquals(CopyRoute.Torbox, d.routeOf(resolve, tb))
         assertNull(d.routeOf(resolve, none))
     }

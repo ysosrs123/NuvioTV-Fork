@@ -259,12 +259,11 @@ internal object Mp4IndexReader {
         val ctts = child(b, stbl, "ctts")
         val cto = LongArray(sampleCount)
         if (ctts != null) {
-            val v1 = b[ctts.dataStart].toInt() == 1
             i = 0
             for (e in 0 until u32(b, ctts.dataStart + 4).toInt()) {
                 val count = u32(b, ctts.dataStart + 8 + 8 * e).toInt()
-                val raw = u32(b, ctts.dataStart + 12 + 8 * e)
-                val off = if (v1) raw.toInt().toLong() else raw
+                // Signed in either box version: some version 0 files carry negative offsets.
+                val off = u32(b, ctts.dataStart + 12 + 8 * e).toInt().toLong()
                 repeat(count) { if (i < sampleCount) cto[i++] = off }
             }
         }

@@ -124,7 +124,7 @@ class CopyPrePickTest {
         assertFalse(CopyPrePick.keepsAdded(picked = true, pickedHash = null, pickedOffer = film, copy = copy))
         assertTrue(CopyPrePick.keepsAdded(picked = true, pickedHash = null, pickedOffer = null, copy = copy))
         assertTrue(CopyPrePick.keepsAdded(picked = true, pickedHash = null,
-            pickedOffer = offer("other", label = "Torrentio: 720p", height = 720, size = 3 * gb), copy = copy))
+            pickedOffer = offer("other", label = "Tortoise: 720p", height = 720, size = 3 * gb), copy = copy))
     }
 
     @Test

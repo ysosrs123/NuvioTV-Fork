@@ -74,7 +74,7 @@ internal class PlayerCopyList(private val controller: PlayerRuntimeController) :
 
     override suspend fun loadNow() {
         val fromMemory = withContext(Dispatchers.Main) {
-            controller.loadSourceStreams(forceRefresh = false)
+            controller.loadSourceStreams(forceRefresh = false, background = true)
             controller.sourceStreamsJob?.takeIf { controller.sourceStreamsFromMemory }
         }
         // A list taken over from the stream screen is ready within moments: waited for, not polled.

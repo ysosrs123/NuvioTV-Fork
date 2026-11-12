@@ -18,11 +18,13 @@ import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.nuvio.tv.core.debrid.ThumbnailCopyDebridEntryPoint
 import com.nuvio.tv.core.player.PlayerSessionTracker
 import com.nuvio.tv.data.local.ImagePerformancePreferences
 import com.nuvio.tv.data.mediaserver.ServerThumbnailSource
 import com.nuvio.tv.ui.screens.player.ParallelRangeDataSource
 import com.nuvio.tv.ui.screens.player.SlowStartServer
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -179,6 +181,7 @@ object SeekThumbnails {
 
     /** Player screen closed: an unfinished 4K coverage pass carries on for a few minutes, anything else stops. */
     fun playerClosed() {
+        openDeferred = false
         prepareUi.value = PrepareUi.Hidden
         dropEarlyRow()
         stopServer(keep = false)
@@ -714,6 +717,10 @@ object SeekThumbnails {
                     ?.filter { it.absolutePath != active }?.forEach { it.deleteRecursively() }
             }
                 .onFailure { Log.w(TAG, "startup housekeeping failed: ${it.javaClass.simpleName}") }
+            runCatching {   // TorBox copies an earlier run added for thumbnails and could not remove
+                val debrid = EntryPointAccessors.fromApplication(app, ThumbnailCopyDebridEntryPoint::class.java)
+                if (debrid.thumbnailCopyAdded().hasRecords()) debrid.thumbnailCopyDebrid().sweepLeftovers()
+            }
         }
     }
 
@@ -784,6 +791,8 @@ object SeekThumbnails {
             const val LATTICE_4K_MAX_BYTES = 500L * 1024 * 1024
             const val SCRUB_REQUEST_ALLOWANCE = 250
             const val IDLE_TRIM_MS = 10_000L
+            /** With nothing to make, the player is still looked at this often, for the position the store keeps. */
+            const val IDLE_SAMPLE_MS = 10_000L
             const val MAX_ATTEMPTS_PER_KEYFRAME = 2
             /** Network failures in a row before no new thumbnails are fetched; the ones made keep showing. */
             const val MAX_FETCH_FAILURES = 5
@@ -1797,6 +1806,7 @@ object SeekThumbnails {
             var neighbourCenter = -1
             var neighbours: List<Int> = emptyList()
             var lastWorkAt = SystemClock.elapsedRealtime()
+            var idleSampledAt = 0L
             val st = store ?: return
             laneChange(laneCtl.onPhase(phase()))
             Log.i(TAG, "decode lanes start=${laneCtl.lanes} ceiling=${laneCtl.ceiling()} " +
@@ -1957,7 +1967,11 @@ object SeekThumbnails {
                             buffers.releaseIdle()
                         }
                     } else {
-                        if (prepareStage in 1..4) sample()
+                        val idleNow = SystemClock.elapsedRealtime()
+                        if (prepareStage in 1..4 || idleNow - idleSampledAt >= IDLE_SAMPLE_MS) {
+                            idleSampledAt = idleNow
+                            sample()
+                        }
                         if (copyWaits) {
                             closeDecoders()
                             buffers.releaseIdle()
@@ -2070,7 +2084,6 @@ object SeekThumbnails {
                     continue
                 }
                 refusalQuietLogged = false
-                lastPositionMs = ps.positionMs
                 lastSampledPlaying = ps.isPlaying
                 val small4K = fourK && !MemoryGovernor.isStrongBox
                 if (PrepareHandover.waitsForBuffering(ps.buffering, prepareStage in 1..4, ps.playWhenReady, small4K)) {
@@ -4199,6 +4212,8 @@ object SeekThumbnails {
                 if (kotlin.math.abs(ps.positionMs - expected) > REANCHOR_JUMP_MS) reanchorToMs = ps.positionMs
             }
             trackPosMs = ps.positionMs
+            // A player that is closing reports 0: the last real position stays.
+            if (ps.positionMs > 0L) lastPositionMs = ps.positionMs
             trackAtMs = now
             trackPlaying = ps.isPlaying
             sampledPlaying = ps.isPlaying
@@ -4747,6 +4762,7 @@ object SeekThumbnails {
             monitorJob?.cancel()
             dropReserve("session end")
             copy?.stop("the thumbnail session ended")
+            headStart?.release()
             dropBorrow()
             if (fourK && !MemoryGovernor.isStrongBox) synchronized(pacer) {
                 Log.i(TAG, "4K pace at session end: pace ${pacer.paceMs / 1000} s, drops counted ${pacer.countedDrops} " +
@@ -4761,7 +4777,7 @@ object SeekThumbnails {
             runCatching { closeDecoders() }
             decodeScope.cancel()
             store?.let { st ->
-                if (lastDurationMs > 0) st.watchedFraction = (lastPositionMs.toFloat() / lastDurationMs).coerceIn(0f, 1f)
+                st.noteUsed(if (lastDurationMs > 0) (lastPositionMs.toFloat() / lastDurationMs).coerceIn(0f, 1f) else 0f)
                 st.flush()
                 runCatching { ThumbStore.housekeeping(context, activeKey = st.key) }
             }

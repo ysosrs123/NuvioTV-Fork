@@ -109,7 +109,7 @@ class CopyFirstTest {
     @Test
     fun aTorBox4KCopyIsTheLastOptionForAFilmFromASlowerSource() {
         val away = offer("p", kind = CopyKind.SERVER, height = 2160, size = 60 * gb, durationMs = ownMs, remote = true)
-        val list = offers(away, offer("4k", kind = CopyKind.DEBRID, height = 2160, size = 50 * gb, source = "Torrentio"))
+        val list = offers(away, offer("4k", kind = CopyKind.DEBRID, height = 2160, size = 50 * gb, source = "Tortoise"))
         assertEquals("4k", CopyFirst.headStartPick(list, null)?.id)
         val both = offers(away, offer("4k", kind = CopyKind.DEBRID, height = 2160, size = 50 * gb),
             offer("1080", kind = CopyKind.LINK, size = 8 * gb))
