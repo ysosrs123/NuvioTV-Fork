@@ -29,9 +29,11 @@ class MdbListSyncRepository(
     private val coroutineScope: CoroutineScope,
     private val now: () -> Long = System::currentTimeMillis,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val playerOpen: () -> Boolean = { false },
+    private val encode: (MdbListSyncSnapshot) -> String = { defaultJson.encodeToString(it) },
     private val remote: (MdbListAuthScope) -> MdbListSyncRemote = { MdbListHttpSyncRemote(api, it) }
 ) {
-    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val json = defaultJson
     private val mutex = Mutex()
     private val gate = TrackingRefreshGate()
     private val mutableState = MutableStateFlow(MdbListSyncState())
@@ -94,7 +96,8 @@ class MdbListSyncRepository(
                         scope = scope,
                         isLoading = false,
                         error = error.toMdbListSyncError(),
-                        retryAtEpochMs = (error as? MdbListApiException)?.retryAtEpochMs,
+                        retryAtEpochMs = (error as? MdbListApiException)?.retryAtEpochMs
+                            ?: (attemptedAt + AUTOMATIC_INTERVAL_MS).takeIf { error is MdbListSaveMemoryException },
                         attemptedAtEpochMs = attemptedAt
                     )
                 }
@@ -187,7 +190,11 @@ class MdbListSyncRepository(
             )
             storage.savePlayback(scope.profileId, playbackPayload) { checkScope(scope) }
         } else {
-            val payload = json.encodeToString(storedSnapshot)
+            val payload = try {
+                encode(storedSnapshot)
+            } catch (_: OutOfMemoryError) {
+                throw MdbListSaveMemoryException()
+            }
             storage.save(scope.profileId, payload) { checkScope(scope) }
         }
         checkScope(scope)
@@ -218,6 +225,7 @@ class MdbListSyncRepository(
         val now = now()
         if (current.retryAtEpochMs?.let { it > now } == true) return false
         if (intent != TrackingRefreshIntent.AUTOMATIC) return true
+        if (playerOpen()) return false
         if (current.error != null) return current.attemptedAtEpochMs?.let { now - it !in 0 until ERROR_RETRY_MS } ?: true
         if (current.snapshot?.invalidatedBuckets?.isNotEmpty() == true) return true
         return current.snapshot?.checkedAtEpochMs?.let { now - it !in 0 until AUTOMATIC_INTERVAL_MS } ?: true
@@ -239,6 +247,7 @@ class MdbListSyncRepository(
     }
 
     companion object {
+        private val defaultJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
         const val AUTOMATIC_INTERVAL_MS = 15L * 60 * 1_000
         const val ERROR_RETRY_MS = 60_000L
     }
@@ -250,3 +259,5 @@ private data class MdbListPlaybackOverride(
     val storageRevision: String? = null,
     val playback: List<MdbListPlayback>
 )
+
+internal class MdbListSaveMemoryException : Exception("Not enough memory to save MDBList data")

@@ -48,7 +48,7 @@ class SimklTrackingScrobbler @Inject constructor(
         val entryIndex = syncRepository.currentEntryIndex()
         val enrichedEvent = event.copy(
             media = syncRepository.state.value.snapshot
-                .enrichMediaReference(event.media, entryIndex)
+                .enrichMediaReferenceOfSameType(event.media, entryIndex)
                 .resolveAnimeEpisodeForSimkl()
         )
         Log.d(

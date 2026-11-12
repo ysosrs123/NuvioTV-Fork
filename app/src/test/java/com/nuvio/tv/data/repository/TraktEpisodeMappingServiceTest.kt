@@ -7,12 +7,20 @@ import com.nuvio.tv.data.remote.dto.trakt.TraktSeasonDto
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import retrofit2.Response
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class TraktEpisodeMappingServiceTest {
     @Test
     fun `episodes the addon has keep their numbers when another season's count differs`() = runTest {
@@ -77,6 +85,56 @@ class TraktEpisodeMappingServiceTest {
 
         assertEquals(2, mapped?.season)
         assertEquals(1, mapped?.episode)
+    }
+
+    @Test
+    fun `a cancelled episode list request does not hold up later ones`() = runTest {
+        val requestStarted = CompletableDeferred<Unit>()
+        val service = service(stallingOnce(requestStarted, traktSeasons = listOf(48)), addonSeasons = listOf(24, 24))
+
+        val cancelled = launch {
+            service.resolveEpisodeMapping("tt1", "series", videoId = null, season = 2, episode = 11)
+        }
+        requestStarted.await()
+        cancelled.cancelAndJoin()
+
+        val mapped = service.resolveEpisodeMapping("tt1", "series", videoId = null, season = 2, episode = 11)
+
+        assertEquals(1, mapped?.season)
+        assertEquals(35, mapped?.episode)
+    }
+
+    @Test
+    fun `a caller waiting on a cancelled episode list request is released`() = runTest {
+        val requestStarted = CompletableDeferred<Unit>()
+        val service = service(stallingOnce(requestStarted, traktSeasons = listOf(48)), addonSeasons = listOf(24, 24))
+
+        val cancelled = launch {
+            service.resolveEpisodeMapping("tt1", "series", videoId = null, season = 2, episode = 11)
+        }
+        requestStarted.await()
+        val waiting = async {
+            service.resolveEpisodeMapping("tt1", "series", videoId = null, season = 2, episode = 11)
+        }
+        runCurrent()
+        cancelled.cancelAndJoin()
+
+        assertNull(waiting.await())
+    }
+
+    private fun stallingOnce(requestStarted: CompletableDeferred<Unit>, traktSeasons: List<Int>): TraktApi {
+        val answering = traktApi(traktSeasons)
+        var stalled = false
+        return mockk<TraktApi> {
+            coEvery { getShowSeasons(any(), any(), any()) } coAnswers {
+                if (!stalled) {
+                    stalled = true
+                    requestStarted.complete(Unit)
+                    awaitCancellation()
+                }
+                answering.getShowSeasons("Bearer a", "tt1", "episodes")
+            }
+        }
     }
 
     private fun chapterTitles(seasonCounts: List<Int>): (Int, Int) -> String = { season, episode ->

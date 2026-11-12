@@ -10,8 +10,10 @@ import com.nuvio.tv.data.local.WatchProgressSource
 import com.nuvio.tv.data.local.WatchedItemsPreferences
 import com.nuvio.tv.data.local.WatchedSeriesStateHolder
 import com.nuvio.tv.domain.model.LibrarySourceMode
+import android.util.Log
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -108,7 +110,7 @@ class TrackingSourceController @Inject constructor(
             }
             watchedItemsPreferences.clearAll(profileId)
             watchedSeriesStateHolder.update(emptySet())
-            provider.refresh(TrackingRefreshIntent.USER_INITIATED)
+            refreshAfterSwitch { provider.refresh(TrackingRefreshIntent.USER_INITIATED) }
         } else if (source == WatchProgressSource.NUVIO_SYNC) {
             repopulateWatchedItemsFromNuvioSync(profileId)
             if (profileManager.activeProfileId.value == profileId) {
@@ -120,7 +122,19 @@ class TrackingSourceController @Inject constructor(
     private suspend fun applyLibrarySourceMode(mode: LibrarySourceMode, profileId: Int) {
         settingsDataStore.setLibrarySourceMode(mode, profileId)
         if (profileManager.activeProfileId.value != profileId) return
-        mode.providerId?.let(libraryProviders::provider)?.refresh(TrackingRefreshIntent.USER_INITIATED)
+        val provider = mode.providerId?.let(libraryProviders::provider) ?: return
+        refreshAfterSwitch { provider.refresh(TrackingRefreshIntent.USER_INITIATED) }
+    }
+
+    // The choice is already saved; a tracker that is rate limited or offline shows its own error and is retried later.
+    private suspend fun refreshAfterSwitch(refresh: suspend () -> Unit) {
+        try {
+            refresh()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            Log.w("TrackingSource", "Refresh after a source switch failed: ${error.message}")
+        }
     }
 
     private suspend fun repopulateWatchedItemsFromNuvioSync(profileId: Int) {

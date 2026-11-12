@@ -24,6 +24,7 @@ interface TrackingProgressProvider {
         get() = watchedItems
 
     fun episodeProgress(contentId: String): Flow<Map<Pair<Int, Int>, WatchProgress>>
+    fun loadedEpisodeProgress(contentId: String): Map<Pair<Int, Int>, WatchProgress>? = null
     fun airedEpisodeOrder(contentId: String): Flow<List<Pair<Int, Int>>>
     fun isWatched(
         contentId: String,

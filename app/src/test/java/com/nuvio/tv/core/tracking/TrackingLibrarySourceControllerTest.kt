@@ -37,6 +37,16 @@ class TrackingLibrarySourceControllerTest {
         coVerify(exactly = 0) { provider.refresh(any()) }
     }
 
+    @Test
+    fun `a tracker that refuses the refresh does not undo or break the selection`() = runTest {
+        val settings = mockk<TraktSettingsDataStore>(relaxed = true)
+        coEvery { settings.getLibrarySourceMode(1) } returns LibrarySourceMode.LOCAL
+        val provider = mockk<TrackingLibraryProvider>(relaxed = true) { every { providerId } returns TrackingProviderId.MDBLIST }
+        coEvery { provider.refresh(any()) } throws IllegalStateException("HTTP 429")
+        controller(settings, provider, MutableStateFlow(1)).selectLibrarySourceMode(LibrarySourceMode.MDBLIST)
+        coVerify(exactly = 1) { settings.setLibrarySourceMode(LibrarySourceMode.MDBLIST, 1) }
+    }
+
     private fun controller(settings: TraktSettingsDataStore, provider: TrackingLibraryProvider, profiles: MutableStateFlow<Int>) =
         TrackingSourceController(
             settings, TrackingProgressProviderRegistry(emptySet()), TrackingLibraryProviderRegistry(setOf(provider)),

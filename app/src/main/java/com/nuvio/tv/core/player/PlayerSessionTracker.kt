@@ -34,6 +34,8 @@ object PlayerSessionTracker {
 
     val isSessionOpen: Flow<Boolean> = openSessions.map { it > 0 }.distinctUntilChanged()
 
+    val isOpenNow: Boolean get() = openSessions.value > 0
+
     private val settledState = MutableStateFlow(true)
 
     val settled: StateFlow<Boolean> = settledState.asStateFlow()

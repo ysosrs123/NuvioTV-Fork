@@ -708,6 +708,12 @@ class TraktProgressService @Inject constructor(
             .distinctUntilChanged()
     }
 
+    /** The show's episode map once Trakt has answered for it in full; null before that. */
+    fun loadedEpisodeProgress(contentId: String): Map<Pair<Int, Int>, WatchProgress>? =
+        episodeProgressState.value[canonicalLookupKey(contentId)]
+            ?.takeIf { it.hasCompletedSnapshot }
+            ?.progress
+
     suspend fun getEpisodeProgressSnapshot(
         contentId: String
     ): Map<Pair<Int, Int>, WatchProgress> {

@@ -44,6 +44,8 @@ class TraktTrackingProgressProvider @Inject constructor(
 
     override fun episodeProgress(contentId: String) = service.observeEpisodeProgress(contentId)
 
+    override fun loadedEpisodeProgress(contentId: String) = service.loadedEpisodeProgress(contentId)
+
     override fun airedEpisodeOrder(contentId: String) = service.observeAiredEpisodes(contentId)
 
     override fun isWatched(

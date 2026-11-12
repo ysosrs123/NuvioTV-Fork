@@ -3,8 +3,10 @@ package com.nuvio.tv.data.repository
 import android.util.Log
 import com.nuvio.tv.data.remote.api.TraktApi
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -190,22 +192,27 @@ class TraktEpisodeMappingService @Inject constructor(
             return try { other?.await() ?: emptyList() } catch (_: Exception) { emptyList() }
         }
 
+        return try {
+            fetchTraktEpisodes(showLookupId).also { deferred.complete(it) }
+        } finally {
+            if (!deferred.isCompleted) deferred.complete(emptyList())
+            withContext(NonCancellable) { cleanupTraktFlight(showLookupId) }
+        }
+    }
+
+    private suspend fun fetchTraktEpisodes(showLookupId: String): List<EpisodeMappingEntry> {
         val seasonsResponse = traktAuthService.executeAuthorizedRequest { authHeader ->
             traktApi.getShowSeasons(
                 authorization = authHeader,
                 id = showLookupId,
                 extended = "episodes"
             )
-        } ?: run {
-            cleanupTraktFlight(showLookupId)
-            return emptyList()
-        }
+        } ?: return emptyList()
         if (!seasonsResponse.isSuccessful) {
             Log.w(
                 TAG,
                 "getTraktEpisodes: seasons request failed code=${seasonsResponse.code()} id=$showLookupId"
             )
-            cleanupTraktFlight(showLookupId)
             return emptyList()
         }
 
@@ -233,8 +240,6 @@ class TraktEpisodeMappingService @Inject constructor(
                 traktEpisodesCache[showLookupId] = traktEpisodes
             }
         }
-        deferred.complete(traktEpisodes)
-        cleanupTraktFlight(showLookupId)
         return traktEpisodes
     }
 

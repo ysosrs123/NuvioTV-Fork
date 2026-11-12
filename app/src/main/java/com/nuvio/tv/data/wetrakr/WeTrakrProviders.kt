@@ -347,32 +347,34 @@ class WeTrakrTrackingLibraryProvider @Inject constructor(
         val desired = weTrakrTabDefinitions.filter { changes.desiredMembership[it.key] == true }.mapNotNull { it.destination }
         require(desired.size <= 1) { "A WeTrakr title sits in one list at a time" }
         val destination = desired.singleOrNull()
-        val movable = current - WeTrakrList.WATCHED - WeTrakrList.WAITING
-        if (destination != null && destination in current) return
-        if (destination == null && movable.isEmpty()) return
+        val removable = current - WeTrakrList.WATCHED
+        if (destination != null && weTrakrTabDefinitions.any { it.destination == destination && it.lists.any(current::contains) }) return
+        if (destination == null && removable.isEmpty()) return
         val target = item.toWeTrakrTarget() ?: error("WeTrakr cannot match this title")
-        if (destination != null) {
+        val removed = if (destination != null) {
             val response = api.post("/sync/tracking", trackingBody(listOf(target), destination.wireValue).toString(), scope)
             check(notFoundCount(response.body) == 0) { "WeTrakr could not match this title" }
+            WeTrakrList.entries.toSet()
         } else {
-            movable.forEach { list ->
-                api.post("/sync/tracking/remove", trackingBody(listOf(target), list.wireValue).toString(), scope)
+            removable.filterTo(linkedSetOf()) { list ->
+                val response = api.post("/sync/tracking/remove", trackingBody(listOf(target), list.wireValue).toString(), scope)
+                notFoundCount(response.body) == 0
             }
         }
-        sync.mutate(scope) { next ->
+        if (removed.isNotEmpty()) sync.mutate(scope) { next ->
             val type = target.type
-            val kept = next.lists.mapValues { (_, entries) ->
-                entries.filterNot { it.title.type == type && item.itemId in it.title.ids.aliases() }
-            }
-            val title = next.lists.values.flatten().firstOrNull { it.title.type == type && item.itemId in it.title.ids.aliases() }?.title
-                ?: WeTrakrTitle(type, target.ids, item.title, item.year, item.poster)
+            val matches = { entry: WeTrakrListEntry -> entry.title.type == type && item.itemId in entry.title.ids.aliases() }
+            val kept = next.lists.mapValues { (list, entries) -> if (list in removed) entries.filterNot(matches) else entries }
             val updated = if (destination != null) {
+                val title = next.lists.values.flatten().firstOrNull(matches)?.title
+                    ?: WeTrakrTitle(type, target.ids, item.title, item.year, item.poster)
                 kept + (destination to listOf(WeTrakrListEntry(title, java.time.Instant.now().toString())) + kept[destination].orEmpty())
             } else {
-                kept + (WeTrakrList.WATCHED to next.list(WeTrakrList.WATCHED)) + (WeTrakrList.WAITING to next.list(WeTrakrList.WAITING))
+                kept
             }
             next.copy(lists = updated) to Unit
         }
+        check(destination != null || removed.size == removable.size) { "WeTrakr could not remove this title" }
     }
 
     override suspend fun refresh(intent: TrackingRefreshIntent) = sync.refresh(intent)
