@@ -4466,4 +4466,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">問題を報告 / マーク</string>
     <string name="remote_buttons_job_report_mark_desc">報告パネルを開きます。記録中はマークを追加します。</string>
+    <string name="display_mode_measured">実測</string>
+    <string name="display_mode_measured_off">画面は %2$s Hz ではなく %1$s Hz で動作中</string>
+    <string name="qms_hint_title">テレビが映画のフレームレートを維持していません</string>
+    <string name="qms_hint_body_qms">Arc は %1$s Hz を要求しました。テレビは完全な切り替えなしでレートを変更し (QMS)、%2$s Hz で動作しています。小さな規則的なカクつきとして現れます。</string>
+    <string name="qms_hint_body">Arc は %1$s Hz を要求しましたが、画面は %2$s Hz で動作しています。小さな規則的なカクつきとして現れます。</string>
+    <string name="qms_hint_fix">最善の対処: テレビの QMS をオフにする</string>
+    <string name="qms_hint_fix_hint">テレビ本体の設定で、この HDMI 入力に対して行います。Arc からは変更できません。</string>
+    <string name="qms_hint_off">フレームレートマッチングをオフ</string>
+    <string name="qms_hint_off_hint">次の映画から、画面は通常のレートのままになります。設定で再びオンにできます。</string>
+    <string name="qms_hint_keep">このままにする</string>
 </resources>

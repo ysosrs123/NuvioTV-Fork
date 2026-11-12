@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Beoordelingen</string>
     <string name="scout_row_picked">Voor jou gekozen</string>
     <string name="scout_row_picked_sub">Films en series, één keer per dag vernieuwd</string>
+    <string name="scout_row_genre">Rijen per genre</string>
+    <string name="scout_row_genre_sub">Tips gegroepeerd op de genres die je leuk vindt</string>
     <string name="scout_row_because">Omdat je … keek</string>
     <string name="scout_row_because_sub">Volgt wat je als laatste hebt uitgekeken</string>
     <string name="scout_row_gems">Verborgen pareltjes</string>

@@ -2008,4 +2008,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Raportează o problemă / marcaj</string>
     <string name="remote_buttons_job_report_mark_desc">Deschide panoul de raportare. În timpul înregistrării adaugă un marcaj.</string>
+    <string name="display_mode_measured">Măsurat</string>
+    <string name="display_mode_measured_off">Ecranul rulează la %1$s Hz, nu la %2$s Hz</string>
+    <string name="qms_hint_title">Televizorul nu păstrează rata de cadre a filmului</string>
+    <string name="qms_hint_body_qms">Arc a cerut %1$s Hz. Televizorul a schimbat rata fără o comutare completă (QMS) și rulează la %2$s Hz. Asta se vede ca o mică sacadare regulată.</string>
+    <string name="qms_hint_body">Arc a cerut %1$s Hz, dar ecranul rulează la %2$s Hz. Asta se vede ca o mică sacadare regulată.</string>
+    <string name="qms_hint_fix">Cea mai bună soluție: oprește QMS pe televizor</string>
+    <string name="qms_hint_fix_hint">În setările proprii ale televizorului pentru această intrare HDMI. Arc nu poate schimba asta.</string>
+    <string name="qms_hint_off">Oprește rata de cadre automată</string>
+    <string name="qms_hint_off_hint">De la următorul film, ecranul rămâne la rata obișnuită. O poți reactiva din Setări.</string>
+    <string name="qms_hint_keep">Păstrează așa</string>
 </resources>

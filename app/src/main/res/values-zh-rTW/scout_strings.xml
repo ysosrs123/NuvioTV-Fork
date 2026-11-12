@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">評分</string>
     <string name="scout_row_picked">為你精選</string>
     <string name="scout_row_picked_sub">電影和影集，每天更新一次</string>
+    <string name="scout_row_genre">依類型分列</string>
+    <string name="scout_row_genre_sub">依你喜歡的類型分組的推薦</string>
     <string name="scout_row_because">因為你看過…</string>
     <string name="scout_row_because_sub">跟隨你最近看完的內容</string>
     <string name="scout_row_gems">遺珠之作</string>

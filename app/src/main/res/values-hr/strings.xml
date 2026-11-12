@@ -4446,4 +4446,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Prijavi problem / označi</string>
     <string name="remote_buttons_job_report_mark_desc">Otvara ploču za prijavu. Tijekom snimanja dodaje oznaku.</string>
+    <string name="display_mode_measured">Izmjereno</string>
+    <string name="display_mode_measured_off">Zaslon radi na %1$s Hz, a ne na %2$s Hz</string>
+    <string name="qms_hint_title">Tvoj TV ne drži broj sličica filma</string>
+    <string name="qms_hint_body_qms">Arc je zatražio %1$s Hz. Tvoj TV promijenio je frekvenciju bez potpunog prebacivanja (QMS) i radi na %2$s Hz. To se vidi kao sitno, pravilno trzanje.</string>
+    <string name="qms_hint_body">Arc je zatražio %1$s Hz, ali tvoj zaslon radi na %2$s Hz. To se vidi kao sitno, pravilno trzanje.</string>
+    <string name="qms_hint_fix">Najbolje rješenje: isključi QMS na TV-u</string>
+    <string name="qms_hint_fix_hint">U postavkama samog TV-a za ovaj HDMI ulaz. Arc to ne može promijeniti.</string>
+    <string name="qms_hint_off">Isključi usklađivanje broja sličica</string>
+    <string name="qms_hint_off_hint">Od sljedećeg filma zaslon ostaje na svojoj uobičajenoj frekvenciji. Možeš ga ponovno uključiti u Postavkama.</string>
+    <string name="qms_hint_keep">Ostavi kako jest</string>
 </resources>

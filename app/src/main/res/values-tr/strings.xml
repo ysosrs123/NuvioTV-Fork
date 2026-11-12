@@ -4503,4 +4503,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Sorun bildir / işaretle</string>
     <string name="remote_buttons_job_report_mark_desc">Bildirim panelini açar. Kayıt sırasında bir işaret ekler.</string>
+    <string name="display_mode_measured">Ölçülen</string>
+    <string name="display_mode_measured_off">Ekran %1$s Hz hızında çalışıyor, %2$s Hz değil</string>
+    <string name="qms_hint_title">TV\'niz filmin kare hızını korumuyor</string>
+    <string name="qms_hint_body_qms">Arc %1$s Hz istedi. TV\'niz tam geçiş yapmadan hız değiştirdi (QMS) ve %2$s Hz hızında çalışıyor. Bu, küçük ve düzenli bir takılma olarak görünür.</string>
+    <string name="qms_hint_body">Arc %1$s Hz istedi, ancak ekranınız %2$s Hz hızında çalışıyor. Bu, küçük ve düzenli bir takılma olarak görünür.</string>
+    <string name="qms_hint_fix">En iyi çözüm: TV\'de QMS\'yi kapatın</string>
+    <string name="qms_hint_fix_hint">TV\'nin bu HDMI girişine ait kendi ayarlarında. Arc bunu değiştiremez.</string>
+    <string name="qms_hint_off">Kare hızı eşleştirmeyi kapat</string>
+    <string name="qms_hint_off_hint">Sonraki filmden itibaren ekran normal hızında kalır. Ayarlar\'dan yeniden açabilirsiniz.</string>
+    <string name="qms_hint_keep">Olduğu gibi bırak</string>
 </resources>

@@ -3357,4 +3357,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Prijavi težavo / označi</string>
     <string name="remote_buttons_job_report_mark_desc">Odpre ploščo za prijavo. Med snemanjem doda oznako.</string>
+    <string name="display_mode_measured">Izmerjeno</string>
+    <string name="display_mode_measured_off">Zaslon deluje pri %1$s Hz, ne pri %2$s Hz</string>
+    <string name="qms_hint_title">Vaš televizor ne ohranja hitrosti sličic filma</string>
+    <string name="qms_hint_body_qms">Arc je zahteval %1$s Hz. Televizor je spremenil hitrost brez popolnega preklopa (QMS) in deluje pri %2$s Hz. To se kaže kot rahlo, enakomerno zatikanje.</string>
+    <string name="qms_hint_body">Arc je zahteval %1$s Hz, vendar zaslon deluje pri %2$s Hz. To se kaže kot rahlo, enakomerno zatikanje.</string>
+    <string name="qms_hint_fix">Najboljša rešitev: izklopite QMS na televizorju</string>
+    <string name="qms_hint_fix_hint">V nastavitvah samega televizorja za ta vhod HDMI. Arc tega ne more spremeniti.</string>
+    <string name="qms_hint_off">Izklopi samodejno hitrost sličic</string>
+    <string name="qms_hint_off_hint">Od naslednjega filma naprej zaslon ostane pri običajni hitrosti. Znova jo lahko vklopite v Nastavitvah.</string>
+    <string name="qms_hint_keep">Pusti, kot je</string>
 </resources>

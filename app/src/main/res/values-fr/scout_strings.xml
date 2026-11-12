@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Notes</string>
     <string name="scout_row_picked">Choisis pour vous</string>
     <string name="scout_row_picked_sub">Films et séries, actualisés une fois par jour</string>
+    <string name="scout_row_genre">Rangées par genre</string>
+    <string name="scout_row_genre_sub">Suggestions regroupées selon les genres que vous aimez</string>
     <string name="scout_row_because">Parce que vous avez regardé…</string>
     <string name="scout_row_because_sub">Suit ce que vous avez terminé récemment</string>
     <string name="scout_row_gems">Pépites cachées</string>

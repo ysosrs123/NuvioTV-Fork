@@ -1181,4 +1181,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Reportar um problema / marcar</string>
     <string name="remote_buttons_job_report_mark_desc">Abre o painel de reporte. Durante a gravação, acrescenta uma marca.</string>
+    <string name="display_mode_measured">Medida</string>
+    <string name="display_mode_measured_off">O ecrã está a %1$s Hz, não a %2$s Hz</string>
+    <string name="qms_hint_title">A tua TV não mantém a taxa de fotogramas do filme</string>
+    <string name="qms_hint_body_qms">O Arc pediu %1$s Hz. A tua TV mudou de taxa sem uma comutação completa (QMS) e está a %2$s Hz. Isso nota-se como um pequeno soluço regular.</string>
+    <string name="qms_hint_body">O Arc pediu %1$s Hz, mas o teu ecrã está a %2$s Hz. Isso nota-se como um pequeno soluço regular.</string>
+    <string name="qms_hint_fix">Melhor solução: desliga o QMS na TV</string>
+    <string name="qms_hint_fix_hint">Nas definições da própria TV para esta entrada HDMI. O Arc não pode alterar isto.</string>
+    <string name="qms_hint_off">Desativar taxa de atualização auto</string>
+    <string name="qms_hint_off_hint">A partir do próximo filme, o ecrã fica na taxa habitual. Podes voltar a ativar nas Definições.</string>
+    <string name="qms_hint_keep">Manter como está</string>
 </resources>

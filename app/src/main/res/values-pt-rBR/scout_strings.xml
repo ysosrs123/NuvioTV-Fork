@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Avaliações</string>
     <string name="scout_row_picked">Escolhidos para você</string>
     <string name="scout_row_picked_sub">Filmes e séries, atualizados uma vez por dia</string>
+    <string name="scout_row_genre">Fileiras por gênero</string>
+    <string name="scout_row_genre_sub">Sugestões agrupadas pelos gêneros que você curte</string>
     <string name="scout_row_because">Porque você assistiu…</string>
     <string name="scout_row_because_sub">Segue o que você terminou por último</string>
     <string name="scout_row_gems">Pérolas escondidas</string>

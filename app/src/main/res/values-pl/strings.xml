@@ -4577,4 +4577,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Zgłoś problem / oznacz</string>
     <string name="remote_buttons_job_report_mark_desc">Otwiera panel zgłoszenia. Podczas nagrywania dodaje znacznik.</string>
+    <string name="display_mode_measured">Zmierzone</string>
+    <string name="display_mode_measured_off">Ekran działa w %1$s Hz, a nie w %2$s Hz</string>
+    <string name="qms_hint_title">Telewizor nie utrzymuje częstotliwości klatek filmu</string>
+    <string name="qms_hint_body_qms">Arc poprosił o %1$s Hz. Telewizor zmienił częstotliwość bez pełnego przełączenia (QMS) i działa w %2$s Hz. Widać to jako drobne, regularne przycięcia.</string>
+    <string name="qms_hint_body">Arc poprosił o %1$s Hz, ale ekran działa w %2$s Hz. Widać to jako drobne, regularne przycięcia.</string>
+    <string name="qms_hint_fix">Najlepsze rozwiązanie: wyłącz QMS w telewizorze</string>
+    <string name="qms_hint_fix_hint">W ustawieniach samego telewizora dla tego wejścia HDMI. Arc nie może tego zmienić.</string>
+    <string name="qms_hint_off">Wyłącz dopasowanie odświeżania</string>
+    <string name="qms_hint_off_hint">Od następnego filmu ekran pozostanie przy zwykłej częstotliwości. Możesz to ponownie włączyć w Ustawieniach.</string>
+    <string name="qms_hint_keep">Zostaw bez zmian</string>
 </resources>

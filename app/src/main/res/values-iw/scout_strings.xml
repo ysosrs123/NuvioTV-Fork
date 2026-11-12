@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">דירוגים</string>
     <string name="scout_row_picked">נבחר בשבילך</string>
     <string name="scout_row_picked_sub">סרטים וסדרות, מתרענן פעם ביום</string>
+    <string name="scout_row_genre">שורות לפי ז׳אנר</string>
+    <string name="scout_row_genre_sub">המלצות מקובצות לפי הז׳אנרים שאתה אוהב</string>
     <string name="scout_row_because">כי צפית ב…</string>
     <string name="scout_row_because_sub">עוקב אחרי מה שסיימת לאחרונה</string>
     <string name="scout_row_gems">פנינים נסתרות</string>

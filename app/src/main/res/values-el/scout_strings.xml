@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Βαθμολογίες</string>
     <string name="scout_row_picked">Επιλεγμένα για εσάς</string>
     <string name="scout_row_picked_sub">Ταινίες και σειρές, ανανεώνονται μία φορά την ημέρα</string>
+    <string name="scout_row_genre">Σειρές ανά είδος</string>
+    <string name="scout_row_genre_sub">Προτάσεις ομαδοποιημένες ανά τα είδη που σου αρέσουν</string>
     <string name="scout_row_because">Επειδή είδατε…</string>
     <string name="scout_row_because_sub">Ακολουθεί ό,τι ολοκληρώσατε τελευταία</string>
     <string name="scout_row_gems">Κρυμμένα διαμάντια</string>

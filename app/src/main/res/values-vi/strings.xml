@@ -4485,4 +4485,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Báo cáo sự cố / đánh dấu</string>
     <string name="remote_buttons_job_report_mark_desc">Mở bảng báo cáo. Khi đang ghi, thêm một dấu.</string>
+    <string name="display_mode_measured">Đo được</string>
+    <string name="display_mode_measured_off">Màn hình chạy ở %1$s Hz, không phải %2$s Hz</string>
+    <string name="qms_hint_title">TV của bạn không giữ tốc độ khung hình của phim</string>
+    <string name="qms_hint_body_qms">Arc yêu cầu %1$s Hz. TV của bạn đã đổi tần số mà không chuyển chế độ hoàn toàn (QMS) và đang chạy ở %2$s Hz. Điều này hiện ra thành hiện tượng giật nhẹ, đều đặn.</string>
+    <string name="qms_hint_body">Arc yêu cầu %1$s Hz, nhưng màn hình của bạn đang chạy ở %2$s Hz. Điều này hiện ra thành hiện tượng giật nhẹ, đều đặn.</string>
+    <string name="qms_hint_fix">Cách tốt nhất: tắt QMS trên TV</string>
+    <string name="qms_hint_fix_hint">Trong cài đặt riêng của TV cho cổng HDMI này. Arc không thể thay đổi.</string>
+    <string name="qms_hint_off">Tắt khớp tốc độ khung hình</string>
+    <string name="qms_hint_off_hint">Từ phim tiếp theo, màn hình giữ tần số thường dùng. Bạn có thể bật lại trong Cài đặt.</string>
+    <string name="qms_hint_keep">Giữ nguyên</string>
 </resources>

@@ -3915,4 +3915,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Повідомити про проблему / позначити</string>
     <string name="remote_buttons_job_report_mark_desc">Відкриває панель повідомлення. Під час запису додає позначку.</string>
+    <string name="display_mode_measured">Виміряно</string>
+    <string name="display_mode_measured_off">Екран працює на %1$s Hz, а не на %2$s Hz</string>
+    <string name="qms_hint_title">Телевізор не тримає частоту кадрів фільму</string>
+    <string name="qms_hint_body_qms">Arc попросив %1$s Hz. Телевізор змінив частоту без повного перемикання (QMS) і працює на %2$s Hz. Це помітно як невеликі регулярні ривки.</string>
+    <string name="qms_hint_body">Arc попросив %1$s Hz, але екран працює на %2$s Hz. Це помітно як невеликі регулярні ривки.</string>
+    <string name="qms_hint_fix">Найкраще рішення: вимкніть QMS на телевізорі</string>
+    <string name="qms_hint_fix_hint">У налаштуваннях самого телевізора для цього входу HDMI. Arc не може це змінити.</string>
+    <string name="qms_hint_off">Вимкнути авточастоту кадрів</string>
+    <string name="qms_hint_off_hint">З наступного фільму екран залишиться на звичайній частоті. Увімкнути знову можна в Налаштуваннях.</string>
+    <string name="qms_hint_keep">Залишити як є</string>
 </resources>

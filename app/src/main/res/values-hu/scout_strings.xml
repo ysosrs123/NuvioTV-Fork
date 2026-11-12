@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Értékelések</string>
     <string name="scout_row_picked">Neked válogatva</string>
     <string name="scout_row_picked_sub">Filmek és sorozatok, naponta egyszer frissül</string>
+    <string name="scout_row_genre">Sorok műfaj szerint</string>
+    <string name="scout_row_genre_sub">Ajánlatok a kedvelt műfajaid szerint csoportosítva</string>
     <string name="scout_row_because">Mert ezt nézted:…</string>
     <string name="scout_row_because_sub">Követi, amit legutóbb befejeztél</string>
     <string name="scout_row_gems">Rejtett gyöngyszemek</string>

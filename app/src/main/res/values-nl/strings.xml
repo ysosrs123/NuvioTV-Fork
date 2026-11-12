@@ -4276,4 +4276,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Probleem melden / markeren</string>
     <string name="remote_buttons_job_report_mark_desc">Opent het meldpaneel. Tijdens de opname voegt het een markering toe.</string>
+    <string name="display_mode_measured">Gemeten</string>
+    <string name="display_mode_measured_off">Scherm draait op %1$s Hz, niet op %2$s Hz</string>
+    <string name="qms_hint_title">Je tv houdt de framerate van de film niet aan</string>
+    <string name="qms_hint_body_qms">Arc vroeg om %1$s Hz. Je tv is van frequentie gewisseld zonder volledige omschakeling (QMS) en draait op %2$s Hz. Dat zie je als een kleine, regelmatige hapering.</string>
+    <string name="qms_hint_body">Arc vroeg om %1$s Hz, maar je scherm draait op %2$s Hz. Dat zie je als een kleine, regelmatige hapering.</string>
+    <string name="qms_hint_fix">Beste oplossing: zet QMS uit op de tv</string>
+    <string name="qms_hint_fix_hint">In de eigen instellingen van de tv voor deze HDMI-ingang. Arc kan dit niet wijzigen.</string>
+    <string name="qms_hint_off">Framerate-aanpassing uitzetten</string>
+    <string name="qms_hint_off_hint">Vanaf de volgende film blijft het scherm op de gebruikelijke frequentie. Je kunt dit weer aanzetten in Instellingen.</string>
+    <string name="qms_hint_keep">Zo laten</string>
 </resources>

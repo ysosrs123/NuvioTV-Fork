@@ -4494,4 +4494,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Informar de un problema / marcar</string>
     <string name="remote_buttons_job_report_mark_desc">Abre el panel de informe. Mientras graba, añade una marca.</string>
+    <string name="display_mode_measured">Medido</string>
+    <string name="display_mode_measured_off">La pantalla va a %1$s Hz, no a %2$s Hz</string>
+    <string name="qms_hint_title">Tu TV no mantiene la frecuencia de fotogramas de la película</string>
+    <string name="qms_hint_body_qms">Arc ha pedido %1$s Hz. Tu TV ha cambiado de frecuencia sin un cambio completo (QMS) y va a %2$s Hz. Se nota como un pequeño tirón periódico.</string>
+    <string name="qms_hint_body">Arc ha pedido %1$s Hz, pero tu pantalla va a %2$s Hz. Se nota como un pequeño tirón periódico.</string>
+    <string name="qms_hint_fix">Mejor solución: desactiva QMS en la TV</string>
+    <string name="qms_hint_fix_hint">En los ajustes de la propia TV para esta entrada HDMI. Arc no puede cambiarlo.</string>
+    <string name="qms_hint_off">Desactivar ajuste de fotogramas</string>
+    <string name="qms_hint_off_hint">A partir de la próxima película, la pantalla se queda en su frecuencia habitual. Puedes volver a activarlo en Configuración.</string>
+    <string name="qms_hint_keep">Dejar como está</string>
 </resources>

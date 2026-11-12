@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Oceny</string>
     <string name="scout_row_picked">Wybrane dla Ciebie</string>
     <string name="scout_row_picked_sub">Filmy i seriale, odświeżane raz dziennie</string>
+    <string name="scout_row_genre">Rzędy według gatunku</string>
+    <string name="scout_row_genre_sub">Propozycje pogrupowane według lubianych gatunków</string>
     <string name="scout_row_because">Bo obejrzano…</string>
     <string name="scout_row_because_sub">Podąża za tym, co ostatnio ukończono</string>
     <string name="scout_row_gems">Ukryte perełki</string>

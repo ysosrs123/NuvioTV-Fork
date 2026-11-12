@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Įvertinimai</string>
     <string name="scout_row_picked">Parinkta jums</string>
     <string name="scout_row_picked_sub">Filmai ir serialai, atnaujinami kartą per dieną</string>
+    <string name="scout_row_genre">Eilutės pagal žanrą</string>
+    <string name="scout_row_genre_sub">Pasiūlymai, sugrupuoti pagal jums patinkančius žanrus</string>
     <string name="scout_row_because">Nes žiūrėjote…</string>
     <string name="scout_row_because_sub">Seka tai, ką paskutinį kartą baigėte</string>
     <string name="scout_row_gems">Paslėpti perlai</string>

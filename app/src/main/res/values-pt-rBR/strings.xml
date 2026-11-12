@@ -4496,4 +4496,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Relatar um problema / marcar</string>
     <string name="remote_buttons_job_report_mark_desc">Abre o painel de relato. Durante a gravação, adiciona uma marca.</string>
+    <string name="display_mode_measured">Medida</string>
+    <string name="display_mode_measured_off">A tela está em %1$s Hz, não em %2$s Hz</string>
+    <string name="qms_hint_title">Sua TV não mantém a taxa de quadros do filme</string>
+    <string name="qms_hint_body_qms">O Arc pediu %1$s Hz. Sua TV mudou de taxa sem uma troca completa (QMS) e está em %2$s Hz. Isso aparece como um pequeno engasgo regular.</string>
+    <string name="qms_hint_body">O Arc pediu %1$s Hz, mas sua tela está em %2$s Hz. Isso aparece como um pequeno engasgo regular.</string>
+    <string name="qms_hint_fix">Melhor solução: desative o QMS na TV</string>
+    <string name="qms_hint_fix_hint">Nos ajustes da própria TV para esta entrada HDMI. O Arc não pode alterar isso.</string>
+    <string name="qms_hint_off">Desativar sincronia de quadros</string>
+    <string name="qms_hint_off_hint">A partir do próximo filme, a tela fica na taxa habitual. Você pode reativar nos Ajustes.</string>
+    <string name="qms_hint_keep">Manter como está</string>
 </resources>

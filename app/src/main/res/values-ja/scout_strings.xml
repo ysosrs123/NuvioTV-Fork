@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">評価</string>
     <string name="scout_row_picked">あなたへのおすすめ</string>
     <string name="scout_row_picked_sub">映画とシリーズ、1日1回更新</string>
+    <string name="scout_row_genre">ジャンル別の列</string>
+    <string name="scout_row_genre_sub">好きなジャンルごとにまとめたおすすめ</string>
     <string name="scout_row_because">… を観たあなたへ</string>
     <string name="scout_row_because_sub">最近見終えた作品に連動</string>
     <string name="scout_row_gems">隠れた名作</string>

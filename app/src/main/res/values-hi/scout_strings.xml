@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">रेटिंग</string>
     <string name="scout_row_picked">आपके लिए चुना गया</string>
     <string name="scout_row_picked_sub">फ़िल्में और सीरीज़, दिन में एक बार रीफ़्रेश</string>
+    <string name="scout_row_genre">शैली के अनुसार पंक्तियाँ</string>
+    <string name="scout_row_genre_sub">आपकी पसंदीदा शैलियों के अनुसार समूहित सुझाव</string>
     <string name="scout_row_because">क्योंकि आपने … देखा</string>
     <string name="scout_row_because_sub">आपने हाल में जो पूरा किया उसके अनुसार</string>
     <string name="scout_row_gems">छिपे हुए रत्न</string>

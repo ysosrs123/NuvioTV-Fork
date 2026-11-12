@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Hodnotenia</string>
     <string name="scout_row_picked">Vybrané pre vás</string>
     <string name="scout_row_picked_sub">Filmy a seriály, obnovujú sa raz denne</string>
+    <string name="scout_row_genre">Rady podľa žánru</string>
+    <string name="scout_row_genre_sub">Tipy zoskupené podľa žánrov, ktoré máte radi</string>
     <string name="scout_row_because">Pretože ste sledovali…</string>
     <string name="scout_row_because_sub">Sleduje, čo ste naposledy dokončili</string>
     <string name="scout_row_gems">Skryté klenoty</string>

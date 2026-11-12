@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Bewertungen</string>
     <string name="scout_row_picked">Für dich ausgewählt</string>
     <string name="scout_row_picked_sub">Filme und Serien, einmal täglich aktualisiert</string>
+    <string name="scout_row_genre">Reihen nach Genre</string>
+    <string name="scout_row_genre_sub">Vorschläge nach deinen Lieblingsgenres gruppiert</string>
     <string name="scout_row_because">Weil du … gesehen hast</string>
     <string name="scout_row_because_sub">Folgt dem, was du zuletzt beendet hast</string>
     <string name="scout_row_gems">Verborgene Perlen</string>

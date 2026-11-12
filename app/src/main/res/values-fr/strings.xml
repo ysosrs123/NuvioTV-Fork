@@ -4493,4 +4493,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Signaler un problème / repère</string>
     <string name="remote_buttons_job_report_mark_desc">Ouvre le panneau de signalement. Pendant l\'enregistrement, ajoute un repère.</string>
+    <string name="display_mode_measured">Mesuré</string>
+    <string name="display_mode_measured_off">L’écran tourne à %1$s Hz, et non à %2$s Hz</string>
+    <string name="qms_hint_title">Votre TV ne garde pas la fréquence d’images du film</string>
+    <string name="qms_hint_body_qms">Arc a demandé %1$s Hz. Votre TV a changé de fréquence sans bascule complète (QMS) et tourne à %2$s Hz. Cela se voit par une petite saccade régulière.</string>
+    <string name="qms_hint_body">Arc a demandé %1$s Hz, mais votre écran tourne à %2$s Hz. Cela se voit par une petite saccade régulière.</string>
+    <string name="qms_hint_fix">Meilleure solution : désactiver QMS sur la TV</string>
+    <string name="qms_hint_fix_hint">Dans les réglages de la TV elle-même, pour cette entrée HDMI. Arc ne peut pas le modifier.</string>
+    <string name="qms_hint_off">Désactiver l’adaptation de fréquence</string>
+    <string name="qms_hint_off_hint">Dès le prochain film, l’écran reste à sa fréquence habituelle. Vous pouvez la réactiver dans les Paramètres.</string>
+    <string name="qms_hint_keep">Ne rien changer</string>
 </resources>

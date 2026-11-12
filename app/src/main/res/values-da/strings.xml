@@ -3872,4 +3872,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Rapportér et problem / markér</string>
     <string name="remote_buttons_job_report_mark_desc">Åbner rapportpanelet. Under optagelse tilføjes en markering.</string>
+    <string name="display_mode_measured">Målt</string>
+    <string name="display_mode_measured_off">Skærmen kører med %1$s Hz, ikke %2$s Hz</string>
+    <string name="qms_hint_title">Dit TV holder ikke filmens billedhastighed</string>
+    <string name="qms_hint_body_qms">Arc bad om %1$s Hz. Dit TV skiftede hastighed uden et fuldt skift (QMS) og kører med %2$s Hz. Det ses som små, regelmæssige hak.</string>
+    <string name="qms_hint_body">Arc bad om %1$s Hz, men din skærm kører med %2$s Hz. Det ses som små, regelmæssige hak.</string>
+    <string name="qms_hint_fix">Bedste løsning: slå QMS fra på TV\'et</string>
+    <string name="qms_hint_fix_hint">I TV\'ets egne indstillinger for denne HDMI-indgang. Arc kan ikke ændre det.</string>
+    <string name="qms_hint_off">Slå billedhastighedstilpasning fra</string>
+    <string name="qms_hint_off_hint">Fra næste film bliver skærmen på sin normale hastighed. Du kan slå det til igen i Indstillinger.</string>
+    <string name="qms_hint_keep">Behold som nu</string>
 </resources>

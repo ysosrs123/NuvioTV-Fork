@@ -4230,4 +4230,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">الإبلاغ عن مشكلة / وضع علامة</string>
     <string name="remote_buttons_job_report_mark_desc">يفتح لوحة البلاغ. أثناء التسجيل يضيف علامة.</string>
+    <string name="display_mode_measured">القياس</string>
+    <string name="display_mode_measured_off">الشاشة تعمل بتردد %1$s Hz وليس %2$s Hz</string>
+    <string name="qms_hint_title">تلفازك لا يحافظ على معدل إطارات الفيلم</string>
+    <string name="qms_hint_body_qms">طلب Arc ترددًا قدره %1$s Hz. غيّر تلفازك المعدل دون تبديل كامل (QMS) ويعمل الآن بتردد %2$s Hz. يظهر ذلك كتقطّع بسيط ومنتظم.</string>
+    <string name="qms_hint_body">طلب Arc ترددًا قدره %1$s Hz، لكن شاشتك تعمل بتردد %2$s Hz. يظهر ذلك كتقطّع بسيط ومنتظم.</string>
+    <string name="qms_hint_fix">الحل الأفضل: أوقف QMS في التلفاز</string>
+    <string name="qms_hint_fix_hint">من إعدادات التلفاز نفسه لمدخل HDMI هذا. لا يستطيع Arc تغييره.</string>
+    <string name="qms_hint_off">إيقاف مطابقة معدل الإطارات</string>
+    <string name="qms_hint_off_hint">ابتداءً من الفيلم التالي، تبقى الشاشة على معدلها المعتاد. يمكنك إعادة تشغيلها من الإعدادات.</string>
+    <string name="qms_hint_keep">الإبقاء كما هو</string>
 </resources>

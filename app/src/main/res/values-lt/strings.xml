@@ -2186,4 +2186,14 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     </plurals>
     <string name="remote_buttons_job_report_mark">Pranešti apie problemą / pažymėti</string>
     <string name="remote_buttons_job_report_mark_desc">Atidaro pranešimo skydelį. Įrašant prideda žymą.</string>
+    <string name="display_mode_measured">Išmatuota</string>
+    <string name="display_mode_measured_off">Ekranas veikia %1$s Hz, o ne %2$s Hz dažniu</string>
+    <string name="qms_hint_title">Jūsų televizorius neišlaiko filmo kadrų dažnio</string>
+    <string name="qms_hint_body_qms">Arc paprašė %1$s Hz. Jūsų televizorius pakeitė dažnį be visiško perjungimo (QMS) ir veikia %2$s Hz dažniu. Tai matoma kaip nedidelis, reguliarus trūkčiojimas.</string>
+    <string name="qms_hint_body">Arc paprašė %1$s Hz, bet jūsų ekranas veikia %2$s Hz dažniu. Tai matoma kaip nedidelis, reguliarus trūkčiojimas.</string>
+    <string name="qms_hint_fix">Geriausias sprendimas: išjunkite QMS televizoriuje</string>
+    <string name="qms_hint_fix_hint">Paties televizoriaus nustatymuose, šiai HDMI įvesčiai. Arc to pakeisti negali.</string>
+    <string name="qms_hint_off">Išjungti kadrų dažnio derinimą</string>
+    <string name="qms_hint_off_hint">Nuo kito filmo ekranas liks įprastu dažniu. Vėl įjungti galite Nustatymuose.</string>
+    <string name="qms_hint_keep">Palikti kaip yra</string>
 </resources>

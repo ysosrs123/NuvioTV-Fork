@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Betyg</string>
     <string name="scout_row_picked">Utvalt för dig</string>
     <string name="scout_row_picked_sub">Filmer och serier, uppdateras en gång om dagen</string>
+    <string name="scout_row_genre">Rader efter genre</string>
+    <string name="scout_row_genre_sub">Tips grupperade efter genrerna du gillar</string>
     <string name="scout_row_because">Eftersom du såg…</string>
     <string name="scout_row_because_sub">Följer det du senast såg klart</string>
     <string name="scout_row_gems">Dolda pärlor</string>

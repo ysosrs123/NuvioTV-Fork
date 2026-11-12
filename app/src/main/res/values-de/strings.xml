@@ -3443,4 +3443,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Problem melden / markieren</string>
     <string name="remote_buttons_job_report_mark_desc">Öffnet den Meldebereich. Während der Aufnahme wird eine Markierung gesetzt.</string>
+    <string name="display_mode_measured">Gemessen</string>
+    <string name="display_mode_measured_off">Bildschirm läuft mit %1$s Hz statt %2$s Hz</string>
+    <string name="qms_hint_title">Ihr TV hält die Bildfrequenz des Films nicht ein</string>
+    <string name="qms_hint_body_qms">Arc hat %1$s Hz angefordert. Ihr TV hat die Frequenz ohne vollständiges Umschalten geändert (QMS) und läuft mit %2$s Hz. Das zeigt sich als kleines, regelmäßiges Ruckeln.</string>
+    <string name="qms_hint_body">Arc hat %1$s Hz angefordert, aber Ihr Bildschirm läuft mit %2$s Hz. Das zeigt sich als kleines, regelmäßiges Ruckeln.</string>
+    <string name="qms_hint_fix">Beste Lösung: QMS am TV ausschalten</string>
+    <string name="qms_hint_fix_hint">In den eigenen Einstellungen des TVs für diesen HDMI-Eingang. Arc kann das nicht ändern.</string>
+    <string name="qms_hint_off">Bildfrequenz-Anpassung ausschalten</string>
+    <string name="qms_hint_off_hint">Ab dem nächsten Film bleibt der Bildschirm bei seiner üblichen Frequenz. In den Optionen können Sie sie wieder einschalten.</string>
+    <string name="qms_hint_keep">So lassen</string>
 </resources>

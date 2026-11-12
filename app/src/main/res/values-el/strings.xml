@@ -4395,4 +4395,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Αναφορά προβλήματος / σήμανση</string>
     <string name="remote_buttons_job_report_mark_desc">Ανοίγει τον πίνακα αναφοράς. Κατά την καταγραφή προσθέτει σήμανση.</string>
+    <string name="display_mode_measured">Μέτρηση</string>
+    <string name="display_mode_measured_off">Η οθόνη λειτουργεί στα %1$s Hz, όχι στα %2$s Hz</string>
+    <string name="qms_hint_title">Η τηλεόρασή σας δεν κρατά τον ρυθμό καρέ της ταινίας</string>
+    <string name="qms_hint_body_qms">Το Arc ζήτησε %1$s Hz. Η τηλεόρασή σας άλλαξε ρυθμό χωρίς πλήρη εναλλαγή (QMS) και λειτουργεί στα %2$s Hz. Αυτό φαίνεται ως μικρό, τακτικό κόλλημα στην εικόνα.</string>
+    <string name="qms_hint_body">Το Arc ζήτησε %1$s Hz, αλλά η οθόνη σας λειτουργεί στα %2$s Hz. Αυτό φαίνεται ως μικρό, τακτικό κόλλημα στην εικόνα.</string>
+    <string name="qms_hint_fix">Καλύτερη λύση: απενεργοποιήστε το QMS στην τηλεόραση</string>
+    <string name="qms_hint_fix_hint">Στις ρυθμίσεις της ίδιας της τηλεόρασης για αυτή την είσοδο HDMI. Το Arc δεν μπορεί να το αλλάξει.</string>
+    <string name="qms_hint_off">Απενεργοποίηση ταιριάσματος καρέ</string>
+    <string name="qms_hint_off_hint">Από την επόμενη ταινία, η οθόνη μένει στον συνήθη ρυθμό της. Μπορείτε να το ενεργοποιήσετε ξανά στις Ρυθμίσεις.</string>
+    <string name="qms_hint_keep">Να μείνει ως έχει</string>
 </resources>

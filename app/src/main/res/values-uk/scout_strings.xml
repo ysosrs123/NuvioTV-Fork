@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Оцінки</string>
     <string name="scout_row_picked">Вибрано для вас</string>
     <string name="scout_row_picked_sub">Фільми та серіали, оновлюються раз на день</string>
+    <string name="scout_row_genre">Ряди за жанрами</string>
+    <string name="scout_row_genre_sub">Добірки за жанрами, які вам подобаються</string>
     <string name="scout_row_because">Бо ви дивилися…</string>
     <string name="scout_row_because_sub">Слідує за тим, що ви додивилися останнім</string>
     <string name="scout_row_gems">Приховані перлини</string>

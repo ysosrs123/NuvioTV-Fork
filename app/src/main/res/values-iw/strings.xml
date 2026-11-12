@@ -4502,4 +4502,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">דיווח על בעיה / סימון</string>
     <string name="remote_buttons_job_report_mark_desc">פותח את חלונית הדיווח. בזמן הקלטה מוסיף סימון.</string>
+    <string name="display_mode_measured">נמדד</string>
+    <string name="display_mode_measured_off">המסך פועל ב-%1$s Hz, לא ב-%2$s Hz</string>
+    <string name="qms_hint_title">הטלוויזיה שלך לא שומרת על קצב הפריימים של הסרט</string>
+    <string name="qms_hint_body_qms">Arc ביקש %1$s Hz. הטלוויזיה שינתה קצב ללא החלפה מלאה (QMS) ופועלת ב-%2$s Hz. זה נראה כקפיצה קטנה וקבועה.</string>
+    <string name="qms_hint_body">Arc ביקש %1$s Hz, אבל המסך שלך פועל ב-%2$s Hz. זה נראה כקפיצה קטנה וקבועה.</string>
+    <string name="qms_hint_fix">הפתרון הטוב ביותר: כיבוי QMS בטלוויזיה</string>
+    <string name="qms_hint_fix_hint">בהגדרות הטלוויזיה עצמה עבור כניסת HDMI זו. Arc לא יכול לשנות זאת.</string>
+    <string name="qms_hint_off">כיבוי התאמת קצב פריימים</string>
+    <string name="qms_hint_off_hint">החל מהסרט הבא, המסך יישאר בקצב הרגיל שלו. אפשר להפעיל שוב בהגדרות.</string>
+    <string name="qms_hint_keep">להשאיר כמו שזה</string>
 </resources>

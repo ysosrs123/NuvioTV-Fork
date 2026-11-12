@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">التقييمات</string>
     <string name="scout_row_picked">مختارات لك</string>
     <string name="scout_row_picked_sub">أفلام ومسلسلات، تُحدَّث مرة يوميًا</string>
+    <string name="scout_row_genre">صفوف حسب النوع</string>
+    <string name="scout_row_genre_sub">اقتراحات مجمّعة حسب الأنواع التي تحبها</string>
     <string name="scout_row_because">لأنك شاهدت…</string>
     <string name="scout_row_because_sub">يتبع آخر ما أنهيته</string>
     <string name="scout_row_gems">جواهر خفية</string>

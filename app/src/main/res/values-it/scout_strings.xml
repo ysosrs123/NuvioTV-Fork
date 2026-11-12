@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Valutazioni</string>
     <string name="scout_row_picked">Scelti per te</string>
     <string name="scout_row_picked_sub">Film e serie, aggiornati una volta al giorno</string>
+    <string name="scout_row_genre">Righe per genere</string>
+    <string name="scout_row_genre_sub">Consigli raggruppati per i generi che ti piacciono</string>
     <string name="scout_row_because">Perché hai guardato…</string>
     <string name="scout_row_because_sub">Segue ciò che hai finito di recente</string>
     <string name="scout_row_gems">Gemme nascoste</string>

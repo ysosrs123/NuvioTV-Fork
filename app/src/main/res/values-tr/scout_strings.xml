@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Puanlar</string>
     <string name="scout_row_picked">Sizin için seçildi</string>
     <string name="scout_row_picked_sub">Filmler ve diziler, günde bir kez yenilenir</string>
+    <string name="scout_row_genre">Türe göre satırlar</string>
+    <string name="scout_row_genre_sub">Sevdiğin türlere göre gruplanmış öneriler</string>
     <string name="scout_row_because">… izlediğiniz için</string>
     <string name="scout_row_because_sub">Son bitirdiklerinizi takip eder</string>
     <string name="scout_row_gems">Gizli hazineler</string>

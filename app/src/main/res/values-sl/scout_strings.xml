@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Ocene</string>
     <string name="scout_row_picked">Izbrano za vas</string>
     <string name="scout_row_picked_sub">Filmi in serije, osvežijo se enkrat na dan</string>
+    <string name="scout_row_genre">Vrstice po žanru</string>
+    <string name="scout_row_genre_sub">Predlogi, združeni po žanrih, ki so vam všeč</string>
     <string name="scout_row_because">Ker ste gledali…</string>
     <string name="scout_row_because_sub">Sledi temu, kar ste nazadnje dokončali</string>
     <string name="scout_row_gems">Skriti biseri</string>

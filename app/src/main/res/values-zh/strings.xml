@@ -1171,4 +1171,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">报告问题 / 标记</string>
     <string name="remote_buttons_job_report_mark_desc">打开报告面板。记录期间会添加标记。</string>
+    <string name="display_mode_measured">实测</string>
+    <string name="display_mode_measured_off">屏幕以 %1$s Hz 运行，而非 %2$s Hz</string>
+    <string name="qms_hint_title">您的电视未保持影片的帧率</string>
+    <string name="qms_hint_body_qms">Arc 请求了 %1$s Hz。您的电视未经完整切换就改变了刷新率 (QMS)，正以 %2$s Hz 运行。这会表现为轻微而有规律的卡顿。</string>
+    <string name="qms_hint_body">Arc 请求了 %1$s Hz，但您的屏幕正以 %2$s Hz 运行。这会表现为轻微而有规律的卡顿。</string>
+    <string name="qms_hint_fix">最佳解决方法：在电视上关闭 QMS</string>
+    <string name="qms_hint_fix_hint">在电视自身针对此 HDMI 输入的设置中。Arc 无法更改。</string>
+    <string name="qms_hint_off">关闭帧率匹配</string>
+    <string name="qms_hint_off_hint">从下一部影片起，屏幕保持平常的刷新率。您可以在设置中重新开启。</string>
+    <string name="qms_hint_keep">保持现状</string>
 </resources>

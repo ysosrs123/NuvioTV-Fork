@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Đánh giá</string>
     <string name="scout_row_picked">Chọn cho bạn</string>
     <string name="scout_row_picked_sub">Phim và loạt phim, làm mới mỗi ngày một lần</string>
+    <string name="scout_row_genre">Hàng theo thể loại</string>
+    <string name="scout_row_genre_sub">Gợi ý được nhóm theo thể loại bạn thích</string>
     <string name="scout_row_because">Vì bạn đã xem…</string>
     <string name="scout_row_because_sub">Theo những gì bạn vừa xem xong</string>
     <string name="scout_row_gems">Viên ngọc ẩn</string>

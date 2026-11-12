@@ -3612,4 +3612,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Laporkan masalah / tandai</string>
     <string name="remote_buttons_job_report_mark_desc">Membuka panel laporan. Saat merekam, menambahkan tanda.</string>
+    <string name="display_mode_measured">Terukur</string>
+    <string name="display_mode_measured_off">Layar berjalan pada %1$s Hz, bukan %2$s Hz</string>
+    <string name="qms_hint_title">TV Anda tidak mengikuti frame rate film</string>
+    <string name="qms_hint_body_qms">Arc meminta %1$s Hz. TV Anda mengubah rate tanpa peralihan penuh (QMS) dan berjalan pada %2$s Hz. Ini terlihat sebagai sendatan kecil yang teratur.</string>
+    <string name="qms_hint_body">Arc meminta %1$s Hz, tetapi layar Anda berjalan pada %2$s Hz. Ini terlihat sebagai sendatan kecil yang teratur.</string>
+    <string name="qms_hint_fix">Solusi terbaik: matikan QMS di TV</string>
+    <string name="qms_hint_fix_hint">Di pengaturan TV itu sendiri untuk input HDMI ini. Arc tidak dapat mengubahnya.</string>
+    <string name="qms_hint_off">Matikan pencocokan frame rate</string>
+    <string name="qms_hint_off_hint">Mulai film berikutnya, layar tetap pada rate biasanya. Anda dapat menyalakannya lagi di Pengaturan.</string>
+    <string name="qms_hint_keep">Biarkan apa adanya</string>
 </resources>

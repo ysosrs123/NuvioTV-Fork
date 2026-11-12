@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Evaluări</string>
     <string name="scout_row_picked">Alese pentru tine</string>
     <string name="scout_row_picked_sub">Filme și seriale, actualizate o dată pe zi</string>
+    <string name="scout_row_genre">Rânduri pe genuri</string>
+    <string name="scout_row_genre_sub">Sugestii grupate după genurile care îți plac</string>
     <string name="scout_row_because">Pentru că ai urmărit…</string>
     <string name="scout_row_because_sub">Urmărește ce ai terminat ultima dată</string>
     <string name="scout_row_gems">Perle ascunse</string>

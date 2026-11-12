@@ -12,6 +12,8 @@
     <string name="scout_settings_ratings">Ocjene</string>
     <string name="scout_row_picked">Odabrano za tebe</string>
     <string name="scout_row_picked_sub">Filmovi i serije, osvježavaju se jednom dnevno</string>
+    <string name="scout_row_genre">Redovi po žanru</string>
+    <string name="scout_row_genre_sub">Prijedlozi grupisani po žanrovima koje voliš</string>
     <string name="scout_row_because">Jer si gledao/la…</string>
     <string name="scout_row_because_sub">Prati ono što si zadnje dovršio/la</string>
     <string name="scout_row_gems">Skriveni dragulji</string>

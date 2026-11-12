@@ -2824,4 +2824,14 @@
     </plurals>
     <string name="remote_buttons_job_report_mark">Rapportera ett problem / markera</string>
     <string name="remote_buttons_job_report_mark_desc">Öppnar rapportpanelen. Under inspelning läggs en markering till.</string>
+    <string name="display_mode_measured">Uppmätt</string>
+    <string name="display_mode_measured_off">Skärmen kör i %1$s Hz, inte %2$s Hz</string>
+    <string name="qms_hint_title">Din TV håller inte filmens bildfrekvens</string>
+    <string name="qms_hint_body_qms">Arc bad om %1$s Hz. Din TV bytte frekvens utan en full omkoppling (QMS) och kör i %2$s Hz. Det syns som små, regelbundna ryck.</string>
+    <string name="qms_hint_body">Arc bad om %1$s Hz, men skärmen kör i %2$s Hz. Det syns som små, regelbundna ryck.</string>
+    <string name="qms_hint_fix">Bästa lösningen: stäng av QMS på TV:n</string>
+    <string name="qms_hint_fix_hint">I TV:ns egna inställningar för den här HDMI-ingången. Arc kan inte ändra det.</string>
+    <string name="qms_hint_off">Stäng av bildfrekvensmatchning</string>
+    <string name="qms_hint_off_hint">Från nästa film stannar skärmen på sin vanliga frekvens. Du kan slå på det igen i Inställningar.</string>
+    <string name="qms_hint_keep">Behåll som det är</string>
 </resources>
