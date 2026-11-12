@@ -488,6 +488,7 @@ class HomeViewModel @Inject constructor(
     /** Latest trailer request made during the startup grace period, sent once grace ends. */
     internal var deferredTrailerPreviewRequest: (() -> Unit)? = null
     internal val adjacentItemPrefetchJobs = AdjacentPrefetchJobs()
+    internal val focusStepPace = FocusStepPace()
     internal val movieWatchedObserverJobs = mutableMapOf<String, Job>()
     internal var movieWatchedBatchJob: Job? = null
     internal var lastMovieWatchedItemKeys: Set<String> = emptySet()
@@ -521,6 +522,9 @@ class HomeViewModel @Inject constructor(
     internal val eagerCatalogLoadCount: Int = 8
     internal val lazyLoadRequestedKeys: MutableSet<String> = ConcurrentHashMap.newKeySet()
     internal val pendingLazyCatalogs = linkedMapOf<String, Pair<Addon, CatalogDescriptor>>()
+    /** Catalogs whose load failed with no row to show. A refresh asks for them again. */
+    internal val failedCatalogKeys: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    internal var failedCatalogRetryJob: Job? = null
     // Reserved-headroom background sweep state
     @Volatile
     internal var catalogSweepJob: Job? = null
@@ -953,6 +957,7 @@ class HomeViewModel @Inject constructor(
         owner: ContinueWatchingHomeOwner,
         clearVersion: Int
     ) = withContext(kotlinx.coroutines.Dispatchers.IO) {
+            if (_uiState.value.continueWatchingItems.isNotEmpty()) return@withContext
             val cachedInProgress = runCatching { cwEnrichmentCache.getInProgressSnapshot(profileId) }.getOrDefault(emptyList())
             val cachedNextUp = runCatching { cwEnrichmentCache.getNextUpSnapshot(profileId) }.getOrDefault(emptyList())
             if (cachedInProgress.isEmpty() && cachedNextUp.isEmpty()) return@withContext
@@ -983,7 +988,8 @@ class HomeViewModel @Inject constructor(
                         episodeDescription = cached.episodeDescription,
                         episodeImdbRating = if (cached.ratingVisible != false) cached.episodeImdbRating else null,
                         genres = cached.genres,
-                        releaseInfo = cached.releaseInfo
+                        releaseInfo = cached.releaseInfo,
+                        contentLanguage = cached.contentLanguage
                     )
                 }
             val nextUpItems = cachedNextUp
@@ -1032,7 +1038,10 @@ class HomeViewModel @Inject constructor(
                 cwEnrichmentCache.cacheCleared.value != clearVersion) return@withContext
             if (items.isNotEmpty()) {
                 val (mainItems, upcomingOnly) = splitUpcomingItems(items, sortMode)
-                _uiState.update { it.copy(continueWatchingItems = mainItems, upcomingItems = upcomingOnly) }
+                _uiState.update {
+                    if (it.continueWatchingItems.isNotEmpty()) it
+                    else it.copy(continueWatchingItems = mainItems, upcomingItems = upcomingOnly)
+                }
                 _initialCwResolved.value = true
             }
     }

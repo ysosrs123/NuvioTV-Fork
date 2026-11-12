@@ -39,16 +39,20 @@ class TmdbService @Inject constructor(
     private val cacheMutex = Mutex()
 
     @Volatile private var storedIdsLoaded = false
+    private val storedIdsLock = Any()
 
     /** Fills both caches from the ids kept on disk, once. Call on an IO thread. */
     private fun loadStoredIds() {
         if (storedIdsLoaded) return
-        for ((key, imdbId) in idStore.load()) {
-            tmdbToImdbCache.putIfAbsent(key, imdbId)
-            val tmdbId = key.substringBefore(':').toIntOrNull() ?: continue
-            imdbToTmdbCache.putIfAbsent("$imdbId:${key.substringAfter(':')}", tmdbId)
+        synchronized(storedIdsLock) {
+            if (storedIdsLoaded) return
+            for ((key, imdbId) in idStore.load()) {
+                tmdbToImdbCache.putIfAbsent(key, imdbId)
+                val tmdbId = key.substringBefore(':').toIntOrNull() ?: continue
+                imdbToTmdbCache.putIfAbsent("$imdbId:${key.substringAfter(':')}", tmdbId)
+            }
+            storedIdsLoaded = true
         }
-        storedIdsLoaded = true
     }
     
     /**

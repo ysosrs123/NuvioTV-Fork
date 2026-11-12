@@ -35,6 +35,13 @@ internal const val MODERN_HERO_TEXT_WIDTH_FRACTION = 0.42f
 internal const val MODERN_HERO_MEDIA_WIDTH_FRACTION = 0.72f
 internal const val MODERN_TRAILER_OVERSCAN_ZOOM = 1.0f
 internal const val MODERN_HERO_FOCUS_DEBOUNCE_MS = 300L
+internal const val MODERN_HERO_QUICK_KEYS_GAP_MS = 450L
+internal const val MODERN_HERO_QUICK_KEYS_SETTLE_MS = 550L
+
+/** While keys follow each other quickly the hero waits longer, so its rebuild does not land on the next press. */
+internal fun heroSettleDelayMs(gapSinceLastMoveMs: Long): Long =
+    if (gapSinceLastMoveMs in 0 until MODERN_HERO_QUICK_KEYS_GAP_MS) MODERN_HERO_QUICK_KEYS_SETTLE_MS
+    else MODERN_HERO_FOCUS_DEBOUNCE_MS
 internal val MODERN_ROW_HEADER_FOCUS_INSET = 40.dp
 private val MODERN_ROW_CARD_BOTTOM_ROOM = 8.dp
 private const val MODERN_ROWS_VIEWPORT_MAX_FRACTION = 0.6f

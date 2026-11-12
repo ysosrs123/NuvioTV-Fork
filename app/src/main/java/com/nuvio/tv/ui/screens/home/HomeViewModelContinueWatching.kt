@@ -891,10 +891,10 @@ internal fun HomeViewModel.loadContinueWatchingPipeline() {
                                                 var resolvedSinceLastEmit = 0
                                                 for (seed in uncachedSeeds) {
                                                     PlayerSessionTracker.isSessionOpen.first { open -> !open }
-                                                    cwProcessedOlderSeedContentIds += seed.contentId
                                                     // Re-check freshness — badge pipeline may have validated
                                                     // this series while we were processing earlier seeds.
                                                     if (fullyWatchedSeriesIds.isSeriesValidationFresh(seed.contentId)) {
+                                                        cwProcessedOlderSeedContentIds += seed.contentId
                                                         kotlinx.coroutines.yield()
                                                         continue
                                                     }
@@ -909,6 +909,7 @@ internal fun HomeViewModel.loadContinueWatchingPipeline() {
                                                         )
                                                     }
                                                     if (item != null) {
+                                                        cwProcessedOlderSeedContentIds += seed.contentId
                                                         conclusivelyProcessedOlderContentIds += seed.contentId
                                                         if (
                                                             cutoffMs == null ||
@@ -956,9 +957,6 @@ internal fun HomeViewModel.loadContinueWatchingPipeline() {
                                                         }
                                                     } else {
                                                         val seedKey = "${seed.contentId}|${seed.season ?: 1}|${seed.episode ?: 1}"
-                                                        synchronized(cwNextUpResolutionCache) {
-                                                            cwNextUpResolutionCache[seedKey] = null
-                                                        }
                                                         // No next-up — mark as validated with smart deadline
                                                         // ONLY if meta was actually resolved (confirming no next episode).
                                                         // If meta was unavailable (network error), skip marking to avoid
@@ -968,7 +966,18 @@ internal fun HomeViewModel.loadContinueWatchingPipeline() {
                                                                 ?: cwMetaCache["series:${seed.contentId}"]
                                                                 ?: cwMetaCache["tv:${seed.contentId}"]
                                                         }
-                                                        if (resolvedMeta != null) {
+                                                        if (resolvedMeta == null) {
+                                                            // The look-up left a "no next episode" entry; drop it so a later run asks again.
+                                                            synchronized(cwNextUpResolutionCache) {
+                                                                cwNextUpResolutionCache.entries.removeAll { (key, resolution) ->
+                                                                    resolution == null && key.startsWith("${seed.contentId}|")
+                                                                }
+                                                            }
+                                                        } else {
+                                                            cwProcessedOlderSeedContentIds += seed.contentId
+                                                            synchronized(cwNextUpResolutionCache) {
+                                                                cwNextUpResolutionCache[seedKey] = null
+                                                            }
                                                             conclusivelyProcessedOlderContentIds += seed.contentId
                                                             val resolvedItemsToRetain = if (cutoffMs != null) {
                                                                 discoveredNextUpItems.filter { resolvedItem ->

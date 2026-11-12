@@ -146,6 +146,62 @@ class MetaRepositoryRateLimitTest {
     }
 
     @Test
+    fun `a title page asks AIOStreams while its error items pause background lookups`() = runTest {
+        var broken = true
+        val repository = newRepository(
+            apiAnswering { url -> if (broken) errorItem() else found(url) },
+            addon("aios", "https://aio.example/config")
+        )
+        repository.getMetaFromAllAddons("series", "tt0000001").last()
+        broken = false
+        assertTrue(repository.getMetaFromAllAddons("series", "tt0000002").last() is NetworkResult.Error)
+        assertEquals(1, requested.size)
+
+        val opened = withContext(MetaCaller(TITLE_PAGE_META_CALLER)) {
+            repository.getMetaFromAllAddons("series", "tt0000002").last()
+        }
+
+        assertTrue(opened is NetworkResult.Success)
+        assertEquals(2, requested.size)
+    }
+
+    @Test
+    fun `a title page asks a host that answered 429`() = runTest {
+        var limited = true
+        val repository = newRepository(
+            apiAnswering { url -> if (limited) tooMany("300") else found(url) },
+            addon("aios", "https://aio.example/config")
+        )
+        repository.getMetaFromAllAddons("movie", "tt0000001").last()
+        limited = false
+
+        val opened = withContext(MetaCaller(TITLE_PAGE_META_CALLER)) {
+            repository.getMetaFromAllAddons("movie", "tt0000002").last()
+        }
+
+        assertTrue(opened is NetworkResult.Success)
+        assertEquals(2, requested.size)
+        assertTrue(repository.getMetaFromAllAddons("movie", "tt0000003").last() is NetworkResult.Error)
+        assertEquals("background lookups still wait", 2, requested.size)
+    }
+
+    @Test
+    fun `a lookup skipped after an error item does not say HTTP 429`() = runTest {
+        val repository = newRepository(
+            apiAnswering { url -> if (url.startsWith("https://aio.example")) errorItem() else tooMany("300") },
+            addon("aios", "https://aio.example/config"),
+            addon("other", "https://busy.example")
+        )
+        repository.getMetaFromAllAddons("series", "tt0000001").last()
+
+        val skipped = repository.getMetaFromAllAddons("series", "tt0000002").last() as NetworkResult.Error
+
+        assertEquals(2, requested.size)
+        assertTrue(skipped.message, skipped.message.contains("Test Addon aios: the addon request failed"))
+        assertTrue(skipped.message, skipped.message.contains("Test Addon other: HTTP 429"))
+    }
+
+    @Test
     fun `an addon answering not found to title after title stops being asked`() = runTest {
         val repository = newRepository(
             apiAnswering { notFound() },
@@ -369,6 +425,10 @@ class MetaRepositoryRateLimitTest {
         val context = mockk<Context>(relaxed = true) {
             every { getString(any()) } returns "Episode"
             every { getString(any(), *anyVararg()) } returns "No supported addon"
+            every { getString(com.nuvio.tv.R.string.meta_error_detail_addon_request_failed) } returns "the addon request failed"
+            every { getString(com.nuvio.tv.R.string.error_meta_tried_issues, *anyVararg()) } answers {
+                args.flatMap { if (it is Array<*>) it.toList() else listOf(it) }.joinToString(" | ")
+            }
         }
         val addonRepository = mockk<AddonRepository>(relaxed = true) {
             every { getInstalledAddons() } returns flowOf(addons.toList())

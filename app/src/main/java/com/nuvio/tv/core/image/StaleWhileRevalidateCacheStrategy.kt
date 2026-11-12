@@ -158,6 +158,7 @@ class StaleWhileRevalidateCacheStrategy(
         try {
             val diskCache = imageLoaderProvider().diskCache ?: return
             diskCache.openSnapshot(url)?.use { diskCache.remove(url) }
+            HomePostersOnDisk.remove(url)
         } catch (_: Exception) { }
     }
 

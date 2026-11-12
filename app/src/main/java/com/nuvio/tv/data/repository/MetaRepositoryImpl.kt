@@ -254,15 +254,22 @@ class MetaRepositoryImpl @Inject constructor(
         }
     }
 
-    /** The answer's meta, or null when it is an addon's error item, which pauses the host like a 429. */
+    /** The answer's meta, or null when it is an addon's error item, which gives the host a short pause for background lookups. */
     private fun usableMeta(dto: com.nuvio.tv.data.remote.dto.MetaDto?, host: String, addonName: String) =
         dto?.takeUnless { isAddonErrorMetaId(it.id) } ?: run {
             if (dto != null) {
-                Log.w(TAG, "Meta answer is an addon error item host=$host addon=$addonName name=${dto.name}")
-                noteResponse(host, addonName, 429, null)
+                val pauseMs = rateLimits.recordErrorItem(host)
+                Log.w(TAG, "Meta answer is an addon error item host=$host addon=$addonName name=${dto.name} pausing ${pauseMs}ms")
             }
             null
         }
+
+    private fun pausedHostFailure(addon: Addon, host: String) = MetaAttemptFailure(
+        addonName = addon.displayName,
+        kind = MetaFailureKind.REQUEST_FAILED,
+        detail = if (rateLimits.isRateLimited(host)) "HTTP 429"
+        else context.getString(R.string.meta_error_detail_addon_request_failed)
+    )
 
     /** Ids an addon never claimed count apart, so they can't stop it being asked for the ones it does. */
     private fun Addon.missKey(id: String): String =
@@ -518,13 +525,9 @@ class MetaRepositoryImpl @Inject constructor(
                     continue
                 }
                 val host = addonHost(addon.baseUrl)
-                if (rateLimits.isPaused(host)) {
+                if (!fromTitlePage && rateLimits.isPaused(host)) {
                     noteSkipped(caller, addon.name)
-                    attemptedFailures += MetaAttemptFailure(
-                        addonName = addon.displayName,
-                        kind = MetaFailureKind.REQUEST_FAILED,
-                        detail = "HTTP 429"
-                    )
+                    attemptedFailures += pausedHostFailure(addon, host)
                     continue
                 }
                 val url = buildMetaUrl(addon.baseUrl, requestedType, id)
@@ -633,13 +636,9 @@ class MetaRepositoryImpl @Inject constructor(
                         val url = buildMetaUrl(addon.baseUrl, candidateType, id)
                         val host = addonHost(addon.baseUrl)
                         loopAddonNames += addon.displayName
-                        if (rateLimits.isPaused(host)) {
+                        if (!fromTitlePage && rateLimits.isPaused(host)) {
                             noteSkipped(caller, addon.name)
-                            loopFailures += MetaAttemptFailure(
-                                addonName = addon.displayName,
-                                kind = MetaFailureKind.REQUEST_FAILED,
-                                detail = "HTTP 429"
-                            )
+                            loopFailures += pausedHostFailure(addon, host)
                             allMissing = false
                             continue
                         }

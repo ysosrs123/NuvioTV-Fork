@@ -1,13 +1,13 @@
 package com.nuvio.tv.core.tmdb
 
 import android.util.Log
+import com.nuvio.tv.core.util.ArcDispatchers
 import com.nuvio.tv.data.repository.MDBListRepository
 import com.nuvio.tv.domain.model.MDBListSettings
 import com.nuvio.tv.domain.model.Meta
 import com.nuvio.tv.domain.model.MetaPreview
 import com.nuvio.tv.domain.model.TmdbSettings
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -38,7 +38,7 @@ class MetaPreviewEnricher @Inject constructor(
         return coroutineScope {
             val semaphore = Semaphore(ENRICHMENT_CONCURRENCY)
             items.map { item ->
-                async(Dispatchers.IO) {
+                async(ArcDispatchers.background) {
                     semaphore.withPermit {
                         try {
                             enrichItem(item, settings, mdbSettings.takeIf { mdbEnabled })

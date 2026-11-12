@@ -365,11 +365,27 @@ internal fun buildModernHomePresentation(
         cache.collectionRows.keys.retainAll(activeCollectionKeys)
     }
 
-    val lookups = buildCarouselRowLookups(rows)
+    val listed = withUniqueRowKeys(rows)
+    val lookups = buildCarouselRowLookups(listed)
     return ModernHomePresentationState(
-        rows = rows.asStable(),
+        rows = listed.asStable(),
         lookups = lookups
     )
+}
+
+/**
+ * Two rows with one key close the app the moment both are laid out (a folder whose sources resolve to the same
+ * catalogue). A repeat gets a suffix here, after the build cache, so the list can always be shown.
+ */
+internal fun withUniqueRowKeys(rows: List<HeroCarouselRow>): List<HeroCarouselRow> {
+    val seen = HashMap<String, Int>(rows.size)
+    var repeated = false
+    val unique = rows.map { row ->
+        val earlier = seen.getOrDefault(row.key, 0)
+        seen[row.key] = earlier + 1
+        if (earlier == 0) row else row.copy(key = "${row.key}#$earlier").also { repeated = true }
+    }
+    return if (repeated) unique else rows
 }
 
 private fun resolveVisibleHomeRows(input: ModernHomePresentationInput): List<HomeRow> {

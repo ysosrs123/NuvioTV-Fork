@@ -15,12 +15,12 @@ class MetaRequestGuardTest {
     fun `retry after in seconds sets the pause`() {
         val limits = AddonRateLimits(nowMs = { now })
 
-        assertEquals(12_000L, limits.recordRateLimited("bingecat.com", "12"))
-        assertTrue(limits.isPaused("bingecat.com"))
+        assertEquals(12_000L, limits.recordRateLimited("catalog.example.com", "12"))
+        assertTrue(limits.isPaused("catalog.example.com"))
         now += 11_999L
-        assertTrue(limits.isPaused("bingecat.com"))
+        assertTrue(limits.isPaused("catalog.example.com"))
         now += 1L
-        assertFalse(limits.isPaused("bingecat.com"))
+        assertFalse(limits.isPaused("catalog.example.com"))
     }
 
     @Test
@@ -53,9 +53,27 @@ class MetaRequestGuardTest {
     }
 
     @Test
+    fun `an error item gives a fixed short pause that is not a 429`() {
+        val limits = AddonRateLimits(nowMs = { now }, defaultPauseMs = 30_000L, errorItemPauseMs = 20_000L)
+
+        assertEquals(20_000L, limits.recordErrorItem("aio.example"))
+        assertTrue(limits.isPaused("aio.example"))
+        assertFalse(limits.isRateLimited("aio.example"))
+        now += 20_000L
+        assertEquals(20_000L, limits.recordErrorItem("aio.example"))
+        now += 20_000L
+        assertFalse(limits.isPaused("aio.example"))
+
+        assertEquals("error items never feed the 429 ladder", 30_000L, limits.recordRateLimited("aio.example", null))
+        assertTrue(limits.isRateLimited("aio.example"))
+        limits.recordErrorItem("aio.example")
+        assertTrue(limits.isRateLimited("aio.example"))
+    }
+
+    @Test
     fun `addon host ignores path and query`() {
-        assertEquals("aiometadatafortheweebs.midnightignite.me",
-            addonHost("https://aiometadatafortheweebs.midnightignite.me/stremio/abc/manifest.json?x=1"))
+        assertEquals("metadata.example.net",
+            addonHost("https://metadata.example.net/stremio/abc/manifest.json?x=1"))
         assertEquals("not a url", addonHost("not a url"))
     }
 

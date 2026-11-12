@@ -176,6 +176,8 @@ internal suspend fun HomeViewModel.loadAllCatalogsPipeline(
     catalogLoadGeneration += 1
     val generation = catalogLoadGeneration
     cancelInFlightCatalogLoads()
+    failedCatalogRetryJob?.cancel()
+    failedCatalogKeys.clear()
 
     // On reload (not first load), keep existing UI data visible while new
     // catalogs load in the background to avoid a flash of empty content.
@@ -491,6 +493,7 @@ internal fun HomeViewModel.loadCatalogPipeline(
                             replaceCatalogRow(key, result.data)
                             watchedTitles.refillPages.remove(key)
                         }
+                        failedCatalogKeys.remove(key)
                         // Trigger MDBList batch for newly loaded catalog data.
                         onCatalogRowItemsChanged(key)
                         // Remove placeholder descriptor now that real data is available
@@ -523,6 +526,10 @@ internal fun HomeViewModel.loadCatalogPipeline(
                         // Remove placeholder on error so it doesn't show forever
                         synchronized(catalogStateLock) {
                             placeholderDescriptors.removeAll { it.catalogKey == errorKey }
+                        }
+                        // One timed retry per failed row, later ones only with a refresh.
+                        if (readCatalogRow(errorKey) == null && failedCatalogKeys.add(errorKey)) {
+                            scheduleFailedCatalogRetry()
                         }
                         if (!hasCountedCompletion) {
                             pendingCatalogLoads = (pendingCatalogLoads - 1).coerceAtLeast(0)
@@ -1096,7 +1103,7 @@ internal fun HomeViewModel.reconcilePosterStatusObserversPipeline(rows: List<Cat
     val allSeriesItemsByKey = linkedMapOf<String, String>()
     rows.asSequence()
         .flatMap { row -> row.items.asSequence() }
-        .filter { it.apiType.equals("series", ignoreCase = true) || it.apiType.equals("tv", ignoreCase = true) }
+        .filter { it.apiType.equals("series", ignoreCase = true) || it.apiType.equals("tv", ignoreCase = true) || it.apiType.equals("anime", ignoreCase = true) }
         .forEach { item ->
             val key = homeItemStatusKey(item.id, item.apiType)
             if (key !in allSeriesItemsByKey) {
@@ -1358,8 +1365,26 @@ internal fun HomeViewModel.mergeRefreshedCatalogRow(
 }
 
 
-internal fun HomeViewModel.refreshVisibleCatalogsPipeline(requestedByUser: Boolean = false, forceReplace: Boolean = false) {
-    val loadedKeys = synchronized(catalogStateLock) { catalogsMap.keys.toSet() }
+private const val FAILED_CATALOG_RETRY_DELAY_MS = 30_000L
+
+private fun HomeViewModel.scheduleFailedCatalogRetry() {
+    if (failedCatalogRetryJob?.isActive == true) return
+    failedCatalogRetryJob = viewModelScope.launch {
+        delay(FAILED_CATALOG_RETRY_DELAY_MS)
+        refreshVisibleCatalogsPipeline(failedOnly = true)
+    }
+}
+
+internal fun HomeViewModel.refreshVisibleCatalogsPipeline(
+    requestedByUser: Boolean = false,
+    forceReplace: Boolean = false,
+    failedOnly: Boolean = false
+) {
+    val loadedKeys = if (failedOnly) {
+        failedCatalogKeys.toSet()
+    } else {
+        synchronized(catalogStateLock) { catalogsMap.keys.toSet() } + failedCatalogKeys
+    }
     if (loadedKeys.isEmpty()) return
 
     val toRefresh = addonsCache.flatMap { addon ->

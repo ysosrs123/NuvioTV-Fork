@@ -62,6 +62,8 @@ class HomePosterViewport {
     var lastRow by mutableIntStateOf(1)
     var scrolling by mutableStateOf(false)
     internal val visibleRequests = java.util.concurrent.atomic.AtomicInteger()
+    /** Uptime of the last focus move on Home; 0 before the first. */
+    @Volatile var lastFocusMoveAtMs = 0L
     internal val progressiveLock = Mutex()
 
     /** One disk warmer per Home viewport; three download slots stay available. */
@@ -163,11 +165,70 @@ internal fun homePosterPrefetchRows(first: Int, last: Int, previousFirst: Int, a
     return (forward + if (up) last + 1 else first - 1).filter { it >= 0 }
 }
 
+/** Background poster lanes left while a Home list is moving. Posters on screen keep all of theirs. */
+internal fun homePosterBackgroundLanes(lanes: Int, scrolling: Boolean): Int = if (scrolling) 1 else lanes
+
+const val HOME_SCROLL_LANES_RESTORE_MS = 150L
+const val HOME_SCROLL_REPORT_EVERY_MS = 1_000L
+private const val HOME_SCROLL_REPORT_STALE_MS = 3_000L
+
+/** Home lists report scrolling here. A report goes stale, so a lost "stopped" cannot keep the lanes cut. */
+internal class HomeScrollSignal(private val nowMs: () -> Long) {
+    @Volatile private var reported = false
+    @Volatile private var reportedAtMs = 0L
+    @Volatile var onStopped: (() -> Unit)? = null
+
+    val scrolling: Boolean get() = reported && nowMs() - reportedAtMs < HOME_SCROLL_REPORT_STALE_MS
+
+    fun reportScrolling() {
+        reportedAtMs = nowMs()
+        reported = true
+    }
+
+    fun reportStopped() {
+        reported = false
+        onStopped?.invoke()
+    }
+}
+
+internal val HomePosterScroll = HomeScrollSignal { android.os.SystemClock.uptimeMillis() }
+
+/**
+ * Posters seen in the disk cache. It only picks the lane: the fetcher opens the file itself, so an entry that is
+ * no longer true costs a wait in the wrong lane and nothing else.
+ */
+internal class KnownDiskKeys(private val limit: Int = 4_000) {
+    private val keys = HashSet<String>()
+
+    operator fun contains(key: String): Boolean = synchronized(keys) { key in keys }
+
+    fun add(key: String) {
+        synchronized(keys) {
+            if (keys.size >= limit) keys.clear()
+            keys += key
+        }
+    }
+
+    fun remove(key: String) {
+        synchronized(keys) { keys.remove(key) }
+    }
+
+    fun clear() {
+        synchronized(keys) { keys.clear() }
+    }
+}
+
+internal val HomePostersOnDisk = KnownDiskKeys()
+
 /**
  * Bounded priority queue; cancellation releases a slot even when granted just before await. Background work holds at
  * most [backgroundConcurrency] slots, so the rest stay free for what is on screen.
  */
-internal class ImagePriorityQueue(private val concurrency: Int, private val backgroundConcurrency: Int = concurrency) {
+internal class ImagePriorityQueue(
+    private val concurrency: Int,
+    private val backgroundConcurrency: Int = concurrency,
+    private val scrolling: () -> Boolean = { false }
+) {
     private class Ticket(val rank: () -> Int, val background: () -> Boolean, val ready: CompletableDeferred<Unit> = CompletableDeferred()) {
         var countedAsBackground = false
     }
@@ -197,9 +258,14 @@ internal class ImagePriorityQueue(private val concurrency: Int, private val back
         }
     }
 
+    /** Hands out lanes that opened without a request finishing, such as when scrolling stops. */
+    fun recheck() {
+        synchronized(waiting) { drain() }
+    }
+
     private fun drain() {
         while (active < concurrency) {
-            val backgroundRoom = activeBackground < backgroundConcurrency
+            val backgroundRoom = activeBackground < homePosterBackgroundLanes(backgroundConcurrency, scrolling())
             val next = waiting.filter { backgroundRoom || !it.background() }.minByOrNull { it.rank() } ?: return
             waiting.remove(next)
             active++
@@ -214,11 +280,21 @@ internal class ImagePriorityQueue(private val concurrency: Int, private val back
 
 /** Only Home artwork opts in. Cached images never wait behind network/decode work. */
 class HomePosterLoadingInterceptor(diskDecodeSlots: Int = 2) : Interceptor {
-    private val downloads = ImagePriorityQueue(HOME_POSTER_DOWNLOADS, HOME_POSTER_BACKGROUND_DOWNLOADS)
+    private val downloads = ImagePriorityQueue(HOME_POSTER_DOWNLOADS, HOME_POSTER_BACKGROUND_DOWNLOADS) {
+        HomePosterScroll.scrolling
+    }
     private val cached = diskDecodeSlots.coerceIn(1, HOME_POSTER_BITMAP_PARALLELISM).let { slots ->
-        ImagePriorityQueue(slots, (slots - 1).coerceAtLeast(1))
+        ImagePriorityQueue(slots, (slots - 1).coerceAtLeast(1)) { HomePosterScroll.scrolling }
     }
     private val locks = PosterRequestLocks()
+
+    init {
+        HomePosterScroll.onStopped = {
+            downloads.recheck()
+            cached.recheck()
+        }
+    }
+
     override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
         val priority = chain.request.extras[HomePosterPriorityKey] ?: return chain.proceed()
         val visible = !priority.prefetch && !priority.progressive
@@ -242,11 +318,20 @@ class HomePosterLoadingInterceptor(diskDecodeSlots: Int = 2) : Interceptor {
                     sizedHomeArtworkUrl(it, (chain.size.width as? coil3.size.Dimension.Pixels)?.px)
                 }
                 // Any saved copy is shown straight from disk; an older one is checked online afterwards.
-                val onDisk = request.diskCachePolicy.readEnabled && diskKey != null && withContext(Dispatchers.IO) {
-                    loader.diskCache?.openSnapshot(diskKey)?.use { true } ?: false
-                }
+                val known = diskKey != null && diskKey in HomePostersOnDisk
+                val onDisk = request.diskCachePolicy.readEnabled && diskKey != null &&
+                    (known || withContext(Dispatchers.IO) {
+                        loader.diskCache?.openSnapshot(diskKey)?.use { true } ?: false
+                    })
                 // Local files get independent slots; absent images cannot hold up their decode.
-                (if (onDisk) cached else downloads).run(shared::rank, { shared.background }) { chain.proceed() }
+                val loaded = (if (onDisk) cached else downloads).run(shared::rank, { shared.background }) {
+                    chain.proceed()
+                }
+                if (onDisk && diskKey != null) {
+                    val fromDisk = (loaded as? coil3.request.SuccessResult)?.dataSource == coil3.decode.DataSource.DISK
+                    if (fromDisk) HomePostersOnDisk.add(diskKey) else if (known) HomePostersOnDisk.remove(diskKey)
+                }
+                loaded
             }
             if (com.nuvio.tv.BuildConfig.DEBUG || android.util.Log.isLoggable("HomePosterCache", android.util.Log.VERBOSE)) {
                 val source = (result as? coil3.request.SuccessResult)?.dataSource?.name ?: "ERROR"

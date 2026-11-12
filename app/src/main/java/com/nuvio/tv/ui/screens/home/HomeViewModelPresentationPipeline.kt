@@ -675,6 +675,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
         deferredEnrichItem = item
         return
     }
+    val stepWaitMs = focusStepPace.onFocus(System.nanoTime() / 1_000_000L)
     if (pendingTmdbEnrichItemId != item.id) {
         tmdbEnrichFocusJob?.cancel()
         pendingTmdbEnrichItemId = null
@@ -734,6 +735,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
     tmdbEnrichFocusJob = viewModelScope.launch(Dispatchers.IO) {
         if (_uiState.value.homeLayout != HomeLayout.MODERN)
                     delay(HomeViewModel.EXTERNAL_META_PREFETCH_FOCUS_DEBOUNCE_MS)
+        else if (stepWaitMs > 0) delay(stepWaitMs)
         if (pendingTmdbEnrichItemId != item.id) {
             if (_enrichingItemId.value == item.id) setEnrichingItemId(null)
             return@launch
@@ -878,7 +880,7 @@ internal fun HomeViewModel.preloadAdjacentItemPipeline(item: MetaPreview) {
     adjacentItemPrefetchJobs.launch(viewModelScope, item.id, Dispatchers.IO) {
         val tmdbEnabledForCurrentLayout = currentTmdbSettings.enabled &&
             (_uiState.value.homeLayout != HomeLayout.MODERN || currentTmdbSettings.modernHomeEnabled)
-        delay(HomeViewModel.EXTERNAL_META_PREFETCH_ADJACENT_DEBOUNCE_MS)
+        delay(HomeViewModel.EXTERNAL_META_PREFETCH_ADJACENT_DEBOUNCE_MS + focusStepPace.extraWaitNowMs)
 
         val initialPreview = _enrichedPreviews.value[item.id] ?: item
         val artworkWarmup = async { prefetchHeroArtwork(initialPreview) }
@@ -1224,15 +1226,18 @@ private fun HomeViewModel.updateCatalogItemWithMeta(itemId: String, meta: Meta) 
 
     // If external meta brought new trailerYtIds and the item has no trailer resolved yet, retry.
     // Only retry if this item is currently focused — avoid prefetching trailers for adjacent items.
-    if ((incomingTrailerYtIds.isNotEmpty() || gainsImdbId) &&
-        !trailerPreviewUrlsState.containsKey(itemId) && activeTrailerPreviewItemId == itemId) {
-        trailerPreviewNegativeCache.remove(itemId)
-        trailerPreviewLoadingIds.remove(itemId)
-        // Bump version so any in-flight pipeline for this item treats itself as stale
-        // and won't overwrite the retry result with a negative cache entry.
-        trailerPreviewRequestVersion++
-        val currentItem = findCatalogItemById(itemId) ?: return
-        requestTrailerPreviewPipeline(currentItem)
+    // Callers run on IO; the trailer bookkeeping is only touched on the main thread.
+    viewModelScope.launch(Dispatchers.Main.immediate) {
+        if ((incomingTrailerYtIds.isNotEmpty() || gainsImdbId) &&
+            !trailerPreviewUrlsState.containsKey(itemId) && activeTrailerPreviewItemId == itemId) {
+            trailerPreviewNegativeCache.remove(itemId)
+            trailerPreviewLoadingIds.remove(itemId)
+            // Bump version so any in-flight pipeline for this item treats itself as stale
+            // and won't overwrite the retry result with a negative cache entry.
+            trailerPreviewRequestVersion++
+            val currentItem = findCatalogItemById(itemId) ?: return@launch
+            requestTrailerPreviewPipeline(currentItem)
+        }
     }
 }
 

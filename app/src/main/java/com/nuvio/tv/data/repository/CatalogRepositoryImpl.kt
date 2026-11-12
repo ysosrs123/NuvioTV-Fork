@@ -297,9 +297,12 @@ class CatalogRepositoryImpl @Inject constructor(
         // Metas may contain null elements and entries with
         // blank id/name (malformed-entry guard). Skip those; toDomainOrNull
         // returns null for a blank id or name.
-        val rawItemCount = data.metas.size
+        val rawItemCount = catalogPageTake(data.metas.size)
+        if (rawItemCount < data.metas.size) {
+            Log.i(TAG, "CATALOG_PAGE_CAP catalogId=$catalogId items=${data.metas.size} kept=$rawItemCount")
+        }
         val merged = LinkedHashMap<String, MetaPreview>(rawItemCount)
-        data.metas.forEach { dto ->
+        data.metas.subList(0, rawItemCount).forEach { dto ->
             val item = dto?.toDomainOrNull(type, addonBaseUrl) ?: return@forEach
             val prior = merged[item.id]
             merged[item.id] = if (prior == null) {
@@ -417,3 +420,11 @@ class CatalogRepositoryImpl @Inject constructor(
         return URLEncoder.encode(value, "UTF-8").replace("+", "%20")
     }
 }
+
+/**
+ * A single catalogue answer of many thousands of entries (whole channel lists sent as one page) is taken in slices:
+ * the rest is asked for from this position when the row is scrolled, where the addon supports that.
+ */
+internal const val MAX_CATALOG_PAGE_ITEMS = 2_000
+
+internal fun catalogPageTake(received: Int, limit: Int = MAX_CATALOG_PAGE_ITEMS): Int = minOf(received, limit)

@@ -10,7 +10,7 @@ class MetaCaller(val name: String) : AbstractCoroutineContextElement(MetaCaller)
     companion object Key : CoroutineContext.Key<MetaCaller>
 }
 
-/** A title page the viewer opened: it asks even an addon that is resting, and leaves the rest as it was. */
+/** A title page the viewer opened: it asks even an addon that is resting or a host that is paused, and leaves the rest as it was. */
 internal const val TITLE_PAGE_META_CALLER = "title-page"
 
 /** Continue Watching lookups, which can wait while a film plays. */
@@ -23,13 +23,15 @@ internal fun addonHost(url: String): String =
  * Pauses meta requests to a host after it answers 429. Several installed addons can live on one host
  * (two AIOMetadata configs, for example), so the pause is per host rather than per addon. Honours
  * Retry-After; without one the pause starts at [defaultPauseMs] and doubles while 429s keep coming.
+ * An addon error item gives a fixed [errorItemPauseMs] pause instead, which never counts as a 429.
  */
 internal class AddonRateLimits(
     private val nowMs: () -> Long = System::currentTimeMillis,
     private val defaultPauseMs: Long = 30_000L,
-    private val maxPauseMs: Long = 10 * 60_000L
+    private val maxPauseMs: Long = 10 * 60_000L,
+    private val errorItemPauseMs: Long = 30_000L
 ) {
-    private class State(val pausedUntilMs: Long, val streak: Int)
+    private class State(val pausedUntilMs: Long, val streak: Int, val rateLimited: Boolean)
 
     private val states = HashMap<String, State>()
 
@@ -48,7 +50,24 @@ internal class AddonRateLimits(
         val fallback = (defaultPauseMs shl (streak - 1).coerceIn(0, 5)).coerceAtMost(maxPauseMs)
         val pause = retryAfterDelayMillis(retryAfterHeader, now, fallback).coerceIn(1_000L, maxPauseMs)
         val until = maxOf(previous?.pausedUntilMs ?: 0L, now + pause)
-        states[host] = State(until, streak)
+        states[host] = State(until, streak, rateLimited = true)
+        return until - now
+    }
+
+    /** True while the pause on [host] comes from a real 429 answer. */
+    @Synchronized
+    fun isRateLimited(host: String): Boolean {
+        val state = states[host] ?: return false
+        return state.rateLimited && nowMs() < state.pausedUntilMs
+    }
+
+    /** Returns the pause in ms that now applies to [host]. */
+    @Synchronized
+    fun recordErrorItem(host: String): Long {
+        val now = nowMs()
+        val previous = states[host]?.takeIf { now < it.pausedUntilMs }
+        val until = maxOf(previous?.pausedUntilMs ?: 0L, now + errorItemPauseMs)
+        states[host] = State(until, states[host]?.streak ?: 0, rateLimited = previous?.rateLimited == true)
         return until - now
     }
 

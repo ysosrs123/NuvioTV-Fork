@@ -26,6 +26,62 @@ class HomeCatalogIncrementalTest {
         checkCompletion(com.nuvio.tv.core.network.NetworkResult.Error("offline"))
     }
 
+    @Test fun `a row whose first load failed is asked for again and shown`() = runTest {
+        val vm = failingViewModel(
+            com.nuvio.tv.core.network.NetworkResult.Error("offline"),
+            com.nuvio.tv.core.network.NetworkResult.Success(row())
+        )
+        val key = vm.catalogKey(addonId = "fast", type = retryCatalog.apiType, catalogId = retryCatalog.id)
+
+        vm.loadCatalogPipeline(retryAddon, retryCatalog, vm.catalogLoadGeneration).join()
+        assertTrue(key in vm.failedCatalogKeys)
+        assertNull(vm.readCatalogRow(key))
+
+        advanceTimeBy(31_000L)
+        runCurrent()
+
+        assertNotNull(vm.readCatalogRow(key))
+        assertTrue(vm.failedCatalogKeys.isEmpty())
+        vm.viewModelScope.cancel()
+    }
+
+    @Test fun `a row that keeps failing gets one timed retry, then waits for a refresh`() = runTest {
+        val vm = failingViewModel(com.nuvio.tv.core.network.NetworkResult.Error("offline"))
+
+        vm.loadCatalogPipeline(retryAddon, retryCatalog, vm.catalogLoadGeneration).join()
+        advanceTimeBy(31_000L)
+        runCurrent()
+        advanceTimeBy(600_000L)
+        runCurrent()
+        verify(exactly = 2) { vm.catalogRepository.getCatalog(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+
+        vm.refreshVisibleCatalogsPipeline()
+        runCurrent()
+        verify(exactly = 3) { vm.catalogRepository.getCatalog(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+        vm.viewModelScope.cancel()
+    }
+
+    private val retryCatalog = com.nuvio.tv.domain.model.CatalogDescriptor(
+        type = com.nuvio.tv.domain.model.ContentType.MOVIE, id = "catalog", name = "Fast row"
+    )
+    private val retryAddon = com.nuvio.tv.domain.model.Addon(
+        id = "fast", name = "Fast", version = "1", description = null, logo = null,
+        baseUrl = "https://example.test", catalogs = listOf(retryCatalog), types = emptyList(), resources = emptyList()
+    )
+
+    private fun failingViewModel(
+        vararg results: com.nuvio.tv.core.network.NetworkResult<com.nuvio.tv.domain.model.CatalogRow>
+    ): HomeViewModel {
+        val vm = spyk(newViewModel())
+        every { vm.scheduleUpdateCatalogRows() } just Runs
+        vm.addonsCache = listOf(retryAddon)
+        vm.pendingCatalogLoads = 1
+        every {
+            vm.catalogRepository.getCatalog(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+        } returnsMany results.map { flowOf(it) }
+        return vm
+    }
+
     private suspend fun kotlinx.coroutines.test.TestScope.checkCompletion(
         result: com.nuvio.tv.core.network.NetworkResult<com.nuvio.tv.domain.model.CatalogRow>
     ) {

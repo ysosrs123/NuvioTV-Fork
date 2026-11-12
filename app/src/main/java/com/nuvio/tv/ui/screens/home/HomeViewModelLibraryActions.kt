@@ -363,7 +363,8 @@ private fun buildCompletedMovieProgress(item: MetaPreview): WatchProgress {
 
 fun HomeViewModel.togglePosterSeriesWatched(item: MetaPreview) {
     val isSeries = item.apiType.equals("series", ignoreCase = true) ||
-        item.apiType.equals("tv", ignoreCase = true)
+        item.apiType.equals("tv", ignoreCase = true) ||
+        item.apiType.equals("anime", ignoreCase = true)
     if (!isSeries) return
     val statusKey = homeItemStatusKey(item.id, item.apiType)
     if (statusKey in _uiState.value.movieWatchedPending) return

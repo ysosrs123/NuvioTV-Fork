@@ -98,8 +98,6 @@ class HomeContinueWatchingOwnershipTest {
     @Test fun `profile change rejects a delayed old-profile snapshot restore`() = runTest {
         val vm=newViewModel()
         val admitted=CompletableDeferred<Unit>();val finish=CompletableDeferred<Unit>()
-        val newRead=AtomicBoolean(false)
-        coEvery { vm.cwEnrichmentCache.getInProgressSnapshot(2) } coAnswers { newRead.set(true);emptyList() }
         val old=com.nuvio.tv.data.local.CachedInProgressItem("old","movie","old",null,null,null,"old",null,null,null,10,100,1,10f)
         coEvery { vm.cwEnrichmentCache.getInProgressSnapshot(1) } coAnswers {
             admitted.complete(Unit)
@@ -113,9 +111,27 @@ class HomeContinueWatchingOwnershipTest {
         activeProfileFlow.value=2;runCurrent()
         vm._uiState.update { it.copy(continueWatchingItems=listOf(ContinueWatchingItem.InProgress(current))) }
         finish.complete(Unit)
-        waitFor { subscriptions.contains(2) && newRead.get() }
+        waitFor { subscriptions.contains(2) }
         assertEquals(current,(vm.uiState.value.continueWatchingItems.single() as ContinueWatchingItem.InProgress).progress)
-        coVerify(atLeast=1) { vm.cwEnrichmentCache.getInProgressSnapshot(2) }
+    }
+
+    @Test fun `a restore leaves a list that is already on screen alone`() = runTest {
+        val vm=newViewModel()
+        val shown=WatchProgress("shown","movie","shown",null,null,null,"shown",null,null,null,10,100,1)
+        vm._uiState.update { it.copy(continueWatchingItems=listOf(ContinueWatchingItem.InProgress(shown))) }
+        val saved=com.nuvio.tv.data.local.CachedInProgressItem("saved","movie","saved",null,null,null,"saved",null,null,null,10,100,1,10f)
+        coEvery { vm.cwEnrichmentCache.getInProgressSnapshot(1) } returns listOf(saved)
+        vm.restoreContinueWatchingSnapshot(1,vm.cwHomeOwner.value,0)
+        assertEquals(shown,(vm._uiState.value.continueWatchingItems.single() as ContinueWatchingItem.InProgress).progress)
+        coVerify(exactly=0) { vm.cwEnrichmentCache.getInProgressSnapshot(any()) }
+    }
+
+    @Test fun `a restored in-progress card keeps its content language`() = runTest {
+        val vm=newViewModel()
+        val saved=com.nuvio.tv.data.local.CachedInProgressItem("film","movie","film",null,null,null,"film",null,null,null,10,100,1,10f,contentLanguage="ja")
+        coEvery { vm.cwEnrichmentCache.getInProgressSnapshot(1) } returns listOf(saved)
+        vm.restoreContinueWatchingSnapshot(1,vm.cwHomeOwner.value,0)
+        assertEquals("ja",(vm._uiState.value.continueWatchingItems.single() as ContinueWatchingItem.InProgress).contentLanguage)
     }
 
     @Test fun `leaving Home cancels already admitted rich metadata lookup`() = runTest {
