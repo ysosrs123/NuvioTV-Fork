@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import com.nuvio.tv.core.network.ADDON_REQUEST_TIMEOUT_MS
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -41,6 +42,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.sync.AddonSyncService
+import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -88,8 +91,11 @@ class AddonRepositoryImpl(
         private const val TAG = "AddonRepository"
         private const val MANIFEST_CACHE_PREFS = "addon_manifest_cache"
         private const val MANIFEST_CACHE_KEY = "manifests_v2"
-        private const val LEGACY_MANIFEST_CACHE_KEY = "manifests"
-        private const val MANIFEST_CACHE_TTL_MS = 6 * 60 * 60 * 1000L 
+        private const val MANIFEST_CACHE_TTL_MS = 6 * 60 * 60 * 1000L
+        private const val MANIFEST_CACHE_FILE = "addon-manifests.json"
+        private const val MANIFEST_PERSIST_SETTLE_MS = 1_000L
+        // An older cache above this is dropped unread: loading it as one string is what ran boxes out of memory.
+        private const val LEGACY_CACHE_MAX_BYTES = 8L * 1024 * 1024
     }
 
     private val syncScope = CoroutineScope(SupervisorJob() + dispatcher)
@@ -254,34 +260,70 @@ class AddonRepositoryImpl(
         lastManifestRefreshAttemptTime = clock()
     }
 
+    private val manifestFile: AddonManifestFile? by lazy {
+        runCatching { AddonManifestFile(File(context.filesDir, MANIFEST_CACHE_FILE), gson) }.getOrNull()
+    }
+    private val persistQueued = AtomicBoolean(false)
+    @Volatile
+    private var legacyCacheDropped = false
+
     private suspend fun loadManifestCacheFromDisk() = kotlinx.coroutines.withContext(dispatcher) {
         try {
-            val prefs = context.getSharedPreferences(MANIFEST_CACHE_PREFS, Context.MODE_PRIVATE)
-            if (prefs.contains(LEGACY_MANIFEST_CACHE_KEY)) {
-                prefs.edit().remove(LEGACY_MANIFEST_CACHE_KEY).apply()
-            }
-            val json = prefs.getString(MANIFEST_CACHE_KEY, null) ?: return@withContext
-            val type = object : TypeToken<Map<String, Addon>>() {}.type
-            val cached: Map<String, Addon> = gson.fromJson(json, type) ?: return@withContext
+            val file = manifestFile
+            val saved = file?.takeIf { it.exists() }
+            val cached = if (saved != null) saved.read() else readLegacyManifestCache()
+            if (cached == null) return@withContext
             synchronized(manifestCacheLock) {
                 manifestCache.putAll(cached)
             }
             bumpManifestCacheRevision()
+            if (saved != null) ArcSetupSize.manifestCacheBytes = saved.sizeBytes() else persistManifestCacheToDisk()
             Log.d(TAG, "Loaded ${cached.size} cached manifests from disk")
         } catch (e: Exception) {
             Log.w(TAG, "Failed to load manifest cache from disk", e)
+        } catch (e: OutOfMemoryError) {
+            Log.w(TAG, "Manifest cache too large to load, fetching manifests again")
         }
     }
 
+    private fun readLegacyManifestCache(): Map<String, Addon>? {
+        val bytes = runCatching {
+            File(context.applicationInfo.dataDir, "shared_prefs/$MANIFEST_CACHE_PREFS.xml").length()
+        }.getOrDefault(0L)
+        if (bytes > LEGACY_CACHE_MAX_BYTES) {
+            Log.w(TAG, "Dropping the old manifest cache unread (${bytes shr 20} MB)")
+            dropLegacyManifestCache()
+            return null
+        }
+        val json = context.getSharedPreferences(MANIFEST_CACHE_PREFS, Context.MODE_PRIVATE)
+            .getString(MANIFEST_CACHE_KEY, null) ?: return null
+        val type = object : TypeToken<Map<String, Addon>>() {}.type
+        return gson.fromJson(json, type)
+    }
+
+    private fun dropLegacyManifestCache() {
+        if (legacyCacheDropped) return
+        legacyCacheDropped = true
+        runCatching { context.deleteSharedPreferences(MANIFEST_CACHE_PREFS) }
+    }
+
+    /** Changes that land close together (a refresh of every addon) are written once. */
     private fun persistManifestCacheToDisk() {
+        if (!persistQueued.compareAndSet(false, true)) return
         syncScope.launch {
+            delay(MANIFEST_PERSIST_SETTLE_MS)
             persistMutex.withLock {
+                persistQueued.set(false)
                 try {
+                    val file = manifestFile ?: return@withLock
                     val snapshot = synchronized(manifestCacheLock) { manifestCache.toMap() }
-                    val prefs = context.getSharedPreferences(MANIFEST_CACHE_PREFS, Context.MODE_PRIVATE)
-                    prefs.edit().putString(MANIFEST_CACHE_KEY, gson.toJson(snapshot)).apply()
+                    file.write(snapshot)
+                    dropLegacyManifestCache()
+                    ArcSetupSize.manifestCacheBytes = file.sizeBytes()
                 } catch (e: Exception) {
                     Log.w(TAG, "Failed to persist manifest cache to disk", e)
+                } catch (e: OutOfMemoryError) {
+                    Log.w(TAG, "Out of memory persisting the manifest cache, skipped")
                 }
             }
         }
@@ -367,6 +409,7 @@ class AddonRepositoryImpl(
                 }
             }.flowOn(dispatcher)
         }
+        .onEach { ArcSetupSize.noteAddons(it) }
         .stateIn(syncScope, SharingStarted.Eagerly, emptyList<Addon>())
 
     override fun getInstalledAddons(): Flow<List<Addon>> = installedAddonsFlow

@@ -114,6 +114,11 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         super.unregisterActivityLifecycleCallbacks(guardedLifecycleCallbacks.remove(callback) ?: callback)
     }
 
+    override fun attachBaseContext(base: Context) {
+        com.nuvio.tv.core.util.ArcDispatchers.configure(base)
+        super.attachBaseContext(base)
+    }
+
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_create")

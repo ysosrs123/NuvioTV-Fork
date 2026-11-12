@@ -48,4 +48,25 @@ class ArcCrashFileTest {
     @Test fun noFileGivesNothing() {
         assertNull(ArcCrashFile.linesFor(File(Files.createTempDirectory("crash").toFile(), "none.txt"), 1L))
     }
+
+    @Test fun threadGroupsCountNativeThreadsByName() {
+        val tasks = Files.createTempDirectory("task").toFile()
+        val names = List(66) { "DefaultDispatch" } + List(22) { i -> "OkHttp $i" } + listOf("RenderThread", "hwuiTask1", "hwuiTask2")
+        names.forEachIndexed { i, name -> File(tasks, "${1000 + i}").apply { mkdirs() }.resolve("comm").writeText(name + "\n") }
+        File(tasks, "9999").mkdirs()
+
+        val read = ArcCrashFile.allThreadNames(tasks)
+
+        assertEquals(names.size, read.size)
+        assertEquals("DefaultDispatch 66, OkHttp 22, hwuiTask 2, RenderThread 1", ArcCrashFile.threadGroups(read))
+    }
+
+    @Test fun threadGroupsShowTenLargest() {
+        val names = (1..12).flatMap { g -> List(13 - g) { "pool$g-x" } }
+        val groups = ArcCrashFile.threadGroups(names).split(", ")
+        assertEquals(10, groups.size)
+        assertEquals("pool1-x 12", groups.first())
+        assertEquals("unknown", ArcCrashFile.threadGroups(emptyList()))
+        assertTrue(ArcCrashFile.allThreadNames(File("/no/such/dir")).isEmpty())
+    }
 }

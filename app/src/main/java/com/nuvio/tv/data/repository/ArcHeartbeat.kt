@@ -8,6 +8,7 @@ import android.os.Debug
 import android.os.PowerManager
 import android.os.SystemClock
 import com.nuvio.tv.core.player.MemoryPressure
+import com.nuvio.tv.core.player.PlaybackMemoryFacts
 import com.nuvio.tv.core.player.thumbnail.MemoryGovernor
 import java.io.File
 import java.text.SimpleDateFormat
@@ -50,6 +51,7 @@ object ArcHeartbeat {
         previous = earlier
         file = target
         val app = context.applicationContext
+        ArcSetupSize.attach(runCatching { File(app.applicationInfo.dataDir) }.getOrNull())
         MemoryPressure.register(app)
         MemoryPressure.addListener(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE) { level -> noteTrim(level) }
         Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "arc-heartbeat").apply { isDaemon = true } }
@@ -115,14 +117,21 @@ object ArcHeartbeat {
             add("time=${System.currentTimeMillis()}")
             add("Written: ${SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())}")
             add("Process up: ${(SystemClock.uptimeMillis() - android.os.Process.getStartUptimeMillis()) / 1000} s")
+            add("Threads in process: ${names.size} Java, ${ArcCrashFile.processThreadCount() ?: "unknown"} total")
             add("Java heap: ${(runtime.totalMemory() - runtime.freeMemory()) shr 20} of ${runtime.maxMemory() shr 20} MB")
             add("Native heap: ${Debug.getNativeHeapAllocatedSize() shr 20} MB")
+            com.nuvio.tv.core.player.PlayerStrays.line()?.let(::add)
             add(gcLine)
             add("Box memory: ${mem.availMem shr 20} MB free, low-memory line ${mem.threshold shr 20} MB, low=${mem.lowMemory}" +
                 (swap?.let { ", swap free ${it.swapFreeMb} of ${it.swapTotalMb} MB" } ?: ""))
             add("Thermal status: $thermal")
-            add("Playing: ${if (runCatching(playing).getOrDefault(false)) "yes" else "no"}")
+            MemoryDetail.line()?.let(::add)
+            OpenFilesGuard.line()?.let(::add)
+            val isPlaying = runCatching(playing).getOrDefault(false)
+            add("Playing: ${if (isPlaying) "yes" else "no"}")
+            if (isPlaying) addAll(runCatching { PlaybackMemoryFacts.lines() }.getOrDefault(emptyList()))
             add("Threads: ${names.size} (${pools(names)})")
+            addAll(ArcSetupSize.lines())
             synchronized(trims) { if (trims.isNotEmpty()) add("Memory warnings: ${trims.joinToString("; ")}") }
             add("Recent: ${ArcBreadcrumbs.recent().takeLast(4).joinToString("; ")}")
         }

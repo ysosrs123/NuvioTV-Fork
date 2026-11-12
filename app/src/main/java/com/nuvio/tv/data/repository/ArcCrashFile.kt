@@ -76,11 +76,12 @@ object ArcCrashFile {
         val runtime = Runtime.getRuntime()
         return listOf(
             "Process up: ${(SystemClock.uptimeMillis() - Process.getStartUptimeMillis()) / 1000} s",
-            "Threads: ${threadCount() ?: Thread.activeCount()}",
+            "Threads: ${processThreadCount()?.let { "$it total" } ?: Thread.activeCount()}",
+            "Thread groups: ${threadGroups(allThreadNames())}",
             "Java heap: ${(runtime.totalMemory() - runtime.freeMemory()) shr 20} of ${runtime.maxMemory() shr 20} MB",
             "Native heap: ${Debug.getNativeHeapAllocatedSize() shr 20} MB",
             "64-bit process: ${if (Process.is64Bit()) "yes" else "no"}"
-        )
+        ) + ArcSetupSize.lines()
     }
 
     private fun write(target: File, thread: Thread, error: Throwable, playing: Boolean) {
@@ -93,7 +94,16 @@ object ArcCrashFile {
         temp.renameTo(target)
     }
 
-    private fun threadCount(): Int? = runCatching {
+    /** Every thread in the process, native ones included; names are cut to 15 characters by the kernel. */
+    internal fun allThreadNames(taskDir: File = File("/proc/self/task")): List<String> =
+        taskDir.listFiles().orEmpty().mapNotNull { task ->
+            runCatching { File(task, "comm").readText().trim() }.getOrNull()
+        }
+
+    internal fun threadGroups(names: List<String>): String =
+        if (names.isEmpty()) "unknown" else ArcHeartbeat.pools(names)
+
+    internal fun processThreadCount(): Int? = runCatching {
         File("/proc/self/status").useLines { lines ->
             lines.firstOrNull { it.startsWith("Threads:") }?.substringAfter(':')?.trim()?.toInt()
         }
