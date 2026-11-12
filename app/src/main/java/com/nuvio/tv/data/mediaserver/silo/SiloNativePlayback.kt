@@ -186,8 +186,10 @@ internal data class WatchProviderCapabilitiesWire(@SerialName("scrobble_playback
 internal class SiloPlayState(
     val installationId: String,
     val itemId: String,
-    val timelineOffsetSeconds: Double
+    val timelineOffsetSeconds: Double,
+    val durationSeconds: Double
 ) {
+    @Volatile var started = false
     private var sequence = 0L
 
     @Synchronized

@@ -33,6 +33,7 @@ import com.nuvio.tv.data.mediaserver.ServerTrack
 import com.nuvio.tv.data.mediaserver.ServerTrickplay
 import com.nuvio.tv.data.mediaserver.ServerTrickplaySet
 import com.nuvio.tv.domain.model.Subtitle
+import com.nuvio.tv.domain.model.WatchProgress
 import com.nuvio.tv.data.mediaserver.ServerSession
 import com.nuvio.tv.data.mediaserver.ServerSignIn
 import com.nuvio.tv.data.mediaserver.ServerSignInIssue
@@ -389,7 +390,7 @@ class SiloNativeProvider internal constructor(
     override suspend fun setPlayed(session: ServerSession, itemId: String, played: Boolean) {
         // A title being played is marked by Silo itself when the play ends past its watched point.
         val justPlayed = recentlyPlayed[itemId]?.let { now() - it < RECENT_PLAY_MS } == true
-        if (played && (justPlayed || playStates.values.any { it.itemId == itemId })) return
+        if (played && (justPlayed || playStates.values.any { it.started && it.itemId == itemId })) return
         send<Unit, Unit>(
             if (played) "POST" else "DELETE",
             session.address,
@@ -750,7 +751,8 @@ class SiloNativeProvider internal constructor(
             }
         val selectedAudio = plan.selectedTracks.audio?.index
         val selectedSubtitle = plan.selectedTracks.subtitle?.index
-        playStates[sessionId] = SiloPlayState(installationId, itemId, plan.timeline.timelineOffsetSeconds)
+        val duration = plan.source.durationSeconds?.takeIf { it > 0.0 } ?: version?.durationSeconds?.toDouble() ?: 0.0
+        playStates[sessionId] = SiloPlayState(installationId, itemId, plan.timeline.timelineOffsetSeconds, duration)
         return ServerPlaybackSession(
             target = ServerPlaybackTarget(request.target.item, effectiveFile),
             mediaSourceId = effectiveFile,
@@ -810,6 +812,7 @@ class SiloNativeProvider internal constructor(
     override suspend fun report(session: ServerSession, playback: ServerPlaybackSession, event: ServerPlaybackEvent) {
         val sessionId = playback.playSessionId ?: return
         val state = playStates[sessionId] ?: return
+        if (event.type != ServerPlaybackEventType.STOP) state.started = true
         val position = event.positionMs.coerceAtLeast(0L) / 1_000.0 + state.timelineOffsetSeconds
         val path = "$PLAYBACK_PATH/${pathSegment(sessionId)}"
         try {
@@ -817,7 +820,9 @@ class SiloNativeProvider internal constructor(
                 ServerPlaybackEventType.START -> Unit
                 ServerPlaybackEventType.STOP -> {
                     playStates.remove(sessionId)
-                    recentlyPlayed[state.itemId] = now()
+                    if (state.durationSeconds > 0.0 && position >= state.durationSeconds * WatchProgress.COMPLETED_THRESHOLD) {
+                        recentlyPlayed[state.itemId] = now()
+                    }
                     val body = siloStopBody(state.installationId, java.util.UUID.randomUUID().toString(), state.nextSequence(), position)
                     stopWithRetries(session, path, body.toString())
                 }

@@ -548,6 +548,7 @@ class SiloNativePlaybackTest {
     fun aTitleBeingPlayedIsNotMarkedWatchedByNuvio() = runTest {
         val (provider, http) = silo { request -> if (request.url.encodedPath.startsWith("/api/v2/watched/")) Reply(204, "") else null }
         val playback = provider.preparePlayback(session(), request())
+        provider.report(session(), playback, ServerPlaybackEvent(ServerPlaybackEventType.START, 0L, false))
 
         provider.setPlayed(session(), "movie-tmdb-603", true)
         provider.report(session(), playback, ServerPlaybackEvent(ServerPlaybackEventType.STOP, 8_000_000L, true))
@@ -557,5 +558,28 @@ class SiloNativePlaybackTest {
 
         assertEquals(listOf("DELETE"), http.requests.filter { it.url.encodedPath == "/api/v2/watched/movie-tmdb-603" }.map { it.method })
         assertNull(http.requests.firstOrNull { it.url.encodedPath == "/api/v2/playback/s-1/progress" })
+    }
+
+    @Test
+    fun aTitleStoppedPartwayCanBeMarkedWatchedStraightAway() = runTest {
+        val (provider, http) = silo { request -> if (request.url.encodedPath.startsWith("/api/v2/watched/")) Reply(204, "") else null }
+        val playback = provider.preparePlayback(session(), request())
+        provider.report(session(), playback, ServerPlaybackEvent(ServerPlaybackEventType.START, 0L, false))
+        provider.report(session(), playback, ServerPlaybackEvent(ServerPlaybackEventType.STOP, 1_200_000L, true))
+
+        provider.setPlayed(session(), "movie-tmdb-603", true)
+
+        assertEquals(listOf("POST"), http.requests.filter { it.url.encodedPath == "/api/v2/watched/movie-tmdb-603" }.map { it.method })
+    }
+
+    @Test
+    fun aTitleThatNeverStartedPlayingCanStillBeMarkedWatched() = runTest {
+        val (provider, http) = silo { request -> if (request.url.encodedPath.startsWith("/api/v2/watched/")) Reply(204, "") else null }
+        provider.preparePlayback(session(), request())
+
+        provider.setPlayed(session(), "movie-tmdb-603", true)
+
+        assertEquals(listOf("POST"), http.requests.filter { it.url.encodedPath == "/api/v2/watched/movie-tmdb-603" }.map { it.method })
+        assertTrue(http.requests.none { it.url.encodedPath.startsWith("/api/v2/playback/s-1") })
     }
 }

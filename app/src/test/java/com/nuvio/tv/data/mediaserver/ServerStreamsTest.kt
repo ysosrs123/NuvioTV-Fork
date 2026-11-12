@@ -16,7 +16,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ServerStreamsTest {
-    private val file = "Apocalypse Now 1979 Theatrical Cut UHD BluRay 2160p TrueHD Atmos 7 1 DV HEVC REMUX-FraMeSToR.mkv"
+    private val file = "Example Movie 1979 Theatrical Cut UHD BluRay 2160p TrueHD Atmos 7 1 DV HEVC REMUX-FraMeSToR.mkv"
 
     private fun candidate(
         mediaSourceId: String = "ms1",

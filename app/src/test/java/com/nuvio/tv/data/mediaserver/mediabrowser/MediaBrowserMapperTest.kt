@@ -76,8 +76,8 @@ class MediaBrowserMapperTest {
         val item = json.decodeFromString(
             BaseItem.serializer(),
             """{"Id": "m1", "Type": "Movie", "RunTimeTicks": 88353570000, "MediaSources": [
-                 {"Id": "ms1", "Name": "Apocalypse Now", "Container": "mkv", "Size": 57508742418, "Bitrate": 52071460,
-                  "Path": "/mnt/movies/Apocalypse Now 1979 Theatrical Cut UHD BluRay 2160p TrueHD Atmos 7 1 DV HEVC REMUX-FraMeSToR.mkv",
+                 {"Id": "ms1", "Name": "Example Movie", "Container": "mkv", "Size": 57508742418, "Bitrate": 52071460,
+                  "Path": "/mnt/movies/Example Movie 1979 Theatrical Cut UHD BluRay 2160p TrueHD Atmos 7 1 DV HEVC REMUX-FraMeSToR.mkv",
                   "DefaultAudioStreamIndex": 2, "MediaStreams": [
                    {"Type": "Video", "Index": 0, "Codec": "hevc", "Width": 3840, "Height": 2160, "BitRate": 45831460,
                     "VideoRange": "HDR", "VideoRangeType": "DOVIWithHDR10", "DvProfile": 7, "DvBlSignalCompatibilityId": 6,
@@ -94,7 +94,7 @@ class MediaBrowserMapperTest {
         assertEquals(57_508_742_418L, candidate.sizeBytes)
         assertEquals(52_071_460L, candidate.bitrateBps)
         assertEquals(
-            "Apocalypse Now 1979 Theatrical Cut UHD BluRay 2160p TrueHD Atmos 7 1 DV HEVC REMUX-FraMeSToR.mkv",
+            "Example Movie 1979 Theatrical Cut UHD BluRay 2160p TrueHD Atmos 7 1 DV HEVC REMUX-FraMeSToR.mkv",
             candidate.filename
         )
         val withoutIndex = item.copy(mediaSources = listOf(item.mediaSources.single().copy(defaultAudioStreamIndex = null)))
@@ -106,7 +106,7 @@ class MediaBrowserMapperTest {
         val withNotices = movie.copy(
             mediaSources = movie.mediaSources + json.decodeFromString(
                 MediaSource.serializer(),
-                """{"Id": "notice", "Type": "Placeholder", "Name": "Torrentio: rate limited"}"""
+                """{"Id": "notice", "Type": "Placeholder", "Name": "Tortoise: rate limited"}"""
             )
         )
         assertEquals(listOf("ms1", "ms2"), mapper.candidates(withNotices).map { it.target.mediaSourceId })

@@ -308,6 +308,23 @@ class ServerPlaybackTest {
     }
 
     @Test
+    fun aStreamThatNeverStartedIsNotAskedAboutTwice() {
+        val harness = harness(FakeServerProvider().apply { streamLimit = 1 })
+        val current = runBlocking {
+            harness.playback.prepare(ServerPlaybackTarget(ServerItemRef(harness.connection.id, "1"), "src-1")).url
+        }
+        harness.provider.streamsElsewhere = 1
+
+        val failure = refusal {
+            harness.playback.prepare(ServerPlaybackTarget(ServerItemRef(harness.connection.id, "2"), "src-2"), replacing = current)
+        }
+
+        assertEquals(ServerFailure.STREAM_LIMIT, failure)
+        assertEquals(2, harness.provider.playbackRequests.size)
+        assertTrue(harness.provider.reported.isEmpty())
+    }
+
+    @Test
     fun otherRefusalsKeepTheCurrentStreamAndAskOnlyOnce() {
         val harness = harness()
         val current = startPlaying(harness, "1")

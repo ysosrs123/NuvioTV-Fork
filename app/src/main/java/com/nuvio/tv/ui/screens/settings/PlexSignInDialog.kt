@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,7 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.runtime.Composable
@@ -187,7 +190,7 @@ private fun PlexCodePanel(state: PlexSignInState, onNewCode: () -> Unit, onCance
 }
 
 @Composable
-private fun PlexServersPanel(state: PlexSignInState, onPick: (PlexServer) -> Unit, onCancel: () -> Unit) {
+private fun ColumnScope.PlexServersPanel(state: PlexSignInState, onPick: (PlexServer) -> Unit, onCancel: () -> Unit) {
     val first = remember { FocusRequester() }
     val servers = state.servers
     val focusIndex = servers.indexOfFirst { it.reach != PlexReach.OFFLINE }
@@ -197,7 +200,12 @@ private fun PlexServersPanel(state: PlexSignInState, onPick: (PlexServer) -> Uni
     when {
         state.serversLoading && servers.isEmpty() -> SiloLine(stringResource(R.string.plex_finding_servers), centred = true)
         servers.isEmpty() -> SiloLine(stringResource(R.string.plex_servers_none), centred = true)
-        else -> Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+        else -> Column(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+        ) {
             servers.forEachIndexed { index, server ->
                 SettingsActionRow(
                     title = server.name,
