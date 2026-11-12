@@ -251,13 +251,13 @@ class CustomPosterUrlResolverTest {
     fun `resolve full PostersPlus URL with static params`() {
         val ids = ContentIds(id = "tmdb:1396", tmdbId = "1396", imdbId = "tt0903747")
         val url = CustomPosterUrlResolver.resolve(
-            "https://postersplus.stremio.ru/poster?tmdb_id={tmdb_id}&imdb_id={imdb_id?}&type={type}" +
+            "https://posters.example.org/poster?tmdb_id={tmdb_id}&imdb_id={imdb_id?}&type={type}" +
                 "&primary_client=stremio_tv_nuvio&fallback_to_imdb=true" +
                 "&movie_weights=letterboxd%3A0.99",
             ids, "series"
         )
         assertEquals(
-            "https://postersplus.stremio.ru/poster?tmdb_id=1396&imdb_id=tt0903747&type=series" +
+            "https://posters.example.org/poster?tmdb_id=1396&imdb_id=tt0903747&type=series" +
                 "&primary_client=stremio_tv_nuvio&fallback_to_imdb=true" +
                 "&movie_weights=letterboxd%3A0.99",
             url

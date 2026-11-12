@@ -168,6 +168,7 @@ private fun SliderSettingsItemLayout(
         onClick = { },
         modifier = modifier
             .fillMaxWidth()
+            .settingsJumpAnchor(title, shape)
             .onFocusChanged { state ->
                 val nowFocused = state.isFocused
                 if (isFocused != nowFocused) {

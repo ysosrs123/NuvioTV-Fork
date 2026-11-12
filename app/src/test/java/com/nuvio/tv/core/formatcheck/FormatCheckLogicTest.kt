@@ -40,15 +40,52 @@ class FormatCheckLogicTest {
         assertEquals(FormatVerdict.FAILED, FormatCheckVerdicts.of(ClipObservation(movedToMpv = true)))
     }
 
-    private val question = FormatCheckCatalog.byId("fc03")!!.question!!
+    private val question = FormatCheckCatalog.byId("fc07")!!.question!!
 
     @Test
     fun `answers change a played result only when they say something`() {
-        assertEquals(FormatVerdict.CONFIRMED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, question, FormatCheckAnswers.DOLBY_VISION))
-        assertEquals(FormatVerdict.NOT_AS_EXPECTED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, question, FormatCheckAnswers.HDR10))
+        assertEquals(FormatVerdict.CONFIRMED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, question, FormatCheckAnswers.HDR10))
+        assertEquals(FormatVerdict.NOT_AS_EXPECTED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, question, FormatCheckAnswers.NOTHING_SPECIAL))
         assertEquals(FormatVerdict.PLAYED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, question, FormatCheckAnswers.CANT_TELL))
         assertEquals(FormatVerdict.PLAYED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, question, null))
-        assertEquals(FormatVerdict.FAILED, FormatCheckVerdicts.withAnswer(FormatVerdict.FAILED, question, FormatCheckAnswers.DOLBY_VISION))
+        assertEquals(FormatVerdict.FAILED, FormatCheckVerdicts.withAnswer(FormatVerdict.FAILED, question, FormatCheckAnswers.HDR10))
+    }
+
+    private val dolbyVisionClips = listOf("fc01", "fc02", "fc03", "fc04", "fc05", "fc06").map { FormatCheckCatalog.byId(it)!! }
+
+    @Test
+    fun `a Dolby Vision answer alone never turns a played clip into a warning`() {
+        dolbyVisionClips.forEach { clip ->
+            val dv = clip.question!!
+            assertTrue(FormatCheckVerdicts.answerIsInfoOnly(dv))
+            dv.options.forEach { answer ->
+                val verdict = FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, dv, answer)
+                assertTrue("${clip.id} $answer", verdict == FormatVerdict.PLAYED || verdict == FormatVerdict.CONFIRMED)
+            }
+            assertEquals(FormatVerdict.CONFIRMED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, dv, FormatCheckAnswers.DOLBY_VISION))
+            assertEquals(FormatVerdict.PLAYED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, dv, FormatCheckAnswers.PICTURE_WRONG))
+        }
+    }
+
+    @Test
+    fun `a Dolby Vision answer doesn't hide a slow or failed play`() {
+        val dv = FormatCheckCatalog.byId("fc03")!!.question!!
+        assertEquals(FormatVerdict.PLAYED_SLOW, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED_SLOW, dv, FormatCheckAnswers.DOLBY_VISION))
+        assertEquals(FormatVerdict.FAILED, FormatCheckVerdicts.withAnswer(FormatVerdict.FAILED, dv, FormatCheckAnswers.DOLBY_VISION))
+        assertEquals(FormatVerdict.NOT_AS_EXPECTED, FormatCheckVerdicts.withAnswer(FormatVerdict.NOT_AS_EXPECTED, dv, FormatCheckAnswers.DOLBY_VISION))
+    }
+
+    @Test
+    fun `Dolby Vision clips warn only when the box or the route fails`() {
+        dolbyVisionClips.forEach { assertTrue(it.id, it.dolbyVision) }
+        assertFalse(FormatCheckCatalog.byId("fc07")!!.dolbyVision)
+        val played = ClipObservation(firstFrame = true, decoder = "c2.x.hevc")
+        assertEquals(FormatVerdict.PLAYED, FormatCheckVerdicts.of(played, dolbyVision = true))
+        assertEquals(FormatVerdict.PLAYED, FormatCheckVerdicts.of(played.copy(dolbyVisionRoute = DolbyVisionRoute.CONVERTED), dolbyVision = true))
+        assertEquals(FormatVerdict.NOT_AS_EXPECTED, FormatCheckVerdicts.of(played.copy(dolbyVisionRoute = DolbyVisionRoute.STRIPPED), dolbyVision = true))
+        assertEquals(FormatVerdict.PLAYED, FormatCheckVerdicts.of(played.copy(dolbyVisionRoute = DolbyVisionRoute.STRIPPED)))
+        assertEquals(FormatVerdict.FAILED, FormatCheckVerdicts.of(ClipObservation(), dolbyVision = true))
+        assertEquals(FormatVerdict.FAILED, FormatCheckVerdicts.of(played.copy(error = "decoder"), dolbyVision = true))
     }
 
     private fun results(verdict: FormatVerdict, vararg ids: String) = ids.map { ClipResult(it, verdict) }

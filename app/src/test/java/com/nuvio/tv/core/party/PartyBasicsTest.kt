@@ -119,14 +119,14 @@ class PartyBasicsTest {
             videoId = "tt0133093",
             title = "The Matrix",
             poster = "https://example.org/p.jpg",
-            fingerprint = PartyFingerprint("ABCDEF", 2, "The.Matrix.mkv", 8_200_000_000, "8E245D9679D31E12", 8_160_000),
+            fingerprint = PartyFingerprint("ABCDEF", 2, "The.Sample.mkv", 8_200_000_000, "0123456789ABCDEF", 8_160_000),
             streamName = "2160p",
             addonName = "Addon",
             sharedUrl = "https://example.org/v.mkv",
         )
         val messages = listOf(
             PartyMessage.Hello("Lounge", host = true, term = 2, speedOk = false),
-            PartyMessage.Media(2, 3, media.copy(fingerprint = media.fingerprint.copy(infoHash = "abcdef", videoHash = "8e245d9679d31e12"))),
+            PartyMessage.Media(2, 3, media.copy(fingerprint = media.fingerprint.copy(infoHash = "abcdef", videoHash = "0123456789abcdef"))),
             PartyMessage.State(2, 3, 10, 20, 30, true, PartyHoldInfo(PartyHoldReason.BUFFERING, "m1", 99), listOf("a", "b"), false, listOf("b")),
             PartyMessage.State(1, 0, 10, 10, 0, false),
             PartyMessage.Command(3, PartyAction.SEEK, 123_456),

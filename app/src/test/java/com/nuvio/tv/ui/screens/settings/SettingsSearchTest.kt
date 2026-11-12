@@ -100,6 +100,18 @@ class SettingsSearchTest {
     }
 
     @Test
+    fun `each interface finds only its own rows`() {
+        val both = SettingsSearchEntry(0, 0, SettingsCategory.APPEARANCE)
+        val original = both.copy(look = SettingsSearchLook.ORIGINAL)
+        val v2 = both.copy(look = SettingsSearchLook.V2)
+        assertTrue(both.shownIn(isV2 = true) && both.shownIn(isV2 = false))
+        assertTrue(original.shownIn(isV2 = false))
+        assertFalse(original.shownIn(isV2 = true))
+        assertTrue(v2.shownIn(isV2 = true))
+        assertFalse(v2.shownIn(isV2 = false))
+    }
+
+    @Test
     fun `remote down leaves the search box for the results`() {
         assertTrue(leavesSearchFieldDown(KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.ACTION_DOWN, hasResults = true))
     }
@@ -146,7 +158,7 @@ class SettingsSearchTest {
         "AppIconPicker.kt", "DebugSettingsScreen.kt", "DeviceAssessmentScreen.kt", "FloppyAccountDialog.kt",
         "FormatCheckScreen.kt", "MdbListLibraryListsDialog.kt", "MediaServerSettingsScreen.kt",
         "MediaServersSettingsScreen.kt", "PlexSignInDialog.kt", "SettingsDesignSystem.kt",
-        "SettingsSectionComponents.kt", "SiloSignInDialog.kt", "TrackingProviderDialogs.kt", "V2PreferenceControls.kt"
+        "SettingsSectionComponents.kt", "SiloSignInDialog.kt", "TrackingProviderDialogs.kt"
     )
 
     private val rowsWithoutSearch = setOf("experience_mode_switch_to_advanced")
@@ -154,7 +166,7 @@ class SettingsSearchTest {
     @Test
     fun `every settings row with a fixed name can be found`() {
         val index = File(settingsFolder, "SettingsSearchIndex.kt").readText()
-        val row = Regex("""Settings(?:Toggle|Action)Row\(\s*title = stringResource\(R\.string\.(\w+)\)\s*,""")
+        val row = Regex("""(?:Settings(?:Toggle|Action)Row|V2ChoiceRow)\(\s*title = stringResource\(R\.string\.(\w+)\)\s*,""")
         val missing = settingsFolder.listFiles().orEmpty()
             .filter { it.extension == "kt" && it.name !in pagesWithoutSearch }
             .flatMap { file -> row.findAll(file.readText()).map { it.groupValues[1] to file.name }.toList() }

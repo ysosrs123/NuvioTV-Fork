@@ -39,7 +39,9 @@ internal fun <T> V2VisualOptions(title: String, selectedValue: T, options: List<
                 val chosen = selectedValue == value
                 val shape = RoundedCornerShape(12.dp)
                 Card(onClick = { onSelect(value) },
-                    modifier = Modifier.weight(1f).focusRequester(requesters.getValue(value)).onFocusChanged { focused = it.isFocused }
+                    modifier = Modifier.weight(1f)
+                        .then(if (chosen) Modifier.settingsJumpAnchor(title, shape) else Modifier)
+                        .focusRequester(requesters.getValue(value)).onFocusChanged { focused = it.isFocused }
                         .settingsItemFocus(focused)
                         .semantics { selected = chosen },
                     shape = CardDefaults.shape(shape),

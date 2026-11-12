@@ -58,11 +58,11 @@ class LinkLogRedactionTest {
     }
 
     @Test
-    fun masksDebridKeyAndHashInTorrentioResolveLinkAndKeepsFileName() {
-        val fileName = "Ice.Age.Collision.Course.2016.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-FraMeSToR.mkv"
-        val url = "https://torrentio.strem.fun/resolve/realdebrid/$rdKey/$infoHash/null/0/$fileName"
+    fun masksDebridKeyAndHashInAddonResolveLinkAndKeepsFileName() {
+        val fileName = "Example.Movie.2016.UHD.BluRay.2160p.TrueHD.Atmos.7.1.HEVC.REMUX-FraMeSToR.mkv"
+        val url = "https://addon.example.com/resolve/realdebrid/$rdKey/$infoHash/null/0/$fileName"
         val redacted = url.redactLinksForLog()
-        assertEquals("https://torrentio.strem.fun/resolve/realdebrid/REDACTED/REDACTED/null/0/$fileName", redacted)
+        assertEquals("https://addon.example.com/resolve/realdebrid/REDACTED/REDACTED/null/0/$fileName", redacted)
         assertFalse(redacted.contains(rdKey))
     }
 
@@ -98,15 +98,15 @@ class LinkLogRedactionTest {
     }
 
     @Test
-    fun masksDebridKeyInsideATorrentioConfigSegment() {
+    fun masksDebridKeyInsideAnAddonConfigSegment() {
         assertEquals(
-            "https://torrentio.strem.fun/providers=yts,eztv|qualityfilter=480p|realdebrid=REDACTED/stream/movie/tt1.json",
-            "https://torrentio.strem.fun/providers=yts,eztv|qualityfilter=480p|realdebrid=$rdKey/stream/movie/tt1.json"
+            "https://addon.example.com/providers=one,two|qualityfilter=480p|realdebrid=REDACTED/stream/movie/tt1.json",
+            "https://addon.example.com/providers=one,two|qualityfilter=480p|realdebrid=$rdKey/stream/movie/tt1.json"
                 .redactLinksForLog()
         )
         assertEquals(
-            "https://torrentio.strem.fun/providers=yts,eztv%7Crealdebrid=REDACTED%7Csort=size/manifest.json",
-            "https://torrentio.strem.fun/providers=yts,eztv%7Crealdebrid=$rdKey%7Csort=size/manifest.json"
+            "https://addon.example.com/providers=one,two%7Crealdebrid=REDACTED%7Csort=size/manifest.json",
+            "https://addon.example.com/providers=one,two%7Crealdebrid=$rdKey%7Csort=size/manifest.json"
                 .redactLinksForLog()
         )
     }
@@ -114,8 +114,8 @@ class LinkLogRedactionTest {
     @Test
     fun masksShortKeyAfterADebridServiceName() {
         assertEquals(
-            "https://torrentio.strem.fun/resolve/alldebrid/REDACTED/REDACTED/null/0/Film.2020.mkv",
-            "https://torrentio.strem.fun/resolve/alldebrid/staticDemoApikeyPrem/$infoHash/null/0/Film.2020.mkv"
+            "https://addon.example.com/resolve/alldebrid/REDACTED/REDACTED/null/0/Film.2020.mkv",
+            "https://addon.example.com/resolve/alldebrid/staticDemoApikeyPrem/$infoHash/null/0/Film.2020.mkv"
                 .redactLinksForLog()
         )
     }
@@ -139,13 +139,13 @@ class LinkLogRedactionTest {
     fun keepsShortSegmentsTitleIdsAndFileNames() {
         val url = "https://v3-cinemeta.strem.io/meta/series/tt0944947:1:2.json"
         assertEquals(url, url.redactLinksForLog())
-        val file = "https://cdn.example.com/dl/42/The.Matrix.1999.2160p.UHD.BluRay.REMUX.HDR.HEVC.Atmos-GROUP.mkv"
+        val file = "https://cdn.example.com/dl/42/Example.Movie.1999.2160p.UHD.BluRay.REMUX.HDR.HEVC.Atmos-GROUP.mkv"
         assertEquals(file, file.redactLinksForLog())
     }
 
     @Test
     fun leavesTextWithoutLinksUnchanged() {
-        val text = "Streams success addon=Torrentio count=12 for tt37287335 with 0123456789abcdef0123456789abcdef01234567"
+        val text = "Streams success addon=Tortoise count=12 for tt37287335 with 0123456789abcdef0123456789abcdef01234567"
         assertEquals(text, text.redactLinksForLog())
         assertEquals("", "".redactLinksForLog())
     }
@@ -185,8 +185,8 @@ class LinkLogRedactionTest {
     fun printableLogValueUsesTheSameRules() {
         assertEquals("(null)", (null as String?).redactedUrlForLog())
         assertEquals(
-            "https://torrentio.strem.fun/resolve/realdebrid/REDACTED/x.mkv",
-            "https://torrentio.strem.fun/resolve/realdebrid/$rdKey/x.mkv".redactedUrlForLog()
+            "https://addon.example.com/resolve/realdebrid/REDACTED/x.mkv",
+            "https://addon.example.com/resolve/realdebrid/$rdKey/x.mkv".redactedUrlForLog()
         )
         assertEquals("(null)", (null as String?).urlForLog())
         assertEquals("https://a.example/REDACTED/manifest.json", "https://a.example/$rdKey/manifest.json".urlForLog())

@@ -7,6 +7,9 @@ import java.util.Locale
 
 internal enum class SettingsSearchModes { BOTH, ADVANCED, ESSENTIAL }
 
+/** Which interface shows the row: Original Nuvio, Nuvio V2 or both. */
+internal enum class SettingsSearchLook { BOTH, ORIGINAL, V2 }
+
 /** One setting the search can find. A title of 0 means the row shows [literalTitle]. */
 internal data class SettingsSearchEntry(
     @param:StringRes val title: Int,
@@ -18,13 +21,20 @@ internal data class SettingsSearchEntry(
     val qualityRules: Boolean = false,
     val modes: SettingsSearchModes = SettingsSearchModes.BOTH,
     val literalTitle: String? = null,
-    val keywords: List<String> = emptyList()
+    val keywords: List<String> = emptyList(),
+    val look: SettingsSearchLook = SettingsSearchLook.BOTH
 )
 
 internal fun SettingsSearchEntry.availableIn(isEssentialMode: Boolean): Boolean = when (modes) {
     SettingsSearchModes.BOTH -> true
     SettingsSearchModes.ADVANCED -> !isEssentialMode
     SettingsSearchModes.ESSENTIAL -> isEssentialMode
+}
+
+internal fun SettingsSearchEntry.shownIn(isV2: Boolean): Boolean = when (look) {
+    SettingsSearchLook.BOTH -> true
+    SettingsSearchLook.ORIGINAL -> !isV2
+    SettingsSearchLook.V2 -> isV2
 }
 
 /** Text ready for matching, in the app's language plus English as a second chance. */

@@ -258,6 +258,15 @@ fun ThemeSettingsContent(
                                 ).then(
                                     if (theme == AppTheme.CUSTOM) Modifier.focusRequester(customThemeFocusRequester)
                                     else Modifier
+                                ).then(
+                                    if (theme == uiState.selectedTheme) {
+                                        Modifier.settingsJumpAnchor(
+                                            stringResource(R.string.appearance_color_theme),
+                                            androidx.compose.foundation.shape.CircleShape
+                                        )
+                                    } else {
+                                        Modifier
+                                    }
                                 )
                             )
                         }

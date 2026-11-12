@@ -478,6 +478,8 @@
     <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed and Noto Sans (with Noto Sans Arabic, Hebrew, Devanagari, Bengali and Tamil) by The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors and The Noto Project Authors. Licensed under the SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_nuvio_title">Nuvio Arc (fork of Nuvio TV)</string>
     <string name="licenses_attributions_nuvio_body">A modified version of Nuvio TV. Source code and licence terms for this build are in the fork\'s repository. Nuvio TV is at github.com/NuvioMedia/NuvioTV. Licensed under the GNU General Public License v3.0.</string>
+    <string name="licenses_attributions_sources_title">Your sources, your responsibility</string>
+    <string name="licenses_attributions_sources_body">Nuvio Arc is a media player. It comes with no films, shows, channels or streams and doesn\'t host, provide or link to any. Everything you play comes from a source you chose to connect: your own media server, an account you hold with another service, or an add-on or extension you installed. Those are made and run by other people, and Nuvio Arc doesn\'t control, check or endorse them. You are responsible for making sure you have the right to play what you play and that your use follows the law where you live.</string>
     <string name="licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>
     <string name="licenses_attributions_tmdb_body">Nuvio Arc uses the TMDB API for movie and TV metadata, artwork, trailers, cast, production details, collections, and recommendations. This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
     <string name="licenses_attributions_trakt_title">Trakt</string>
@@ -2411,6 +2413,16 @@
     <string name="skip_generic">Skip</string>
     <string name="display_mode_refresh">Refresh</string>
     <string name="display_mode_resolution">Resolution</string>
+    <string name="display_mode_measured">Measured</string>
+    <string name="display_mode_measured_off">Screen runs at %1$s Hz, not %2$s Hz</string>
+    <string name="qms_hint_title">Your TV isn\'t keeping the film\'s frame rate</string>
+    <string name="qms_hint_body_qms">Arc asked for %1$s Hz. Your TV changed rate without a full switch (QMS) and is running at %2$s Hz. That shows as a small, regular stutter.</string>
+    <string name="qms_hint_body">Arc asked for %1$s Hz, but your screen is running at %2$s Hz. That shows as a small, regular stutter.</string>
+    <string name="qms_hint_fix">Best fix: turn QMS off on the TV</string>
+    <string name="qms_hint_fix_hint">In the TV\'s own settings for this HDMI input. Arc can\'t change it.</string>
+    <string name="qms_hint_off">Turn frame rate matching off</string>
+    <string name="qms_hint_off_hint">From the next film on, the screen stays at its usual rate. You can turn it back on in Settings.</string>
+    <string name="qms_hint_keep">Keep as it is</string>
 
 
     <string name="search_keyboard_hint">Press Done on the keyboard to search</string>

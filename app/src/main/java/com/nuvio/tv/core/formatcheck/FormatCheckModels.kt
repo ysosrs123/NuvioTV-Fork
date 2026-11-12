@@ -39,6 +39,9 @@ data class FormatClip(
     /** Set for a format the app decodes itself whenever its software decoders are on. */
     val questionWhenDecoded: FormatQuestion? = null
 ) {
+    val dolbyVision: Boolean
+        get() = FormatFamily.DOLBY_VISION in families || label.startsWith("Dolby Vision")
+
     fun decodedByApp(settings: FormatCheckSettings) = settings.softwareDecoders && questionWhenDecoded != null
 
     fun questionFor(settings: FormatCheckSettings) = if (decodedByApp(settings)) questionWhenDecoded else question
@@ -117,16 +120,25 @@ object FormatCheckVerdicts {
 
     private const val SLOW_DROPPED_FRAMES = 12
 
-    fun of(observation: ClipObservation, audioOnly: Boolean = false): FormatVerdict = when {
+    fun of(observation: ClipObservation, audioOnly: Boolean = false, dolbyVision: Boolean = false): FormatVerdict = when {
         !observation.firstFrame -> FormatVerdict.FAILED
         observation.error != null -> FormatVerdict.FAILED
         observation.movedToMpv -> FormatVerdict.PLAYED_MPV
+        dolbyVision && observation.dolbyVisionRoute == DolbyVisionRoute.STRIPPED -> FormatVerdict.NOT_AS_EXPECTED
         !audioOnly && observation.droppedFrames >= SLOW_DROPPED_FRAMES -> FormatVerdict.PLAYED_SLOW
         else -> FormatVerdict.PLAYED
     }
 
+    /**
+     * Dolby Vision badges and picture modes differ too much between TVs, so for those clips the answer is only shown,
+     * never turned into a warning. Only the box's decoder or Arc's route can fail a Dolby Vision clip.
+     */
+    fun answerIsInfoOnly(question: FormatQuestion) = question.expected == FormatCheckAnswers.DOLBY_VISION
+
     fun withAnswer(verdict: FormatVerdict, question: FormatQuestion, answer: String?): FormatVerdict = when {
         verdict == FormatVerdict.FAILED || answer == null -> verdict
+        answerIsInfoOnly(question) ->
+            if (answer == question.expected && verdict == FormatVerdict.PLAYED) FormatVerdict.CONFIRMED else verdict
         answer == question.expected -> FormatVerdict.CONFIRMED
         answer in question.wrong -> FormatVerdict.NOT_AS_EXPECTED
         else -> verdict

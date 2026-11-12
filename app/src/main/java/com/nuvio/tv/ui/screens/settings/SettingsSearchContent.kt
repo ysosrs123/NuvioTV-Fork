@@ -42,6 +42,7 @@ import com.nuvio.tv.ui.screens.scout.ask.MicButton
 import com.nuvio.tv.ui.screens.scout.ask.QuestionField
 import com.nuvio.tv.ui.screens.scout.ask.rememberAskVoice
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import java.util.Locale
 
 private class SettingsSearchItem(
@@ -118,8 +119,9 @@ internal fun SettingsSearchContent(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
-    val inReach = remember(visibleCategories) {
-        SETTINGS_SEARCH_ENTRIES.filter { it.category in visibleCategories }
+    val isV2 = LocalV2Appearance.current != null
+    val inReach = remember(visibleCategories, isV2) {
+        SETTINGS_SEARCH_ENTRIES.filter { it.category in visibleCategories && it.shownIn(isV2) }
     }
     val items = remember(context, inReach) { context.searchItems(inReach) }
     val found = remember(items, query) {

@@ -190,6 +190,7 @@ private fun LicensesAttributionsDetailsPanel(
                         item = appLicenseItem(),
                         modifier = Modifier.focusRequester(firstFocusRequester)
                     )
+                    AttributionDetailRow(item = sourcesNoticeItem())
                 }
 
                 AttributionSection(
@@ -379,6 +380,13 @@ private fun appLicenseItem() = LicenseAttributionItem(
     title = stringResource(R.string.licenses_attributions_nuvio_title),
     body = stringResource(R.string.licenses_attributions_nuvio_body),
     url = NuvioRepositoryUrl
+)
+
+@Composable
+private fun sourcesNoticeItem() = LicenseAttributionItem(
+    title = stringResource(R.string.licenses_attributions_sources_title),
+    body = stringResource(R.string.licenses_attributions_sources_body),
+    url = "$NuvioRepositoryUrl#disclaimer"
 )
 
 @Composable

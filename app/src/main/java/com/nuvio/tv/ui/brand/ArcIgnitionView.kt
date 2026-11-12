@@ -91,8 +91,11 @@ class ArcIgnitionView(
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        renderer?.quit()
+        val idle = renderer?.quit() ?: true
         renderer = null
+        // Let go of the drawing context here, before the framework disconnects the surface: on the Shield the main
+        // thread otherwise waits on the graphics driver for seconds while the view is removed.
+        if (idle) runCatching { holder.surface.release() }
     }
 
     private inner class Renderer(private val holder: SurfaceHolder) : Choreographer.FrameCallback {
@@ -160,8 +163,11 @@ class ArcIgnitionView(
             }
         }
 
-        /** Waits only for a frame being drawn, never for [ArcIgnitionScene.prepare]. A gone surface counts as faded out. */
-        fun quit() {
+        /**
+         * Waits only for a frame being drawn, never for [ArcIgnitionScene.prepare]. A gone surface counts as faded out.
+         * False when a frame was still being drawn after the wait.
+         */
+        fun quit(): Boolean {
             quitting = true
             handler.post {
                 running = false
@@ -169,8 +175,10 @@ class ArcIgnitionView(
                 logSummary("closed")
                 deliverExit()
             }
-            if (drawLock.tryLock(500, TimeUnit.MILLISECONDS)) drawLock.unlock()
+            val idle = drawLock.tryLock(500, TimeUnit.MILLISECONDS)
+            if (idle) drawLock.unlock()
             thread.quitSafely()
+            return idle
         }
 
         override fun doFrame(frameTimeNanos: Long) {

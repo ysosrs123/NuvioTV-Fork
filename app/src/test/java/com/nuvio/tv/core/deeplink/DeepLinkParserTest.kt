@@ -17,16 +17,16 @@ class DeepLinkParserTest {
     @Test
     fun parsesAddonInstallDeepLink() {
         assertEquals(
-            AppDeepLink.AddonInstall("https://free.nebulapro.xyz/sports/i/free/manifest.json"),
-            DeepLinkParser.parse("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json")
+            AppDeepLink.AddonInstall("https://addon.example.com/catalog/i/demo/manifest.json"),
+            DeepLinkParser.parse("nuvio://addon.example.com/catalog/i/demo/manifest.json")
         )
     }
 
     @Test
     fun parsesStremioAddonInstallDeepLink() {
         assertEquals(
-            AppDeepLink.AddonInstall("https://free.nebulapro.xyz/sports/i/free/manifest.json"),
-            DeepLinkParser.parse("stremio://free.nebulapro.xyz/sports/i/free/manifest.json")
+            AppDeepLink.AddonInstall("https://addon.example.com/catalog/i/demo/manifest.json"),
+            DeepLinkParser.parse("stremio://addon.example.com/catalog/i/demo/manifest.json")
         )
     }
 

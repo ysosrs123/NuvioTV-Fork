@@ -24,7 +24,7 @@ class NuvioPartySessionTest {
         metaId = "tt1745960",
         metaType = "movie",
         title = "Top Gun: Maverick",
-        source = PartySource(infoHash = "ABCDEF", fileIdx = 2, filename = "maverick.mkv", videoSize = 42L, name = "TB 4K"),
+        source = PartySource(infoHash = "ABCDEF", fileIdx = 2, filename = "testfilm.mkv", videoSize = 42L, name = "TB 4K"),
     )
 
     private val arcFilm = PartyMedia(contentId = "tt1745960", contentType = "movie", title = "Top Gun: Maverick")

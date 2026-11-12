@@ -185,7 +185,7 @@ class PartySessionTest {
         contentType = "movie",
         videoId = "tt0133093",
         title = "The Matrix",
-        fingerprint = PartyFingerprint("abc", 0, "The.Matrix.mkv", 8_000_000_000, null, 7_200_000),
+        fingerprint = PartyFingerprint("abc", 0, "The.Sample.mkv", 8_000_000_000, null, 7_200_000),
     )
 
     private fun gap(a: FakePlayer, b: FakePlayer): Long = abs(a.positionMs - b.positionMs)

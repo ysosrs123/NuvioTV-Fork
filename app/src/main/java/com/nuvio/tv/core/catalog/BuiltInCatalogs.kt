@@ -25,6 +25,9 @@ interface BuiltInCatalogProvider {
     /** Where these rows go until the user has ordered them; saved positions always win. */
     val defaultFirstKeys: List<String> get() = emptyList()
 
+    /** A saved key an unsaved row of this provider goes right after, or null to start it at the top. */
+    fun anchorFor(key: String, saved: List<String>): String? = null
+
     /** Lower goes higher among the rows that start at the top. */
     val defaultFirstRank: Int get() = 1
 
@@ -74,8 +77,18 @@ class BuiltInCatalogs @Inject constructor(
     fun collectionForFolders(collectionId: String): Collection? =
         providers.firstNotNullOfOrNull { it.collectionForFolders(collectionId) }
 
-    fun withDefaultFirst(savedKeys: List<String>): List<String> =
-        providers.sortedBy { it.defaultFirstRank }.flatMap { it.defaultFirstKeys }.filterNot(savedKeys::contains) + savedKeys
+    fun withDefaultFirst(savedKeys: List<String>): List<String> {
+        val placed = savedKeys.toMutableList()
+        val top = ArrayList<String>()
+        providers.sortedBy { it.defaultFirstRank }.forEach { provider ->
+            provider.defaultFirstKeys.forEach { key ->
+                if (key in placed || key in top) return@forEach
+                val at = provider.anchorFor(key, placed)?.let(placed::indexOf) ?: -1
+                if (at >= 0) placed.add(at + 1, key) else top.add(key)
+            }
+        }
+        return top + placed
+    }
 
     fun provider(baseUrl: String?): BuiltInCatalogProvider? = providers.firstOrNull { it.handles(baseUrl) }
 

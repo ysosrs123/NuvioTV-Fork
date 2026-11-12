@@ -852,11 +852,10 @@ class MetaDetailsViewModel @Inject constructor(
                 .first()
             if (profileManager.activeProfileId.value != profileId) return@launch
             if (localWatched.isEmpty()) return@launch
+            val loadedProgress = watchProgressRepository.activeProviderLoadedEpisodeProgress(contentId)
+                ?: return@launch
 
-            val staleEpisodes = localWatched.filter { (season, episode) ->
-                val providerEntry = providerProgressMap[season to episode]
-                providerEntry == null || !providerEntry.isCompleted()
-            }
+            val staleEpisodes = staleLocalWatchedEpisodes(localWatched, providerProgressMap, loadedProgress)
 
             if (staleEpisodes.isNotEmpty()) {
                 Log.d(TAG, "revalidateWatchedEpisodes: pruning ${staleEpisodes.size} stale entries for $contentId")

@@ -787,6 +787,7 @@ fun AdvancedSettingsContent(
                                         .get(context.applicationContext)
                                     runCatching { loader.memoryCache?.clear() }
                                     runCatching { loader.diskCache?.clear() }
+                                    com.nuvio.tv.core.image.HomePostersOnDisk.clear()
                                     runCatching { entryPoint.okHttpClient().cache?.evictAll() }
                                     runCatching { entryPoint.validatedOkHttpClient().cache?.evictAll() }
                                     runCatching { entryPoint.catalogRepository().clearCaches() }

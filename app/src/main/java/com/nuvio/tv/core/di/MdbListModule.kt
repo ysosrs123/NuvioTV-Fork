@@ -3,6 +3,7 @@ package com.nuvio.tv.core.di
 import com.nuvio.tv.core.network.IPv4FirstDns
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.network.NoDelaySocketFactory
+import com.nuvio.tv.core.player.PlayerSessionTracker
 import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.ProfileDataStore
@@ -97,6 +98,7 @@ object MdbListModule {
         profiles: ProfileManager
     ) = MdbListSyncRepository(
         storage, auth, api, profiles.activeProfileId,
-        CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        CoroutineScope(SupervisorJob() + Dispatchers.IO),
+        playerOpen = { PlayerSessionTracker.isOpenNow }
     )
 }

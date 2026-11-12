@@ -13,6 +13,8 @@
     <string name="scout_settings_ratings">Ratings</string>
     <string name="scout_row_picked">Picked for you</string>
     <string name="scout_row_picked_sub">Movies and series, refreshed once a day</string>
+    <string name="scout_row_genre">Rows by genre</string>
+    <string name="scout_row_genre_sub">Picks grouped by the genres you like</string>
     <string name="scout_row_because">Because you watched…</string>
     <string name="scout_row_because_sub">Follows the last things you finished</string>
     <string name="scout_row_gems">Hidden gems</string>

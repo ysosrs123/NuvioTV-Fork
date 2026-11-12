@@ -256,7 +256,7 @@ private fun isSoftwareDecoder(name: String) = name.startsWith("c2.android.") || 
 
 @Composable
 private fun routeLabel(clip: FormatClip, result: ClipResult): String? {
-    if (FormatFamily.DOLBY_VISION !in clip.families && !clip.label.startsWith("Dolby Vision")) return null
+    if (!clip.dolbyVision) return null
     if (result.verdict == FormatVerdict.FAILED || result.verdict == FormatVerdict.NOT_TESTED) return null
     val decoder = result.decoder.orEmpty()
     return when {
@@ -288,6 +288,10 @@ private fun settingNoteLabel(note: FormatSettingNote): String = stringResource(
 private fun rowDetail(clip: FormatClip, result: ClipResult?): String = buildList {
     if (result?.settingNotes?.contains(FormatSettingNote.CLOSED_APP_LAST_RUN) != true) add(verdictReason(clip, result))
     result?.let { r ->
+        val infoOnly = clip.question?.let(FormatCheckVerdicts::answerIsInfoOnly) == true
+        if (infoOnly && r.answer != null && r.verdict != FormatVerdict.CONFIRMED && r.verdict != FormatVerdict.NOT_AS_EXPECTED) {
+            add(stringResource(R.string.format_check_why_showed, answerLabel(r.answer)))
+        }
         routeLabel(clip, r)?.let { add(it) }
         r.settingNotes.forEach { add(settingNoteLabel(it)) }
     }
@@ -1132,7 +1136,7 @@ private suspend fun playClip(
             }
         }
         val seen = FormatCheckSession.observation.value
-        var verdict = FormatCheckVerdicts.of(seen, audioOnly = clip.group == FormatGroup.AUDIO)
+        var verdict = FormatCheckVerdicts.of(seen, audioOnly = clip.group == FormatGroup.AUDIO, dolbyVision = clip.dolbyVision)
         if (question != null) verdict = FormatCheckVerdicts.withAnswer(verdict, question, answer)
         nav.popBackStack(Screen.FormatCheck.route, inclusive = false)
         delay(BETWEEN_CLIPS_MS)

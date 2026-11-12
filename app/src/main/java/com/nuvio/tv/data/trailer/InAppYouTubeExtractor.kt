@@ -581,6 +581,48 @@ class InAppYouTubeExtractor internal constructor(
             )
         }
 
+        val bestProgressive = sortCandidates(progressive).firstOrNull()
+
+        var videoOnly: TrailerPlaybackSource? = null
+        for (kind in sourcePreference(singleUrl)) {
+            kotlinx.coroutines.yield()
+            val source = when (kind) {
+                // Probe every client's top candidates in parallel and take the best reachable
+                // pair. Token-free clients (visionos) win here even when gated clients score
+                // higher, because gated URLs fail the reachability probe.
+                PlaybackSourceKind.ADAPTIVE -> {
+                    val chosenVideo = probeBestPerClient(
+                        trailerVideoCandidates(adaptiveVideo, trailerVideoLimits)
+                    )
+                    val chosenAudio = if (chosenVideo != null) {
+                        probeBestPerClient(adaptiveAudio, preferClient = chosenVideo.client)
+                    } else null
+                    chosenVideo?.let {
+                        Log.d(TAG, "Trailer adaptive: ${it.client}/${it.height}p/${it.codec} " +
+                            "audio=${chosenAudio?.client ?: "none"}")
+                        val adaptive = TrailerPlaybackSource(videoUrl = it.url, audioUrl = chosenAudio?.url)
+                        if (chosenAudio == null) videoOnly = adaptive
+                        adaptive.takeIf { chosenAudio != null }
+                    }
+                }
+                // HLS manifest (1080p, always works for COPPA/kids content). The manifests are
+                // only downloaded here, once the adaptive streams have failed.
+                PlaybackSourceKind.HLS_MANIFEST ->
+                    pickBestManifest(manifestUrls)
+                        ?.let { TrailerPlaybackSource(videoUrl = it.manifestUrl, audioUrl = null) }
+                // Progressive (combined video+audio, usually low quality)
+                PlaybackSourceKind.PROGRESSIVE ->
+                    bestProgressive?.url?.let { resolveReachableUrl(it) }
+                        ?.let { TrailerPlaybackSource(videoUrl = it, audioUrl = null) }
+            }
+            if (source != null) return ExtractionAttempt(source)
+        }
+        videoOnly?.let { return ExtractionAttempt(it) }
+
+        return ExtractionAttempt(null)
+    }
+
+    private suspend fun pickBestManifest(manifestUrls: List<Triple<String, Int, String>>): ManifestCandidate? {
         var bestManifest: ManifestCandidate? = null
         for ((clientKey, priority, manifestUrl) in manifestUrls) {
             try {
@@ -608,44 +650,7 @@ class InAppYouTubeExtractor internal constructor(
                 }
             }
         }
-
-        val bestProgressive = sortCandidates(progressive).firstOrNull()
-
-        var videoOnly: TrailerPlaybackSource? = null
-        for (kind in sourcePreference(singleUrl)) {
-            kotlinx.coroutines.yield()
-            val source = when (kind) {
-                // Probe every client's top candidates in parallel and take the best reachable
-                // pair. Token-free clients (visionos) win here even when gated clients score
-                // higher, because gated URLs fail the reachability probe.
-                PlaybackSourceKind.ADAPTIVE -> {
-                    val chosenVideo = probeBestPerClient(
-                        trailerVideoCandidates(adaptiveVideo, trailerVideoLimits)
-                    )
-                    val chosenAudio = if (chosenVideo != null) {
-                        probeBestPerClient(adaptiveAudio, preferClient = chosenVideo.client)
-                    } else null
-                    chosenVideo?.let {
-                        Log.d(TAG, "Trailer adaptive: ${it.client}/${it.height}p/${it.codec} " +
-                            "audio=${chosenAudio?.client ?: "none"}")
-                        val adaptive = TrailerPlaybackSource(videoUrl = it.url, audioUrl = chosenAudio?.url)
-                        if (chosenAudio == null) videoOnly = adaptive
-                        adaptive.takeIf { chosenAudio != null }
-                    }
-                }
-                // HLS manifest (1080p, always works for COPPA/kids content)
-                PlaybackSourceKind.HLS_MANIFEST ->
-                    bestManifest?.let { TrailerPlaybackSource(videoUrl = it.manifestUrl, audioUrl = null) }
-                // Progressive (combined video+audio, usually low quality)
-                PlaybackSourceKind.PROGRESSIVE ->
-                    bestProgressive?.url?.let { resolveReachableUrl(it) }
-                        ?.let { TrailerPlaybackSource(videoUrl = it, audioUrl = null) }
-            }
-            if (source != null) return ExtractionAttempt(source)
-        }
-        videoOnly?.let { return ExtractionAttempt(it) }
-
-        return ExtractionAttempt(null)
+        return bestManifest
     }
 
     private fun extractVideoId(input: String): String? {
