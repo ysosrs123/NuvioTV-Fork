@@ -193,9 +193,6 @@ Built into Arc, with no website, external add-on or key to set up for the picks.
 
 
 
-https://github.com/user-attachments/assets/b2063feb-7c4a-4fa1-924d-63686184f5dd
-
-
 **Native Dolby Vision Profile 7 FEL on the Ugoos AM9 Pro** -- the stats overlay showing "Profile 7.6 FEL - RPU + BL + EL" on the native route.
 
 For now this needs a Ugoos AM9 Pro on Android 14 running my own test kernel, plus a Dolby Vision display. That kernel is not available yet; I plan to share it once it has had more testing. Stock firmware and other boxes can't do it, so there the mode simply behaves like Auto.
