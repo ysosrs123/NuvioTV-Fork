@@ -10,6 +10,7 @@ const val SCOUT_MAX_NEGATIVE_SEEDS = 4
 const val SCOUT_MIN_SEEDS = 3
 const val SCOUT_REFRESH_MS = 24L * 60 * 60 * 1000
 const val SCOUT_MIN_REBUILD_GAP_MS = 60L * 60 * 1000
+const val SCOUT_POOL_VERSION = 1
 private const val RECENCY_DECAY = 0.97
 private const val FINISHED_WEIGHT = 1.0
 private const val LIKE_WEIGHT = 3.0
@@ -53,7 +54,8 @@ data class ScoutPool(
     val gems: List<ScoutPick> = emptyList(),
     val tasteRows: List<ScoutTasteRow> = emptyList(),
     val newForYou: List<ScoutPick> = emptyList(),
-    val trendingForYou: List<ScoutPick> = emptyList()
+    val trendingForYou: List<ScoutPick> = emptyList(),
+    val version: Int = 0
 )
 
 @JsonClass(generateAdapter = true)
@@ -176,7 +178,7 @@ fun scoutRotate(picks: List<ScoutPick>, count: Int, seed: Long): List<ScoutPick>
 }
 
 fun scoutShouldRefresh(pool: ScoutPool?, signature: String, now: Long): Boolean {
-    if (pool == null || pool.builtAt <= 0L) return true
+    if (pool == null || pool.builtAt <= 0L || pool.version < SCOUT_POOL_VERSION) return true
     val age = now - pool.builtAt
     if (age >= SCOUT_REFRESH_MS || age < 0) return true
     return signature != pool.historySignature && age >= SCOUT_MIN_REBUILD_GAP_MS

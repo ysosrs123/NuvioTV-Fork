@@ -187,4 +187,75 @@ class ScoutCatalogProviderTest {
         assertTrue(provider().handles(ScoutCatalogProvider.BASE_URL))
         assertFalse(provider().handles("http://addon"))
     }
+
+    private val tastePool = fullPool.copy(
+        tasteRows = listOf(
+            com.nuvio.tv.domain.model.ScoutTasteRow("35_en", picks = listOf(pick(11))),
+            com.nuvio.tv.domain.model.ScoutTasteRow("53_ko", picks = listOf(pick(12)))
+        )
+    )
+
+    private fun key(id: String) = com.nuvio.tv.domain.model.catalogRowLegacyKey(ScoutCatalogProvider.ADDON_ID, "scout", id)
+
+    @Test
+    fun `genre rows take numbered places and the genre stays in the title`() {
+        val provider = provider(tastePool)
+        val ids = provider.catalogIds(ScoutProfile(), tastePool)
+        assertEquals(listOf("taste_slot1", "taste_slot2"), ids.filter { it.startsWith(ScoutCatalogProvider.CATALOG_TASTE) })
+        assertEquals(listOf("tmdb:12"), provider.row("taste_slot2").items.map { it.id })
+        assertTrue(provider.row("taste_slot3").items.isEmpty())
+        assertTrue(provider.row("taste_53_ko").items.isEmpty())
+    }
+
+    @Test
+    fun `slot ids round trip and stay within the row limit`() {
+        assertEquals(listOf("slot1", "slot2", "slot3"), List(SCOUT_ROWS_MAX) { scoutTasteSlotId(it) })
+        assertEquals(listOf(0, 1, 2), listOf("slot1", "slot2", "slot3").map { scoutTasteSlotIndex(it) })
+        assertNull(scoutTasteSlotIndex("slot0"))
+        assertNull(scoutTasteSlotIndex("slot${SCOUT_ROWS_MAX + 1}"))
+        assertNull(scoutTasteSlotIndex("35_en"))
+    }
+
+    @Test
+    fun `the first home keys do not change with the day's genres`() {
+        assertEquals(provider(fullPool).defaultFirstKeys, provider(tastePool).defaultFirstKeys)
+        assertTrue(key("taste_slot3") in provider(null).defaultFirstKeys)
+    }
+
+    @Test
+    fun `genre rows have their own switch apart from picked for you`() {
+        val noGenres = provider(tastePool).catalogIds(ScoutProfile(settings = ScoutSettings(genreRows = false)), tastePool)
+        assertTrue(ScoutCatalogProvider.CATALOG_PICKED in noGenres)
+        assertTrue(noGenres.none { it.startsWith(ScoutCatalogProvider.CATALOG_TASTE) })
+        val onlyGenres = provider(tastePool).catalogIds(ScoutProfile(settings = ScoutSettings(pickedRow = false)), tastePool)
+        assertFalse(ScoutCatalogProvider.CATALOG_PICKED in onlyGenres)
+        assertEquals(2, onlyGenres.count { it.startsWith(ScoutCatalogProvider.CATALOG_TASTE) })
+        assertTrue(ScoutSettings().genreRows)
+    }
+
+    @Test
+    fun `a new genre place goes next to the scout rows the user placed`() {
+        val catalogs = com.nuvio.tv.core.catalog.BuiltInCatalogs(setOf(provider(tastePool)))
+        val saved = listOf("a", key("picked"), "b", key("taste_slot1"), "c")
+        val order = catalogs.withDefaultFirst(saved)
+        assertEquals(listOf(key("taste_slot1"), key("taste_slot2"), key("taste_slot3"), "c"), order.takeLast(4))
+        assertEquals(listOf("a", key("picked"), "b"), order.dropWhile { it != "a" }.take(3))
+
+        val fresh = catalogs.withDefaultFirst(listOf("a", key("picked"), "b"))
+        assertEquals(listOf(key("picked"), key("taste_slot1"), key("taste_slot2"), key("taste_slot3"), "b"), fresh.takeLast(5))
+    }
+
+    @Test
+    fun `genre places take over where the old genre rows were saved`() {
+        val catalogs = com.nuvio.tv.core.catalog.BuiltInCatalogs(setOf(provider(tastePool)))
+        val order = catalogs.withDefaultFirst(listOf(key("picked"), "a", key("taste_35_en"), key("taste_18_en"), "b"))
+        val at = order.indexOf(key("taste_35_en"))
+        assertEquals(listOf(key("taste_slot1"), key("taste_slot2"), key("taste_slot3")), order.subList(at + 1, at + 4))
+    }
+
+    @Test
+    fun `with nothing saved the genre places start at the top in scout order`() {
+        val order = com.nuvio.tv.core.catalog.BuiltInCatalogs(setOf(provider(tastePool))).withDefaultFirst(emptyList())
+        assertEquals(provider(tastePool).defaultFirstKeys, order)
+    }
 }

@@ -129,14 +129,20 @@ class ScoutPicksTest {
     fun `refresh only when missing or a day old`() {
         val now = SCOUT_REFRESH_MS * 3
         assertTrue(scoutShouldRefresh(null, "", now))
-        assertFalse(scoutShouldRefresh(ScoutPool(builtAt = now - 1000), "", now))
+        assertFalse(scoutShouldRefresh(ScoutPool(builtAt = now - 1000, version = SCOUT_POOL_VERSION), "", now))
         assertTrue(scoutShouldRefresh(ScoutPool(builtAt = now - SCOUT_REFRESH_MS), "", now))
     }
 
     @Test
     fun `changed history rebuilds early but not within the hour`() {
         val now = SCOUT_REFRESH_MS * 3
-        assertFalse(scoutShouldRefresh(ScoutPool(builtAt = now - 1000, historySignature = "a"), "b", now))
-        assertTrue(scoutShouldRefresh(ScoutPool(builtAt = now - SCOUT_MIN_REBUILD_GAP_MS, historySignature = "a"), "b", now))
+        assertFalse(scoutShouldRefresh(ScoutPool(builtAt = now - 1000, historySignature = "a", version = SCOUT_POOL_VERSION), "b", now))
+        assertTrue(scoutShouldRefresh(ScoutPool(builtAt = now - SCOUT_MIN_REBUILD_GAP_MS, historySignature = "a", version = SCOUT_POOL_VERSION), "b", now))
+    }
+
+    @Test
+    fun `a pool saved before the current version is rebuilt at once`() {
+        val now = SCOUT_REFRESH_MS * 3
+        assertTrue(scoutShouldRefresh(ScoutPool(builtAt = now - 1000, historySignature = "a"), "a", now))
     }
 }

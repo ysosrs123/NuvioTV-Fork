@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Favorite
@@ -125,6 +126,13 @@ internal fun ScoutSettingsContent(
                 subtitle = stringResource(R.string.scout_row_picked_sub),
                 checked = settings.pickedRow,
                 onToggle = { viewModel.updateSettings { it.copy(pickedRow = !it.pickedRow) } }
+            )
+            SettingsToggleRow(
+                title = stringResource(R.string.scout_row_genre),
+                leadingIcon = Icons.Default.Category,
+                subtitle = stringResource(R.string.scout_row_genre_sub),
+                checked = settings.genreRows,
+                onToggle = { viewModel.updateSettings { it.copy(genreRows = !it.genreRows) } }
             )
             SettingsToggleRow(
                 title = stringResource(R.string.scout_row_because),

@@ -220,6 +220,30 @@ class ScoutMixViewModelTest {
     }
 
     @Test
+    fun `the episode that is up next is never also in the queue`() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel()
+        runCurrent()
+        repeat(3) {
+            vm.play()
+            session.returnFromPlayer("tt1", ScoutMixReturn.ENDED)
+            vm.onShown()
+            runCurrent()
+            val pick = vm.state.value.pick as ScoutMixPick.Episode
+            assertFalse(vm.state.value.coming.any { it.key == pick.key })
+            vm.stop()
+        }
+    }
+
+    @Test
+    fun `the row lists each episode once even when the queue repeats the pick`() {
+        val episodes = meta().videos.map { ScoutMixPick.Episode(show, meta(), it) }
+        val tiles = mixQueueTiles(episodes[1], listOf(episodes[1], episodes[2], episodes[2], episodes[3]))
+        assertEquals(listOf(episodes[1].key, episodes[2].key, episodes[3].key), tiles.map { it.key })
+        assertEquals(listOf(episodes[2].key), comingWithout(listOf(episodes[1], episodes[2]), episodes[1]).map { it.key })
+        assertEquals(2, comingWithout(listOf(episodes[1], episodes[2]), ScoutMixPick.AllSeen).size)
+    }
+
+    @Test
     fun `with Keep playing off the player's card waits to be pressed`() = runTest(mainDispatcherRule.dispatcher) {
         val vm = viewModel(keepPlaying = false)
         runCurrent()

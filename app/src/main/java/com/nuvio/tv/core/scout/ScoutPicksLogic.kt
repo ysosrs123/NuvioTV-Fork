@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.scout
 
 import com.nuvio.tv.domain.model.SCOUT_MAX_NEGATIVE_SEEDS
+import com.nuvio.tv.domain.model.SCOUT_MIN_SEEDS
 import com.nuvio.tv.domain.model.ScoutExclusions
 import com.nuvio.tv.domain.model.ScoutPick
 import com.nuvio.tv.domain.model.ScoutRating
@@ -21,6 +22,7 @@ private const val LIKE = 3.0
 private const val REWATCHED = 4.0
 private const val FINISHED = 1.0
 private const val STOPPED = -1.0
+private const val WATCHING = 0.5
 private const val NOT_FOR_ME = -3.0
 private const val DECAY = 0.97
 private const val STOPPED_AFTER_MS = 14L * 24 * 60 * 60 * 1000
@@ -44,6 +46,12 @@ private const val WEIGHT_AGE = 0.6
 private const val AGE_MIN_TITLES = 5
 private const val AGE_SHARE_BELOW = 0.2
 private const val AGE_HIGHEST_FLOOR = 2
+private const val CEILING_MIN_TITLES = 3
+private const val CEILING_HIGHEST = 1
+private const val CEILING_ABOVE_SHARE = 0.05
+private const val CEILING_COVER = 0.95
+private val KIDS_GENRES = setOf(10751, 10762)
+private val NOT_FOR_KIDS_GENRES = setOf(27, 53, 80, 10752, 10768)
 
 private const val MAX_SAME_SERIES = 1
 private const val MAX_SAME_PERSON = 3
@@ -116,10 +124,22 @@ fun scoutSignals(
     return fromHistory + ratedOnly + stoppedFilms
 }
 
-fun scoutSignalSeeds(signals: List<ScoutSeed>): List<ScoutSeed> {
+/** Titles being watched that have no other signal yet, newest first, each lighter than a finished one. */
+fun scoutWatchingSeeds(started: List<WatchProgress>, signals: List<ScoutSeed>): List<ScoutSeed> {
+    val known = signals.map { it.contentId }.toSet()
+    return started.filter { it.contentId.isNotBlank() && it.contentId !in known }
+        .groupBy { it.contentId }
+        .map { (_, rows) -> rows.maxBy { it.lastWatched } }
+        .sortedByDescending { it.lastWatched }
+        .mapIndexed { index, row -> ScoutSeed(row.contentId, row.contentType.isTv(), row.name, WATCHING * DECAY.pow(index), null) }
+}
+
+/** With too few finished or rated titles, what the profile is watching fills in. */
+fun scoutSignalSeeds(signals: List<ScoutSeed>, watching: List<ScoutSeed> = emptyList()): List<ScoutSeed> {
     val positive = signals.filter { it.weight > 0 }.sortedByDescending { it.weight }.take(SCOUT_PICKS_SEEDS)
+    val lighter = if (positive.size < SCOUT_MIN_SEEDS) watching.filter { it.weight > 0 }.take(SCOUT_PICKS_SEEDS - positive.size) else emptyList()
     val negative = signals.filter { it.weight < 0 }.sortedBy { it.weight }.take(SCOUT_MAX_NEGATIVE_SEEDS)
-    return positive + negative
+    return positive + lighter + negative
 }
 
 private fun ScoutRating.weight() = when (this) {
@@ -183,6 +203,30 @@ fun scoutAgeFloor(ages: List<Pair<Int, Double>>): Int? {
         if (seen > AGE_SHARE_BELOW * total) return level
     }
     return AGE_HIGHEST_FLOOR
+}
+
+/**
+ * The highest level a profile that watches only young titles really watches, or null when teen or adult
+ * titles carry more than a trace of its weight. Above it a pick is removed.
+ */
+fun scoutAgeCeiling(ages: List<Pair<Int, Double>>): Int? {
+    val counted = ages.filter { it.second > 0 }
+    if (counted.size < CEILING_MIN_TITLES) return null
+    val total = counted.sumOf { it.second }
+    if (counted.filter { it.first > CEILING_HIGHEST }.sumOf { it.second } > CEILING_ABOVE_SHARE * total) return null
+    var seen = 0.0
+    for (level in 0 until CEILING_HIGHEST) {
+        seen += counted.filter { it.first == level }.sumOf { it.second }
+        if (seen >= CEILING_COVER * total) return level
+    }
+    return CEILING_HIGHEST
+}
+
+/** Under a ceiling a title of unknown level stays only when it is a family or kids title. */
+fun scoutWithinCeiling(pick: ScoutPick, level: Int?, ceiling: Int?): Boolean = when {
+    ceiling == null -> true
+    level != null -> level <= ceiling
+    else -> pick.genres.any { it in KIDS_GENRES } && pick.genres.none { it in NOT_FOR_KIDS_GENRES }
 }
 
 fun scoutTasteVector(items: List<Pair<ScoutTasteTitle, Double>>, ratedLove: Set<String> = emptySet()): ScoutTasteVector {

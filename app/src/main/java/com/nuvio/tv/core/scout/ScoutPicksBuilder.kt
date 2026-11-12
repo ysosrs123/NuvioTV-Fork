@@ -30,6 +30,7 @@ private const val MAX_REQUESTS = 2
 private const val TASTE_TITLES = 80
 private const val TASTE_NEGATIVE = 10
 private const val MIN_TASTE_TITLES = 3
+private const val AGE_TITLES = 40
 private const val KEYWORD_SOURCES = 5
 private const val PEOPLE_SOURCES = 4
 private const val SOURCE_WEIGHT = 2.0
@@ -104,13 +105,25 @@ class ScoutPicksBuilder @Inject constructor(
     private fun resting(now: Long): Set<String> =
         scoutResting(readShown(shownFile(profileManager.activeProfileId.value)), ScoutOpenedLog.read(context), now)
 
+    /** The age ceiling read from the profile's own titles; their facts are kept, so the rebuild needs no second look-up. */
+    suspend fun ageCeiling(titles: List<ScoutSeed>, now: Long, profileId: Int = profileManager.activeProfileId.value): Int? {
+        val positive = titles.filter { it.weight > 0 }.sortedByDescending { it.weight }.distinctBy { it.contentId }.take(AGE_TITLES)
+        if (positive.isEmpty()) return null
+        val facts = taste.get().fill(positive.map { it.contentId to it.tv }, now, profileId)
+        return scoutAgeCeiling(positive.mapNotNull { seed -> facts[seed.contentId]?.ageLevel?.let { it to seed.weight } })
+    }
+
+    /** Age levels of titles already looked up on this box, by pick key; null where TMDB has no US rating. */
+    fun knownAgeLevels(now: Long): Map<String, Int?> = readFacts(now).mapValues { it.value.ageLevel }
+
     suspend fun improve(
         signals: List<ScoutSeed>,
         ratings: Collection<ScoutRatingEntry>,
         results: List<Pair<ScoutSeed, List<ScoutPick>>>,
         exclusions: ScoutExclusions,
         now: Long,
-        language: String? = null
+        language: String? = null,
+        ageCeiling: Int? = null
     ): ScoutImproved? {
         val positive = signals.filter { it.weight > 0 }.sortedByDescending { it.weight }.take(TASTE_TITLES)
         val negative = signals.filter { it.weight < 0 }.take(TASTE_NEGATIVE)
@@ -133,8 +146,9 @@ class ScoutPicksBuilder @Inject constructor(
 
         val known = readFacts(now)
         val related = relatedResults(results.map { it.first }.filter { it.weight > 0 && it.name.isNotBlank() }, known, now, language)
-        val tally = scoutTally(results + extra + related, exclusions.copy(tmdbKeys = exclusions.tmdbKeys + resting(now)))
-        val candidates = lookUpCandidates(tally, known, now)
+        val found = scoutTally(results + extra + related, exclusions.copy(tmdbKeys = exclusions.tmdbKeys + resting(now)))
+        val candidates = lookUpCandidates(found, known, now)
+        val tally = found.filterValues { (pick, _) -> scoutWithinCeiling(pick, known[pick.key]?.ageLevel, ageCeiling) }
         val all = candidates + items.associate { it.first.contentId to it.first }
         val frequency = HashMap<String, Int>()
         all.values.forEach { title -> title.usefulKeywords().forEach { frequency.merge(it.name, 1, Int::plus) } }
@@ -156,12 +170,13 @@ class ScoutPicksBuilder @Inject constructor(
         val trending = trendingTitles(language)
         val allFresh = lookUpFresh(newTitles + trending, known, now, language)
         val freshFacts = all + allFresh
+        fun suitable(list: List<ScoutPick>) = list.filter { scoutWithinCeiling(it, freshFacts[it.key]?.ageLevel, ageCeiling) }
         val freshFrequency = HashMap<String, Int>()
         freshFacts.values.forEach { title -> title.usefulKeywords().forEach { freshFrequency.merge(it.name, 1, Int::plus) } }
         val shownFirst = picked.take(FRESH_SKIP_TOP).map { it.key }.toSet()
         val blocked = exclusions.copy(tmdbKeys = exclusions.tmdbKeys + resting(now))
-        val newRow = scoutFreshRow(newTitles, freshFacts, vector, freshFrequency, blocked, shownFirst)
-        val trendingRow = scoutFreshRow(trending, freshFacts, vector, freshFrequency, blocked, shownFirst + newRow.take(FRESH_SKIP_TOP).map { it.key })
+        val newRow = scoutFreshRow(suitable(newTitles), freshFacts, vector, freshFrequency, blocked, shownFirst)
+        val trendingRow = scoutFreshRow(suitable(trending), freshFacts, vector, freshFrequency, blocked, shownFirst + newRow.take(FRESH_SKIP_TOP).map { it.key })
         saveFacts(known)
         return ScoutImproved(picked, rows, newRow, trendingRow)
     }

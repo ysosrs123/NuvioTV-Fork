@@ -57,8 +57,8 @@ class ScoutEngineTest {
 
     private fun stubDiscover(results: List<TmdbDiscoverResult>) {
         val body = Response.success(TmdbDiscoverResponse(results = results))
-        coEvery { tmdb.discoverMovies(apiKey = any(), language = any(), page = any(), sortBy = any(), withCompanies = any(), releaseDateLte = any(), voteCountGte = any(), withGenres = any(), releaseDateGte = any(), voteAverageGte = any(), voteAverageLte = any(), withOriginalLanguage = any(), withOriginCountry = any(), withKeywords = any(), year = any(), watchRegion = any(), withWatchProviders = any(), withWatchMonetizationTypes = any(), withoutCompanies = any(), withoutGenres = any(), withoutKeywords = any(), withoutWatchProviders = any(), voteCountLte = any(), withRuntimeLte = any(), withRuntimeGte = any()) } returns body
-        coEvery { tmdb.discoverTv(apiKey = any(), language = any(), page = any(), sortBy = any(), withCompanies = any(), withNetworks = any(), firstAirDateLte = any(), voteCountGte = any(), withGenres = any(), firstAirDateGte = any(), voteAverageGte = any(), voteAverageLte = any(), withOriginalLanguage = any(), withOriginCountry = any(), withKeywords = any(), firstAirDateYear = any(), withStatus = any(), watchRegion = any(), withWatchProviders = any(), withWatchMonetizationTypes = any(), withoutCompanies = any(), withoutGenres = any(), withoutKeywords = any(), withoutWatchProviders = any(), voteCountLte = any(), withRuntimeLte = any(), withRuntimeGte = any()) } returns body
+        coEvery { tmdb.discoverMovies(apiKey = any(), language = any(), page = any(), sortBy = any(), withCompanies = any(), releaseDateLte = any(), voteCountGte = any(), withGenres = any(), releaseDateGte = any(), voteAverageGte = any(), voteAverageLte = any(), withOriginalLanguage = any(), withOriginCountry = any(), withKeywords = any(), year = any(), watchRegion = any(), withWatchProviders = any(), withWatchMonetizationTypes = any(), withoutCompanies = any(), withoutGenres = any(), withoutKeywords = any(), withoutWatchProviders = any(), voteCountLte = any(), withRuntimeLte = any(), withRuntimeGte = any(), certificationCountry = any(), certificationLte = any()) } returns body
+        coEvery { tmdb.discoverTv(apiKey = any(), language = any(), page = any(), sortBy = any(), withCompanies = any(), withNetworks = any(), firstAirDateLte = any(), voteCountGte = any(), withGenres = any(), firstAirDateGte = any(), voteAverageGte = any(), voteAverageLte = any(), withOriginalLanguage = any(), withOriginCountry = any(), withKeywords = any(), firstAirDateYear = any(), withStatus = any(), watchRegion = any(), withWatchProviders = any(), withWatchMonetizationTypes = any(), withoutCompanies = any(), withoutGenres = any(), withoutKeywords = any(), withoutWatchProviders = any(), voteCountLte = any(), withRuntimeLte = any(), withRuntimeGte = any(), certificationCountry = any(), certificationLte = any(), withType = any()) } returns body
     }
 
     private fun engine(
@@ -66,7 +66,9 @@ class ScoutEngineTest {
         profile: ScoutProfile = ScoutProfile(),
         started: List<WatchProgress> = emptyList(),
         listed: ScoutListed = ScoutListed(),
-        activeProfile: MutableStateFlow<Int> = MutableStateFlow(1)
+        activeProfile: MutableStateFlow<Int> = MutableStateFlow(1),
+        ceiling: Int? = null,
+        levels: Map<String, Int?> = emptyMap()
     ): ScoutEngine {
         val context = mockk<Context> { every { filesDir } returns folder.root }
         val settings = mockk<TmdbSettingsDataStore>(relaxed = true)
@@ -79,8 +81,12 @@ class ScoutEngineTest {
         io.mockk.every { store.profile } returns kotlinx.coroutines.flow.flowOf(profile)
         val profiles = mockk<ProfileManager> { every { activeProfileId } returns activeProfile }
         val support = mockk<ScoutFolderSupport> { coEvery { listed() } returns listed }
-        val picks = mockk<ScoutPicksBuilder> { coEvery { improve(any(), any(), any(), any(), any(), any()) } returns null }
-        return ScoutEngine(context, tmdb, service, settings, dagger.Lazy { progress }, mockk(relaxed = true), store, profiles, support, picks, dagger.Lazy { mockk<ScoutMoodCheck>(relaxed = true) })
+        val picks = mockk<ScoutPicksBuilder> {
+            coEvery { improve(any(), any(), any(), any(), any(), any(), any()) } returns null
+            coEvery { ageCeiling(any(), any(), any()) } returns ceiling
+            every { knownAgeLevels(any()) } returns levels
+        }
+        return ScoutEngine(context, tmdb, service, settings, dagger.Lazy { progress }, mockk(relaxed = true), dagger.Lazy { mockk(relaxed = true) }, store, profiles, support, picks, dagger.Lazy { mockk<ScoutMoodCheck>(relaxed = true) })
     }
 
     private fun watched(id: String, name: String, at: Long, year: String? = "2019") =
@@ -190,6 +196,7 @@ class ScoutEngineTest {
         val pool = com.nuvio.tv.domain.model.ScoutPool(
             builtAt = System.currentTimeMillis(),
             historySignature = com.nuvio.tv.domain.model.scoutHistorySignature(emptyList(), emptySet()),
+            version = com.nuvio.tv.domain.model.SCOUT_POOL_VERSION,
             picked = listOf(com.nuvio.tv.domain.model.ScoutPick(tmdbId = profileId, tv = false, name = title))
         )
         java.io.File(folder.root, "scout").mkdirs()
@@ -229,6 +236,42 @@ class ScoutEngineTest {
         e.refreshIfDue(now)
         assertNull(e.pool.value)
         assertFalse(java.io.File(folder.root, "scout/pool_1.json").exists())
+    }
+
+    @Test
+    fun `a kids profile keeps adult titles out and tops up with kids titles only`() = runBlocking {
+        stubRecs(rec(1, "Kids film"), rec(2, "Adult film"), rec(3, "Unrated drama"))
+        val kidsTv = TmdbDiscoverResult(
+            id = 50, name = "Kids show", posterPath = "/p50", firstAirDate = "2020-01-01",
+            voteAverage = 7.5, voteCount = 300, genreIds = listOf(10762, 16)
+        )
+        stubDiscover(listOf(kidsTv))
+        val e = engine(seeded(), ceiling = 0, levels = mapOf("movie:1" to 0, "movie:2" to 3))
+        e.refreshIfDue(now)
+        val pool = e.pool.value!!
+        assertTrue(pool.picked.any { it.name == "Kids film" })
+        assertFalse(pool.picked.any { it.name == "Adult film" || it.name == "Unrated drama" })
+        assertTrue(pool.because.flatMap { it.picks }.none { it.name == "Adult film" })
+        coVerify { tmdb.discoverMovies(apiKey = any(), language = any(), page = any(), sortBy = "popularity.desc", withCompanies = any(), releaseDateLte = any(), voteCountGte = any(), withGenres = any(), releaseDateGte = any(), voteAverageGte = any(), voteAverageLte = any(), withOriginalLanguage = any(), withOriginCountry = any(), withKeywords = any(), year = any(), watchRegion = any(), withWatchProviders = any(), withWatchMonetizationTypes = any(), withoutCompanies = any(), withoutGenres = any(), withoutKeywords = any(), withoutWatchProviders = any(), voteCountLte = any(), withRuntimeLte = any(), withRuntimeGte = any(), certificationCountry = "US", certificationLte = "G") }
+        coVerify { tmdb.discoverTv(apiKey = any(), language = any(), page = any(), sortBy = "popularity.desc", withCompanies = any(), withNetworks = any(), firstAirDateLte = any(), voteCountGte = any(), withGenres = "10762", firstAirDateGte = any(), voteAverageGte = any(), voteAverageLte = any(), withOriginalLanguage = any(), withOriginCountry = any(), withKeywords = any(), firstAirDateYear = any(), withStatus = any(), watchRegion = any(), withWatchProviders = any(), withWatchMonetizationTypes = any(), withoutCompanies = any(), withoutGenres = any(), withoutKeywords = any(), withoutWatchProviders = any(), voteCountLte = any(), withRuntimeLte = any(), withRuntimeGte = any()) }
+    }
+
+    @Test
+    fun `with one finished title the shows being watched become seeds`() = runBlocking {
+        stubRecs(*(1..60).map { rec(it) }.toTypedArray())
+        stubDiscover(emptyList())
+        val started = listOf("tt7", "tt8").mapIndexed { index, id ->
+            WatchProgress(
+                contentId = id, contentType = "series", name = "Show $id", poster = null, backdrop = null, logo = null,
+                videoId = id, season = 1, episode = 1, episodeTitle = null, position = 10, duration = 100, lastWatched = now - index
+            )
+        }
+        coEvery { tmdb.getTvRecommendations(any(), any(), any(), any()) } returns
+            Response.success(TmdbRecommendationsResponse(results = (61..70).map { rec(it) }))
+        val e = engine(listOf(watched("tt1", "One", 3)), started = started)
+        e.refreshIfDue(now)
+        coVerify(exactly = 2) { tmdb.getTvRecommendations(any(), any(), any(), any()) }
+        assertTrue(e.pool.value!!.picked.any { it.tmdbId in 61..70 })
     }
 
     @Test

@@ -284,7 +284,9 @@ fun ScoutMixScreen(
                         }
                     }
                 )
-                val tiles = if (state.tabShow == null) listOfNotNull(episode) + state.coming else state.showEpisodes
+                val tiles = remember(state.tabShow, episode, state.coming, state.showEpisodes) {
+                    if (state.tabShow == null) mixQueueTiles(episode, state.coming) else state.showEpisodes.distinctBy { it.key }
+                }
                 LazyRow(
                     modifier = Modifier.fillMaxWidth().height(tileHeight + NuvioTheme.spacing.md),
                     contentPadding = PaddingValues(horizontal = ScoutFocusRoom, vertical = NuvioTheme.spacing.xs),

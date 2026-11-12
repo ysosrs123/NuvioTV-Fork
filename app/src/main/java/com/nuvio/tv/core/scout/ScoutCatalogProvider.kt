@@ -99,12 +99,26 @@ class ScoutCatalogProvider @Inject constructor(
             catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_PICKED),
             catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_NEW),
             catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_TRENDING),
-            *engine.pool.value?.tasteRows.orEmpty().map { catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_TASTE + it.id) }.toTypedArray(),
+            *slotKeys.toTypedArray(),
             "collection_$TILES_COLLECTION_ID",
             catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_BECAUSE + 0),
             catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_BECAUSE + 1),
             catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_GEMS)
         ) + (ScoutSlices.all.map { it.id } + savedAnswers).map { catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_SAVED + it) }
+
+    private val slotKeys = List(SCOUT_ROWS_MAX) { catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_TASTE + scoutTasteSlotId(it)) }
+
+    override fun anchorFor(key: String, saved: List<String>): String? {
+        val slot = slotKeys.indexOf(key)
+        if (slot < 0) return null
+        slotKeys.take(slot).lastOrNull { it in saved }?.let { return it }
+        val legacyPrefix = catalogRowLegacyKey(ADDON_ID, ROW_TYPE, CATALOG_TASTE)
+        saved.firstOrNull { it.startsWith(legacyPrefix) && it !in slotKeys }?.let { return it }
+        return listOf(CATALOG_PICKED, CATALOG_NEW, CATALOG_TRENDING)
+            .map { catalogRowLegacyKey(ADDON_ID, ROW_TYPE, it) }
+            .filter { it in saved }
+            .maxByOrNull(saved::indexOf)
+    }
 
     private fun startOnce() {
         if (!started.compareAndSet(false, true)) return
@@ -164,8 +178,8 @@ class ScoutCatalogProvider @Inject constructor(
             if (settings.pickedRow && !pool?.picked.isNullOrEmpty()) add(descriptor(CATALOG_PICKED, context.getString(R.string.scout_row_picked)))
             if (settings.pickedRow && !pool?.newForYou.isNullOrEmpty()) add(descriptor(CATALOG_NEW, context.getString(R.string.scout_picks_row_new)))
             if (settings.pickedRow && !pool?.trendingForYou.isNullOrEmpty()) add(descriptor(CATALOG_TRENDING, context.getString(R.string.scout_picks_row_trending)))
-            if (settings.pickedRow) pool?.tasteRows?.forEach { row ->
-                add(descriptor(CATALOG_TASTE + row.id, tasteRowName(row)))
+            if (settings.genreRows) pool?.tasteRows?.take(SCOUT_ROWS_MAX)?.forEachIndexed { index, row ->
+                add(descriptor(CATALOG_TASTE + scoutTasteSlotId(index), tasteRowName(row)))
             }
             if (settings.becauseRow) pool?.because?.forEachIndexed { index, because ->
                 add(descriptor(CATALOG_BECAUSE + index, context.getString(R.string.scout_row_because_title, because.seedName)))
@@ -337,7 +351,7 @@ class ScoutCatalogProvider @Inject constructor(
             catalogId == CATALOG_NEW -> pool?.newForYou.orEmpty()
             catalogId == CATALOG_TRENDING -> pool?.trendingForYou.orEmpty()
             catalogId.startsWith(CATALOG_TASTE) ->
-                pool?.tasteRows?.firstOrNull { it.id == catalogId.removePrefix(CATALOG_TASTE) }?.picks.orEmpty()
+                scoutTasteSlotIndex(catalogId.removePrefix(CATALOG_TASTE))?.let { pool?.tasteRows?.getOrNull(it) }?.picks.orEmpty()
             else -> emptyList()
         }
         if (catalogId == CATALOG_PICKED || catalogId == CATALOG_NEW || catalogId == CATALOG_TRENDING || catalogId.startsWith(CATALOG_TASTE)) {
@@ -455,6 +469,12 @@ class ScoutCatalogProvider @Inject constructor(
         const val CATALOG_SAVED = "saved_"
     }
 }
+
+/** Genre rows sit in fixed places on Home; the genre in each place may change from day to day. */
+internal fun scoutTasteSlotId(index: Int): String = "slot${index + 1}"
+
+internal fun scoutTasteSlotIndex(id: String): Int? =
+    id.removePrefix("slot").takeIf { id.startsWith("slot") }?.toIntOrNull()?.minus(1)?.takeIf { it in 0 until SCOUT_ROWS_MAX }
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -5,6 +5,7 @@ import android.util.Log
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tmdb.TmdbService
+import com.nuvio.tv.core.util.ArcDispatchers
 import com.nuvio.tv.data.local.ScoutStore
 import com.nuvio.tv.data.remote.api.TmdbApi
 import com.nuvio.tv.domain.model.ScoutPick
@@ -275,9 +276,9 @@ class ScoutTasteRepository @Inject constructor(
     }
 
     /** For the daily rebuild: the given titles, looked up only if they are not known yet. */
-    suspend fun fill(wanted: List<Pair<String, Boolean>>, now: Long): Map<String, ScoutTasteTitle> = lock.withLock {
-        withContext(Dispatchers.IO) {
-            val target = file(profileManager.activeProfileId.value)
+    suspend fun fill(wanted: List<Pair<String, Boolean>>, now: Long, profileId: Int = profileManager.activeProfileId.value): Map<String, ScoutTasteTitle> = lock.withLock {
+        withContext(ArcDispatchers.background) {
+            val target = file(profileId)
             val known = runCatching { adapter.fromJson(target.readText()).orEmpty() }.getOrDefault(emptyList())
                 .associateBy { it.contentId }.toMutableMap()
             val missing = wanted.filter { known[it.first].needsLookUp(now) }

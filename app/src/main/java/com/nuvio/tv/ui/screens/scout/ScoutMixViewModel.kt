@@ -42,6 +42,16 @@ private const val COUNTDOWN_SECONDS = 8
 private const val COMING_SHOWN = 6
 private const val TAB_SETTLE_MS = 300L
 
+/** The queue without the episode that is up next: the row shows that one first by itself. */
+internal fun comingWithout(coming: List<ScoutMixPick.Episode>, pick: ScoutMixPick?): List<ScoutMixPick.Episode> {
+    val key = (pick as? ScoutMixPick.Episode)?.key ?: return coming
+    return coming.filter { it.key != key }
+}
+
+/** Up next first, then the queue, each episode once. */
+internal fun mixQueueTiles(pick: ScoutMixPick.Episode?, coming: List<ScoutMixPick.Episode>): List<ScoutMixPick.Episode> =
+    (listOfNotNull(pick) + coming).distinctBy { it.key }
+
 data class ScoutMixUiState(
     val loading: Boolean = true,
     val pick: ScoutMixPick? = null,
@@ -123,7 +133,7 @@ class ScoutMixViewModel @Inject constructor(
                 return
             }
             pickJob?.cancel()
-            _state.update { it.copy(loading = false, pick = next, countdown = null) }
+            _state.update { it.copy(loading = false, pick = next, countdown = null, coming = comingWithout(it.coming, next)) }
             play()?.let { picked ->
                 _start.trySend(picked)
                 mix.value?.let { fillComing(it, picked) }
@@ -355,7 +365,7 @@ class ScoutMixViewModel @Inject constructor(
             )
             val offers = if (pick is ScoutMixPick.AllSeen) suggestions.forMix(saved) else emptyList()
             pickedFrom = saved.shows.map { it.id }
-            _state.update { it.copy(loading = false, pick = pick, offers = offers) }
+            _state.update { it.copy(loading = false, pick = pick, offers = offers, coming = comingWithout(it.coming, pick)) }
             if (pick is ScoutMixPick.Episode) {
                 fillFromMeta(saved, pick)
                 fillComing(saved, pick)

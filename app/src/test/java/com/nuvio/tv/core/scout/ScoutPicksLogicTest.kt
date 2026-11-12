@@ -151,6 +151,56 @@ class ScoutPicksLogicTest {
     }
 
     @Test
+    fun `a profile of young titles gets a ceiling, any real teen or adult share removes it`() {
+        assertEquals(0, scoutAgeCeiling(List(6) { 0 to 1.0 }))
+        assertEquals(1, scoutAgeCeiling(List(8) { 0 to 1.0 } + List(2) { 1 to 1.0 }))
+        assertEquals(0, scoutAgeCeiling(List(30) { 0 to 1.0 } + (3 to 1.0)))
+        assertEquals(1, scoutAgeCeiling(List(25) { 0 to 1.0 } + List(4) { 1 to 1.0 } + (3 to 1.0)))
+        assertNull(scoutAgeCeiling(List(2) { 0 to 1.0 }))
+        assertNull(scoutAgeCeiling(List(5) { 3 to 1.0 }))
+    }
+
+    @Test
+    fun `a family profile with parents and kids is not capped`() {
+        val kids = List(12) { 0 to 1.0 } + List(4) { 1 to 1.0 }
+        val parents = List(3) { 3 to 1.0 } + (2 to 1.0)
+        assertNull(scoutAgeCeiling(kids + parents))
+        val adult = scoutTasteVector((1..6).map { facts("h$it").copy(ageLevel = 3) to 1.0 })
+        assertEquals(2, adult.ageFloor)
+        assertNull(scoutAgeCeiling((1..6).map { 3 to 1.0 }))
+    }
+
+    @Test
+    fun `under a ceiling only suitable titles stay, unknown ones only when they are for families`() {
+        val family = pick(1, genres = listOf(16, 10751))
+        val kidsShow = pick(2, genres = listOf(10762))
+        val anime = pick(3, genres = listOf(16, 10759))
+        val crime = pick(4, genres = listOf(10751, 80))
+        assertTrue(scoutWithinCeiling(anime, 3, null))
+        assertTrue(scoutWithinCeiling(anime, 1, 1))
+        assertFalse(scoutWithinCeiling(family, 2, 1))
+        assertTrue(scoutWithinCeiling(family, null, 0))
+        assertTrue(scoutWithinCeiling(kidsShow, null, 0))
+        assertFalse(scoutWithinCeiling(anime, null, 1))
+        assertFalse(scoutWithinCeiling(crime, null, 1))
+    }
+
+    @Test
+    fun `titles being watched seed only when finished ones are too few`() {
+        val watching = scoutWatchingSeeds(
+            listOf(progress("s1", "series", 10, 100, now - day, 1), progress("s2", "series", 10, 100, now - 2 * day, 1), progress("m1", "movie", 50, 100, now)),
+            emptyList()
+        )
+        assertEquals(listOf("m1", "s1", "s2"), watching.map { it.contentId })
+        assertTrue(watching.all { it.weight in 0.0..0.5 && it.finishedOrder == null })
+        val one = scoutSignals(listOf(film("f1")), emptyList(), emptyList(), now)
+        assertEquals(listOf("f1", "m1", "s1", "s2"), scoutSignalSeeds(one, watching).map { it.contentId })
+        val three = scoutSignals((1..3).map { film("f$it", now - it * day) }, emptyList(), emptyList(), now)
+        assertEquals(3, scoutSignalSeeds(three, watching).size)
+        assertTrue(scoutWatchingSeeds(listOf(progress("f1", "movie", 50, 100, now)), one).isEmpty())
+    }
+
+    @Test
     fun `seeds are capped and picks work from history without any ratings`() {
         val signals = scoutSignals((1..30).map { film("m$it", now - it * day) }, emptyList(), emptyList(), now)
         assertEquals(SCOUT_PICKS_SEEDS, scoutSignalSeeds(signals).size)

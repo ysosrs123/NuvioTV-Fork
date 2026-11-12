@@ -36,6 +36,7 @@ class ScoutStore @Inject constructor(
     private val ratingsEnabled = booleanPreferencesKey("ratings_enabled")
     private val askAfterFilm = booleanPreferencesKey("ask_after_film")
     private val pickedRow = booleanPreferencesKey("picked_row")
+    private val genreRows = booleanPreferencesKey("genre_rows")
     private val becauseRow = booleanPreferencesKey("because_row")
     private val gemsRow = booleanPreferencesKey("gems_row")
     private val tilesRow = booleanPreferencesKey("tiles_row_chosen")
@@ -88,6 +89,7 @@ class ScoutStore @Inject constructor(
             it[ratingsEnabled] = next.ratingsEnabled
             it[askAfterFilm] = next.askAfterFilm
             it[pickedRow] = next.pickedRow
+            it[genreRows] = next.genreRows
             it[becauseRow] = next.becauseRow
             it[gemsRow] = next.gemsRow
             it[tilesRow] = next.tilesRow
@@ -101,10 +103,11 @@ class ScoutStore @Inject constructor(
 
     suspend fun profileOf(profileId: Int): ScoutProfile = readProfile(profileId, factory.get(profileId, FEATURE).data.first())
 
-    private fun readSettings(p: Preferences) = ScoutSettings(
+    internal fun readSettings(p: Preferences) = ScoutSettings(
         ratingsEnabled = p[ratingsEnabled] ?: true,
         askAfterFilm = p[askAfterFilm] ?: true,
         pickedRow = p[pickedRow] ?: true,
+        genreRows = p[genreRows] ?: p[pickedRow] ?: true,
         becauseRow = p[becauseRow] ?: true,
         gemsRow = p[gemsRow] ?: true,
         tilesRow = p[tilesRow] ?: false,

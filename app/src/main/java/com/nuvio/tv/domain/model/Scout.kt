@@ -25,6 +25,7 @@ data class ScoutSettings(
     val ratingsEnabled: Boolean = true,
     val askAfterFilm: Boolean = true,
     val pickedRow: Boolean = true,
+    val genreRows: Boolean = true,
     val becauseRow: Boolean = true,
     val gemsRow: Boolean = true,
     val tilesRow: Boolean = false,
