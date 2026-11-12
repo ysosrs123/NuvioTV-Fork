@@ -40,12 +40,13 @@ class DisplayRefreshMeterTest {
     }
 
     @Test
-    fun `a count left at the old rate after a mode change is not taken as the screen's rate`() {
-        assertTrue(DisplayRefreshMeter.ticksStayedAt(fromHz = 59.94f, measuredHz = 59.939f, androidHz = 23.976f, seamless = false))
-        assertFalse(DisplayRefreshMeter.ticksStayedAt(fromHz = 59.94f, measuredHz = 24.000f, androidHz = 23.976f, seamless = false))
-        assertFalse(DisplayRefreshMeter.ticksStayedAt(fromHz = 59.94f, measuredHz = 23.976f, androidHz = 23.976f, seamless = false))
-        assertFalse(DisplayRefreshMeter.ticksStayedAt(fromHz = 59.94f, measuredHz = 59.939f, androidHz = 23.976f, seamless = true))
-        assertFalse(DisplayRefreshMeter.ticksStayedAt(fromHz = null, measuredHz = 59.939f, androidHz = 23.976f, seamless = false))
+    fun `a count nowhere near the new rate after a mode change is not taken as the screen's rate`() {
+        assertTrue(DisplayRefreshMeter.ticksMissedModeChange(measuredHz = 59.939f, androidHz = 23.976f, seamless = false))
+        assertTrue(DisplayRefreshMeter.ticksMissedModeChange(measuredHz = 37.555f, androidHz = 23.976f, seamless = false))
+        assertFalse(DisplayRefreshMeter.ticksMissedModeChange(measuredHz = 24.000f, androidHz = 23.976f, seamless = false))
+        assertFalse(DisplayRefreshMeter.ticksMissedModeChange(measuredHz = 23.976f, androidHz = 23.976f, seamless = false))
+        assertFalse(DisplayRefreshMeter.ticksMissedModeChange(measuredHz = 37.555f, androidHz = 23.976f, seamless = true))
+        assertFalse(DisplayRefreshMeter.ticksMissedModeChange(measuredHz = 59.939f, androidHz = 23.976f, seamless = null))
     }
 
     @Test

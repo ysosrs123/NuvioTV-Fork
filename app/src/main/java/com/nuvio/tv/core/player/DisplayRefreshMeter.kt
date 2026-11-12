@@ -36,6 +36,8 @@ object DisplayRefreshMeter {
     private const val MIN_TICKS = 40
     /** 24.000 against 23.976 is 0.1 %; a four second reading is good to a few thousandths of a percent. */
     private const val DIFFERS_FRACTION = 0.0004f
+    /** After a real mode change a count further than this from Android's rate is a bad count, not the screen. */
+    private const val PLAUSIBLE_FRACTION = 0.01f
 
     @Volatile var latest: Reading? = null
         private set
@@ -61,7 +63,7 @@ object DisplayRefreshMeter {
                         return
                     }
                     val hz = hzFrom(ticks) ?: return
-                    if (ticksStayedAt(fromHz, hz, androidHz, seamless)) ticksIgnoreModeChanges = true
+                    if (ticksMissedModeChange(hz, androidHz, seamless)) ticksIgnoreModeChanges = true
                     val reading = Reading(hz, androidHz, seamless, ticks.size, reliable(seamless, ticksIgnoreModeChanges))
                     latest = reading
                     readings.tryEmit(reading)
@@ -100,9 +102,12 @@ object DisplayRefreshMeter {
     private fun off(measuredHz: Float, androidHz: Float): Boolean =
         androidHz > 0f && abs(measuredHz - androidHz) / androidHz > DIFFERS_FRACTION
 
-    /** A mode change that left the count at the rate it came from, not at the one Android switched to. */
-    internal fun ticksStayedAt(fromHz: Float?, measuredHz: Float, androidHz: Float, seamless: Boolean?): Boolean =
-        seamless == false && fromHz != null && off(measuredHz, androidHz) && !off(measuredHz, fromHz)
+    /**
+     * A mode change after which the count is nowhere near the rate Android switched to: left at the old rate, or
+     * somewhere in between. A screen that really runs at 24.000 for 23.976 is 0.1 % off and is still judged.
+     */
+    internal fun ticksMissedModeChange(measuredHz: Float, androidHz: Float, seamless: Boolean?): Boolean =
+        seamless == false && androidHz > 0f && abs(measuredHz - androidHz) / androidHz > PLAUSIBLE_FRACTION
 
     /** Without a mode change (QMS or VRR) the count is the only evidence there is, so it always stands. */
     internal fun reliable(seamless: Boolean?, ticksIgnoreModeChanges: Boolean): Boolean =
