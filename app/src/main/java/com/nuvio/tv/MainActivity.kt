@@ -308,6 +308,9 @@ open class MainActivity : ComponentActivity() {
     lateinit var profileManager: ProfileManager
 
     @Inject
+    lateinit var profileLockStateDataStore: com.nuvio.tv.data.local.ProfileLockStateDataStore
+
+    @Inject
     lateinit var authManager: AuthManager
 
     @Inject
@@ -511,24 +514,28 @@ open class MainActivity : ComponentActivity() {
             val activeProfile = remember(activeProfileId, profiles) {
                 profiles.firstOrNull { it.id == activeProfileId }
             }
-            var profilePinStates by remember { mutableStateOf<Map<Int, Boolean>>(emptyMap()) }
+            val profilePinStates by remember {
+                profileLockStateDataStore.pinEnabled.map<Map<Int, Boolean>, Map<Int, Boolean>?> { it }
+            }.collectAsState(initial = null)
 
             LaunchedEffect(authState, profiles) {
                 if (authState is AuthState.FullAccount) {
                     profileSyncService.pullProfileLockStates()
-                        .onSuccess { profilePinStates = it }
-                        .onFailure { profilePinStates = emptyMap() }
-                } else {
-                    profilePinStates = emptyMap()
+                        .onSuccess { profileLockStateDataStore.replaceAll(it) }
                 }
             }
 
-            val activeProfileHasPin = remember(activeProfileId, profilePinStates) {
-                profilePinStates[activeProfileId] == true
+            val signedOut = authState is AuthState.SignedOut
+            val activeProfileHasPin = remember(activeProfileId, profilePinStates, signedOut) {
+                com.nuvio.tv.core.profile.ProfileStartGate.hasPin(signedOut, profilePinStates, activeProfileId)
             }
 
             LaunchedEffect(hasEverSelectedProfile, activeProfileHasPin, rememberLastProfileEnabled) {
-                if (rememberLastProfileEnabled && hasEverSelectedProfile && !activeProfileHasPin && !hasSelectedProfileThisSession && !v2ProfilePickerRequested) {
+                if (!hasSelectedProfileThisSession && !v2ProfilePickerRequested && com.nuvio.tv.core.profile.ProfileStartGate.canAutoSelect(
+                        rememberLastProfileEnabled, hasEverSelectedProfile, activeProfileHasPin,
+                        com.nuvio.tv.core.profile.ProfileStartGate.hasPin(signedOut, profilePinStates, profileManager.savedActiveProfileId())
+                    )
+                ) {
                     hasSelectedProfileThisSession = true
                     if (authManager.authState.value is AuthState.FullAccount) {
                         startupSyncService.requestSyncNow()
@@ -780,7 +787,7 @@ open class MainActivity : ComponentActivity() {
                         return@Surface
                     }
 
-                    if (authState is AuthState.Loading) {
+                    if (authState is AuthState.Loading || activeProfileHasPin == null) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -863,7 +870,7 @@ open class MainActivity : ComponentActivity() {
                     }
 
                     val shouldShowProfileSelection =
-                        !hasSelectedProfileThisSession && (profiles.size > 1 || activeProfileHasPin || v2ProfilePickerRequested)
+                        !hasSelectedProfileThisSession && (profiles.size > 1 || activeProfileHasPin == true || v2ProfilePickerRequested)
 
                     if (shouldShowProfileSelection) {
                         SideEffect { startPicture.end() }
@@ -1527,6 +1534,10 @@ open class MainActivity : ComponentActivity() {
                 System.nanoTime(), frameData.frameDurationUiNanos, frameData.isJank
             )
             if (frameData.isJank) {
+                com.nuvio.tv.data.repository.ArcSlowFrames.note(
+                    frameData.frameDurationUiNanos / 1_000_000,
+                    frameData.states.firstOrNull { it.key == "Screen" }?.value
+                )
                 Log.w(
                     "JankStats",
                     "JANK: ${frameData.frameDurationUiNanos / 1_000_000}ms | states: ${frameData.states}"

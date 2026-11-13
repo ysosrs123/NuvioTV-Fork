@@ -55,6 +55,8 @@ object PluginRuntimeHooks {
     @Volatile
     private var isCloudstreamInitialized = false
 
+    val started: Boolean get() = isCloudstreamInitialized
+
     /**
      * Lazily initialize Conscrypt + the cloudstream baseClient. Safe to call
      * repeatedly; only the first call performs work. Must be invoked before any

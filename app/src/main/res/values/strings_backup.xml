@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Names and pictures</string>
     <string name="backup_part_settings">Arc settings</string>
     <string name="backup_part_settings_sub">Scout, thumbnails, DNS, remote buttons and more</string>
+    <string name="backup_part_history">Library and watch history</string>
+    <string name="backup_part_history_sub">Saved titles, Continue watching and watched marks</string>
+    <string name="backup_part_history_signed_in">Your Nuvio account already keeps these. Restored only on a box that is not signed in.</string>
+    <string name="backup_part_history_counts">Saved titles: %1$d. Watched: %2$d. In progress: %3$d.</string>
+    <string name="backup_supporter">Supporter status</string>
+    <string name="backup_supporter_yes">Yes. Supporter colours and icons are kept.</string>
+    <string name="backup_supporter_no">No</string>
     <string name="backup_part_secrets">Passwords and keys</string>
     <string name="backup_part_secrets_saved">Locked with your PIN</string>
     <string name="backup_part_secrets_needs_pin">Needs the backup PIN</string>

@@ -152,6 +152,7 @@ data class SubtitleStyleSettings(
     val tertiaryPreferredLanguage: String? = null,
     val preferredLanguageBeforeOff: String? = null,
     val useForcedSubtitles: Boolean = false,
+    val preferAddonSubtitles: Boolean = false,
     val showOnlyPreferredLanguages: Boolean = false,
     val stripSdh: Boolean = false,
     val size: Int = 100, // Percentage (50-200)
@@ -382,6 +383,8 @@ data class PlayerSettings(
     // Display settings
     val frameRateMatchingMode: FrameRateMatchingMode = FrameRateMatchingMode.OFF,
     val resolutionMatchingEnabled: Boolean = false,
+    /** Extra wait after a refresh rate change, in seconds; 0 = Auto (two seconds, then until HDMI audio is back). */
+    val afrSettleDelaySeconds: Int = 0,
     // Stream selection settings
     val streamAutoPlayMode: StreamAutoPlayMode = StreamAutoPlayMode.MANUAL,
     val streamAutoPlaySource: StreamAutoPlaySource = StreamAutoPlaySource.ALL_SOURCES,
@@ -579,6 +582,8 @@ enum class VodCacheSizeMode {
 enum class SeekingMode {
     GENTLE, BALANCED, FAST, CONFIRM
 }
+
+const val AFR_SETTLE_DELAY_MAX_SECONDS = 10
 
 enum class FrameRateMatchingMode {
     OFF, START, START_STOP
@@ -878,6 +883,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val frameRateMatchingKey = booleanPreferencesKey("frame_rate_matching")
     private val frameRateMatchingModeKey = stringPreferencesKey("frame_rate_matching_mode")
     private val resolutionMatchingEnabledKey = booleanPreferencesKey("resolution_matching_enabled")
+    private val afrSettleDelaySecondsKey = intPreferencesKey("afr_settle_delay_seconds")
     private val streamAutoPlayModeKey = stringPreferencesKey("stream_auto_play_mode")
     private val streamAutoPlaySourceKey = stringPreferencesKey("stream_auto_play_source")
     private val streamAutoPlaySelectedAddonsKey = stringSetPreferencesKey("stream_auto_play_selected_addons")
@@ -938,6 +944,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val subtitlePreferredLanguageBeforeOffKey = stringPreferencesKey("subtitle_preferred_language_before_off")
     private val subtitleUseForcedSubtitlesKey = booleanPreferencesKey("subtitle_use_forced_subtitles")
     private val subtitleShowOnlyPreferredLanguagesKey = booleanPreferencesKey("subtitle_show_only_preferred_languages")
+    private val subtitlePreferAddonKey = booleanPreferencesKey("subtitle_prefer_addon")
     private val subtitleStripSdhKey = booleanPreferencesKey("subtitle_strip_sdh")
     private val subtitleSizeKey = intPreferencesKey("subtitle_size")
     private val subtitleBitmapSizeKey = intPreferencesKey("subtitle_bitmap_size")
@@ -1394,6 +1401,7 @@ class PlayerSettingsDataStore @Inject constructor(
                     runCatching { FrameRateMatchingMode.valueOf(it) }.getOrNull()
                 } ?: if (prefs[frameRateMatchingKey] == true) FrameRateMatchingMode.START_STOP else FrameRateMatchingMode.OFF,
                 resolutionMatchingEnabled = prefs[resolutionMatchingEnabledKey] ?: false,
+                afrSettleDelaySeconds = (prefs[afrSettleDelaySecondsKey] ?: 0).coerceIn(0, AFR_SETTLE_DELAY_MAX_SECONDS),
                 streamAutoPlayMode = prefs[streamAutoPlayModeKey]?.let {
                     runCatching { StreamAutoPlayMode.valueOf(it) }.getOrDefault(StreamAutoPlayMode.MANUAL)
                 } ?: StreamAutoPlayMode.MANUAL,
@@ -1516,6 +1524,7 @@ class PlayerSettingsDataStore @Inject constructor(
                             prefs[subtitlePreferredLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED ||
                             prefs[subtitleSecondaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED ||
                             prefs[subtitleTertiaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED,
+                        preferAddonSubtitles = prefs[subtitlePreferAddonKey] ?: false,
                         showOnlyPreferredLanguages = prefs[subtitleShowOnlyPreferredLanguagesKey] ?: false,
                         stripSdh = prefs[subtitleStripSdhKey] ?: false,
                         size = prefs[subtitleSizeKey] ?: SubtitleStyleSettings().size,
@@ -2010,6 +2019,12 @@ class PlayerSettingsDataStore @Inject constructor(
     internal suspend fun setResolutionMatchingEnabled(enabled: Boolean, profileId: Int) {
         store(profileId).edit { prefs ->
             prefs[resolutionMatchingEnabledKey] = enabled
+        }
+    }
+
+    suspend fun setAfrSettleDelaySeconds(seconds: Int) {
+        store().edit { prefs ->
+            prefs[afrSettleDelaySecondsKey] = seconds.coerceIn(0, AFR_SETTLE_DELAY_MAX_SECONDS)
         }
     }
 
@@ -2554,6 +2569,12 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setUseForcedSubtitles(enabled: Boolean) {
         store().edit { prefs ->
             prefs[subtitleUseForcedSubtitlesKey] = enabled
+        }
+    }
+
+    suspend fun setPreferAddonSubtitles(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[subtitlePreferAddonKey] = enabled
         }
     }
 

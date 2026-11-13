@@ -171,8 +171,14 @@ sealed class Screen(val route: String) {
     data object ScoutTaste : Screen("scout_taste")
     data object ScoutQuickStart : Screen("scout_quick_start")
     data object ScoutWords : Screen("scout_words")
-    data object ScoutMix : Screen("scout_mix/{mixId}") {
-        fun createRoute(mixId: String): String = "scout_mix/${URLEncoder.encode(mixId, "UTF-8")}"
+    data object ScoutMix : Screen("scout_mix/{mixId}?play={play}") {
+        fun createRoute(mixId: String, play: Boolean = false): String =
+            "scout_mix/${URLEncoder.encode(mixId, "UTF-8")}" + if (play) "?play=1" else ""
+    }
+    data object ScoutMixes : Screen("scout_mixes")
+    data object ScoutMixOwn : Screen("scout_mix_own?recipe={recipe}") {
+        fun createRoute(recipe: String?): String =
+            "scout_mix_own" + (recipe?.let { "?recipe=" + URLEncoder.encode(it, "UTF-8") } ?: "")
     }
     data object ExperienceModeSelection : Screen("experience_mode_selection")
     data object LayoutSelection : Screen("layout_selection")

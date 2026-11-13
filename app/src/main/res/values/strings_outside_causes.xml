@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">This source isn\'t working right now. Arc can\'t fix that, so there\'s no need to report it. Try another source.</string>
+    <string name="report_check_blocked_hint_notice">This source isn\'t working right now. Arc can\'t fix that, so there\'s no need to report it. Check your add-on or Debrid account, or try another source.</string>
+    <string name="stream_large_file_short">Large file for this box</string>
+    <string name="stream_large_file_uhd">This is a very large 4K file. Boxes with less memory, like this one, often struggle with files this size, so it may pause or stop. A 1080p version of the same film usually plays more smoothly.</string>
+    <string name="stream_large_file_other">This is a very large file. Boxes with less memory, like this one, often struggle with files this size, so it may pause or stop. A smaller 1080p version, marked WEB rather than Remux, usually plays more smoothly.</string>
+</resources>

@@ -246,6 +246,13 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    fun continueWithoutAccount() {
+        viewModelScope.launch {
+            authManager.continueWithoutAccount()
+            _uiState.update { it.copy(connectedStats = null, isStatsLoading = false) }
+        }
+    }
+
     fun loadLinkedDevices() {
         viewModelScope.launch {
             syncRepository.getLinkedDevices().fold(

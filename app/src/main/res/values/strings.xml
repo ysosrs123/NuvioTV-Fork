@@ -880,6 +880,11 @@
     <string name="playback_resolution_matching">Resolution matching</string>
     <string name="playback_resolution_matching_sub">Allow display mode changes to match video resolution.</string>
     <string name="playback_resolution_matching_unsupported_sub">Display reports only one resolution; matching may have no effect.</string>
+    <string name="playback_afr_settle_delay">Delay after refresh rate change</string>
+    <string name="playback_afr_settle_delay_sub">How long a film waits for the TV after a rate change. Raise it if films start black or silent through a receiver or soundbar.</string>
+    <string name="playback_afr_settle_delay_auto">Auto</string>
+    <string name="playback_afr_settle_delay_auto_sub">Two seconds, then until the TV\'s sound link is back</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
     <string name="playback_afr_capability_unsupported_title">Some settings may not work</string>
     <string name="playback_afr_capability_both_problem_body">Auto Frame Rate and resolution matching are both enabled, but your display reports only one refresh rate and one resolution. Neither may take effect, and it is recommended to disable both.</string>
     <string name="playback_afr_capability_only_afr_unsupported_body">Auto Frame Rate is enabled but your display reports only one refresh rate. Switching may have no effect, and it is recommended to disable.</string>
@@ -1060,6 +1065,8 @@
     <string name="sub_tertiary_lang">Third preferred language</string>
     <string name="sub_use_forced_subtitles">Use Forced Subtitles</string>
     <string name="sub_addon_subtitles">Addon subtitles</string>
+    <string name="sub_prefer_addon_subtitles">Addon subtitles first</string>
+    <string name="sub_prefer_addon_subtitles_desc">Pick an addon subtitle over the file\'s own when both are in your language. The file\'s own is used when no addon has one.</string>
     <string name="sub_addon_subtitles_desc">Fetch subtitles from installed addons during playback. When off, only subtitles embedded in the file are available.</string>
     <string name="sub_use_forced_subtitles_desc">Prefer forced subtitles when audio matches subtitle language; if unavailable, select nothing</string>
     <string name="sub_show_only_preferred_languages">Show only preferred languages</string>
@@ -2135,14 +2142,14 @@
     <string name="report_item_title">Title and file name</string>
     <string name="report_item_note">Add a note</string>
     <string name="report_item_note_hint">Optional</string>
-    <string name="report_note_placeholder">What should we know?</string>
+    <string name="report_note_placeholder">Anything else worth knowing?</string>
     <string name="report_never_sent">Never sent: stream links, debrid or add-on keys, your account or email. The report service does not keep your IP address.</string>
     <string name="report_send">Send</string>
     <string name="report_failed_limit">This box has reached today\'s limit for reports. Please try again tomorrow.</string>
     <string name="report_sent_title">Report sent</string>
     <string name="report_sent_qr_description">QR code for your report</string>
     <string name="report_sent_phone">Scan with your phone to add photos or follow your report. Arc is a hobby project, so not every report gets a reply.</string>
-    <string name="report_sent_no_phone">Thanks for letting us know. Arc is a hobby project, so not every report gets a reply.</string>
+    <string name="report_sent_no_phone">Thanks for the report. Arc is a hobby project, so not every report gets a reply.</string>
     <string name="report_sent_back">Back to watching</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Choose all that fit. Arc has kept the last minute.</item>
@@ -2152,7 +2159,7 @@
         <item quantity="one">Player settings and the last minute</item>
         <item quantity="other">Player settings and the last %1$d minutes</item>
     </plurals>
-    <string name="report_settings_subtitle">Tell us what went wrong or what you would like Arc to do</string>
+    <string name="report_settings_subtitle">Say what went wrong or what you would like Arc to do</string>
     <string name="report_group_choose">What would you like to report?</string>
     <string name="report_group_options">Options</string>
     <string name="report_row_playback">A playback problem</string>
@@ -2416,13 +2423,17 @@
     <string name="display_mode_measured">Measured</string>
     <string name="display_mode_measured_off">Screen runs at %1$s Hz, not %2$s Hz</string>
     <string name="qms_hint_title">Your TV isn\'t keeping the film\'s frame rate</string>
-    <string name="qms_hint_body_qms">Arc asked for %1$s Hz. Your TV changed rate without a full switch (QMS) and is running at %2$s Hz. That shows as a small, regular stutter.</string>
-    <string name="qms_hint_body">Arc asked for %1$s Hz, but your screen is running at %2$s Hz. That shows as a small, regular stutter.</string>
     <string name="qms_hint_fix">Best fix: turn QMS off on the TV</string>
     <string name="qms_hint_fix_hint">In the TV\'s own settings for this HDMI input. Arc can\'t change it.</string>
     <string name="qms_hint_off">Turn frame rate matching off</string>
-    <string name="qms_hint_off_hint">From the next film on, the screen stays at its usual rate. You can turn it back on in Settings.</string>
     <string name="qms_hint_keep">Keep as it is</string>
+    <string name="qms_hint_body_v2">Arc asked for %1$s Hz, but your screen is running at %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc asked for %1$s Hz. Your TV changed rate without a full switch (QMS) and is running at %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">You may notice one repeated frame about every %1$d seconds.</string>
+    <string name="qms_hint_effect_judder">That shows as a steady judder.</string>
+    <string name="qms_hint_mode_tip">Some boxes and receivers have a setting for exact film rates (23.976 Hz), often called fractional rates. Arc can\'t change it.</string>
+    <string name="qms_hint_off_hint_qms">Arc then stops asking for the film\'s rate. Your TV may still change rate by itself.</string>
+    <string name="qms_hint_ok">OK</string>
 
 
     <string name="search_keyboard_hint">Press Done on the keyboard to search</string>

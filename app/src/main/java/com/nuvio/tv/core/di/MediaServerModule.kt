@@ -7,6 +7,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Build
+import com.nuvio.tv.core.network.NetworkValidation
 import com.nuvio.tv.core.network.NoDelaySocketFactory
 import com.nuvio.tv.core.report.PlaybackRecorder
 import com.nuvio.tv.data.repository.networkKindForRecorder
@@ -126,13 +127,13 @@ object MediaServerModule {
                 }
 
                 override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
-                    PlaybackRecorder.noteNetwork(
-                        kind = networkKindForRecorder(capabilities),
-                        validated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-                    )
+                    val validated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                    NetworkValidation.note(validated)
+                    PlaybackRecorder.noteNetwork(kind = networkKindForRecorder(capabilities), validated = validated)
                 }
 
                 override fun onLost(network: Network) {
+                    NetworkValidation.note(false)
                     PlaybackRecorder.noteNetwork(kind = "none", validated = false)
                 }
             })

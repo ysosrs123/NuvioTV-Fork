@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.report.ReportBusy
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
@@ -309,10 +310,12 @@ class StartupSyncService @Inject constructor(
             if (pullKey(currentState.userId) != key || startupPullJob?.isActive == true) return@launch
             val profileId = profileManager.activeProfileId.value
             Log.d(TAG, "Activity sync started profile=$profileId reason=$reason")
-            val succeeded = coroutineScope {
-                val watchState = async { pullPeriodicWatchState() }
-                val library = async { pullPeriodicLibrary() }
-                watchState.await() && library.await()
+            val succeeded = ReportBusy.during(ReportBusy.SYNC) {
+                coroutineScope {
+                    val watchState = async { pullPeriodicWatchState() }
+                    val library = async { pullPeriodicLibrary() }
+                    watchState.await() && library.await()
+                }
             }
             if (succeeded) {
                 activityPullFreshness = SurfacePullFreshness(
@@ -402,11 +405,13 @@ class StartupSyncService @Inject constructor(
             val maxAttempts = 3
             var syncCompleted = false
             for (attempt in 1..maxAttempts) {
-                val result = pullRemoteData(
-                    userId = userId,
-                    force = force,
-                    includeProfileSettings = includeProfileSettings
-                )
+                val result = ReportBusy.during(ReportBusy.SYNC) {
+                    pullRemoteData(
+                        userId = userId,
+                        force = force,
+                        includeProfileSettings = includeProfileSettings
+                    )
+                }
                 if (result.isSuccess) {
                     lastPulledKey = key
                     lastPulledIncludedProfileSettings = includeProfileSettings

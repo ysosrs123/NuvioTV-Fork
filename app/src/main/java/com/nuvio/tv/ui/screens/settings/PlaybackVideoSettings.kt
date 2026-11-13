@@ -98,6 +98,15 @@ internal fun PlaybackVideoSection(
         titleTrailingIconTint = NuvioTheme.colors.Warning,
         enabled = enabled
     )
+    if (settings.frameRateMatchingMode != FrameRateMatchingMode.OFF) {
+        SettingsActionRow(
+            title = stringResource(R.string.playback_afr_settle_delay),
+            subtitle = stringResource(R.string.playback_afr_settle_delay_sub),
+            value = afrSettleDelayLabel(settings.afrSettleDelaySeconds),
+            enabled = enabled,
+            onClick = { onOpenDialog(PlaybackDialog.AFR_SETTLE_DELAY) }
+        )
+    }
     AfrCapabilityWarningCard(
         snapshot = displayCapabilities,
         afrModeOn = settings.frameRateMatchingMode != FrameRateMatchingMode.OFF,
@@ -318,6 +327,14 @@ internal fun VideoSettingsDialogs(
             },
             onDismiss = onDismiss
         )
+        PlaybackDialog.AFR_SETTLE_DELAY -> AfrSettleDelayDialog(
+            selectedSeconds = settings.afrSettleDelaySeconds,
+            onSelected = { seconds ->
+                onUpdate { setAfrSettleDelaySeconds(seconds) }
+                onDismiss()
+            },
+            onDismiss = onDismiss
+        )
         PlaybackDialog.DV7_HANDLING_MODE -> Dv7HandlingModeDialog(
             selectedMode = settings.dv7HandlingMode,
             onModeSelected = { mode ->
@@ -370,6 +387,37 @@ private fun FrameRateMatchingDialog(
         onDismiss = onDismiss,
         width = 460.dp,
         maxHeight = 320.dp
+    )
+}
+
+private val AFR_SETTLE_DELAY_CHOICES = listOf(0, 3, 4, 5, 6, 8, 10)
+
+@Composable
+private fun afrSettleDelayLabel(seconds: Int): String =
+    if (seconds <= 0) stringResource(R.string.playback_afr_settle_delay_auto)
+    else stringResource(R.string.playback_afr_settle_delay_seconds, seconds)
+
+@Composable
+private fun AfrSettleDelayDialog(
+    selectedSeconds: Int,
+    onSelected: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options = AFR_SETTLE_DELAY_CHOICES.map { seconds ->
+        SettingsPickerOption(
+            seconds,
+            afrSettleDelayLabel(seconds),
+            if (seconds == 0) stringResource(R.string.playback_afr_settle_delay_auto_sub) else null
+        )
+    }
+    SettingsSingleChoiceDialog(
+        title = stringResource(R.string.playback_afr_settle_delay),
+        options = options,
+        selectedValue = if (selectedSeconds in AFR_SETTLE_DELAY_CHOICES) selectedSeconds else 0,
+        onOptionSelected = onSelected,
+        onDismiss = onDismiss,
+        width = 460.dp,
+        maxHeight = 420.dp
     )
 }
 

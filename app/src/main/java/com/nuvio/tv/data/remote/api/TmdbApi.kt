@@ -705,7 +705,9 @@ data class TmdbDiscoverResult(
     @Json(name = "vote_average") val voteAverage: Double? = null,
     @Json(name = "vote_count") val voteCount: Int? = null,
     @Json(name = "genre_ids") val genreIds: List<Int>? = null,
-    @Json(name = "popularity") val popularity: Double? = null
+    @Json(name = "origin_country") val originCountry: List<String>? = null,
+    @Json(name = "popularity") val popularity: Double? = null,
+    @Json(name = "original_language") val originalLanguage: String? = null
 )
 
 @JsonClass(generateAdapter = true)
@@ -785,7 +787,8 @@ data class TmdbPersonCreditCrew(
     @Json(name = "vote_average") val voteAverage: Double? = null,
     @Json(name = "vote_count") val voteCount: Int? = null,
     @Json(name = "overview") val overview: String? = null,
-    @Json(name = "genre_ids") val genreIds: List<Int>? = null
+    @Json(name = "genre_ids") val genreIds: List<Int>? = null,
+    @Json(name = "original_language") val originalLanguage: String? = null
 )
 
 @JsonClass(generateAdapter = true)

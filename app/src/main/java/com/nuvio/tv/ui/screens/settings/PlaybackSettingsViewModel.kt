@@ -319,6 +319,10 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setResolutionMatchingEnabled(enabled)
     }
 
+    suspend fun setAfrSettleDelaySeconds(seconds: Int) {
+        playerSettingsDataStore.setAfrSettleDelaySeconds(seconds)
+    }
+
     suspend fun disableAfrAndResolution() {
         playerSettingsDataStore.setFrameRateMatchingMode(FrameRateMatchingMode.OFF)
         playerSettingsDataStore.setResolutionMatchingEnabled(false)
@@ -393,6 +397,10 @@ class PlaybackSettingsViewModel @Inject constructor(
 
     suspend fun setAddonSubtitlesEnabled(enabled: Boolean) {
         playerSettingsDataStore.setAddonSubtitlesEnabled(enabled)
+    }
+
+    suspend fun setPreferAddonSubtitles(enabled: Boolean) {
+        playerSettingsDataStore.setPreferAddonSubtitles(enabled)
     }
 
     suspend fun setSubtitleShowOnlyPreferredLanguages(enabled: Boolean) {

@@ -792,10 +792,17 @@ class LibraryViewModel @Inject constructor(
 
     private fun observeCloudLibrarySettings() {
         viewModelScope.launch {
-            debridSettingsDataStore.settings
-                .map { settings ->
+            val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(context)
+            val limited = if (ratingLimits == null) {
+                kotlinx.coroutines.flow.flowOf(false)
+            } else {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { ratingLimits.limitFor(profileManager.activeProfileId.value) }
+                combine(profileManager.activeProfileId, ratingLimits.limits) { id, _ -> ratingLimits.limitFor(id) != null }
+            }
+            combine(debridSettingsDataStore.settings, limited) { settings, isLimited -> settings to isLimited }
+                .map { (settings, isLimited) ->
                     CloudLibrarySettingsSnapshot(
-                        enabled = settings.cloudLibraryEnabled,
+                        enabled = settings.cloudLibraryEnabled && !isLimited,
                         connectionKeys = DebridProviders.configuredServices(settings)
                             .filter { credential -> credential.provider.supports(DebridProviderCapability.CloudLibrary) }
                             .map { credential -> "${credential.provider.id}:${credential.apiKey}" }

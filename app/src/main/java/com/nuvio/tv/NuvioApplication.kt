@@ -65,6 +65,11 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         private const val HTTP_CACHE_DIR = "http_cache"
         private const val HTTP_CACHE_VALIDATED_DIR = "http_cache_validated"
 
+        private val START_PREFERENCES = listOf(
+            "server_configuration", "floppy_auth", "mdblist_auth", "wetrakr_auth", "media_servers",
+            "member_access_snapshot", "member_catalogs", "backup_restore", "app_locale"
+        )
+
         /** Long enough that the walk cannot contend with cold start. */
         private const val CACHE_READOUT_DELAY_MS = 15_000L
 
@@ -119,13 +124,22 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         super.attachBaseContext(base)
     }
 
+    // Files read on the screen thread while the app is set up: opened here first so they load in parallel.
+    private fun warmStartPreferences() {
+        Thread({
+            START_PREFERENCES.forEach { name -> runCatching { getSharedPreferences(name, Context.MODE_PRIVATE) } }
+        }, "arc-prefs-warm").start()
+    }
+
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_create")
+        warmStartPreferences()
         com.nuvio.tv.core.network.ArcDns.init(this)
         super.onCreate()
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_injected")
         com.nuvio.tv.data.repository.ArcCrashFile.install(this) { screensaverController.playbackActive.value }
+        com.nuvio.tv.data.repository.ArcBuildLog.start(this)
         com.nuvio.tv.data.repository.ArcMainWatchdog.start(this)
         com.nuvio.tv.data.repository.ArcHeartbeat.start(this) { screensaverController.playbackActive.value }
         PluginRuntimeHooks.onApplicationCreate(this)

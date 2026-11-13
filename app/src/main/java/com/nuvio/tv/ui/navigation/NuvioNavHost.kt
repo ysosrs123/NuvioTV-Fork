@@ -295,6 +295,9 @@ private fun PlaybackNavHost(
                     val scoutTile = collectionId == com.nuvio.tv.core.scout.ScoutCatalogProvider.TILES_COLLECTION_ID
                     val surprise = if (scoutTile && folderId == com.nuvio.tv.core.scout.ScoutCatalogProvider.FOLDER_SURPRISE) scoutNav.surprisePick() else null
                     when {
+                        collectionId == com.nuvio.tv.core.scout.ScoutMixCatalogProvider.COLLECTION_ID &&
+                            folderId == com.nuvio.tv.core.scout.ScoutMixCatalogProvider.FOLDER_MORE ->
+                            navController.navigate(Screen.ScoutMixes.route)
                         collectionId == com.nuvio.tv.core.scout.ScoutMixCatalogProvider.COLLECTION_ID ->
                             navController.navigate(Screen.ScoutMix.createRoute(folderId))
                         surprise != null -> navController.navigate(
@@ -1262,7 +1265,10 @@ private fun PlaybackNavHost(
 
         composable(
             route = Screen.ScoutMix.route,
-            arguments = listOf(navArgument("mixId") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("mixId") { type = NavType.StringType },
+                navArgument("play") { type = NavType.StringType; nullable = true; defaultValue = null }
+            )
         ) {
             com.nuvio.tv.ui.screens.scout.ScoutMixScreen(
                 onBack = { navController.popBackStack() },
@@ -1290,7 +1296,18 @@ private fun PlaybackNavHost(
                 onOpenShow = { show ->
                     navController.navigate(Screen.Detail.createRoute(show.id, show.type, show.addonBaseUrl))
                 },
-                onFindShow = { navController.navigate(Screen.Search.route) }
+                onFindShow = { navController.navigate(Screen.Search.route) },
+                onAdjust = { recipe -> navController.navigate(Screen.ScoutMixOwn.createRoute(recipe)) }
+            )
+        }
+
+        composable(
+            route = Screen.ScoutMixOwn.route,
+            arguments = listOf(navArgument("recipe") { type = NavType.StringType; nullable = true; defaultValue = null })
+        ) {
+            com.nuvio.tv.ui.screens.scout.ScoutMixOwnScreen(
+                onBack = { navController.popBackStack() },
+                onMade = { id -> navController.navigate(Screen.ScoutMix.createRoute(id, play = true)) }
             )
         }
 
@@ -1523,6 +1540,12 @@ private fun PlaybackNavHost(
             ScoutPageRoute(navController, askHasKey, startOnTaste = false)
         }
 
+        composable(Screen.ScoutMixes.route) {
+            val askAccess: com.nuvio.tv.ui.screens.scout.ask.AskAccessViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val askHasKey by askAccess.hasKey.collectAsStateWithLifecycle()
+            ScoutPageRoute(navController, askHasKey, startOnTaste = false, startOnMixes = true)
+        }
+
         composable(Screen.ScoutTaste.route) {
             val askAccess: com.nuvio.tv.ui.screens.scout.ask.AskAccessViewModel = androidx.hilt.navigation.compose.hiltViewModel()
             val askHasKey by askAccess.hasKey.collectAsStateWithLifecycle()
@@ -1685,7 +1708,7 @@ private fun PlaybackNavHost(
 }
 
 @androidx.compose.runtime.Composable
-private fun ScoutPageRoute(navController: androidx.navigation.NavHostController, askHasKey: Boolean, startOnTaste: Boolean) {
+private fun ScoutPageRoute(navController: androidx.navigation.NavHostController, askHasKey: Boolean, startOnTaste: Boolean, startOnMixes: Boolean = false) {
     com.nuvio.tv.ui.screens.scout.ScoutScreen(
         onOpenTitle = { id, type -> navController.navigate(Screen.Detail.createRoute(id, type, null)) },
         onPlayTitle = { id, type, backdrop, logo ->
@@ -1697,6 +1720,10 @@ private fun ScoutPageRoute(navController: androidx.navigation.NavHostController,
             navController.navigate(Screen.FolderDetail.createRoute(com.nuvio.tv.core.scout.ScoutCatalogProvider.TILES_COLLECTION_ID, sliceId))
         },
         onAsk = if (askHasKey) { { navController.navigate(Screen.ScoutAsk.route) } } else null,
-        startOnTaste = startOnTaste
+        startOnTaste = startOnTaste,
+        startOnMixes = startOnMixes,
+        onPlayMix = { id -> navController.navigate(Screen.ScoutMix.createRoute(id, play = true)) },
+        onOpenMix = { id -> navController.navigate(Screen.ScoutMix.createRoute(id)) },
+        onMixOwn = { recipe -> navController.navigate(Screen.ScoutMixOwn.createRoute(recipe)) }
     )
 }
