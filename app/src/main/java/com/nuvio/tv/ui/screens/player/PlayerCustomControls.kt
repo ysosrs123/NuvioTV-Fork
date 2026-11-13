@@ -149,7 +149,8 @@ internal fun PlayerCustomControls(
     playerBadges: List<PlayerBadge>,
     onSkipAnchorChanged: (Dp) -> Unit,
     actions: V2PlayerActions,
-    reportCodeVisible: Boolean
+    reportCodeVisible: Boolean,
+    warming: Boolean = false
 ) {
     val v2 = LocalV2Appearance.current != null
     val appearance = LocalV2Appearance.current
@@ -189,12 +190,12 @@ internal fun PlayerCustomControls(
         focus.requestGeneration = 0
     }
     // Capture before removing the focused target can clear the group's focus state.
-    val needsRecovery = state.showControls && !state.showMoreDialog && focus.buttonFocused && focus.lastFocused !in order
+    val needsRecovery = !warming && state.showControls && !state.showMoreDialog && focus.buttonFocused && focus.lastFocused !in order
     SideEffect { if (needsRecovery && !panelVisible && focus.requestGeneration == 0) {
         if (PlayerControlAction.MORE in order) focus.pendingReturn = PlayerControlAction.MORE
         focus.restore(layout, deckAvailable)
     } }
-    LaunchedEffect(Unit) { if (!panelVisible) focus.restore(layout, deckAvailable) }
+    LaunchedEffect(Unit) { if (!panelVisible && !warming) focus.restore(layout, deckAvailable) }
     fun invoke(action: PlayerControlAction) {
         actions.interaction()
         focus.pendingReturn = action
@@ -227,7 +228,8 @@ internal fun PlayerCustomControls(
                 PlayerControlsProgressBarHost(viewModel, progressFocus,
                     upFocusRequester = progressUpFocus,
                     downFocusRequester = fallback?.let(focus::target),
-                    onUpKey = actions.hide, onFocused = actions.interaction, onClick = actions.playPause)
+                    onUpKey = actions.hide, onFocused = actions.interaction, onClick = actions.playPause,
+                    warming = warming)
             }
             }, time = {
             if (hasSeekTimeline) PlayerControlsTimeTextHost(viewModel)
@@ -240,7 +242,8 @@ internal fun PlayerCustomControls(
                 }
                 .onFocusChanged { focus.buttonFocused = it.hasFocus }.focusGroup(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                PlayerControlDeck(layout, available, focus::target, state.isPlaying, moreExpanded = state.showMoreDialog,
+                PlayerControlDeck(layout, available, focus::target, state.isPlaying, enabled = !warming,
+                    moreExpanded = state.showMoreDialog,
                     popupSelected = focus.requested ?: focus.pendingReturn,
                     onMoreDismiss = {
                         actions.interaction()

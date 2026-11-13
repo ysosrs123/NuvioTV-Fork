@@ -132,9 +132,9 @@ class RealDebridDirectDebridResolver @Inject constructor(
         link: String,
         file: RealDebridTorrentFileDto
     ): DirectDebridResolveResult {
-        val unrestrict = call(stored) { api.unrestrictLink(it, link) }
-            ?.takeIf { it.isSuccessful }
-            ?: return DirectDebridResolveResult.Stale
+        val answer = call(stored) { api.unrestrictLink(it, link) } ?: return DirectDebridResolveResult.Stale
+        val unrestrict = answer.takeIf { it.isSuccessful }
+            ?: return DirectDebridResolveResult.busyOrStale(answer.code())
         val body = unrestrict.body()
         val url = body?.download?.takeIf { it.isNotBlank() } ?: return DirectDebridResolveResult.Stale
         return DirectDebridResolveResult.Success(
@@ -162,7 +162,7 @@ class RealDebridDirectDebridResolver @Inject constructor(
         errorBody()?.close()
         return when (code()) {
             401, 403 -> DirectDebridResolveResult.Error
-            else -> DirectDebridResolveResult.Stale
+            else -> DirectDebridResolveResult.busyOrStale(code())
         }
     }
 

@@ -18,8 +18,36 @@ internal object SlowStartServer {
 
     fun matches(url: String?): Boolean {
         val u = url?.trim()?.toHttpUrlOrNull() ?: return false
-        return isLocalHost(u.host) || isUsenet(url)
+        return isLocalHost(u.host) || isUsenet(url) || isNoted(u.toString())
     }
+
+    /** A Usenet entry by what its add-on calls it: an NZB indexer, "Usenet", or Easynews. */
+    fun namesUsenet(name: String?, description: String?, addonName: String?): Boolean {
+        if (USENET_NAME.containsMatchIn(name?.lineSequence()?.firstOrNull().orEmpty())) return true
+        return listOf(name, description, addonName).any { it?.contains("easynews", ignoreCase = true) == true }
+    }
+
+    /**
+     * Remembers a link whose entry is named as Usenet, so the link gets the longer wait although nothing in the link
+     * itself says so (an Easynews link goes through the add-on and redirects).
+     */
+    fun noteStream(url: String?, name: String?, description: String?, addonName: String?) {
+        if (!namesUsenet(name, description, addonName)) return
+        val key = url?.trim()?.toHttpUrlOrNull()?.toString() ?: return
+        synchronized(noted) {
+            noted.remove(key)
+            noted.add(key)
+            while (noted.size > NOTED_LIMIT) noted.remove(noted.first())
+        }
+    }
+
+    private fun isNoted(key: String): Boolean = synchronized(noted) { key in noted }
+
+    internal fun clearNoted() = synchronized(noted) { noted.clear() }
+
+    val USENET_NAME = Regex("(?<![a-z])(usenet|nzb)", RegexOption.IGNORE_CASE)
+    private const val NOTED_LIMIT = 32
+    private val noted = LinkedHashSet<String>()
 
     /**
      * An AIOStreams Usenet stream: each new read may have the server fetch articles. Its own streams have /usenet/ in

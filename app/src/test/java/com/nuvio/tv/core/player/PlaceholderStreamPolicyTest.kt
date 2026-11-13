@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.player
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -301,5 +302,20 @@ class PlaceholderStreamPolicyTest {
         assertTrue(PlaceholderStreamPolicy.stopsAtReady(size, filmOrEpisode = false))
         assertTrue(!PlaceholderStreamPolicy.stopsAtReady(duration, filmOrEpisode = true))
         assertTrue(!PlaceholderStreamPolicy.stopsAtReady(PlaceholderStreamPolicy.Verdict.Accept, filmOrEpisode = true))
+    }
+
+    @Test
+    fun `first response length rejects a 4_5 MB notice for a long title`() {
+        val verdict = PlaceholderStreamPolicy.rejectOnFirstLength(4_718_592L, 120 * minute, alreadyDecided = false)
+        assertEquals(PlaceholderStreamPolicy.Reason.ImplausibleSize, verdict?.reason)
+    }
+
+    @Test
+    fun `first response length leaves real files, short titles and decided streams alone`() {
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(7_054_000_000L, 120 * minute, false))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(4_718_592L, 12 * minute, false))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(4_718_592L, null, false))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(4_718_592L, 120 * minute, alreadyDecided = true))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(PlaceholderStreamPolicy.MIN_PLAUSIBLE_BYTES + 1, 120 * minute, false))
     }
 }

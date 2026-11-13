@@ -1,11 +1,13 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.R
 import com.nuvio.tv.core.torrent.TorrentState
 import com.nuvio.tv.core.torrent.torrentInitialLoadingProgress
 import com.nuvio.tv.domain.model.Stream
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -41,6 +43,8 @@ internal suspend fun PlayerRuntimeController.startTorrentStream(
 }
 
 internal fun PlayerRuntimeController.stopTorrentStream() {
+    torrentMetadataWatchJob?.cancel()
+    torrentMetadataWatchJob = null
     torrentStreamJob?.cancel()
     torrentStreamJob = null
     torrentStateObserverJob?.cancel()
@@ -75,6 +79,48 @@ internal fun PlayerRuntimeController.observeTorrentState() {
                 }
             }
         }
+    }
+}
+
+private fun PlayerRuntimeController.watchTorrentMetadata(infoHash: String) {
+    torrentMetadataWatchJob?.cancel()
+    torrentMetadataWatchJob = scope.launch {
+        var waitingSinceMs = 0L
+        var lastDownloadAtMs: Long? = null
+        while (true) {
+            delay(TorrentMetadataGiveUp.CHECK_INTERVAL_MS)
+            if (currentInfoHash != infoHash || hasRenderedFirstFrame) return@launch
+            val state = torrentService.state.value
+            if (state is TorrentState.Streaming || state is TorrentState.Error) return@launch
+            if (state !is TorrentState.Connecting || state.phase != "add_magnet") continue
+            val now = SystemClock.elapsedRealtime()
+            if (waitingSinceMs == 0L) waitingSinceMs = now
+            if (state.downloadSpeed > 0L) lastDownloadAtMs = now
+            val waitedMs = now - waitingSinceMs
+            if (TorrentMetadataGiveUp.shouldGiveUp(waitedMs, lastDownloadAtMs?.let { now - it })) {
+                giveUpOnTorrentMetadata(state, waitedMs)
+                return@launch
+            }
+        }
+    }
+}
+
+private fun PlayerRuntimeController.giveUpOnTorrentMetadata(state: TorrentState.Connecting, waitedMs: Long) {
+    Log.w(
+        TAG,
+        "No torrent metadata after ${waitedMs}ms seeds=${state.seeds} peers=${state.peers} " +
+            "speed=${state.downloadSpeed}; stopping and moving on"
+    )
+    val detail = context.getString(
+        R.string.player_torrent_connecting_status,
+        context.getString(R.string.player_torrent_fetching_metadata),
+        context.getString(R.string.player_torrent_peer_info, state.seeds, state.peers),
+        formatSpeed(context, state.downloadSpeed)
+    )
+    val message = context.getString(R.string.player_error_failed_start_torrent, detail)
+    stopTorrentStream()
+    if (!advanceToNextLiveSource(message)) {
+        surfaceSourceFailoverError(message)
     }
 }
 
@@ -181,6 +227,7 @@ internal fun PlayerRuntimeController.launchTorrentSourceStream(
     torrentStreamJob = scope.launch {
         try {
             observeTorrentState()
+            watchTorrentMetadata(infoHash)
 
             currentTorrentSources = stream.sources
             val trackers = stream.sources

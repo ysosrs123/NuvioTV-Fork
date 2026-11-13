@@ -345,14 +345,16 @@ private fun PlayerRuntimeController.attemptMpvAutoRetry(
 internal fun PlayerRuntimeController.maybeRunMpvStartupWatchdog(view: NuvioMpvSurfaceView) {
     if (hasRenderedFirstFrame) return
 
-    val enabled = _uiState.value.error == null &&
-        !isReleasingPlayer &&
-        !startupEngineFailoverTriggered &&
-        !mpvErrorRecoveryArmed &&
-        currentStreamUrl.isNotBlank() &&
-        !isInBackground &&
-        !userPausedManually
     val waitingForSurface = view.hasPendingInitialMedia
+    val enabled = MpvStartupWatchdogPolicy.watchdogEnabled(
+        hasError = _uiState.value.error != null,
+        releasing = isReleasingPlayer,
+        failoverTriggered = startupEngineFailoverTriggered,
+        recoveryArmed = mpvErrorRecoveryArmed,
+        hasStream = currentStreamUrl.isNotBlank(),
+        inBackground = isInBackground,
+        playerPaused = !waitingForSurface && view.isPausedNow()
+    )
     var idleActive = false
     var cacheProgressing = false
     if (enabled && !waitingForSurface) {

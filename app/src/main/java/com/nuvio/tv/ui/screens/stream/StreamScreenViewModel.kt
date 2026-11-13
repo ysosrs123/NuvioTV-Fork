@@ -127,10 +127,97 @@ class StreamScreenViewModel @Inject constructor(
     private val serverStreams: ServerStreams,
     private val serverPlayback: ServerPlayback,
     thumbnailCopyDebrid: com.nuvio.tv.core.debrid.ThumbnailCopyDebrid,
-    partyRuntime: com.nuvio.tv.core.party.PartyRuntime,
-    profileManager: com.nuvio.tv.core.profile.ProfileManager,
-    savedStateHandle: SavedStateHandle
+    private val partyRuntime: com.nuvio.tv.core.party.PartyRuntime,
+    private val profileManager: com.nuvio.tv.core.profile.ProfileManager,
+    private val scoutMixSession: com.nuvio.tv.core.player.ScoutMixSession,
+    savedStateHandle: SavedStateHandle,
+    private val ratingLimits: com.nuvio.tv.core.ratinglimit.RatingLimitGate,
+    private val profileSync: com.nuvio.tv.core.sync.ProfileSyncService,
+    private val profileLocks: com.nuvio.tv.data.local.ProfileLockStateDataStore
 ) : ViewModel() {
+
+    private val _mixHasNoSources = MutableStateFlow(false)
+    /** A mix episode picking its own source found none: the page closes and the mix tries another. */
+    val mixHasNoSources: StateFlow<Boolean> = _mixHasNoSources.asStateFlow()
+
+    data class RatingPinRequest(
+        val owner: com.nuvio.tv.domain.model.UserProfile,
+        val ownerHasPin: Boolean,
+        val profileName: String,
+        val certification: String?,
+        val limit: com.nuvio.tv.core.ratinglimit.RatingLimit
+    )
+
+    private val _ratingPin = MutableStateFlow<RatingPinRequest?>(null)
+    val ratingPin: StateFlow<RatingPinRequest?> = _ratingPin.asStateFlow()
+    private val _ratingPinError = MutableStateFlow<String?>(null)
+    val ratingPinError: StateFlow<String?> = _ratingPinError.asStateFlow()
+    private val _ratingPinWorking = MutableStateFlow(false)
+    val ratingPinWorking: StateFlow<Boolean> = _ratingPinWorking.asStateFlow()
+
+    private fun ratingTitleId(): String = contentId ?: videoId
+
+    private fun startWhenRatingFits() {
+        viewModelScope.launch {
+            val check = ratingLimits.check(playbackProfileId, ratingTitleId(), contentType)
+            if (check !is com.nuvio.tv.core.ratinglimit.RatingCheck.NeedsPin) {
+                loadStreams()
+                return@launch
+            }
+            val profiles = profileManager.profiles.value
+            val owner = profiles.firstOrNull { it.isPrimary }
+            if (owner == null) {
+                loadStreams()
+                return@launch
+            }
+            val request = RatingPinRequest(
+                owner = owner,
+                ownerHasPin = profileLocks.pinEnabled.first()[owner.id] == true,
+                profileName = profiles.firstOrNull { it.id == playbackProfileId }?.name.orEmpty(),
+                certification = check.certification,
+                limit = check.limit
+            )
+            if (partyHostMedia != null) {
+                runCatching { partyRuntime.party.leaveParty() }
+                _partyBlocked.value = request
+            } else {
+                _ratingPin.value = request
+            }
+        }
+    }
+
+    private val _partyBlocked = MutableStateFlow<RatingPinRequest?>(null)
+    val partyBlocked: StateFlow<RatingPinRequest?> = _partyBlocked.asStateFlow()
+
+    fun clearRatingPinError() {
+        _ratingPinError.value = null
+    }
+
+    fun submitRatingPin(pin: String) {
+        val request = _ratingPin.value ?: return
+        if (!request.ownerHasPin || _ratingPinWorking.value) return
+        _ratingPinWorking.value = true
+        viewModelScope.launch {
+            val answer = profileSync.verifyProfilePin(request.owner.id, pin)
+            _ratingPinWorking.value = false
+            answer.onSuccess { verify ->
+                if (verify.unlocked) {
+                    ratingLimits.unlock(playbackProfileId, ratingTitleId(), contentType)
+                    _ratingPinError.value = null
+                    _ratingPin.value = null
+                    loadStreams()
+                } else {
+                    _ratingPinError.value = if (verify.retryAfterSeconds > 0) {
+                        context.getString(R.string.profile_pin_locked, verify.retryAfterSeconds)
+                    } else {
+                        context.getString(R.string.profile_pin_incorrect)
+                    }
+                }
+            }.onFailure {
+                _ratingPinError.value = context.getString(R.string.profile_pin_verify_error)
+            }
+        }
+    }
 
     /** Latest debrid stream preferences for TRaSH-aligned auto-pick ranking. */
     @Volatile
@@ -362,7 +449,7 @@ class StreamScreenViewModel @Inject constructor(
             }
         }
         loadMissingMetaDetailsIfNeeded()
-        loadStreams()
+        startWhenRatingFits()
     }
 
     private fun SavedStateHandle.getOptionalString(key: String): String? {
@@ -1109,6 +1196,11 @@ class StreamScreenViewModel @Inject constructor(
                     if (!cutShort && !listFailed) lastSuccessData?.let { handOverToPlayer(it) }
                     markRemainingSourceChipsAsError()
                 }
+                if (pickForMe && !(hasLoadingChips && cutShort) && _uiState.value.allStreams.isEmpty() &&
+                    scoutMixSession.noSources(contentId, videoId)
+                ) {
+                    _mixHasNoSources.value = true
+                }
                 if (directAutoPlayFlowEnabledForSession && !resolvedAutoPlayTarget) {
                     directAutoPlayFlowEnabledForSession = false
                     // All addons finished with no instant stream to auto-play: drop the loader and
@@ -1576,6 +1668,9 @@ class StreamScreenViewModel @Inject constructor(
 
     suspend fun prewarmSelectedPlayback(playbackInfo: StreamPlaybackInfo) {
         if (playbackInfo.isServerStream) return
+        com.nuvio.tv.ui.screens.player.SlowStartServer.noteStream(
+            playbackInfo.url, playbackInfo.streamName, playbackInfo.streamDescription, playbackInfo.addonName
+        )
         com.nuvio.tv.ui.screens.player.PlayerPlaybackNetworking.prewarmSelectedPlayback(
             playbackInfo.url, playbackInfo.headers
         )
@@ -1695,6 +1790,10 @@ class StreamScreenViewModel @Inject constructor(
             }
             DirectDebridResolveResult.Stale -> {
                 showDirectDebridPlaybackError(context.getString(R.string.debrid_stale_stream), refreshStreams = true)
+                null
+            }
+            is DirectDebridResolveResult.Busy -> {
+                showDirectDebridPlaybackError(context.getString(R.string.debrid_busy, result.httpStatus), refreshStreams = false)
                 null
             }
             DirectDebridResolveResult.Error -> {

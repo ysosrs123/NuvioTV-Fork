@@ -5,6 +5,7 @@ import android.text.Spanned
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.text.Cue
 import com.nuvio.tv.ui.util.LANGUAGE_OVERRIDES
+import com.nuvio.tv.ui.util.LANGUAGE_WHITESPACE_RUN
 import com.nuvio.tv.ui.util.resolveLanguageNameAlias
 
 internal object PlayerSubtitleUtils {
@@ -17,7 +18,7 @@ internal object PlayerSubtitleUtils {
             .replace('-', ' ')
             .replace('.', ' ')
             .replace('/', ' ')
-            .replace(Regex("\\s+"), " ")
+            .replace(LANGUAGE_WHITESPACE_RUN, " ")
             .trim()
 
         fun containsAny(vararg values: String): Boolean = values.any { value ->

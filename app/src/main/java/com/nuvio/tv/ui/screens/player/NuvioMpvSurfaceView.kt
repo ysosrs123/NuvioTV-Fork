@@ -187,6 +187,11 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         return mpv.getPropertyBoolean("pause") == false
     }
 
+    fun isPausedNow(): Boolean {
+        if (!initialized) return false
+        return mpv.getPropertyBoolean("pause") == true
+    }
+
     fun isPausedForCacheNow(): Boolean {
         if (!initialized) return false
         return mpv.getPropertyBoolean("paused-for-cache") == true

@@ -57,7 +57,7 @@ class TorboxDirectDebridResolver @Inject constructor(
                 bypassCache = true
             )
             Log.d(TAG, "resolve: getTorrent done in ${System.currentTimeMillis() - getTorrentStartMs}ms code=${torrent.code()}")
-            if (!torrent.isSuccessful) return DirectDebridResolveResult.Stale
+            if (!torrent.isSuccessful) return DirectDebridResolveResult.busyOrStale(torrent.code())
             val files = torrent.body()?.data?.files.orEmpty()
             val file = fileSelector.selectFile(files, resolve, season, episode)
                 ?: return DirectDebridResolveResult.Stale
@@ -75,7 +75,7 @@ class TorboxDirectDebridResolver @Inject constructor(
                 appendName = false
             )
             Log.d(TAG, "resolve: requestDownloadLink done in ${System.currentTimeMillis() - linkStartMs}ms code=${link.code()}")
-            if (!link.isSuccessful) return DirectDebridResolveResult.Stale
+            if (!link.isSuccessful) return DirectDebridResolveResult.busyOrStale(link.code())
             val url = link.body()?.data?.takeIf { it.isNotBlank() }
                 ?: return DirectDebridResolveResult.Stale
 
@@ -102,7 +102,7 @@ class TorboxDirectDebridResolver @Inject constructor(
         return when (code()) {
             401, 403 -> DirectDebridResolveResult.Error
             409 -> DirectDebridResolveResult.NotCached
-            else -> DirectDebridResolveResult.Stale
+            else -> DirectDebridResolveResult.busyOrStale(code())
         }
     }
 
@@ -136,4 +136,12 @@ sealed class DirectDebridResolveResult {
     data object NotCached : DirectDebridResolveResult()
     data object Stale : DirectDebridResolveResult()
     data object Error : DirectDebridResolveResult()
+
+    /** The service answered "too many requests" or a server fault: the link itself may be fine. */
+    data class Busy(val httpStatus: Int) : DirectDebridResolveResult()
+
+    companion object {
+        fun busyOrStale(httpStatus: Int): DirectDebridResolveResult =
+            if (httpStatus == 429 || httpStatus in 500..599) Busy(httpStatus) else Stale
+    }
 }

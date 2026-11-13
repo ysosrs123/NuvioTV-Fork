@@ -354,6 +354,21 @@ class IecAudioTimestampClockTest {
     }
 
     @Test
+    fun lastSource_saysWhereThePositionCameFrom() {
+        val clock = ClockRig()
+        assertEquals(IecAudioTimestampClock.SOURCE_NONE, clock.clock.lastSource)
+        clock.pos(head = 96_000L, written = 288_000L)
+        assertEquals(IecAudioTimestampClock.SOURCE_HEAD, clock.clock.lastSource)
+        clock.lockAdvancing(head = 192_000L)
+        assertEquals(IecAudioTimestampClock.SOURCE_TIMESTAMP, clock.clock.lastSource)
+        clock.timestamp = null
+        clock.reset()
+        assertEquals(IecAudioTimestampClock.SOURCE_NONE, clock.clock.lastSource)
+        clock.pos(head = 288_000L, written = 288_000L)
+        assertEquals(IecAudioTimestampClock.SOURCE_AT_WRITTEN, clock.clock.lastSource)
+    }
+
+    @Test
     fun avengersLog_headTracksWallUntilTheSixteenSecondGap() {
         val playing = AVENGERS.filter { it.playing }
         val origin = playing.first()

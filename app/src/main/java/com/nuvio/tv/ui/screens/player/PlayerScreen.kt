@@ -71,6 +71,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
@@ -105,6 +106,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -304,7 +306,8 @@ fun PlayerScreen(
     var controlsSkipAnchor by remember { mutableStateOf(148.dp) }
     var reportCodeVisible by remember { mutableStateOf(false) }
     val reportMarkFocusRequester = remember { FocusRequester() }
-    val markFocusOnOpen = remember { booleanArrayOf(false) }
+    var statsOverlayHeightPx by remember { mutableIntStateOf(0) }
+    var clockOverlayHeightPx by remember { mutableIntStateOf(0) }
     val recordingStatus by com.nuvio.tv.core.report.PlaybackRecorder.status.collectAsState()
     var exitDispatched by remember { mutableStateOf(false) }
     var externalHandoffInProgress by remember { mutableStateOf(false) }
@@ -569,6 +572,17 @@ fun PlayerScreen(
                     SeekThumbnails.hostResumed = false
                     NextEpisodeThumbs.cancel()
                     viewModel.pauseForLifecycle()
+                    val hostActivity = context as? androidx.activity.ComponentActivity
+                    if (
+                        hostActivity != null &&
+                        isAppBackgroundPause(
+                            isFinishing = hostActivity.isFinishing,
+                            isChangingConfigurations = hostActivity.isChangingConfigurations,
+                            hostState = hostActivity.lifecycle.currentState
+                        )
+                    ) {
+                        viewModel.releaseForBackground(atPause = true)
+                    }
                 }
                 Lifecycle.Event.ON_STOP -> {
                     // This back stack entry also stops when the player is navigated away from or
@@ -764,12 +778,6 @@ fun PlayerScreen(
                 viewModel.onEvent(PlayerEvent.OnShowMoreDialog)
             }
             delay(250)
-            if (markFocusOnOpen[0]) {
-                markFocusOnOpen[0] = false
-                runCatching { reportMarkFocusRequester.requestFocus() }
-                v2Focus.pendingReturn = null
-                return@LaunchedEffect
-            }
             val returningLayout = uiState.controlLayout
             val settle = PauseOnTimeline.afterSettle(
                 pauseRequest = pauseRequest,
@@ -1198,10 +1206,11 @@ fun PlayerScreen(
                 if (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ESCAPE ||
                     (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_BACK && !postPlayHandlesBack)
                 ) {
+                    val leaveRecordingStrip = recordingStatus.active && !uiState.showControls && focusOnControl[0]
                     return@onPreviewKeyEvent when (keyEvent.nativeKeyEvent.action) {
                         KeyEvent.ACTION_DOWN -> true
                         KeyEvent.ACTION_UP -> {
-                            handleBackPress()
+                            if (leaveRecordingStrip) runCatching { containerFocusRequester.requestFocus() } else handleBackPress()
                             true
                         }
                         else -> true
@@ -1469,8 +1478,7 @@ fun PlayerScreen(
                                 if (firstPress) {
                                     swallowKeyUp = keyEvent.nativeKeyEvent.keyCode
                                     if (recordingStatus.active) {
-                                        markFocusOnOpen[0] = true
-                                        viewModel.onEvent(PlayerEvent.OnToggleControls)
+                                        runCatching { reportMarkFocusRequester.requestFocus() }
                                     } else {
                                         viewModel.onEvent(PlayerEvent.OnPlayPause)
                                     }
@@ -1650,6 +1658,28 @@ fun PlayerScreen(
             !postPlayRecommendationState.isVisible &&
             uiState.postPlayMode !is PostPlayMode.StillWatching
         val latestPlayerControlsVisible by rememberUpdatedState(playerControlsVisible)
+        var controlsWarmed by remember { mutableStateOf(false) }
+        var controlsWarming by remember { mutableStateOf(false) }
+        val warmControls = shouldWarmPlayerControls(
+            loadingOverlayVisible = uiState.showLoadingOverlay && !postPlayRecommendationState.isVisible,
+            alreadyWarmed = controlsWarmed,
+            playerScreenActive = uiState.error == null,
+            controlsVisible = playerControlsVisible
+        )
+        LaunchedEffect(warmControls) {
+            if (!warmControls) return@LaunchedEffect
+            // Let the loading screen draw first, then build the controls unseen for two frames.
+            withFrameNanos { }
+            withFrameNanos { }
+            controlsWarming = true
+            try {
+                withFrameNanos { }
+                withFrameNanos { }
+            } finally {
+                controlsWarming = false
+                controlsWarmed = true
+            }
+        }
         LaunchedEffect(playerControlsVisible) {
             if (!playerControlsVisible) {
                 subtitleControlsClearancePx = 0f
@@ -2102,8 +2132,10 @@ fun PlayerScreen(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.lg)
+                    .onSizeChanged { statsOverlayHeightPx = it.height }
                     .zIndex(2.7f)
             )
+            val statsOverlayShown = uiState.showPlaybackStatsOverlay && uiState.error == null && !v2UtilityVisible
 
             // Buffering indicator — isolated in its own composable scope so that
             // isBuffering state changes only recompose this small subtree instead
@@ -2118,12 +2150,20 @@ fun PlayerScreen(
 
             // Error state
             if (uiState.error != null) {
+                val errorCard = uiState.errorCard.matching(uiState.error)
                 ErrorOverlay(
                     message = uiState.error!!,
+                    title = errorCard?.title,
+                    facts = errorCard?.facts,
+                    onOtherSources = if (errorCard != null && !uiState.isLive) {
+                        ({ viewModel.onEvent(PlayerEvent.OnErrorOtherSources) })
+                    } else {
+                        null
+                    },
                     showSwitchToMpvAction = uiState.showSwitchToMpvErrorAction &&
                         uiState.internalPlayerEngine != InternalPlayerEngine.MVP_PLAYER,
                     onSwitchToMpv = { viewModel.onEvent(PlayerEvent.OnSwitchToMpvPlayer) },
-                    showReportAction = uiState.playbackIssueReportsEnabled,
+                    showReportAction = uiState.playbackIssueReportsEnabled && errorCard?.sendAllowed != false,
                     reportStatus = uiState.playbackIssueReportStatus,
                     reportId = uiState.playbackIssueReportId,
                     reportError = uiState.playbackIssueReportError,
@@ -2148,6 +2188,8 @@ fun PlayerScreen(
                     afterRecording = uiState.reportPanelAfterRecording,
                     recordingMs = uiState.reportPanelRecordingMs,
                     recordingMarks = uiState.reportPanelRecordingMarks,
+                    check = uiState.reportPanelCheck,
+                    onTryOtherSource = { viewModel.onEvent(PlayerEvent.OnErrorOtherSources) },
                     onRecord = if (uiState.reportPanelStarted && !uiState.isLive && !recordingStatus.active) {
                         ({ viewModel.onEvent(PlayerEvent.OnStartReportRecording) })
                     } else {
@@ -2156,17 +2198,31 @@ fun PlayerScreen(
                 )
             }
 
-            if (recordingStatus.active && playerControlsVisible) {
-                RecordingMarkControls(
+            if (recordingStatus.active && uiState.error == null) {
+                RecordingStrip(
+                    marks = recordingStatus.marks,
                     markFocus = reportMarkFocusRequester,
                     downFocus = if (uiState.showControls) progressBarFocusRequester else null,
+                    leaveWhenIdle = !uiState.showControls,
                     onMark = { viewModel.onEvent(PlayerEvent.OnMarkReportProblem) },
                     onStop = { viewModel.onEvent(PlayerEvent.OnStopReportRecording) },
-                    onInteraction = { viewModel.scheduleHideControls() },
+                    onInteraction = { if (uiState.showControls) viewModel.scheduleHideControls() },
+                    onLeave = { runCatching { containerFocusRequester.requestFocus() } },
                     modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = NuvioTheme.spacing.xxl, bottom = controlsSkipAnchor)
-                        .zIndex(2.1f)
+                        .align(Alignment.TopEnd)
+                        .padding(
+                            top = with(LocalDensity.current) {
+                                val belowStats = NuvioTheme.spacing.lg + (if (statsOverlayShown) statsOverlayHeightPx else 0).toDp()
+                                val belowClock = if (clockOverlayHeightPx > 0) {
+                                    NuvioTheme.spacing.xl + clockOverlayHeightPx.toDp() + NuvioTheme.spacing.sm
+                                } else {
+                                    0.dp
+                                }
+                                maxOf(belowStats, belowClock)
+                            },
+                            end = NuvioTheme.spacing.xxl
+                        )
+                        .zIndex(2.75f)
                 )
             }
 
@@ -2314,6 +2370,7 @@ fun PlayerScreen(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 28.dp, top = NuvioTheme.spacing.xl)
+                    .onSizeChanged { clockOverlayHeightPx = it.height }
                     .zIndex(2.15f)
             ) {
                 PlayerClockOverlayHost(
@@ -2397,6 +2454,9 @@ fun PlayerScreen(
                     onBack = { exitPlayer() },
                     skipButtonVisible = skipButtonActuallyVisible
                 )
+            }
+            if (controlsWarming && !playerControlsVisible) {
+                PlayerControlsWarmUp(uiState, viewModel, customAvailable, playerBadges, reportCodeVisible)
             }
 
             // Aspect ratio indicator (floating pill)
@@ -4006,7 +4066,8 @@ internal fun PlayerControlsProgressBarHost(
     downFocusRequester: FocusRequester? = null,
     onUpKey: (() -> Unit)? = null,
     onFocused: (() -> Unit)? = null,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    warming: Boolean = false
 ) {
     val playbackTimeline by viewModel.playbackTimeline.collectAsState()
     val gliding = ScrubGlide.active
@@ -4033,7 +4094,8 @@ internal fun PlayerControlsProgressBarHost(
         onFocused = onFocused,
         onClick = onClick,
         bufferedPosition = playbackTimeline.bufferedPosition,
-        chapterFractions = chapterFractions
+        chapterFractions = chapterFractions,
+        warming = warming
     )
 }
 
@@ -4261,7 +4323,8 @@ private fun ProgressBar(
     /** Position (ms) up to which content is buffered. Pass 0 to skip the overlay. */
     bufferedPosition: Long = 0L,
     playbackPosition: Long = currentPosition,
-    chapterFractions: List<Float> = emptyList()
+    chapterFractions: List<Float> = emptyList(),
+    warming: Boolean = false
 ) {
     val v2ProgressBrush = if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) {
         com.nuvio.tv.ui.theme.createThemeBrush(com.nuvio.tv.ui.v2.appearance.v2AccentColors())
@@ -4294,7 +4357,7 @@ private fun ProgressBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(20.dp)
-            .onGloballyPositioned { SeekBarAnchor.bounds = it.boundsInRoot() }
+            .onGloballyPositioned { if (!warming) SeekBarAnchor.bounds = it.boundsInRoot() }
             .then(
                 if (focusRequester != null) Modifier.focusRequester(focusRequester)
                 else Modifier
@@ -4313,7 +4376,7 @@ private fun ProgressBar(
                 isFocused = it.isFocused
                 if (it.isFocused) onFocused?.invoke()
             }
-            .focusable()
+            .focusable(enabled = !warming)
             .semantics {
                 contentDescription = seekBarLabel
                 progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
@@ -5047,6 +5110,9 @@ private fun LoadingIssueReportAction(
 @Composable
 private fun ErrorOverlay(
     message: String,
+    title: String? = null,
+    facts: String? = null,
+    onOtherSources: (() -> Unit)? = null,
     showSwitchToMpvAction: Boolean = false,
     onSwitchToMpv: (() -> Unit)? = null,
     showReportAction: Boolean,
@@ -5056,19 +5122,49 @@ private fun ErrorOverlay(
     onReport: () -> Unit,
     onBack: () -> Unit
 ) {
-    val exitFocusRequester = remember { FocusRequester() }
-    val reportFocusRequester = remember { FocusRequester() }
-    val mpvFocusRequester = remember { FocusRequester() }
     val onSwitchMpvAction = onSwitchToMpv.takeIf { showSwitchToMpvAction }
-    val targetFocusRequester = if (onSwitchMpvAction != null) mpvFocusRequester else exitFocusRequester
+    val buttons = buildList {
+        if (onOtherSources != null) {
+            add(ErrorOverlayButton("sources", stringResource(R.string.player_error_other_sources), onOtherSources, primary = true))
+        }
+        if (onSwitchMpvAction != null) {
+            add(ErrorOverlayButton("mpv", stringResource(R.string.player_switch_to_mpv), onSwitchMpvAction, primary = onOtherSources == null))
+        }
+        if (showReportAction) {
+            add(
+                ErrorOverlayButton(
+                    key = "report",
+                    text = when (reportStatus) {
+                        PlaybackIssueReportStatus.Sending -> stringResource(R.string.player_report_issue_sending_button)
+                        PlaybackIssueReportStatus.Sent -> stringResource(R.string.player_report_issue_sent_button)
+                        PlaybackIssueReportStatus.Saved -> stringResource(R.string.report_saved_title)
+                        else -> stringResource(R.string.player_report_issue)
+                    },
+                    onClick = onReport,
+                    primary = false,
+                    enabled = !reportStatus.isReportBusyOrDone
+                )
+            )
+        }
+        add(
+            ErrorOverlayButton(
+                "back",
+                stringResource(R.string.player_go_back),
+                onBack,
+                primary = onOtherSources == null && onSwitchMpvAction == null
+            )
+        )
+    }
+    val buttonKeys = buttons.joinToString { it.key }
+    val requesters = remember(buttonKeys) { buttons.map { FocusRequester() } }
+    val targetIndex = buttons.indexOfFirst { it.key == "sources" || it.key == "mpv" }.takeIf { it >= 0 } ?: buttons.lastIndex
+    val targetFocusRequester = requesters[targetIndex]
 
-    var targetButtonPlaced by remember(onSwitchMpvAction != null) { mutableStateOf(false) }
-    var mpvFocused by remember(onSwitchMpvAction != null) { mutableStateOf(false) }
-    var reportFocused by remember(onSwitchMpvAction != null) { mutableStateOf(false) }
-    var exitFocused by remember(onSwitchMpvAction != null) { mutableStateOf(false) }
-    val hasOverlayFocus = mpvFocused || reportFocused || exitFocused
+    var targetButtonPlaced by remember(buttonKeys) { mutableStateOf(false) }
+    var focusedButtons by remember(buttonKeys) { mutableStateOf(0) }
+    val hasOverlayFocus = focusedButtons != 0
 
-    LaunchedEffect(targetButtonPlaced, onSwitchMpvAction != null) {
+    LaunchedEffect(targetButtonPlaced, buttonKeys) {
         if (!targetButtonPlaced) return@LaunchedEffect
         val focused = targetFocusRequester.requestFocusAfterFrames(frames = 0)
         if (!focused) {
@@ -5101,20 +5197,38 @@ private fun ErrorOverlay(
             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
         ) {
             Text(
-                text = stringResource(R.string.player_error_title),
+                text = title ?: stringResource(R.string.player_error_title),
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color.White
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxl)
             )
 
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
                 modifier = Modifier
                     .padding(horizontal = NuvioTheme.spacing.xxl)
-                    .semantics { liveRegion = LiveRegionMode.Polite }
-            )
+                    .widthIn(max = ERROR_MESSAGE_MAX_WIDTH)
+            ) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                )
+                if (!facts.isNullOrBlank()) {
+                    Text(
+                        text = facts,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.5f),
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
 
@@ -5145,64 +5259,39 @@ private fun ErrorOverlay(
                 horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (onSwitchMpvAction != null) {
+                buttons.forEachIndexed { index, button ->
                     PlayerOverlayButton(
-                        text = stringResource(R.string.player_switch_to_mpv),
-                        onClick = onSwitchMpvAction,
-                        primary = true,
+                        text = button.text,
+                        onClick = button.onClick,
+                        primary = button.primary,
+                        enabled = button.enabled,
                         modifier = Modifier
-                            .focusRequester(mpvFocusRequester)
-                            .onPlaced { targetButtonPlaced = true }
-                            .onFocusChanged { mpvFocused = it.isFocused }
+                            .focusRequester(requesters[index])
+                            .then(if (index == targetIndex) Modifier.onPlaced { targetButtonPlaced = true } else Modifier)
+                            .onFocusChanged { state ->
+                                val bit = 1 shl index
+                                focusedButtons = if (state.isFocused) focusedButtons or bit else focusedButtons and bit.inv()
+                            }
                             .focusProperties {
-                                right = if (showReportAction) reportFocusRequester else exitFocusRequester
+                                left = if (index > 0) requesters[index - 1] else FocusRequester.Default
+                                right = if (index < buttons.lastIndex) requesters[index + 1] else FocusRequester.Default
                             }
                     )
                 }
-                if (showReportAction) {
-                    PlayerOverlayButton(
-                        text = when (reportStatus) {
-                            PlaybackIssueReportStatus.Sending -> stringResource(R.string.player_report_issue_sending_button)
-                            PlaybackIssueReportStatus.Sent -> stringResource(R.string.player_report_issue_sent_button)
-                            PlaybackIssueReportStatus.Saved -> stringResource(R.string.report_saved_title)
-                            else -> stringResource(R.string.player_report_issue)
-                        },
-                        onClick = onReport,
-                        primary = false,
-                        enabled = !reportStatus.isReportBusyOrDone,
-                        modifier = Modifier
-                            .focusRequester(reportFocusRequester)
-                            .onFocusChanged { reportFocused = it.isFocused }
-                            .focusProperties {
-                                if (onSwitchMpvAction != null) left = mpvFocusRequester
-                                right = exitFocusRequester
-                            }
-                    )
-                }
-                PlayerOverlayButton(
-                    text = stringResource(R.string.player_go_back),
-                    onClick = onBack,
-                    primary = onSwitchMpvAction == null,
-                    modifier = Modifier
-                        .focusRequester(exitFocusRequester)
-                        .onPlaced {
-                            if (onSwitchMpvAction == null) targetButtonPlaced = true
-                        }
-                        .onFocusChanged { exitFocused = it.isFocused }
-                        .focusProperties {
-                            left = if (showReportAction) {
-                                reportFocusRequester
-                            } else if (onSwitchMpvAction != null) {
-                                mpvFocusRequester
-                            } else {
-                                FocusRequester.Default
-                            }
-                        }
-                )
             }
         }
     }
 }
+
+private data class ErrorOverlayButton(
+    val key: String,
+    val text: String,
+    val onClick: () -> Unit,
+    val primary: Boolean,
+    val enabled: Boolean = true
+)
+
+private val ERROR_MESSAGE_MAX_WIDTH = 720.dp
 
 @Composable
 internal fun PlayerOverlayButton(

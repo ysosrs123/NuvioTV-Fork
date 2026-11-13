@@ -305,6 +305,12 @@ class PlayerRuntimeController(
             PlayerMediaSourceFactory.parseHeaders(headersJson)
         )
         currentStreamUrl = initialPlaybackRequest.url
+        SlowStartServer.noteStream(
+            initialPlaybackRequest.url,
+            navigationArgs.streamName,
+            navigationArgs.streamDescription,
+            navigationArgs.addonName
+        )
         currentStreamMimeType = PlayerMediaSourceFactory.inferMimeType(
             url = initialPlaybackRequest.url,
             filename = currentFilename,
@@ -850,6 +856,11 @@ class PlayerRuntimeController(
     // playback start briefly so the (tunneled) pipeline does not begin inside
     // the mode transition.
     internal var exoDelayStartAfterAfrSwitch: Boolean = false
+    // True while playback waits for the TV to settle after a pre-start mode switch; every start site stands
+    // down and the settle job starts playback when it ends.
+    internal var afrSettleHolding: Boolean = false
+    internal var afrSettleJob: Job? = null
+    internal var afrSettleToken: Int = 0
     // Frame rate taken from ExoPlayer's reported track format between prepare
     // and first frame, instead of a MediaExtractor probe on the ExoPlayer engine
     // path. trackAfrAttemptedForCurrentStream gates one attempt
@@ -906,7 +917,10 @@ class PlayerRuntimeController(
     internal var pendingAudioPcmFallbackRebuild: Boolean = false
     // Same-configuration rebuilds after a bitstream (passthrough) AudioTrack refusal, per stream.
     internal val playbackRecoveryGate = PlaybackRecoveryGate()
+    internal val sinkErrorLimiter = com.nuvio.tv.core.report.SinkErrorLimiter()
     internal var playbackRecoveryJob: Job? = null
+    internal var networkDropWatchJob: Job? = null
+    internal var networkDropRecoveredId: Int = 0
     internal var hasTriedDv7HevcFallback: Boolean = false
     internal var forceDv7ToHevc: Boolean = false
     internal var startupRetryCount: Int = 0
@@ -1013,6 +1027,7 @@ class PlayerRuntimeController(
     internal var libassPipelineDecisionStreamUrl: String? = null
     internal var torrentStreamJob: Job? = null
     internal var torrentStateObserverJob: Job? = null
+    internal var torrentMetadataWatchJob: Job? = null
     internal var isTorrentStream: Boolean = navigationArgs.infoHash != null && !initialStreamUrl.startsWith("http")
     internal var currentInfoHash: String? = navigationArgs.infoHash
     internal var currentFileIdx: Int? = navigationArgs.fileIdx
@@ -1136,6 +1151,7 @@ class PlayerRuntimeController(
         playerSession.close()
         stopServerPlayback()
         releasePlayer(flushPlaybackState = true, trimBufferInBackground = true)
+        PlaybackByteCounter.firstLengthListener = null
         stopTorrentStream()
         torrentService.shutdown()
         startupLoadingReportJob?.cancel()

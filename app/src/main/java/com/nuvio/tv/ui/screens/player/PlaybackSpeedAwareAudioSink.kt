@@ -138,7 +138,14 @@ internal class PlaybackSpeedAwareAudioSink(
 
     fun iecFillerWhilePlaying(): Long? = monitor.iecFillerWhilePlaying()
 
+    /** Underruns of Arc's own high-bitrate output, which the player's own counter never sees; null on any other path. */
+    fun iecUnderruns(): Int? = if (monitor.iecActive()) monitor.nativeAudioTrackUnderrunCount() else null
+
+    fun takeIecQueueLowMs(): Int? = monitor.takeIecQueueLowMs()
+
     fun iecClockSteadied(): Boolean = monitor.iecClockSteadied()
+
+    fun iecClockReading(): com.nuvio.tv.ui.screens.player.iec.IecClockReading? = monitor.iecClockReading()
 
     fun sampleAudioRoute(): AudioRouteSnapshot? = monitor.sampleAudioRoute()
 

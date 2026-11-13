@@ -635,7 +635,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                     val now = System.currentTimeMillis()
                     if (now - lastBufferLogTimeMs >= 10_000) {
                         lastBufferLogTimeMs = now
-                        bufferMemoryKeeper?.onTick()
+                        bufferMemoryKeeper?.onTick(playing = false)
                     }
                 }
             }
@@ -708,6 +708,10 @@ internal fun PlayerRuntimeController.stopProgressUpdates() {
     progressJob = null
 }
 
+internal fun PlayerRuntimeController.stopMpvProgressUpdatesForPause() {
+    if (MpvStartupWatchdogPolicy.progressTickMayStop(hasRenderedFirstFrame)) stopProgressUpdates()
+}
+
 internal fun PlayerRuntimeController.startWatchProgressSaving() {
     watchProgressSaveJob?.cancel()
     watchProgressSaveJob = scope.launch {
@@ -734,7 +738,7 @@ private fun PlayerRuntimeController.reportProvider(iptvSource: Boolean): String?
     )
 }
 
-private fun PlayerRuntimeController.reportSourceLine(): String? {
+internal fun PlayerRuntimeController.reportSourceLine(): String? {
     val iptv = LivePlaybackUiPolicy.isLiveContentType(contentType) || ReportText.isIptvLink(currentStreamUrl)
     return reportSourceNote(reportProvider(iptv), currentStreamDescription.takeUnless { iptv || isServerStream })
 }
@@ -797,6 +801,7 @@ internal fun PlayerRuntimeController.openReportPanel(afterRecording: Boolean = f
             reportPanelRecordingMarks = recorded?.marks ?: 0,
             reportPanelFileName = reportFileName(),
             reportPanelSource = reportSourceLine(),
+            reportPanelCheck = if (afterRecording) null else it.errorCard.matching(it.error),
             reportPanelTitle = title.takeUnless { LivePlaybackUiPolicy.isLiveContentType(contentType) }
                 ?.takeIf { name -> name.isNotBlank() }
                 ?.plus(episode),
@@ -840,10 +845,10 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport(choices: Playback
         )
     val audioTrack = state.audioTracks.reportTrackLabel(state.selectedAudioTrackIndex)
     val subtitleTrack = state.subtitleTracks.reportTrackLabel(state.selectedSubtitleTrackIndex)
-    val reportReason = PlayerStartupLoadingPolicy.loadingStallReportReason(
-        showLoadingOverlay = state.showLoadingOverlay,
+    val reportReason = PlayerStartupLoadingPolicy.reportReason(
         hasRenderedFirstFrame = hasRenderedFirstFrame,
         error = state.error,
+        wasPlaying = reportPanelResumeOnClose || hasActivePlayIntent(),
     )
     val loadingInput = buildPlaybackIssueLoadingInput(reportReason)
     val playbackAnalyticsInput = playbackAnalyticsDiagnostics.snapshot(
@@ -910,6 +915,9 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport(choices: Playback
         sourceDetail = currentStreamDescription.takeUnless { iptvSource || isServerStream }
     )
 
+    val filmFps = _exoPlayer?.videoFormat?.frameRate?.takeIf { it > 0f }
+    val measuredHz = com.nuvio.tv.core.player.DisplayRefreshMeter.latest?.takeIf { it.reliable }?.measuredHz
+    val arcMatching = currentPlayerSettingsForReport.frameRateMatchingMode.name
     val requestVersion = playbackIssueReportRequestVersion.incrementAndGet()
     _uiState.update {
         it.copy(
@@ -924,7 +932,8 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport(choices: Playback
             playbackIssueReportRepository.submit(
                 input.copy(
                     network = PlaybackReportFacts.network(appContext),
-                    box = PlaybackReportFacts.box(appContext)
+                    box = PlaybackReportFacts.box(appContext),
+                    display = PlaybackReportFacts.display(appContext, filmFps, arcMatching, measuredHz)
                 )
             )
         }
@@ -1226,8 +1235,10 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
     val progress = currentWatchProgress(parentContentId, parentContentType, position, duration, System.currentTimeMillis())
         .copy(progressPercent = fallbackPercent)
     val inMix = episodeShufflePlayback.inMix(profileId, contentId, currentVideoId)
+    val plan = watchProgressSavePlan(progress.isCompleted(), hasMarkedCurrentEpisodeCompleted)
+    if (plan == WatchProgressSavePlan.MARK_COMPLETED) hasMarkedCurrentEpisodeCompleted = true
 
-    scope.launch(kotlinx.coroutines.NonCancellable) {
+    scope.launch(NonCancellable + watchProgressSaveDispatcher) {
         try {
             val effectiveContentId = watchProgressRepository.normalizeParentContentId(
                 parentContentId = progress.contentId,
@@ -1238,9 +1249,8 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
             runCatching {
                 episodeShufflePlayback.noteMixPlay(profileId, normalizedProgress, inMix)
             }
-            if (normalizedProgress.isCompleted()) {
-                if (!hasMarkedCurrentEpisodeCompleted) {
-                    hasMarkedCurrentEpisodeCompleted = true
+            if (plan == WatchProgressSavePlan.MARK_COMPLETED || plan == WatchProgressSavePlan.ALREADY_COMPLETED) {
+                if (plan == WatchProgressSavePlan.MARK_COMPLETED) {
                     watchProgressRepository.markAsCompleted(
                         normalizedProgress,
                         profileId = profileId,
@@ -1248,7 +1258,7 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
                     )
                 }
                 runCatching { tvRecommendationManager.onProgressRemoved(normalizedProgress.contentId) }
-            } else if (!hasMarkedCurrentEpisodeCompleted) {
+            } else if (plan == WatchProgressSavePlan.SAVE_IN_PROGRESS) {
                 // Only save in-progress when the episode has not already been
                 // marked as completed during this playback session.  After
                 // natural playback completion the player can report stale
@@ -1267,6 +1277,18 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
         }
     }
 }
+
+private val watchProgressSaveDispatcher = Dispatchers.IO.limitedParallelism(1)
+
+internal enum class WatchProgressSavePlan { MARK_COMPLETED, ALREADY_COMPLETED, SAVE_IN_PROGRESS, SKIP }
+
+internal fun watchProgressSavePlan(completed: Boolean, alreadyMarkedCompleted: Boolean): WatchProgressSavePlan =
+    when {
+        completed && !alreadyMarkedCompleted -> WatchProgressSavePlan.MARK_COMPLETED
+        completed -> WatchProgressSavePlan.ALREADY_COMPLETED
+        !alreadyMarkedCompleted -> WatchProgressSavePlan.SAVE_IN_PROGRESS
+        else -> WatchProgressSavePlan.SKIP
+    }
 
 private fun PlayerRuntimeController.saveCloudLibraryProgress(
     position: Long,
@@ -1876,12 +1898,15 @@ fun PlayerRuntimeController.onEvent(
             dropPausedThumbnail()
             var pausedNow = false
             if (isUsingMpvEngine()) {
-                val playing = isPlaybackCurrentlyPlaying()
+                val playing = MpvStartupWatchdogPolicy.playPauseShouldPause(
+                    isPlaying = isPlaybackCurrentlyPlaying(),
+                    hasRenderedFirstFrame = hasRenderedFirstFrame
+                )
                 if (playing) {
                     userPausedManually = true
                     pausedNow = true
                     setPlaybackPaused(true)
-                    stopProgressUpdates()
+                    stopMpvProgressUpdatesForPause()
                     stopWatchProgressSaving()
                     emitPauseScrobbleForCurrentProgress()
                     schedulePauseOverlay()
@@ -2369,8 +2394,12 @@ fun PlayerRuntimeController.onEvent(
         PlayerEvent.OnShowSourcesPanel -> {
             showSourcesPanel()
         }
+        PlayerEvent.OnErrorOtherSources -> {
+            openSourcesFromErrorCard()
+        }
         PlayerEvent.OnDismissSourcesPanel -> {
             dismissSourcesPanel()
+            restoreErrorCardAfterSources()
         }
         PlayerEvent.OnReloadSourceStreams -> {
             loadSourceStreams(forceRefresh = true)
@@ -2379,6 +2408,7 @@ fun PlayerRuntimeController.onEvent(
             filterSourceStreamsByAddon(event.addonName)
         }
         is PlayerEvent.OnSourceStreamSelected -> {
+            _uiState.update { it.copy(errorCardBeforeSources = null) }
             switchToSourceStream(event.stream)
         }
         PlayerEvent.OnDismissTransientOverlay -> {

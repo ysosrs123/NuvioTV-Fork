@@ -52,10 +52,8 @@ internal object SourceFailoverSelection {
     fun isUsenet(stream: Stream): Boolean {
         stream.clientResolve?.let { if (CopyChoice.usenetMarked(it.type, it.service)) return true }
         if (SlowStartServer.isUsenet(stream.getStreamUrl())) return true
-        return USENET_NAME.containsMatchIn(stream.name?.lineSequence()?.firstOrNull().orEmpty())
+        return SlowStartServer.USENET_NAME.containsMatchIn(stream.name?.lineSequence()?.firstOrNull().orEmpty())
     }
-
-    private val USENET_NAME = Regex("(?<![a-z])(usenet|nzb)", RegexOption.IGNORE_CASE)
 
     /**
      * The first playable entry after [currentIndex] (or from the top when the playing entry is not

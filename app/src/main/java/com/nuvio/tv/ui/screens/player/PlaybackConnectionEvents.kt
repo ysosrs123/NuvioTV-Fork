@@ -186,7 +186,8 @@ internal class PlaybackConnectionEventListener(
             "headers=${headersMs}ms total=${totalMs}ms " +
             "preDns=${preDnsMs}ms route=${routeMs}ms ttfb=${ttfbMs}ms acqToHdr=${acqToHdrMs}ms " +
             "inflight=$inflightAtStart hostInflight=$hostInflightAtStart " +
-            "code=$code proto=$protoLabel range=$rangeLabel host=$currentHost"
+            "code=$code proto=$protoLabel range=$rangeLabel host=$currentHost" +
+            (if (callT0 > 0L) " start=${PlaybackConnectionEvents.sinceSessionStart(callT0)}ms" else "")
         // Logcat stays the primary emission; log captures read NET_CONN from
         // logcat. The in-app ring buffer is additive (feeds the in-app
         // network log surface).
@@ -261,7 +262,13 @@ internal object PlaybackConnectionEvents : EventListener.Factory {
     /** Whether the range request for [url] and [range] reused a connection; null when it was not seen. */
     fun takePiece(url: String, range: String): Boolean? = pieceReuse.remove("$url|$range")
 
+    @Volatile private var sessionStartMs = SystemClock.elapsedRealtime()
+
+    /** Call start against the last [clear], so lines of one playback can be put in start order. Warm-up calls show negative. */
+    fun sinceSessionStart(elapsedRealtimeMs: Long): Long = elapsedRealtimeMs - sessionStartMs
+
     fun clear() {
+        sessionStartMs = SystemClock.elapsedRealtime()
         recentLogs.clear()
         resolvedServingHost = null
         inflightTotal.set(0)

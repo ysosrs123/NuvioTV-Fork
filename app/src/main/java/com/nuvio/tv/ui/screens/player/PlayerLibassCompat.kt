@@ -35,6 +35,9 @@ private class AssPlayerBinding(
 
 private val assBindingsByPlayer = Collections.synchronizedMap(WeakHashMap<ExoPlayer, AssPlayerBinding>())
 
+/** Players that have a libass renderer now, for the memory snapshot. */
+internal fun libassPlayersAlive(): Int = assBindingsByPlayer.size
+
 /**
  * [subtitleTimeShiftUs] moves libass subtitles against the picture (audio delay minus subtitle
  * delay, read on every frame), the same shift the text renderers get.

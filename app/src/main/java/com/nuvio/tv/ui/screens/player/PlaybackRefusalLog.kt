@@ -16,6 +16,9 @@ internal class PlaybackRefusalLog(
     private val sink: (String) -> Unit = { line ->
         Log.w("NuvioNet", line)
         PlaybackConnectionEvents.recordEvent(line)
+    },
+    private val recorder: (String) -> Unit = { detail ->
+        com.nuvio.tv.core.report.PlaybackRecorder.event(com.nuvio.tv.core.report.RecorderEvent.NETWORK, detail)
     }
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -27,6 +30,10 @@ internal class PlaybackRefusalLog(
             runCatching {
                 val page = if (isText(response.header("Content-Type"))) response.peekBody(PEEK_BYTES).string() else null
                 val domain = RequestBudget.domainOf(host)
+                recorder(
+                    "refused code=${response.code} server=${com.nuvio.tv.core.logging.ReportHosts.label(host)} last60s=${budget.requests(domain, 60_000L)} " +
+                        "retryAfter=${response.header("Retry-After")?.take(20) ?: "none"}"
+                )
                 sink(
                     "NET_REFUSED code=${response.code} host=$host domain=$domain " +
                         "last60s=${budget.requests(domain, 60_000L)} last300s=${budget.requests(domain, 300_000L)} " +

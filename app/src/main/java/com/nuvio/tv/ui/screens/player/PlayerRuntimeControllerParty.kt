@@ -83,7 +83,7 @@ internal class PartyPlayerBridge(
         controller.dropPausedThumbnail()
         if (controller.isUsingMpvEngine()) {
             controller.setPlaybackPaused(true)
-            controller.stopProgressUpdates()
+            controller.stopMpvProgressUpdatesForPause()
             controller.stopWatchProgressSaving()
             controller.emitPauseScrobbleForCurrentProgress()
         } else {

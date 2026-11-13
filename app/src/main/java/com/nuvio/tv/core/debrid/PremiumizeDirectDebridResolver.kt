@@ -34,7 +34,7 @@ class PremiumizeDirectDebridResolver @Inject constructor(
             if (!response.isSuccessful) {
                 return when (response.code()) {
                     401, 403 -> DirectDebridResolveResult.Error
-                    else -> DirectDebridResolveResult.Stale
+                    else -> DirectDebridResolveResult.busyOrStale(response.code())
                 }
             }
             val body = response.body() ?: return DirectDebridResolveResult.Stale

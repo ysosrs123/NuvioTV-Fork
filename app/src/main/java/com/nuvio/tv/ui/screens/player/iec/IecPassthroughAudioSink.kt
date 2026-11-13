@@ -53,6 +53,8 @@ internal class IecPassthroughAudioSink(
     private var headAnchorFrames: Long = 0L
     private var playing: Boolean = false
     private var handledEndOfStream: Boolean = false
+    @Volatile private var queueLowMs: Int = QUEUE_NOT_MEASURED
+    private var queueCheckedNanos: Long = 0L
     private var shortEndStartedNanos: Long = NEVER
     private var shortEndNanos: Long = 0L
     private var keepAliveForTrack: Boolean = keepAliveEnabled
@@ -78,7 +80,12 @@ internal class IecPassthroughAudioSink(
     @Volatile
     private var configuredHbr: Boolean = false
     private var writeStallStartedNanos: Long = WRITE_STALL_NOT_STARTED
+    @Volatile
     private var totalWriteStalls: Long = 0L
+    @Volatile
+    private var clockHeadMs: Int = CLOCK_NOT_READ
+    @Volatile
+    private var clockLatencyMs: Int = CLOCK_NOT_READ
     private var stallCounted = false
     internal val writeStallCount: Long get() = totalWriteStalls
     private var reopenedAtNanos: Long = NEVER
@@ -144,7 +151,36 @@ internal class IecPassthroughAudioSink(
     /** Filler frames that went in mid-content while playing; pauses and seeks are not counted. */
     fun iecFillerWhilePlaying(): Long? = if (isKeepAliveActive) fillerWhilePlaying else null
 
+    /** The least sound that was queued in the output since the last call, or null with nothing measured. */
+    fun takeIecQueueLowMs(): Int? {
+        val low = queueLowMs
+        queueLowMs = QUEUE_NOT_MEASURED
+        return low.takeIf { it >= 0 }
+    }
+
+    private fun noteQueueLevel(track: IecAudioTrack, now: Long) {
+        if (!playing || now - queueCheckedNanos < QUEUE_CHECK_NANOS) return
+        queueCheckedNanos = now
+        val queuedMs = ((writtenFrames - track.playbackHeadFrames()) * 1000L / track.sampleRate)
+            .coerceIn(0L, 60_000L).toInt()
+        val low = queueLowMs
+        if (low < 0 || queuedMs < low) queueLowMs = queuedMs
+    }
+
     fun iecClockSteadied(): Boolean = isIecActive && timestampClock.isSteadied
+
+    /** The output's own played position and delay at the last position read, or null before one. */
+    fun iecClockReading(): IecClockReading? {
+        val source = timestampClock.lastSource
+        val headMs = clockHeadMs
+        if (!isIecActive || source == IecAudioTimestampClock.SOURCE_NONE || headMs < 0) return null
+        return IecClockReading(
+            headMs = headMs,
+            latencyMs = clockLatencyMs,
+            source = source,
+            writeStalls = totalWriteStalls.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        )
+    }
 
     fun iecPayload(): HbrPayload? = if (isIecActive) iecTrack?.payload else null
 
@@ -302,12 +338,18 @@ internal class IecPassthroughAudioSink(
                 if (adjusted < 0L) null else stamp.copy(framePosition = adjusted)
             }
         }
+        val latencyUs = track.outputLatencyUs()
+        if (startPtsUs != C.TIME_UNSET) {
+            val headUs = IecAudioTimestampClock.framesToUs(head.coerceAtLeast(0L), track.sampleRate)
+            clockHeadMs = ((startPtsUs + headUs) / 1_000L).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
+            clockLatencyMs = (latencyUs / 1_000L).coerceIn(0L, 60_000L).toInt()
+        }
         return timestampClock.positionUs(
             sampleRate = track.sampleRate,
             headFrames = head.coerceAtLeast(0L),
             writtenFrames = written,
             startPtsUs = startPtsUs,
-            latencyUs = track.outputLatencyUs(),
+            latencyUs = latencyUs,
             playHeld = track.isPlayHeld(),
             timestamp = sample,
             playing = playing,
@@ -1395,6 +1437,7 @@ internal class IecPassthroughAudioSink(
         val track = iecTrack ?: return
         val underruns = track.underrunCount()
         val now = System.nanoTime()
+        noteQueueLevel(track, now)
         if (underruns == lastHealthUnderruns && now - lastHealthNanos < HEALTH_INTERVAL_NANOS) return
         lastHealthNanos = now
         lastHealthUnderruns = underruns
@@ -1435,6 +1478,9 @@ internal class IecPassthroughAudioSink(
         internal const val IEC_REOPEN_POLL_NANOS = 500_000_000L
         internal const val MAX_REOPENS_PER_FORMAT = 5
         private const val NEVER = Long.MIN_VALUE
+        private const val QUEUE_NOT_MEASURED = -1
+        private const val CLOCK_NOT_READ = -1
+        private const val QUEUE_CHECK_NANOS = 250_000_000L
         private const val SHORT_END_MARGIN_NANOS = 200_000_000L
         private const val ROUTE_RECHECK_NANOS = 1_000_000_000L
         private const val HEALTH_INTERVAL_NANOS = 5_000_000_000L

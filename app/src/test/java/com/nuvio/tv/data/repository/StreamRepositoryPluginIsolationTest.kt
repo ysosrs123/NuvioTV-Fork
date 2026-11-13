@@ -70,6 +70,54 @@ class StreamRepositoryPluginIsolationTest {
     }
 
     @Test
+    fun `a paused plugin search still reports the add-ons as answered`() = runBlocking {
+        val harness = newHarness(listOf(compatibleScraper()))
+        coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
+        harness.repository.setLocalPluginSearchPaused(true)
+
+        val result = withTimeout(2_000) {
+            harness.repository.getStreamsFromAllAddons(
+                type = "movie", videoId = "tt1341338", season = null, episode = null
+            ).first {
+                it is NetworkResult.Success &&
+                    harness.repository.sourcesAnsweredExceptPlugins("movie", "tt1341338", null, null)
+            }
+        }
+
+        assertEquals(listOf("Fast Addon"), (result as NetworkResult.Success).data.map { it.addonName })
+        coVerify(exactly = 0) { harness.pluginManager.executeScrapersStreaming(any(), any(), any(), any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `a finished search clears the answered mark`() = runTest {
+        val scraper = compatibleScraper()
+        val harness = newHarness(listOf(scraper))
+        coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
+        every {
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, null, false, any())
+        } returns flowOf(scraper to listOf(LocalScraperResult(title = "Movie", url = "https://stream.example/m.m3u8")))
+
+        val results = harness.repository.getStreamsFromAllAddons(
+            type = "movie", videoId = "tt1341338", season = null, episode = null
+        ).toList()
+
+        val names = (results.last() as NetworkResult.Success).data.map { it.addonName }
+        assertEquals(setOf("Fast Addon", "Plugin"), names.toSet())
+        assertEquals(false, harness.repository.sourcesAnsweredExceptPlugins("movie", "tt1341338", null, null))
+    }
+
+    @Test
+    fun `no answered mark without plugins`() = runTest {
+        val harness = newHarness(emptyList())
+
+        val results = harness.repository.getStreamsFromAllAddons(
+            type = "movie", videoId = "tt1341338", season = null, episode = null
+        ).toList()
+
+        assertEquals(1, results.count { it is NetworkResult.Success })
+    }
+
+    @Test
     fun `TMDB lookup is skipped when no compatible plugin is enabled`() = runTest {
         val harness = newHarness(emptyList())
 

@@ -1726,8 +1726,12 @@ internal fun PlayerRuntimeController.tryAutoSelectPreferredSubtitleFromAvailable
             PlayerSubtitleUtils.matchesLanguageCode(currentSelectedLang, primaryTarget)
         val hasBetterAddonMatch = !isPrimarySatisfied && primaryTarget != null &&
             state.addonSubtitles.any { PlayerSubtitleUtils.matchesLanguageCode(it.lang, primaryTarget) }
+        val addonFirstSwitch = state.subtitleStyle.preferAddonSubtitles &&
+            state.selectedAddonSubtitle == null && state.selectedSubtitleTrackIndex >= 0 &&
+            AddonSubtitlesFirst.pick(state.addonSubtitles.filterNot(::addonSubtitleIsForced), preferredTargets,
+                preferredTargets.indexOfFirst { PlayerSubtitleUtils.matchesLanguageCode(currentSelectedLang, it) }) { it.lang } != null
 
-        if (!hasBetterAddonMatch) return
+        if (!hasBetterAddonMatch && !addonFirstSwitch) return
     }
     val selectedAudioTrack = selectedAudioTrackForSubtitleMatching(state)
     val useForcedSubtitles = state.subtitleStyle.useForcedSubtitles
@@ -1811,6 +1815,18 @@ internal fun PlayerRuntimeController.tryAutoSelectPreferredSubtitleFromAvailable
                 )
                 selectAddonSubtitle(primaryAddonMatch)
                 maybeRunAutomaticSubtitleSync(primaryAddonMatch) // AutoSync hook
+                return
+            }
+        }
+        if (state.subtitleStyle.preferAddonSubtitles && addonSubtitlesLoaded) {
+            val addonFirst = AddonSubtitlesFirst.pick(
+                state.addonSubtitles.filterNot(::addonSubtitleIsForced), targets, matchedTargetPosition
+            ) { it.lang }
+            if (addonFirst != null) {
+                autoSubtitleSelected = true
+                Log.d(PlayerRuntimeController.TAG, "AUTO_SUB pick addon first: lang=${addonFirst.lang} over internal variant=$trackVariant")
+                selectAddonSubtitle(addonFirst)
+                maybeRunAutomaticSubtitleSync(addonFirst) // AutoSync hook
                 return
             }
         }
@@ -2055,5 +2071,15 @@ internal fun PlayerRuntimeController.applySubtitlePreferences(
         builder.setIgnoredTextSelectionFlags(newFlags)
 
         player.trackSelectionParameters = builder.build()
+    }
+}
+
+/** "Add-on subtitles first": an add-on subtitle in the language the file's own track matched, or a higher ranked one. */
+internal object AddonSubtitlesFirst {
+    fun <T> pick(addons: List<T>, targets: List<String>, matchedTargetPosition: Int, lang: (T) -> String?): T? {
+        if (matchedTargetPosition < 0) return null
+        return targets.take(matchedTargetPosition + 1).firstNotNullOfOrNull { target ->
+            addons.firstOrNull { PlayerSubtitleUtils.matchesLanguageCode(lang(it), target) }
+        }
     }
 }

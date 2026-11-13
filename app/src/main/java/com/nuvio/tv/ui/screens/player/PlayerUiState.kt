@@ -197,6 +197,8 @@ data class PlayerUiState(
     val playerBadgeFilters: List<CompiledStreamBadgeFilter> = emptyList(),
     val showPlayerBadges: Boolean = false,
     val error: String? = null,
+    val errorCard: PlayerErrorCard? = null,
+    val errorCardBeforeSources: PlayerErrorCard? = null,
     val showSwitchToMpvErrorAction: Boolean = false,
     val playbackIssueReportStatus: PlaybackIssueReportStatus = PlaybackIssueReportStatus.Idle,
     val playbackIssueReportId: String? = null,
@@ -211,6 +213,7 @@ data class PlayerUiState(
     val reportPanelRecordingMarks: Int = 0,
     val reportPanelFileName: String? = null,
     val reportPanelSource: String? = null,
+    val reportPanelCheck: PlayerErrorCard? = null,
     val reportPillTick: Int = 0,
     val reportNoSpaceTick: Int = 0,
     val pendingSeekPosition: Long? = null, // For resuming from saved progress
@@ -417,6 +420,7 @@ sealed class PlayerEvent {
     data class OnEpisodeAddonFilterSelected(val addonName: String?) : PlayerEvent()
     data class OnEpisodeStreamSelected(val stream: Stream) : PlayerEvent()
     data object OnShowSourcesPanel : PlayerEvent()
+    data object OnErrorOtherSources : PlayerEvent()
     data object OnDismissSourcesPanel : PlayerEvent()
     data object OnReloadSourceStreams : PlayerEvent()
     data class OnSourceAddonFilterSelected(val addonName: String?) : PlayerEvent()

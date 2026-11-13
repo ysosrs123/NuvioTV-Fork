@@ -3645,6 +3645,17 @@ public class MatroskaExtractor implements Extractor {
     // Leading HEVC samples still to scan for an alternative transfer SEI.
     public int hevcAlternativeTransferSamplesToCheck = MAX_HEVC_ALTERNATIVE_TRANSFER_SAMPLES;
 
+    static boolean dolbyVisionProfileMatchesCodec(String codecId, int profile) {
+      switch (codecId) {
+        case CODEC_ID_AV1:
+          return profile == 10;
+        case CODEC_ID_H264:
+          return profile == 9;
+        default:
+          return true;
+      }
+    }
+
     /** Builds the {@link Format} for the track. */
     @RequiresNonNull("codecId")
     public void initializeFormat(
@@ -3864,7 +3875,16 @@ public class MatroskaExtractor implements Extractor {
         DolbyVisionConfig dolbyVisionConfig =
             DolbyVisionConfig.parse(new ParsableByteArray(this.dolbyVisionConfigBytes));
         if (dolbyVisionConfig != null) {
-          if (DolbyVisionCompatibility.isStaleContainerDolbyVisionConfig(
+          if (!dolbyVisionProfileMatchesCodec(codecId, dolbyVisionConfig.profile)) {
+            Log.i(
+                TAG,
+                "Ignoring Dolby Vision profile "
+                    + dolbyVisionConfig.profile
+                    + " on a "
+                    + codecId
+                    + " track");
+            dolbyVisionConfigBytes = null;
+          } else if (DolbyVisionCompatibility.isStaleContainerDolbyVisionConfig(
               hasColorInfo, colorTransfer)) {
             Log.i(
                 TAG,

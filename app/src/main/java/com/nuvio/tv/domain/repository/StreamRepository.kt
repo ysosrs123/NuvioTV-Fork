@@ -15,6 +15,9 @@ interface StreamRepository {
     /** Suspends local plugin work while playback owns the device, then resumes the same search. */
     fun setLocalPluginSearchPaused(paused: Boolean)
 
+    /** Every add-on and server of the running search has answered; only local plugins are still out (or paused). */
+    fun sourcesAnsweredExceptPlugins(type: String, videoId: String, season: Int?, episode: Int?): Boolean = false
+
     /**
      * Fetches streams from all installed addons for a given video ID
      * @param type The content type (movie, series, etc.)

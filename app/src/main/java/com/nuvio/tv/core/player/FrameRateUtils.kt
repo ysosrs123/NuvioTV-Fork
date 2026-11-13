@@ -43,6 +43,7 @@ object FrameRateUtils {
     /** Below this the reported rate is not real content; never switch the panel for it. */
     private const val MIN_AFR_SWITCH_FPS = 20f
     private const val RESOLUTION_MATCH_MIN_SHORT_SIDE = 720
+    private const val RESOLUTION_FIT_SLACK = 1.02f
     private val CLEAN_REFRESH_MULTIPLES = listOf(3f, 4f, 5f, 6f)
     private const val REFRESH_ERROR_SLACK = 0.0001f
     private const val TIMESTAMP_REORDER_MARGIN = 16
@@ -452,6 +453,14 @@ object FrameRateUtils {
         modes: List<DisplayModeSpec>,
         frameRate: Float
     ): ModeChoice {
+        // 25 and 29.97/30 fps play at 50 and 59.94/60 Hz when the display has them: the same clean cadence,
+        // with menus, subtitles and the TV's motion handling at their usual rate. Interlaced sources show up
+        // here as 25/29.97 and need the field rate anyway.
+        if (prefersDoubleRate(frameRate)) {
+            pickBestForTarget(modes, frameRate * 2f)?.let {
+                return ModeChoice(it, ModeMatchQuality.DOUBLE)
+            }
+        }
         pickBestForTarget(modes, frameRate)?.let {
             return ModeChoice(it, ModeMatchQuality.EXACT)
         }
@@ -471,9 +480,19 @@ object FrameRateUtils {
         pulldown?.let {
             return ModeChoice(it, ModeMatchQuality.PULLDOWN)
         }
+        // 48 fps on a display without 48/96/120/144 Hz: 60 Hz repeats every fourth frame, an even pattern;
+        // 50 Hz, the nearest rate, hitches twice a second.
+        if (frameRate in 47.5f..48.5f) {
+            pickBestForTarget(modes, frameRate * 1.25f)?.let {
+                return ModeChoice(it, ModeMatchQuality.PULLDOWN)
+            }
+        }
         val modeFallback = modes.minByOrNull { refreshWeight(it.refreshRate, frameRate) }
         return ModeChoice(modeFallback ?: activeMode, ModeMatchQuality.FALLBACK)
     }
+
+    internal fun prefersDoubleRate(frameRate: Float): Boolean =
+        frameRate in 24.5f..25.5f || frameRate in 29.5f..30.5f
 
     private fun hasValidVideoSize(videoWidth: Int?, videoHeight: Int?): Boolean {
         return (videoWidth ?: 0) > 0 && (videoHeight ?: 0) > 0
@@ -509,9 +528,10 @@ object FrameRateUtils {
             return normalizedWidth.toLong() * normalizedHeight.toLong()
         }
 
+        // An encode a few pixels over a mode (1928x1080, 3848x2160) still belongs to that mode.
         fun fits(mode: DisplayModeSpec): Boolean {
             val (modeWidth, modeHeight) = normalizedSize(mode.width, mode.height)
-            return modeWidth >= targetWidth && modeHeight >= targetHeight
+            return modeWidth * RESOLUTION_FIT_SLACK >= targetWidth && modeHeight * RESOLUTION_FIT_SLACK >= targetHeight
         }
 
         // Never below 720p when the display offers 720p or larger.
@@ -627,6 +647,37 @@ object FrameRateUtils {
         )
     }
 
+    /**
+     * Main thread only. Whether [matchFrameRateAndWait] would ask for another mode, so a caller can leave
+     * playback and audio alone when nothing will change. Null when the display cannot be read.
+     */
+    fun wouldSwitchDisplayMode(
+        activity: Activity,
+        frameRate: Float,
+        videoWidth: Int?,
+        videoHeight: Int?,
+        resolutionMatchingEnabled: Boolean
+    ): Boolean? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
+        if (frameRate < MIN_AFR_SWITCH_FPS) return false
+        return runCatching {
+            val display = activity.window?.decorView?.display ?: return null
+            val activeSpec = display.mode.toSpec()
+            val choice = planDisplayMode(
+                modes = display.supportedModes.map { it.toSpec() },
+                activeMode = activeSpec,
+                frameRate = frameRate,
+                videoWidth = videoWidth,
+                videoHeight = videoHeight,
+                resolutionMatchingEnabled = resolutionMatchingEnabled
+            ).choice
+            choice != null && choice.mode.modeId != activeSpec.modeId
+        }.getOrNull()
+    }
+
+    /** True 23.976 reads slightly under 23.988; anything from there up snaps to 24.000 and must stay there. */
+    fun prefers23976(rawFps: Float): Boolean = rawFps in 23.95f..23.988f
+
     suspend fun matchFrameRateAndWait(
         activity: Activity,
         frameRate: Float,
@@ -648,11 +699,13 @@ object FrameRateUtils {
 
         var seamless: Boolean? = null
         var fromHz: Float? = null
+        var fromModeId: Int? = null
         val switchPlan = withContext(Dispatchers.Main) {
             val window = activity.window ?: return@withContext null
             val display = window.decorView.display ?: return@withContext null
             val activeMode = display.mode
             fromHz = activeMode.refreshRate
+            fromModeId = activeMode.modeId
             val supportedModes = display.supportedModes.toList()
             val activeSpec = activeMode.toSpec()
 
@@ -722,6 +775,7 @@ object FrameRateUtils {
             val layoutParams = window.attributes
             layoutParams.preferredDisplayModeId = modeBest.modeId
             window.attributes = layoutParams
+            lastSwitchRequestedAtElapsed = android.os.SystemClock.elapsedRealtime()
             Pair(modeBest, null)
         } ?: return null
 
@@ -742,9 +796,7 @@ object FrameRateUtils {
             } ?: break
 
             lastMode = mode
-            val modeStable =
-                mode.modeId == expectedMode.modeId ||
-                    matchesTargetRefresh(mode.refreshRate, expectedMode.refreshRate)
+            val modeStable = switchReported(mode.modeId, mode.refreshRate, expectedMode.modeId, expectedMode.refreshRate, fromModeId)
             if (modeStable) {
                 stablePolls += 1
                 if (stablePolls >= SWITCH_REQUIRED_STABLE_POLLS) {
@@ -785,6 +837,31 @@ object FrameRateUtils {
         originalModeId = null
     }
 
+    /** Elapsed-realtime of the last display mode request, for the settle wait. 0 before any. */
+    @Volatile var lastSwitchRequestedAtElapsed: Long = 0L
+        private set
+
+    /**
+     * Android has reached the requested mode. A mode within tolerance counts only once the mode id has left the
+     * one active before the request: 59.94 and 60, or 23.976 and 24, are within tolerance of each other.
+     */
+    internal fun switchReported(
+        reportedModeId: Int,
+        reportedHz: Float,
+        expectedModeId: Int,
+        expectedHz: Float,
+        fromModeId: Int?
+    ): Boolean = reportedModeId == expectedModeId ||
+        (reportedModeId != fromModeId && matchesTargetRefresh(reportedHz, expectedHz))
+
+    /**
+     * The original mode must be written back when the display is elsewhere, and also when it still shows the
+     * original but the window asks for another mode: a switch requested just before leaving would otherwise
+     * complete afterwards and stay.
+     */
+    internal fun restoreNeedsWrite(displayModeId: Int, requestedModeId: Int, targetModeId: Int): Boolean =
+        displayModeId != targetModeId || (requestedModeId != 0 && requestedModeId != targetModeId)
+
     fun restoreOriginalDisplayMode(activity: Activity): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
         DisplayRefreshMeter.clear()
@@ -793,7 +870,7 @@ object FrameRateUtils {
         return try {
             val window = activity.window ?: return false
             val display = window.decorView.display ?: return false
-            if (display.mode.modeId == targetModeId) {
+            if (!restoreNeedsWrite(display.mode.modeId, window.attributes.preferredDisplayModeId, targetModeId)) {
                 originalModeId = null
                 true
             } else {
@@ -833,6 +910,11 @@ object FrameRateUtils {
     fun snapToStandardRate(formatFrameRate: Float): Float {
         if (formatFrameRate <= 0f) return formatFrameRate
         return when {
+            // Frame durations rounded to whole milliseconds: 42 ms (23.810), 33 ms (30.303), 17 ms (58.824).
+            // Each could be either member of its pair; the 1000/1001 rate is by far the common one.
+            formatFrameRate in 23.80f..23.82f -> NTSC_FILM_FPS
+            formatFrameRate in 30.29f..30.32f -> 30000f / 1001f
+            formatFrameRate in 58.81f..58.84f -> 60000f / 1001f
             formatFrameRate in 23.90f..23.988f -> NTSC_FILM_FPS
             formatFrameRate in 23.988f..24.1f -> CINEMA_24_FPS
             formatFrameRate in 24.9f..25.1f -> 25f

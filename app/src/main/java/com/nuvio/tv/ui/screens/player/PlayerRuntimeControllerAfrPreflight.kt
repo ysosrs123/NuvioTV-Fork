@@ -118,7 +118,7 @@ internal suspend fun PlayerRuntimeController.runAfrCachePreflightIfEnabled(
             detectedFrameRateSource = FrameRateSource.PROBE
         )
     }
-    val prefer23976ProbeBias = cached.raw in 23.95f..23.999f
+    val prefer23976ProbeBias = FrameRateUtils.prefers23976(cached.raw)
     val targetFrameRate = FrameRateUtils.refineFrameRateForDisplay(
         activity = activity,
         detectedFps = cached.snapped,
@@ -228,7 +228,7 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
                     detectedFrameRateSource = FrameRateSource.PROBE
                 )
             }
-            val prefer23976ProbeBias = cached.raw in 23.95f..23.999f
+            val prefer23976ProbeBias = FrameRateUtils.prefers23976(cached.raw)
             val targetFrameRate = FrameRateUtils.refineFrameRateForDisplay(
                 activity = activity,
                 detectedFps = cached.snapped,
@@ -363,7 +363,7 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
             )
         }
 
-        val prefer23976ProbeBias = detection.raw in 23.95f..23.999f
+        val prefer23976ProbeBias = FrameRateUtils.prefers23976(detection.raw)
         val targetFrameRate = FrameRateUtils.refineFrameRateForDisplay(
             activity = activity,
             detectedFps = detection.snapped,

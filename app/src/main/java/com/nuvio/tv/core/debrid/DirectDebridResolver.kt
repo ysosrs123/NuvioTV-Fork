@@ -148,7 +148,7 @@ class DirectDebridResolver @Inject constructor(
             is DirectDebridResolveResult.Success -> DirectDebridPlayableResult.Success(stream.withResolvedDebridUrl(result))
             DirectDebridResolveResult.MissingApiKey -> DirectDebridPlayableResult.MissingApiKey
             DirectDebridResolveResult.NotCached -> DirectDebridPlayableResult.NotCached
-            DirectDebridResolveResult.Stale -> DirectDebridPlayableResult.Stale
+            DirectDebridResolveResult.Stale, is DirectDebridResolveResult.Busy -> DirectDebridPlayableResult.Stale
             DirectDebridResolveResult.Error -> DirectDebridPlayableResult.Error
         }
     }

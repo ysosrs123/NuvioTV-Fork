@@ -38,7 +38,26 @@ class AllocatorStopTrim(
         })
     }
 
+    /** Leaving the app: frees what the teardown hands back as it arrives instead of once after a settle. */
+    fun trimUntilEmpty(stepMs: Long = EMPTY_STEP_MS, steps: Int = EMPTY_STEPS, pause: (Long) -> Unit = Thread::sleep) {
+        background(Runnable {
+            allocator.setTargetBufferSize(0)
+            for (step in 0 until steps) {
+                allocator.trim()
+                if (allocator.totalBytesAllocated == 0 && allocator.memoryFootprint.toLong() == 0L) return@Runnable
+                try {
+                    pause(stepMs)
+                } catch (_: InterruptedException) {
+                    return@Runnable
+                }
+            }
+            allocator.trim()
+        })
+    }
+
     private companion object {
         const val SETTLE_MS = 2_000L
+        const val EMPTY_STEP_MS = 250L
+        const val EMPTY_STEPS = 12
     }
 }

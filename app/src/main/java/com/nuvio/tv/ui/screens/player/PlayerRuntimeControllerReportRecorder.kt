@@ -6,7 +6,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.video.VideoFrameMetadataListener
 import com.nuvio.tv.core.player.BufferBudgetControl
 import com.nuvio.tv.core.report.PlaybackRecorder
+import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import com.nuvio.tv.core.report.RECORDER_UNKNOWN
+import com.nuvio.tv.core.report.ReportBusy
 import com.nuvio.tv.core.report.SampleExtras
 import kotlin.math.roundToInt
 
@@ -28,12 +30,13 @@ internal fun PlayerRuntimeController.recordExoSample(player: ExoPlayer, position
     val dropped = counters?.droppedBufferCount ?: RECORDER_UNKNOWN
     val sink = playbackSpeedAwareAudioSink
     val jitter = sink?.audioClockJitter()
+    val clock = sink?.iecClockReading()
     PlaybackRecorder.sample(
         engine = PlaybackRecorder.ENGINE_EXO,
         readyAheadMs = player.bufferedPosition - positionMs,
         loaderActive = if (player.isLoading) 1 else 0,
         droppedFrames = dropped,
-        audioUnderruns = playbackAnalyticsDiagnostics.audioUnderrunTotal(),
+        audioUnderruns = sink?.iecUnderruns() ?: playbackAnalyticsDiagnostics.audioUnderrunTotal(),
         bufferCapBytes = (_loadControl as? BufferBudgetControl)?.allocatorTargetBytes()?.toLong() ?: -1L,
         tunnelled = tunnelled,
         playing = player.isPlaying,
@@ -47,7 +50,13 @@ internal fun PlayerRuntimeController.recordExoSample(player: ExoPlayer, position
             fillerCount = sink?.iecFillerWhilePlaying()?.coerceAtMost(Int.MAX_VALUE.toLong())?.toInt() ?: RECORDER_UNKNOWN,
             audioPositionMs = sink?.lastAudioPositionMs()?.coerceIn(0L, Int.MAX_VALUE.toLong())?.toInt() ?: RECORDER_UNKNOWN,
             speedPercent = (player.playbackParameters.speed * 100f).roundToInt(),
-            connections = PlaybackLanes.current()?.connections ?: RECORDER_UNKNOWN
+            connections = PlaybackLanes.current()?.connections ?: RECORDER_UNKNOWN,
+            audioQueueMs = sink?.takeIecQueueLowMs() ?: RECORDER_UNKNOWN,
+            busyFlags = ReportBusy.flags(SeekThumbnails.memoryFloorBytes() > 0L),
+            audioHeadMs = clock?.headMs ?: RECORDER_UNKNOWN,
+            audioLatencyMs = clock?.latencyMs ?: RECORDER_UNKNOWN,
+            audioClockSource = clock?.source ?: RECORDER_UNKNOWN,
+            audioWriteStalls = clock?.writeStalls ?: RECORDER_UNKNOWN
         )
     )
     reportRecordingEnded(PlaybackRecorder.takeAutoStop())

@@ -6,6 +6,42 @@ import org.junit.Test
 
 /** Which stream servers get the long first-data wait and no warm-up requests. */
 class SlowStartServerTest {
+    @Test fun anEntryNamedAsUsenetOrEasynewsGetsTheLongWait() {
+        SlowStartServer.clearNoted()
+        val link = "https://addon.example.org/resolve/abc123/Film.2017.2160p.mkv"
+        assertFalse(SlowStartServer.matches(link))
+
+        SlowStartServer.noteStream(link, "SEL nzb 2160p\nFilm.2017.2160p.mkv", null, "SELection")
+        assertTrue(SlowStartServer.matches(link))
+        assertTrue(SlowStartServer.matches(" $link "))
+        assertFalse(SlowStartServer.matches("https://addon.example.org/resolve/other/Film.mkv"))
+        assertFalse(SlowStartServer.isUsenet(link))
+
+        assertTrue(SlowStartServer.namesUsenet("4K HDR", "Source: Easynews", "Some add-on"))
+        assertTrue(SlowStartServer.namesUsenet("1080p", null, "Easynews+"))
+        assertTrue(SlowStartServer.namesUsenet("[Usenet] 1080p", null, null))
+        assertFalse(SlowStartServer.namesUsenet("TorBox 1080p", "Film.2017.1080p.WEB.mkv", "Torrentio"))
+        assertFalse(SlowStartServer.namesUsenet("1080p\nposted to usenet", null, null))
+        assertFalse(SlowStartServer.namesUsenet(null, null, null))
+        SlowStartServer.clearNoted()
+    }
+
+    @Test fun anOrdinaryEntryIsNotRemembered() {
+        SlowStartServer.clearNoted()
+        val link = "https://cdn.example.org/dl/Film.mkv"
+        SlowStartServer.noteStream(link, "TorBox 1080p", "Film.2017.1080p.WEB.mkv", "Torrentio")
+        SlowStartServer.noteStream("not a link", "nzb", null, null)
+        assertFalse(SlowStartServer.matches(link))
+    }
+
+    @Test fun onlyTheNewestNotedLinksAreKept() {
+        SlowStartServer.clearNoted()
+        repeat(40) { SlowStartServer.noteStream("https://addon.example.org/r/$it/Film.mkv", "nzb", null, null) }
+        assertFalse(SlowStartServer.matches("https://addon.example.org/r/0/Film.mkv"))
+        assertTrue(SlowStartServer.matches("https://addon.example.org/r/39/Film.mkv"))
+        SlowStartServer.clearNoted()
+    }
+
     @Test fun aNasOnTheHomeNetworkMayTakeItsTime() {
         assertTrue(SlowStartServer.matches("http://192.168.1.10:3100/api/v1/debrid/playback/abc/Example.Movie.mkv"))
         assertTrue(SlowStartServer.matches("http://10.0.0.5:3000/x.mkv"))

@@ -110,6 +110,13 @@ internal fun PlaybackSubtitlesSection(
         enabled = enabled
     )
     SettingsToggleRow(
+        title = stringResource(R.string.sub_prefer_addon_subtitles),
+        subtitle = stringResource(R.string.sub_prefer_addon_subtitles_desc),
+        checked = style.preferAddonSubtitles,
+        onToggle = { onUpdate { setPreferAddonSubtitles(!style.preferAddonSubtitles) } },
+        enabled = enabled && settings.addonSubtitlesEnabled
+    )
+    SettingsToggleRow(
         title = stringResource(R.string.sub_strip_sdh),
         subtitle = stringResource(R.string.sub_strip_sdh_desc),
         checked = style.stripSdh,

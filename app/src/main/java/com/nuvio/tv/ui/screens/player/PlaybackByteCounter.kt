@@ -13,11 +13,25 @@ import java.nio.ByteBuffer
 internal object PlaybackByteCounter {
     @Volatile private var current = PlaybackTransferSession(null, PlaybackTransferCoverage.UNAVAILABLE)
 
+    /** Called on the loading thread when the active source's first response gives its total length. */
+    @Volatile var firstLengthListener: ((url: String, length: Long) -> Unit)? = null
+
+    fun onFirstLength(owner: PlaybackTransferSession, length: Long) {
+        val url = owner.sourceUrl ?: return
+        if (owner === current) firstLengthListener?.invoke(url, length)
+    }
+
     fun beginSource(url: String, coverage: PlaybackTransferCoverage): PlaybackTransferSession =
         PlaybackTransferSession(url, coverage).also { current = it }
 
     fun reset() { current = PlaybackTransferSession(null, PlaybackTransferCoverage.UNAVAILABLE) }
     fun snapshot(): PlaybackTransferSnapshot = current.snapshot(SystemClock::elapsedRealtime)
+    /** Media bytes read for [url] since its source began, or null when this route is not counted. */
+    fun mediaBytesFor(url: String?): Long? {
+        val owner = current
+        if (url == null || url != owner.sourceUrl || !owner.coverage.available) return null
+        return owner.snapshot(SystemClock::elapsedRealtime).readBytes
+    }
     fun contentLengthFor(url: String?): Long? {
         val owner = current
         return if (url != null && url == owner.sourceUrl) owner.snapshot(SystemClock::elapsedRealtime).contentLength else null
@@ -48,8 +62,9 @@ internal class CountingDataSource(private val upstream: DataSource, private val 
         isMediaRequest = dataSpec.uri.toString() == owner.sourceUrl
         val length = upstream.open(dataSpec)
         val encoding = upstream.responseHeaders.entries.firstOrNull { it.key.equals("Content-Encoding", true) }?.value
-        owner.recordLength(dataSpec.uri.toString(), dataSpec.position, length,
+        val firstLength = owner.recordLength(dataSpec.uri.toString(), dataSpec.position, length,
             dataSpec.length == C.LENGTH_UNSET.toLong(), encoding.isNullOrEmpty() || encoding.all { it.equals("identity", true) })
+        if (firstLength) PlaybackByteCounter.onFirstLength(owner, dataSpec.position + length)
         return length
     }
     override fun supportsByteBufferRead(): Boolean =

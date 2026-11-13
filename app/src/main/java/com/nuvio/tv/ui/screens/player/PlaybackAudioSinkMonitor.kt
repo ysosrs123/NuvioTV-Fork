@@ -19,6 +19,32 @@ private const val JITTER_MAX_WINDOW_MS = 250L
 private const val JITTER_MAX_PLAUSIBLE_MS = 500L
 private const val JITTER_EVENT_MS = 20L
 private const val JITTER_MIN_SAMPLES = 25
+private const val GAP_EVENT_EVERY_MS = 2_000L
+private const val GAP_SEEK_MS = 30_000L
+
+/**
+ * A reading the jitter figures leave out as implausible: the clock strayed more than half a second from the wall
+ * clock, or the position was not read for more than a quarter second while playing. A jump of many seconds is a seek.
+ */
+internal fun isAudioClockGap(playing: Boolean, wallDeltaMs: Long, offMs: Long): Boolean =
+    playing && wallDeltaMs >= JITTER_MIN_INTERVAL_MS && abs(offMs) < GAP_SEEK_MS &&
+        (wallDeltaMs > JITTER_MAX_WINDOW_MS || abs(offMs) > JITTER_MAX_PLAUSIBLE_MS)
+
+/** At most one line every [everyMs]; the gaps in between are counted on the next line. */
+internal class GapLimiter(private val everyMs: Long = GAP_EVENT_EVERY_MS) {
+    private var lastAtMs = Long.MIN_VALUE
+    private var held = 0
+
+    /** The number of gaps held back since the last line, or -1 when this one is held back too. */
+    fun take(nowMs: Long): Int {
+        if (lastAtMs != Long.MIN_VALUE && nowMs - lastAtMs < everyMs) {
+            held += 1
+            return -1
+        }
+        lastAtMs = nowMs
+        return held.also { held = 0 }
+    }
+}
 
 /** How far the reported audio position strays from wall clock over one playback. */
 internal data class AudioClockJitter(
@@ -99,6 +125,8 @@ internal class PlaybackAudioSinkMonitor(
 
     private var startThresholdAppliedThisTrack: Boolean = false
 
+    private val gapLimiter = GapLimiter()
+
     // A new track re-baselines without counting: only a device change on the same
     // track is a route change.
     @Volatile
@@ -151,6 +179,16 @@ internal class PlaybackAudioSinkMonitor(
             val posDeltaMs = (positionUs - lastPos) / 1_000L
             val expectedMs = (wallDeltaMs * playbackSpeed).toLong()
             val absMs = abs(posDeltaMs - expectedMs)
+            if (isAudioClockGap(playbackActive, wallDeltaMs, posDeltaMs - expectedMs)) {
+                val held = gapLimiter.take(nowMs)
+                if (held >= 0) {
+                    PlaybackRecorder.event(
+                        com.nuvio.tv.core.report.RecorderEvent.AUDIO_CLOCK_GAP,
+                        "wallMs=$wallDeltaMs audioMs=$posDeltaMs offMs=${posDeltaMs - expectedMs} atAudioMs=${positionUs / 1_000L}" +
+                            if (held > 0) " heldBack=$held" else ""
+                    )
+                }
+            }
             val counted = playbackActive &&
                 wallDeltaMs in JITTER_MIN_INTERVAL_MS..JITTER_MAX_WINDOW_MS &&
                 absMs <= JITTER_MAX_PLAUSIBLE_MS
@@ -231,7 +269,13 @@ internal class PlaybackAudioSinkMonitor(
     /** TrueHD keep-alive filler written mid-content while playing, or null when the keep-alive is not running. */
     fun iecFillerWhilePlaying(): Long? = iecSink?.iecFillerWhilePlaying()
 
+    fun iecActive(): Boolean = iecSink?.isIecActive == true
+
+    fun takeIecQueueLowMs(): Int? = iecSink?.takeIf { it.isIecActive }?.takeIecQueueLowMs()
+
     fun iecClockSteadied(): Boolean = iecSink?.iecClockSteadied() == true
+
+    fun iecClockReading(): com.nuvio.tv.ui.screens.player.iec.IecClockReading? = iecSink?.iecClockReading()
 
     /** The output track's own underrun count, or null when no track can be read. */
     fun nativeAudioTrackUnderrunCount(): Int? {

@@ -366,6 +366,15 @@ internal fun PlayerRuntimeController.attemptAutoRetry(
     // they are handled by attemptDeadSourceFailover before this is reached.
     if (isDeadSourcePlaybackError(error)) return false
     if (errorRetryCount >= MAX_AUTO_RETRIES) return false
+    if (RateLimitStartGiveUp.skipsPlayerRetry(
+            httpStatus = error.findInvalidResponseCodeException()?.responseCode,
+            firstFrameRendered = hasRenderedFirstFrame,
+            mediaBytesRead = PlaybackByteCounter.mediaBytesFor(currentStreamUrl)
+        )
+    ) {
+        Log.w(PlayerRuntimeController.TAG, "429 since the start with no media bytes; no player retry for host=${currentStreamUrl.safeHost()}")
+        return false
+    }
 
     val paused = pausedByUser
     val attempt = errorRetryCount
@@ -919,10 +928,12 @@ internal fun PlayerRuntimeController.tryParsingErrorProbeFallback(
             if (isServerDirectPlay && advanceToNextLiveSource(detailedError)) {
                 return@launch
             }
-            val userFacingError = error.toDisplayMessage(context)
+            val card = errorCardFor(error)
+            val userFacingError = card?.message ?: error.toDisplayMessage(context)
             _uiState.update {
                 it.copy(
                     error = userFacingError,
+                    errorCard = card,
                     isBuffering = false,
                     showLoadingOverlay = false,
                     showPauseOverlay = false

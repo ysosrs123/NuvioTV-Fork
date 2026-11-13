@@ -34,10 +34,13 @@ internal fun QmsHintDialog(reading: DisplayRefreshMeter.Reading, onTurnOff: () -
     val asked = DisplayRefreshMeter.format(reading.androidHz).keepLtr()
     val measured = DisplayRefreshMeter.format(reading.measuredHz).keepLtr()
     val qms = reading.seamless == true
+    val effect = DisplayRefreshMeter.repeatEverySeconds(reading.measuredHz, reading.androidHz)
+        ?.let { stringResource(R.string.qms_hint_effect_repeat, it) }
+        ?: stringResource(R.string.qms_hint_effect_judder)
     NuvioDialog(
         onDismiss = onKeep,
         title = stringResource(R.string.qms_hint_title),
-        subtitle = stringResource(if (qms) R.string.qms_hint_body_qms else R.string.qms_hint_body, asked, measured),
+        subtitle = stringResource(if (qms) R.string.qms_hint_body_qms_v2 else R.string.qms_hint_body_v2, asked, measured, effect),
         width = 560.dp,
         solidWithoutBlur = true
     ) {
@@ -55,18 +58,36 @@ internal fun QmsHintDialog(reading: DisplayRefreshMeter.Reading, onTurnOff: () -
                 )
             }
         }
-        Text(
-            text = stringResource(R.string.qms_hint_off_hint),
-            style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.extendedColors.textSecondary
-        )
-        SettingsDialogActionRow {
-            SettingsDialogActionButton(
-                text = stringResource(R.string.qms_hint_keep),
-                onClick = onKeep,
-                modifier = Modifier.focusRequester(keep)
+        if (!qms) {
+            // After a real mode change turning matching off only trades this for 60 Hz judder: no off button.
+            Text(
+                text = stringResource(R.string.qms_hint_mode_tip),
+                style = MaterialTheme.typography.bodySmall,
+                color = NuvioTheme.extendedColors.textSecondary
             )
-            SettingsDialogActionButton(text = stringResource(R.string.qms_hint_off), onClick = onTurnOff, primary = true)
+            SettingsDialogActionRow {
+                SettingsDialogActionButton(
+                    text = stringResource(R.string.qms_hint_ok),
+                    onClick = onKeep,
+                    primary = true,
+                    modifier = Modifier.focusRequester(keep)
+                )
+            }
+        } else {
+            Text(
+                text = stringResource(R.string.qms_hint_off_hint_qms),
+                style = MaterialTheme.typography.bodySmall,
+                color = NuvioTheme.extendedColors.textSecondary
+            )
+            SettingsDialogActionRow {
+                SettingsDialogActionButton(text = stringResource(R.string.qms_hint_off), onClick = onTurnOff)
+                SettingsDialogActionButton(
+                    text = stringResource(R.string.qms_hint_keep),
+                    onClick = onKeep,
+                    primary = true,
+                    modifier = Modifier.focusRequester(keep)
+                )
+            }
         }
     }
 }

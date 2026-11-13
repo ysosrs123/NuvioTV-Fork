@@ -138,13 +138,14 @@ class AfrPreflightPolicyTest {
     }
 
     @Test
-    fun `prefer23976ProbeBias window matches preflight bias gate`() {
-        // Mirrors: prefer23976ProbeBias = detection.raw in 23.95f..23.999f
-        fun prefer23976(raw: Float): Boolean = raw in 23.95f..23.999f
+    fun `the 23976 preference stops where the snap to 24 begins`() {
+        fun prefer23976(raw: Float): Boolean = FrameRateUtils.prefers23976(raw)
 
         assertTrue(prefer23976(23.976f))
         assertTrue(prefer23976(23.95f))
-        assertTrue(prefer23976(23.999f))
+        assertTrue(prefer23976(23.987f))
+        assertFalse(prefer23976(23.99f))
+        assertFalse(prefer23976(23.999f))
         assertFalse(prefer23976(24.0f))
         assertFalse(prefer23976(23.94f))
         assertFalse(prefer23976(25f))

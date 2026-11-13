@@ -97,6 +97,16 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
     private var lastLoad: PlaybackIssuePlaybackLoadInput? = null
     private var lastLoadError: PlaybackIssuePlaybackLoadErrorInput? = null
     val lastLoadErrorHttpStatus: Int? get() = lastLoadError?.httpStatus
+    val lastLoadErrorClass: String? get() = lastLoadError?.exceptionClass
+    val lastLoadErrorDurationMs: Long? get() = lastLoadError?.durationMs
+    val bytesLoadedSoFar: Long get() = totalBytesLoaded
+    private var lastLoadStartedAtElapsedMs: Long? = null
+    /** How long the newest request has been open, or null when no request is open. */
+    val openLoadAgeMs: Long?
+        get() {
+            if (loadStartedCount <= loadCompletedCount + loadCanceledCount + loadErrorCount) return null
+            return lastLoadStartedAtElapsedMs?.let { SystemClock.elapsedRealtime() - it }
+        }
     // Last COMPLETED load of dataType MEDIA only. The HUD's Request row
     // reads this instead of lastLoad: on progressive streams the single long
     // read only ever ends by CANCELLATION (seek/stop/track change), and its
@@ -241,6 +251,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         loadCompletedCount = 0
         loadCanceledCount = 0
         loadErrorCount = 0
+        lastLoadStartedAtElapsedMs = null
         totalBytesLoaded = 0L
         lastLoad = null
         lastLoadError = null
@@ -656,6 +667,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         mediaLoadData: MediaLoadData
     ) {
         loadStartedCount += 1
+        lastLoadStartedAtElapsedMs = SystemClock.elapsedRealtime()
         lastLoad = loadEventInfo.toPlaybackLoad(mediaLoadData)
         record(
             name = "load_started",
@@ -914,6 +926,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         val now = SystemClock.elapsedRealtime()
         val timeMs = System.currentTimeMillis()
         eventCount += 1
+        if (!name.keptInEventLists()) return
         val position = eventTime?.currentPlaybackPositionMs.safeTimeMs() ?: positionMs
         val bufferedPosition = eventTime?.bufferedPositionMs() ?: bufferedPositionMs
         val rawLine = buildRawEventLine(
@@ -976,6 +989,8 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
                 PlaybackRecorder.event(RecorderEvent.STALL, "$name ${details.recorderFields(STALL_FIELDS)}")
             "player_error", "load_error" ->
                 PlaybackRecorder.event(RecorderEvent.ERROR, "$name ${details.recorderFields(ERROR_FIELDS)}")
+            "video_decoder_initialized", "audio_decoder_initialized", "video_decoder_released", "audio_decoder_released" ->
+                PlaybackRecorder.event(RecorderEvent.TRACK, "$name ${details.recorderFields(DECODER_FIELDS)}")
             "video_format", "audio_format" ->
                 PlaybackRecorder.event(RecorderEvent.TRACK, "$name ${details.recorderFields(FORMAT_FIELDS)}")
         }
@@ -1009,10 +1024,17 @@ internal fun PlayerRuntimeController.flushPendingPlaybackRawEventLines() {
     }
 }
 
+/**
+ * Loading flips on and off with every piece the player fetches, so its lines pushed everything else out of the
+ * report; each kept line already says whether the player was loading.
+ */
+internal fun String.keptInEventLists(): Boolean = this != "is_loading"
+
 private const val EXO_EVENT_LOG_TAG = "NuvioExoEvent"
 
 private val STALL_FIELDS = listOf("count", "stallMs", "lastDurationMs", "totalMs", "positionMs", "bufferedPositionMs", "state")
 private val ERROR_FIELDS = listOf("errorCode", "errorCodeName", "exception", "cause", "httpStatus", "dataType", "wasCanceled")
+private val DECODER_FIELDS = listOf("decoder", "initMs", "count")
 private val FORMAT_FIELDS = listOf("trackType", "mime", "size", "frameRate", "channels", "sampleRate", "language")
 
 private fun Map<String, String>.recorderFields(allowed: List<String>): String =

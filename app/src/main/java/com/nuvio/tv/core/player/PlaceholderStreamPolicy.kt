@@ -85,6 +85,20 @@ object PlaceholderStreamPolicy {
     }
 
     /**
+     * The size rule alone, for the moment the first response gives the real total length, so a notice
+     * clip is caught before the start times out. Null when it does not apply or was already decided.
+     */
+    fun rejectOnFirstLength(
+        contentLengthBytes: Long?,
+        expectedRuntimeMs: Long?,
+        alreadyDecided: Boolean
+    ): Verdict.Reject? {
+        if (alreadyDecided) return null
+        val verdict = evaluate(contentLengthBytes, durationMs = null, expectedRuntimeMs = expectedRuntimeMs)
+        return (verdict as? Verdict.Reject)?.takeIf { it.reason == Reason.ImplausibleSize }
+    }
+
+    /**
      * @param contentLengthBytes actual bytes the server declared for the file being
      *   played, or null when unknown. NOT the advertised/label size.
      * @param durationMs decoded duration once known, or null before prepare.

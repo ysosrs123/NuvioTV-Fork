@@ -70,6 +70,13 @@ object PlaybackMemoryFacts {
 
     fun clear() = state.set(null)
 
+    /** Bytes the ExoPlayer buffer holds now, or null without one. */
+    fun bufferHeldBytes(): Long? {
+        val player = state.get() ?: return null
+        val allocator = player.allocator ?: player.keeper?.control?.bufferAllocator ?: return null
+        return runCatching { allocator.totalBytesAllocated.toLong() }.getOrNull()
+    }
+
     /** The snapshot lines while a film plays; a few volatile reads and two allocator getters, nothing on the player. */
     fun lines(): List<String> {
         val player = state.get() ?: return emptyList()

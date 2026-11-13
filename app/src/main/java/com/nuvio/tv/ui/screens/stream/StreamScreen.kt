@@ -144,6 +144,8 @@ fun StreamScreen(
     onAutoPlayResolved: (StreamPlaybackInfo) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val mixHasNoSources by viewModel.mixHasNoSources.collectAsStateWithLifecycle()
+    LaunchedEffect(mixHasNoSources) { if (mixHasNoSources) onBackPress() }
     val pluginSearchSummary by viewModel.pluginSearchSummary.collectAsStateWithLifecycle()
     val pluginNames by viewModel.pluginNames.collectAsStateWithLifecycle()
     var showPluginBreakdown by remember { mutableStateOf(false) }
@@ -424,6 +426,55 @@ fun StreamScreen(
         }
     }
 
+    val partyBlocked by viewModel.partyBlocked.collectAsState()
+    partyBlocked?.let { request ->
+        Box(modifier = Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+            RatingLimitPartyDialog(request = request, title = uiState.title, onDismiss = onBackPress)
+        }
+        return
+    }
+    val ratingPin by viewModel.ratingPin.collectAsState()
+    ratingPin?.let { request ->
+        val ratingPinError by viewModel.ratingPinError.collectAsState()
+        val ratingPinWorking by viewModel.ratingPinWorking.collectAsState()
+        val shownTitle = uiState.title.ifBlank { request.profileName }
+        if (!request.ownerHasPin) {
+            Box(modifier = Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+                RatingLimitNotice(
+                    heading = stringResource(R.string.rating_limit_play_heading, request.owner.name),
+                    text = stringResource(R.string.rating_limit_play_no_pin, request.owner.name, request.profileName),
+                    onDismiss = onBackPress
+                )
+            }
+            return
+        }
+        val support = when {
+            request.certification != null -> stringResource(
+                R.string.rating_limit_play_rated, shownTitle, request.certification, request.profileName, request.limit.label
+            )
+            else -> stringResource(R.string.rating_limit_play_unrated, shownTitle, request.profileName, request.limit.label)
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(NuvioTheme.colors.Background)
+        ) {
+            com.nuvio.tv.ui.screens.profile.ProfilePinOverlay(
+                state = com.nuvio.tv.ui.screens.profile.ProfilePinOverlayState.Ask(
+                    profile = request.owner,
+                    heading = stringResource(R.string.rating_limit_play_heading, request.owner.name),
+                    support = support
+                ),
+                isWorking = ratingPinWorking,
+                errorMessage = ratingPinError,
+                onClearError = viewModel::clearRatingPinError,
+                onDismiss = onBackPress,
+                onSubmit = viewModel::submitRatingPin
+            )
+        }
+        return
+    }
+
     val showOverlay = uiState.showDirectAutoPlayOverlay || uiState.externalPlayerOverlayVisible
 
     Box(
@@ -486,6 +537,7 @@ fun StreamScreen(
 
                 // Right side - Streams container
                 RightStreamSection(
+                    runtimeMinutes = uiState.runtime,
                     pluginFooter = pluginSearchSummary?.takeIf { it.total > 0 }?.let { summary ->
                         { PluginSearchSummaryRow(summary = summary, onClick = { showPluginBreakdown = true }) }
                     },
@@ -823,6 +875,7 @@ private fun RightStreamSection(
     onExpandStreams: () -> Unit = {},
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
+    runtimeMinutes: Int? = null,
     pluginFooter: (@Composable () -> Unit)? = null
 ) {
     val isRtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
@@ -1030,6 +1083,7 @@ private fun RightStreamSection(
                             onFocusedStreamKeyChanged = { focusedStreamKeyInList = it },
                             onFocusChanged = { listHasFocus = it },
                             onExpandStreams = onExpandStreams,
+                            runtimeMinutes = runtimeMinutes,
                             footer = pluginFooter
                         )
                     }
@@ -1188,6 +1242,7 @@ private fun StreamsList(
     onFocusedStreamKeyChanged: (String?) -> Unit = {},
     onFocusChanged: (Boolean) -> Unit = {},
     onExpandStreams: () -> Unit = {},
+    runtimeMinutes: Int? = null,
     footer: (@Composable () -> Unit)? = null
 ) {
     val isRtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
@@ -1211,6 +1266,12 @@ private fun StreamsList(
             com.nuvio.tv.core.formatcheck.FormatCheckStreamRules.actionFor(streams[it], formatRules) ==
                 com.nuvio.tv.core.formatcheck.StreamAction.WARN
         }.mapTo(HashSet()) { streamKeys[it] }
+    }
+    val smallBox = remember { LargeFileNote.isSmallBox(formatRulesContext) }
+    val largeFileKinds = remember(streamKeys, runtimeMinutes, smallBox) {
+        if (!smallBox) emptyMap() else streams.indices.mapNotNull { index ->
+            LargeFileNote.kindFor(streams[index], runtimeMinutes)?.let { streamKeys[index] to it }
+        }.toMap()
     }
     val firstStreamKey = streamKeys.firstOrNull()
     val streamFocusRequesters = remember { mutableMapOf<String, FocusRequester>() }
@@ -1344,6 +1405,7 @@ private fun StreamsList(
                     badgePlacement = badgePlacement,
                     reserveBadgeSpace = hasBadgeRules && stream.badges.isEmpty(),
                     formatCheckWarning = streamKeys[index] in warnedStreamKeys,
+                    largeFile = largeFileKinds[streamKeys[index]],
                     onClick = { onStreamSelected(stream) },
                     onFocusSettled = { onStreamFocused(stream) },
                     focusRequester = when {
@@ -1384,6 +1446,7 @@ private fun StreamCard(
     badgePlacement: StreamBadgePlacement,
     reserveBadgeSpace: Boolean = false,
     formatCheckWarning: Boolean = false,
+    largeFile: LargeFileKind? = null,
     onClick: () -> Unit,
     onFocusSettled: () -> Unit = {},
     focusRequester: FocusRequester? = null,
@@ -1509,6 +1572,30 @@ private fun StreamCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = NuvioTheme.colors.TextPrimary
                     )
+                }
+
+                if (largeFile != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(top = 2.dp)
+                                .size(14.dp),
+                            tint = NuvioTheme.colors.Warning
+                        )
+                        Text(
+                            text = stringResource(
+                                when {
+                                    !isFocused -> R.string.stream_large_file_short
+                                    largeFile == LargeFileKind.Uhd -> R.string.stream_large_file_uhd
+                                    else -> R.string.stream_large_file_other
+                                }
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = NuvioTheme.colors.Warning
+                        )
+                    }
                 }
 
                 streamDescription?.let { description ->

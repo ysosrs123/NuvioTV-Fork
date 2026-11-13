@@ -89,10 +89,10 @@ class FrameRateModeSelectionTest {
 
     @Test
     fun `hd and uhd content that already matched is unchanged`() {
-        assertEquals(16, pick(stick, 25f, 1920, 1080))
+        assertEquals(12, pick(stick, 25f, 1920, 1080))
         assertEquals(11, pick(stick, film, 3840, 2160))
         assertEquals(18, pick(stick, 25f, 1280, 720))
-        assertEquals(17, pick(am9, 25f, 1920, 1080))
+        assertEquals(14, pick(am9, 25f, 1920, 1080))
         assertEquals(9, pick(am9, film, 3840, 2160))
         assertEquals(22, pick(am9, 25f, 1280, 720))
     }
@@ -105,8 +105,8 @@ class FrameRateModeSelectionTest {
 
     @Test
     fun `resolution matching off keeps the same-size choice`() {
-        assertEquals(9, pick(stick, 25f, 640, 480, resolutionMatching = false))
-        assertEquals(8, pick(am9, 25f, 640, 480, resolutionMatching = false))
+        assertEquals(5, pick(stick, 25f, 640, 480, resolutionMatching = false))
+        assertEquals(5, pick(am9, 25f, 640, 480, resolutionMatching = false))
         assertEquals(11, pick(stick, film, 1920, 1080, resolutionMatching = false))
     }
 
@@ -118,7 +118,7 @@ class FrameRateModeSelectionTest {
 
     @Test
     fun `unknown video size uses the same-size modes`() {
-        assertEquals(9, pick(stick, 25f, null, null))
+        assertEquals(5, pick(stick, 25f, null, null))
     }
 
     @Test

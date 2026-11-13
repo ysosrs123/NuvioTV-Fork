@@ -320,14 +320,15 @@ object NuvioExoPlayerPerformanceHelper {
         free: com.nuvio.tv.core.player.BufferSizing.FreeMemory?,
         chunkWindowMb: Int,
         heldMb: Int,
-        fourKInAppMemory: Boolean = false
+        fourKInAppMemory: Boolean = false,
+        floorMb: Int = com.nuvio.tv.core.player.BufferSizing.MIN_SIZED_BUFFER_MB
     ): String {
         val boxMb = targetBufferSizeMb
         unsizedTargetBufferSizeMb = boxMb
         if (!targetIsAutomatic) return "boxMb=$boxMb sizedMb=$boxMb user=true"
-        val sized = com.nuvio.tv.core.player.BufferSizing.sizedBudgetMb(boxMb, free, chunkWindowMb, heldMb, fourKInAppMemory)
+        val sized = com.nuvio.tv.core.player.BufferSizing.sizedBudgetMb(boxMb, free, chunkWindowMb, heldMb, fourKInAppMemory, floorMb)
         targetBufferSizeMb = sized
-        return com.nuvio.tv.core.player.BufferSizing.describe(boxMb, sized, free, chunkWindowMb, heldMb, fourKInAppMemory)
+        return com.nuvio.tv.core.player.BufferSizing.describe(boxMb, sized, free, chunkWindowMb, heldMb, fourKInAppMemory, floorMb)
     }
 
     /**

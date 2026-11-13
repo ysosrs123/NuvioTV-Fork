@@ -20,6 +20,22 @@ internal object ReusedLinkRefresh {
     fun isLinkError(httpStatus: Int?, deadSource: Boolean): Boolean =
         deadSource || (httpStatus != null && httpStatus >= 400 && httpStatus != 416 && httpStatus != 429)
 
+    /** Refused outright before any picture: the list handed out a link that had already run out. */
+    fun isRefusedAtFirstRequest(httpStatus: Int?): Boolean = httpStatus == 400 || httpStatus == 410
+
+    /** The entry playing now, described like a saved link so [sameSource] can find it in a reloaded list. */
+    fun playingEntry(
+        url: String,
+        streamName: String,
+        headers: Map<String, String>,
+        filename: String?,
+        videoSize: Long?,
+        bingeGroup: String?
+    ): CachedStreamLink = CachedStreamLink(
+        url = url, streamName = streamName, headers = headers, cachedAtMs = 0L, filename = filename,
+        videoSize = videoSize, bingeGroup = bingeGroup
+    )
+
     /**
      * The same release from the same source: same file name first, then the same entry name, each in the same binge
      * group when both have one; then the same binge group and size. Never the failed link itself.
@@ -50,6 +66,10 @@ internal object ReusedLinkRefresh {
         val size = saved.videoSize ?: return null
         return playable.firstOrNull { it.behaviorHints?.bingeGroup == group && it.behaviorHints?.videoSize == size }
     }
+
+    /** The reloaded list hands out the refused address again, so waiting for a fresh one is pointless. */
+    fun failedAddressBack(streams: List<Stream>, failedUrl: String): Boolean =
+        streams.any { SourceFailoverSelection.failoverKey(it) == failedUrl }
 }
 
 /** The link playing now is the saved link played again as is. */
@@ -78,19 +98,46 @@ internal fun PlayerRuntimeController.tryFreshLinkAfterStartupExhausted(detailedE
     return refreshReusedLink(detailedError)
 }
 
+/**
+ * A link picked from the list (not a saved one) refused with 400 or 410 before the first picture: the source list is
+ * loaded again once and the same entry plays with its new link. Only the entry already started is opened again.
+ */
+internal fun PlayerRuntimeController.tryFreshLinkForRefusedLink(error: PlaybackException, detailedError: String): Boolean {
+    if (hasRenderedFirstFrame || freshLinkForReusedLinkTried) return false
+    if (!ReusedLinkRefresh.isRefusedAtFirstRequest(error.findInvalidResponseCodeException()?.responseCode)) return false
+    if (serverPlayback.session(currentStreamUrl) != null) return false
+    val url = currentStreamUrl.takeIf(String::isNotBlank) ?: return false
+    val entry = ReusedLinkRefresh.playingEntry(
+        url = url,
+        streamName = _uiState.value.currentStreamName?.takeIf(String::isNotBlank) ?: title,
+        headers = currentHeaders,
+        filename = currentFilename,
+        videoSize = currentVideoSize,
+        bingeGroup = currentStreamBingeGroup
+    )
+    Log.w(PlayerRuntimeController.TAG, "Link refused at the first request (${detailedError.redactLinksForLog()}); " +
+        "reloading the source list for the same entry")
+    return refreshLink(entry, savedKey = null, detailedError = detailedError)
+}
+
 private fun PlayerRuntimeController.refreshReusedLink(detailedError: String): Boolean {
     val saved = replayedLinkPlaying() ?: return false
     val key = streamCacheKey ?: return false
+    Log.w(PlayerRuntimeController.TAG, "Saved link failed (${detailedError.redactLinksForLog()}); asking its source for a fresh link")
+    return refreshLink(saved, savedKey = key, detailedError = detailedError)
+}
+
+/** [savedKey]: the saved link to forget, when the failed link was one. */
+private fun PlayerRuntimeController.refreshLink(saved: CachedStreamLink, savedKey: String?, detailedError: String): Boolean {
     val requestKey = currentSourceRequestKey() ?: return false
     freshLinkForReusedLinkTried = true
     deadSourceStreamUrls.add(currentStreamUrl)
     saved.url.takeIf(String::isNotBlank)?.let(deadSourceStreamUrls::add)
     _uiState.update { it.copy(deadSourceStreamUrls = deadSourceStreamUrls.toSet()) }
-    Log.w(PlayerRuntimeController.TAG, "Saved link failed (${detailedError.redactLinksForLog()}); asking its source for a fresh link")
     val savedPosition = currentPlaybackPositionMs()?.takeIf { it > 0L } ?: 0L
     errorRetryJob?.cancel()
     errorRetryJob = scope.launch {
-        streamLinkCacheDataStore.remove(key)
+        savedKey?.let { streamLinkCacheDataStore.remove(it) }
         _uiState.update {
             it.copy(
                 error = null,
@@ -110,6 +157,7 @@ private fun PlayerRuntimeController.refreshReusedLink(detailedError: String): Bo
                     _uiState.value.sourceAllStreams, saved, deadSourceStreamUrls, request?.season, request?.episode
                 )
                 if (fresh != null || sourceStreamsFetchCompleted) break
+                if (savedKey == null && ReusedLinkRefresh.failedAddressBack(_uiState.value.sourceAllStreams, saved.url)) break
             }
             if (SystemClock.elapsedRealtime() >= deadline) break
             delay(FRESH_LINK_LIST_POLL_MS)

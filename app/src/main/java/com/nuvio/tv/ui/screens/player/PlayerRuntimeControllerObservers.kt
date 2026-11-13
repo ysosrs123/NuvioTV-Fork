@@ -1004,6 +1004,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
         var lastBufferedAheadMs = 0L
         var lastPositionMs = _exoPlayer?.currentPosition ?: 0L
         var videoRestarted = false
+        var readWaitGiven = false
         var slowStart = SlowStartServer.matches(currentStreamUrl)
         while (isActive) {
             delay(PlayerRuntimeController.STARTUP_WATCHDOG_TIMEOUT_MS)
@@ -1043,9 +1044,27 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                 hasVideoTrack = currentStreamHasVideoTrack,
                 videoSelected = currentVideoTrackSelected,
                 playbackThreadAnswers = playbackThreadAnswers,
+                videoFileWithUnreadPicture = StartupWatchdogDecision.isVideoFileWithUnreadPicture(
+                    fileName = currentFilename ?: currentStreamUrl,
+                    streamMimeType = currentStreamMimeType,
+                ),
+                videoDecoderOpened = playbackAnalyticsDiagnostics.hudSample().videoDecoderName != null,
+                openRequestAgeMs = playbackAnalyticsDiagnostics.openLoadAgeMs,
+                loadErrorSeen = playbackAnalyticsDiagnostics.lastLoadErrorClass != null,
+                readWaitGiven = readWaitGiven,
             )
             lastPositionMs = positionMs
             when (step) {
+                StartupWatchdogDecision.Step.WaitForRead -> {
+                    readWaitGiven = true
+                    Log.w(
+                        PlayerRuntimeController.TAG,
+                        "STARTUP_WATCHDOG: no data ${elapsedMs}ms after starting_stream, request open " +
+                            "${playbackAnalyticsDiagnostics.openLoadAgeMs}ms and still inside its read wait; " +
+                            "waiting one more interval (ceiling=${ceilingMs}ms)"
+                    )
+                    continue
+                }
                 StartupWatchdogDecision.Step.WaitForData -> {
                     // A home server or a Usenet stream may still be fetching what playback asked for (start or resume point).
                     Log.w(
@@ -1087,9 +1106,20 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                 else -> livePlayer.playbackState.toString()
             }
             val fireReason = (step as StartupWatchdogDecision.Step.Fire).reason
-            val fireMessage = when (fireReason) {
-                "video_track_unsupported" ->
+            if (fireReason == "video_never_decoded" && isExoPlayerActiveForFormatFallback && !isInBackground) {
+                Log.w(
+                    PlayerRuntimeController.TAG,
+                    "STARTUP_WATCHDOG: decoder open with ${bufferedAheadMs}ms buffered and no picture " +
+                        "${elapsedMs}ms after starting_stream; trying MPV"
+                )
+                if (switchToMpvForUnsupportedFormat("startup-no-picture")) return@launch
+            }
+            val fireCard = withSendRule(watchdogErrorCard(fireReason, elapsedMs, livePlayer))
+            val fireMessage = fireCard?.message ?: when (fireReason) {
+                "video_track_unsupported", "video_never_decoded" ->
                     context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unsupported)
+                "video_track_unreadable" ->
+                    context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unreadable)
                 "tracks_not_read", "no_video_track", "no_data_buffered" ->
                     startupNoDataMessage(context, playbackAnalyticsDiagnostics.lastLoadErrorHttpStatus)
                 else ->
@@ -1110,6 +1140,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                 if (it.error == null) {
                     it.copy(
                         error = fireMessage,
+                        errorCard = fireCard,
                         showLoadingOverlay = false
                     )
                 } else {
@@ -1154,13 +1185,15 @@ internal fun PlayerRuntimeController.retractStartupTimeoutErrorAfterFirstFrame()
     val startupWatchdogMessages = setOf(
         context.getString(com.nuvio.tv.R.string.player_error_startup_timeout),
         context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unsupported),
+        context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unreadable),
         context.getString(com.nuvio.tv.R.string.player_error_startup_no_stream_data),
     )
     var retracted = false
     _uiState.update {
-        if (it.error != null && it.error in startupWatchdogMessages) {
+        val watchdogCard = it.errorCard.matching(it.error)?.takeIf { card -> card.fromWatchdog }
+        if (it.error != null && (it.error in startupWatchdogMessages || watchdogCard != null)) {
             retracted = true
-            it.copy(error = null)
+            it.copy(error = null, errorCard = null)
         } else {
             it
         }

@@ -419,7 +419,12 @@ internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean, ba
                             sourceStreamsError = null
                         )
                     }
-                    if (partial != null) sourceCopyListEarly = true
+                    // A background fill leaves plugin searches paused, so the search stays open: thumbnails take the list
+                    // once the add-ons and servers have answered.
+                    if (partial != null || (background &&
+                            streamRepository.sourcesAnsweredExceptPlugins(type, vid, seasonArg, episodeArg))) {
+                        sourceCopyListEarly = true
+                    }
                     launchSourceDebridPreparationIfNeeded(
                         launched = debridPreparationLaunched,
                         streams = allStreams,
@@ -767,6 +772,7 @@ private fun PlayerRuntimeController.applySelectedStreamState(
 ) {
     val playbackRequest = PlayerMediaSourceFactory.normalizePlaybackRequest(url, headers)
     currentStreamUrl = playbackRequest.url
+    SlowStartServer.noteStream(playbackRequest.url, stream.name, stream.description, stream.addonName)
     currentHeaders = playbackRequest.headers
     currentFilename = stream.behaviorHints?.filename ?: streamFilenameFromUrl(playbackRequest.url)
     currentStreamResponseHeaders = stream.behaviorHints?.proxyHeaders?.response.orEmpty()

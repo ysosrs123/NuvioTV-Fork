@@ -9,6 +9,14 @@ internal data class IecAudioTimestampSample(
     val nanoTime: Long
 )
 
+/** What the output said at the last position read; [source] is one of the SOURCE_ values of the clock. */
+internal class IecClockReading(
+    val headMs: Int,
+    val latencyMs: Int,
+    val source: Int,
+    val writeStalls: Int
+)
+
 internal class IecAudioTimestampClock(
     private val nowNanos: () -> Long = System::nanoTime
 ) {
@@ -30,6 +38,11 @@ internal class IecAudioTimestampClock(
     /** True once this box's position has proved too jumpy to follow; lasts for the track, seeks included. */
     val isSteadied: Boolean get() = steadyClock.engaged
 
+    /** Where the last position came from, or [SOURCE_NONE] before the first one. */
+    @Volatile
+    var lastSource: Int = SOURCE_NONE
+        private set
+
     init {
         reset()
     }
@@ -40,6 +53,7 @@ internal class IecAudioTimestampClock(
         timestampWraps = 0L
         lastSystemTimeUs = C.TIME_UNSET
         lastPositionUs = C.TIME_UNSET
+        lastSource = SOURCE_NONE
         steadyClock.reset()
     }
 
@@ -73,8 +87,10 @@ internal class IecAudioTimestampClock(
         val safeWritten = writtenFrames.coerceAtLeast(0L)
         val headUs = framesToUs(safeHead, sampleRate)
         if (guardJumps && steadyClock.engaged) {
-            val steadyUs = steadyClock.positionUs(systemTimeUs, headUs, playing)
-                .coerceAtMost(framesToUs(safeWritten, sampleRate))
+            val rawSteadyUs = steadyClock.positionUs(systemTimeUs, headUs, playing)
+            val steadyWrittenUs = framesToUs(safeWritten, sampleRate)
+            val steadyUs = rawSteadyUs.coerceAtMost(steadyWrittenUs)
+            lastSource = if (rawSteadyUs >= steadyWrittenUs) SOURCE_AT_WRITTEN else SOURCE_STEADIED
             return startPtsUs + (steadyUs - latencyUs.coerceAtLeast(0L)).coerceAtLeast(0L)
         }
         poll(systemTimeUs, timestamp, headUs, sampleRate, speed)
@@ -91,8 +107,10 @@ internal class IecAudioTimestampClock(
             resetPoller()
             lastSystemTimeUs = C.TIME_UNSET
             lastPositionUs = C.TIME_UNSET
+            lastSource = SOURCE_AT_WRITTEN
         } else {
             positionUs = smooth(systemTimeUs, positionUs, speed, playing)
+            lastSource = if (fromTimestamp) SOURCE_TIMESTAMP else SOURCE_HEAD
         }
         val presentedUs = if (fromTimestamp) {
             positionUs.coerceAtLeast(0L)
@@ -305,6 +323,12 @@ internal class IecAudioTimestampClock(
         const val MAX_POSITION_SMOOTHING_SPEED_CHANGE_PERCENT = 10
         const val WRAP_FROM = 0xC0000000L
         const val WRAP_TO = 0x40000000L
+
+        const val SOURCE_NONE = -1
+        const val SOURCE_HEAD = 0
+        const val SOURCE_TIMESTAMP = 1
+        const val SOURCE_STEADIED = 2
+        const val SOURCE_AT_WRITTEN = 3
 
         fun framesToUs(frames: Long, sampleRate: Int): Long {
             if (sampleRate <= 0 || frames <= 0L) return 0L

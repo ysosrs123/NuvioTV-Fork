@@ -56,10 +56,13 @@ internal class PlaybackTransferSession(
         if (coverage.available) PlaybackEndpoint.from(url)?.let { endpoint = it }
     }
 
-    @Synchronized fun recordLength(requestedUrl: String, position: Long, length: Long, unbounded: Boolean, identityEncoded: Boolean) {
+    /** Returns true the first time a total length is known for this source. */
+    @Synchronized fun recordLength(requestedUrl: String, position: Long, length: Long, unbounded: Boolean, identityEncoded: Boolean): Boolean {
         if (!coverage.available || requestedUrl != sourceUrl || !unbounded || !identityEncoded ||
-            position < 0 || length <= 0 || Long.MAX_VALUE - position < length) return
+            position < 0 || length <= 0 || Long.MAX_VALUE - position < length) return false
+        val first = contentLength == null
         contentLength = position + length
+        return first
     }
 
     /** Read the clock inside the lock so the counters and time form one sample. */

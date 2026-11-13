@@ -80,4 +80,41 @@ class ReusedLinkRefreshTest {
         val unrelated = stream("https://cdn.example/u", name = "Other", filename = "Other.mkv", group = "g")
         assertNull(ReusedLinkRefresh.sameSource(listOf(unrelated), saved(), emptySet(), 1, 2))
     }
+
+    @Test fun onlyAnOutrightRefusalCountsAsRefusedAtTheFirstRequest() {
+        assertTrue(ReusedLinkRefresh.isRefusedAtFirstRequest(400))
+        assertTrue(ReusedLinkRefresh.isRefusedAtFirstRequest(410))
+        assertFalse(ReusedLinkRefresh.isRefusedAtFirstRequest(403))
+        assertFalse(ReusedLinkRefresh.isRefusedAtFirstRequest(404))
+        assertFalse(ReusedLinkRefresh.isRefusedAtFirstRequest(429))
+        assertFalse(ReusedLinkRefresh.isRefusedAtFirstRequest(503))
+        assertFalse(ReusedLinkRefresh.isRefusedAtFirstRequest(null))
+    }
+
+    @Test fun aRefusedEntryIsFoundAgainWithItsNewLink() {
+        val playing = ReusedLinkRefresh.playingEntry(
+            url = "https://bridge.example/gone", streamName = "CNCVerse 1080p", headers = emptyMap(),
+            filename = "Film.2024.1080p.mkv", videoSize = 2_000L, bingeGroup = "cnc|1080p"
+        )
+        val other = stream("https://bridge.example/other", name = "CNCVerse 720p", filename = "Film.2024.720p.mkv")
+        val renewed = stream("https://bridge.example/new", name = "CNCVerse 1080p", filename = "Film.2024.1080p.mkv",
+            group = "cnc|1080p")
+        assertEquals(renewed, ReusedLinkRefresh.sameSource(listOf(other, renewed), playing, emptySet(), null, null))
+    }
+
+    @Test fun aRefusedEntryHandedOutWithTheSameLinkIsNotTriedAgain() {
+        val playing = ReusedLinkRefresh.playingEntry(
+            url = "https://bridge.example/gone", streamName = "CNCVerse 1080p", headers = emptyMap(),
+            filename = "Film.2024.1080p.mkv", videoSize = null, bingeGroup = null
+        )
+        val same = stream("https://bridge.example/gone", name = "CNCVerse 1080p", filename = "Film.2024.1080p.mkv")
+        assertNull(ReusedLinkRefresh.sameSource(listOf(same), playing, emptySet(), null, null))
+        assertTrue(ReusedLinkRefresh.failedAddressBack(listOf(same), "https://bridge.example/gone"))
+    }
+
+    @Test fun aNewAddressIsNotTheFailedOneBack() {
+        val renewed = stream("https://bridge.example/new", name = "CNCVerse 1080p", filename = "Film.2024.1080p.mkv")
+        assertFalse(ReusedLinkRefresh.failedAddressBack(listOf(renewed), "https://bridge.example/gone"))
+        assertFalse(ReusedLinkRefresh.failedAddressBack(emptyList(), "https://bridge.example/gone"))
+    }
 }

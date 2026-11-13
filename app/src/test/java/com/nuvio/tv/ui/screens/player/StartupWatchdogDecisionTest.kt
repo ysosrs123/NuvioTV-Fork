@@ -20,10 +20,48 @@ class StartupWatchdogDecisionTest {
         hasVideoTrack: Boolean = true,
         videoSelected: Boolean = true,
         playbackThreadAnswers: Boolean = true,
+        videoDecoderOpened: Boolean = false,
+        openRequestAgeMs: Long? = null,
+        loadErrorSeen: Boolean = false,
+        readWaitGiven: Boolean = false,
     ) = StartupWatchdogDecision.next(
         elapsedMs, 20_000L, ceilingMs, slowStart, bufferedAheadMs, lastBufferedAheadMs, ready, playing,
         positionMs, lastPositionMs, videoRestarted, tracksRead, hasVideoTrack, videoSelected, playbackThreadAnswers,
+        videoDecoderOpened = videoDecoderOpened,
+        openRequestAgeMs = openRequestAgeMs,
+        loadErrorSeen = loadErrorSeen,
+        readWaitGiven = readWaitGiven,
     )
+
+    @Test
+    fun anOpenDecoderFedWellAheadWithNoPictureIsAFormatTheBoxCannotShow() {
+        // AV1 labelled Dolby Vision: 120 s buffered, DV decoder open, never a frame.
+        assertEquals(Step.Fire("video_never_decoded"), step(elapsedMs = 40_000L, bufferedAheadMs = 120_000L,
+            lastBufferedAheadMs = 120_000L, videoDecoderOpened = true))
+        // Decoder not open, or only a little buffered: still the decoder message.
+        assertEquals(Step.Fire("decoder_unresponsive"), step(elapsedMs = 40_000L, bufferedAheadMs = 120_000L,
+            lastBufferedAheadMs = 120_000L))
+        assertEquals(Step.Fire("decoder_unresponsive"), step(elapsedMs = 40_000L, bufferedAheadMs = 4_000L,
+            lastBufferedAheadMs = 4_000L, videoDecoderOpened = true))
+        // Ready means the renderers are going; that stays with the existing paths.
+        assertEquals(Step.Fire("decoder_unresponsive"), step(elapsedMs = 40_000L, bufferedAheadMs = 120_000L,
+            lastBufferedAheadMs = 120_000L, videoDecoderOpened = true, ready = true))
+    }
+
+    @Test
+    fun aRequestStillInsideItsReadWaitGetsOneMoreInterval() {
+        // Resume point answered 12 s ago, nothing buffered yet, no load error.
+        assertEquals(Step.WaitForRead, step(openRequestAgeMs = 12_000L, videoDecoderOpened = true))
+        // Only once.
+        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 40_000L, openRequestAgeMs = 3_000L, readWaitGiven = true))
+        // Not after a load error, not past the read wait, not with no request open, not past the ceiling.
+        assertEquals(Step.Fire("no_data_buffered"), step(openRequestAgeMs = 12_000L, loadErrorSeen = true))
+        assertEquals(Step.Fire("no_data_buffered"), step(openRequestAgeMs = 16_000L))
+        assertEquals(Step.Fire("no_data_buffered"), step(openRequestAgeMs = null))
+        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 41_000L, ceilingMs = 60_000L, openRequestAgeMs = 12_000L))
+        // A stuck player thread is not a slow server.
+        assertEquals(Step.Fire("decoder_unresponsive"), step(openRequestAgeMs = 12_000L, playbackThreadAnswers = false))
+    }
 
     @Test
     fun aUsenetResumeStillFetchingWaitsInsteadOfBlamingTheDecoder() {

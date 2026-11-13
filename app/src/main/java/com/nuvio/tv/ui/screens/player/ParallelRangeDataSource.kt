@@ -219,6 +219,8 @@ internal class ParallelRangeDataSource(
         internal fun otherPendingSession(uri: Uri): Boolean = playbackResources.otherPendingSession(uri)
         /** Drops a pre-started session for [uri] that is no longer wanted; one for another link stays. */
         internal fun dropPendingSession(uri: Uri) = playbackResources.dropPendingSession(uri)
+        /** For the memory snapshot, read without locks: bytes the playback pieces hold (about), their count, idle pooled bytes. */
+        internal fun heldForReport(): LongArray = playbackResources.heldForReport()
 
         // Most downloads an isolated test session runs at once.
         internal const val MAX_DIAGNOSTIC_DOWNLOADS = 32
@@ -309,6 +311,20 @@ internal class ParallelRangeDataSource(
         val activeInstances = java.util.concurrent.atomic.AtomicInteger(0)
         val globalBufferPool = ConcurrentHashMap<Long, ConcurrentLinkedDeque<PooledBuffer>>()
         val retiredChunkSizes: MutableSet<Long> = ConcurrentHashMap.newKeySet()
+
+        fun heldForReport(): LongArray {
+            var bytes = 0L
+            var pieces = 0L
+            for (session in listOfNotNull(currentChunkSession, pendingChunkSession)) {
+                val count = session.futures.size.toLong()
+                val held = session.heldBytes.get()
+                pieces += count
+                bytes += if (held > 0L) held else count * session.chunkSize
+            }
+            var idle = 0L
+            for ((size, pool) in globalBufferPool) idle += size * pool.size
+            return longArrayOf(bytes, pieces, idle)
+        }
 
         fun retireChunkSize(chunkSize: Long) {
             retiredChunkSizes.add(chunkSize)

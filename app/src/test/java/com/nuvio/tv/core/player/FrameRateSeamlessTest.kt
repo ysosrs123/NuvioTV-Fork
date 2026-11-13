@@ -47,9 +47,9 @@ class FrameRateSeamlessTest {
     }
 
     @Test
-    fun `25 fps takes seamless 50 Hz with qms and exact 25 Hz without`() {
+    fun `25 fps takes 50 Hz with qms and without`() {
         assertEquals(50f, pick(qms4k60, 25f), 0.01f)
-        assertEquals(25f, pick(plain4k60, 25f), 0.01f)
+        assertEquals(50f, pick(plain4k60, 25f), 0.01f)
     }
 
     @Test

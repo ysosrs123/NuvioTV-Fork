@@ -93,6 +93,84 @@ class BufferSizingTest {
     }
 
     @Test
+    fun `only boxes under 1_15 GB count as 1 GB boxes, the low-RAM flag only when the total is unknown`() {
+        assertTrue(BufferSizing.isOneGbBox(904 * mb, lowRamDevice = true))
+        assertTrue(BufferSizing.isOneGbBox(904 * mb, lowRamDevice = false))
+        assertTrue(BufferSizing.isOneGbBox(0L, lowRamDevice = true))
+        assertFalse(BufferSizing.isOneGbBox(0L, lowRamDevice = false))
+        assertFalse(BufferSizing.isOneGbBox((1.2 * gb).toLong(), lowRamDevice = true))
+        assertFalse(BufferSizing.isOneGbBox((1.4 * gb).toLong(), lowRamDevice = true))
+        assertFalse(BufferSizing.isOneGbBox((1.9 * gb).toLong(), lowRamDevice = true))
+        assertFalse(BufferSizing.isOneGbBox((3.8 * gb).toLong(), lowRamDevice = false))
+    }
+
+    @Test
+    fun `a 1 GB box keeps 8 s of the film as its floor, other boxes keep 50 MB`() {
+        assertEquals(24, BufferSizing.sizedFloorMb(oneGbBox = true, bitrateBps = 0L))
+        assertEquals(16, BufferSizing.sizedFloorMb(oneGbBox = true, bitrateBps = 8_000_000L))
+        assertEquals(29, BufferSizing.sizedFloorMb(oneGbBox = true, bitrateBps = 30_000_000L))
+        assertEquals(50, BufferSizing.sizedFloorMb(oneGbBox = true, bitrateBps = 80_000_000L))
+        for (bps in listOf(0L, 8_000_000L, 30_000_000L, 80_000_000L)) {
+            assertEquals(50, BufferSizing.sizedFloorMb(oneGbBox = false, bitrateBps = bps))
+        }
+    }
+
+    @Test
+    fun `a 904 MB low-RAM TV sizes below the old 50 MB floor`() {
+        val oneGb = BufferSizing.isOneGbBox(904 * mb, lowRamDevice = true)
+        val boxMb = BufferSizing.autoBufferMbForRam(904 * mb)
+        assertEquals(100, boxMb)
+        // 248 MB free against a 64 MB line: 16 MB spare once the decoder's share is kept.
+        val tv = free(248, 64)
+        assertEquals(50, BufferSizing.sizedBudgetMb(boxMb, tv, 0, 0))
+        val hevc1080p = BufferSizing.sizedFloorMb(oneGb, 8_000_000L)
+        assertEquals(16, BufferSizing.sizedBudgetMb(boxMb, tv, 0, 0, floorMb = hevc1080p))
+        val unknown = BufferSizing.sizedFloorMb(oneGb, 0L)
+        assertEquals(24, BufferSizing.sizedBudgetMb(boxMb, tv, 0, 0, floorMb = unknown))
+        assertEquals(16, BufferSizing.sizedBudgetMb(boxMb, free(400, 64, low = true), 0, 0, floorMb = hevc1080p))
+        // With room the box size is unchanged.
+        assertEquals(100, BufferSizing.sizedBudgetMb(boxMb, free(500, 64), 0, 0, floorMb = hevc1080p))
+    }
+
+    @Test
+    fun `2 GB and 4 GB boxes size exactly as before`() {
+        data class Box(val totalMem: Long, val lowRam: Boolean)
+        val boxes = listOf(
+            Box((1.4 * gb).toLong(), true),
+            Box((1.9 * gb).toLong(), true),
+            Box((1.9 * gb).toLong(), false),
+            Box((3.8 * gb).toLong(), false),
+        )
+        val cases = listOf(
+            Triple(free(425, 130), 96, 0),
+            Triple(free(488, 130), 96, 80),
+            Triple(free(409, 144), 0, 0),
+            Triple(free(2400, 220, low = true), 0, 0),
+            Triple(free(1288, 220), 192, 0),
+            Triple(free(248, 64), 0, 0),
+        )
+        for (box in boxes) {
+            val boxMb = BufferSizing.autoBufferMbForRam(box.totalMem)
+            for (bps in listOf(0L, 8_000_000L, 30_000_000L, 80_000_000L)) {
+                val floor = BufferSizing.sizedFloorMb(BufferSizing.isOneGbBox(box.totalMem, box.lowRam), bps)
+                assertEquals(BufferSizing.MIN_SIZED_BUFFER_MB, floor)
+                for ((f, window, held) in cases) {
+                    for (fourK in listOf(false, true)) {
+                        assertEquals(
+                            "$box $bps $f",
+                            BufferSizing.sizedBudgetMb(boxMb, f, window, held, fourK),
+                            BufferSizing.sizedBudgetMb(boxMb, f, window, held, fourK, floor)
+                        )
+                    }
+                }
+            }
+        }
+        assertEquals(50, BufferSizing.sizedBudgetMb(200, free(425, 130), 96, 0, floorMb = 50))
+        assertEquals(708, BufferSizing.sizedBudgetMb(1000, free(1288, 220), 192, 0, floorMb = 50))
+        assertEquals(50, BufferSizing.sizedBudgetMb(1000, free(2400, 220, low = true), 0, 0, floorMb = 50))
+    }
+
+    @Test
     fun `unknown free memory keeps the box size`() {
         assertEquals(150, BufferSizing.sizedBudgetMb(150, null, 96, 0))
     }

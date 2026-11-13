@@ -24,6 +24,11 @@ class BufferMemoryKeeper(
     /** The box's own size for this budget; 0 or no more than the built budget means no growth. */
     ceilingBytes: Long = 0L,
     private val swapFreeMb: () -> Long = { -1L },
+    /** The least a pressure cut or the lending leaves; [BufferSizing.sizedFloorMb]. */
+    floorBytes: Long = BufferSizing.MIN_SIZED_BUFFER_MB * MB,
+    /** A 1 GB box ([BufferSizing.isOneGbBox]): Android's last warning always counts. */
+    private val oneGbBox: Boolean = false,
+    private val onLastWarning: () -> Unit = {},
 ) {
     interface Worker {
         fun run(task: () -> Unit)
@@ -33,6 +38,7 @@ class BufferMemoryKeeper(
     @Volatile var pressureLevel: Int = LEVEL_NONE
         private set
     @Volatile private var lastPressureAtMs = 0L
+    @Volatile private var lastCheckLogAtMs = Long.MIN_VALUE / 2
     @Volatile private var levelSetAtMs = 0L
     /** When [pressureLevel] last changed, on [clock]; 0 while it never has. */
     val levelChangedAtMs: Long get() = levelSetAtMs
@@ -54,6 +60,11 @@ class BufferMemoryKeeper(
         private set
     /** Budget added above the built size so far. */
     @Volatile var grownBytes: Long = 0L
+        private set
+    /** Where loading stops while paused with little room; -1 while playing or with room. */
+    @Volatile var pausedCapBytes: Long = -1L
+        private set
+    @Volatile var floorBytes: Long = floorBytes.coerceAtLeast(0L)
         private set
 
     private val trimListener: (Int) -> Unit = ::onTrimMemory
@@ -80,6 +91,11 @@ class BufferMemoryKeeper(
                 trimIdle("trim:$level")
                 return@run
             }
+            if (oneGbLastWarning(level, oneGbBox)) {
+                raise(LEVEL_CRITICAL, "trim:$level oneGb")
+                runCatching(onLastWarning)
+                return@run
+            }
             val free = freeMemory()
             val swap = swapFreeMb()
             if (free == null || warningStands(free, swap)) {
@@ -89,6 +105,16 @@ class BufferMemoryKeeper(
             val freed = trimIdle(null)
             Log.i(TAG, "BUFFER_MEMORY: trim:$level set aside availMb=${free.availMb} thresholdMb=${free.thresholdMb} " +
                 "swapFreeMb=$swap freedMb=${freed / MB}")
+        }
+    }
+
+    fun setFloorBytes(bytes: Long) {
+        if (detached) return
+        val floor = bytes.coerceAtLeast(0L)
+        worker.run {
+            if (floor == floorBytes) return@run
+            floorBytes = floor
+            if (pressureLevel != LEVEL_NONE || lentBytes > 0L) applyTarget()
         }
     }
 
@@ -173,16 +199,23 @@ class BufferMemoryKeeper(
         }
     }
 
-    /** About every 10 s while playing: Android 14 and later no longer sends RUNNING_LOW to visible apps. */
-    fun onTick() {
+    /** About every 10 s, playing or paused: Android 14 and later no longer sends RUNNING_LOW to visible apps. */
+    fun onTick(playing: Boolean = true) {
         if (detached) return
-        worker.run { check() }
+        worker.run { check(playing) }
     }
 
-    internal fun check() {
+    internal fun check(playing: Boolean = true) {
         if (detached) return
         val free = freeMemory()
         val now = clock()
+        if (now - lastCheckLogAtMs >= CHECK_LOG_EVERY_MS) {
+            lastCheckLogAtMs = now
+            Log.i(TAG, "BUFFER_MEMORY: check availMb=${free?.availMb} thresholdMb=${free?.thresholdMb} " +
+                "budgetMb=${control.uncappedBudgetBytes / MB} heldMb=${control.bufferAllocator.totalBytesAllocated / MB} " +
+                "level=$pressureLevel playing=$playing")
+        }
+        tendPausedCap(playing, free)
         if (free != null && free.lowMemory) {
             val level = if (pressureLevel == LEVEL_LOW && now - levelSetAtMs >= ESCALATE_AFTER_MS) LEVEL_CRITICAL
                 else maxOf(pressureLevel, LEVEL_LOW)
@@ -201,7 +234,7 @@ class BufferMemoryKeeper(
             return
         }
         if (pressureLevel == LEVEL_NONE) {
-            if (now - lastPressureAtMs >= RESTORE_QUIET_MS) tendGrowth(free)
+            if (playing && now - lastPressureAtMs >= RESTORE_QUIET_MS) tendGrowth(free)
             return
         }
         if (now - lastPressureAtMs < RESTORE_QUIET_MS) {
@@ -252,6 +285,32 @@ class BufferMemoryKeeper(
             "availMb=${free.availMb} thresholdMb=${free.thresholdMb} swapFreeMb=$swap")
     }
 
+    /**
+     * A paused film keeps loading until the budget is full, and the next app started in front (a launcher, a
+     * screensaver) needs room the buffer would take. While paused with less than [PAUSED_ROOM_MB] spare, loading
+     * stops at what is held; playing again lifts that.
+     */
+    private fun tendPausedCap(playing: Boolean, free: BufferSizing.FreeMemory?) {
+        if (playing) {
+            if (pausedCapBytes >= 0L) {
+                pausedCapBytes = -1L
+                applyTarget()
+                Log.i(TAG, "BUFFER_MEMORY: paused cap lifted capMb=${capOrBudgetMb()}")
+            }
+            return
+        }
+        if (pausedCapBytes >= 0L || free == null) return
+        val roomMb = free.availMb - free.thresholdMb - BufferSizing.SYSTEM_MARGIN_MB
+        if (roomMb >= PAUSED_ROOM_MB) return
+        val budget = control.uncappedBudgetBytes
+        val floor = minOf(budget, floorBytes)
+        pausedCapBytes = control.bufferAllocator.totalBytesAllocated.toLong().coerceIn(floor, budget.coerceAtLeast(floor))
+        applyTarget()
+        trimIdle(null)
+        Log.i(TAG, "BUFFER_MEMORY: paused with little room, loading stops capMb=${capOrBudgetMb()} " +
+            "availMb=${free.availMb} thresholdMb=${free.thresholdMb}")
+    }
+
     private fun raise(level: Int, reason: String) {
         if (detached) return
         lastPressureAtMs = clock()
@@ -280,7 +339,7 @@ class BufferMemoryKeeper(
             LEVEL_CRITICAL -> CRITICAL_SHARE_PERCENT
             else -> return budget
         }
-        val floor = minOf(budget, BufferSizing.MIN_SIZED_BUFFER_MB * MB)
+        val floor = minOf(budget, floorBytes)
         val back = control.backBufferBytes.coerceIn(0L, budget.coerceAtLeast(0L))
         return (back + (budget - back) * share / 100).coerceAtLeast(floor)
     }
@@ -288,12 +347,17 @@ class BufferMemoryKeeper(
     private fun capOrBudgetMb(): Long =
         effectiveCapBytes().takeIf { it >= 0L }?.let { it / MB } ?: (control.uncappedBudgetBytes / MB)
 
-    /** The pressure cap, lowered further by what the extra downloads hold; -1 when neither applies. */
+    /** The pressure cap, lowered further by the paused cap and what the extra downloads hold; -1 when none applies. */
     internal fun effectiveCapBytes(): Long {
-        val pressure = if (pressureLevel == LEVEL_NONE) -1L else capBytes(pressureLevel)
+        val level = if (pressureLevel == LEVEL_NONE) -1L else capBytes(pressureLevel)
+        val pressure = when {
+            pausedCapBytes < 0L -> level
+            level < 0L -> pausedCapBytes
+            else -> minOf(level, pausedCapBytes)
+        }
         val budget = control.uncappedBudgetBytes
         if (lentBytes <= 0L || lendingHeld || budget <= 0L) return pressure
-        val floor = minOf(budget, maxOf(BufferSizing.MIN_SIZED_BUFFER_MB * MB, lendFloorBytes))
+        val floor = minOf(budget, maxOf(floorBytes, lendFloorBytes))
         val lent = (budget - lentBytes).coerceAtLeast(floor)
         return if (pressure < 0L) lent else minOf(pressure, lent)
     }
@@ -363,6 +427,10 @@ class BufferMemoryKeeper(
             free.lowMemory || free.availMb - free.thresholdMb < BufferSizing.SYSTEM_MARGIN_MB ||
                 swapFreeMb in 0 until WARNING_SWAP_MB
 
+        /** onLowMemory (level 80) on a 1 GB box: Android is about to close the app, whatever the free memory reads. */
+        fun oneGbLastWarning(level: Int, oneGbBox: Boolean): Boolean =
+            oneGbBox && level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
+
         /** The same line as the extra downloads' swap rule. */
         const val WARNING_SWAP_MB = 50L
 
@@ -384,6 +452,8 @@ class BufferMemoryKeeper(
         const val SEEK_SETTLE_MS = 2_000L
         /** After a quiet minute pressure eases one level if the box has room, or straight off for a hand-set size. */
         const val RESTORE_QUIET_MS = 60_000L
+        // One status line a minute, so the check can be seen in a log while the film is paused.
+        const val CHECK_LOG_EVERY_MS = 60_000L
         /** Still short of memory this long after the first cut: cut further. */
         const val ESCALATE_AFTER_MS = 30_000L
         /** With swap gone, the cut steps up only this close to the low-memory line. */
@@ -395,6 +465,8 @@ class BufferMemoryKeeper(
         /** No growth beside a nearly full swap unless RAM is plentiful: the box's memory killer watches swap too. */
         const val GROW_MIN_SWAP_MB = 96L
         const val GROW_ROOM_BESIDE_SWAP_MB = 300L
+        /** Spare room a paused film leaves for the next app in front; a launcher with artwork takes about this much. */
+        const val PAUSED_ROOM_MB = 300L
         const val KEEP_IDLE_BYTES = 2 * 1024 * 1024
         /** 256 allocations of 64 KB per step. */
         const val TRIM_STEP_BYTES = 16 * 1024 * 1024

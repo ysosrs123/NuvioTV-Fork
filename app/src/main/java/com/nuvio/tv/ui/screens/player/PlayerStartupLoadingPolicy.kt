@@ -5,16 +5,15 @@ package com.nuvio.tv.ui.screens.player
  */
 internal object PlayerStartupLoadingPolicy {
 
-    fun loadingStallReportReason(
-        showLoadingOverlay: Boolean,
+    fun reportReason(
         hasRenderedFirstFrame: Boolean,
         error: String?,
-    ): String {
-        return if (isLoadingStallReportable(showLoadingOverlay, hasRenderedFirstFrame, error)) {
-            "loading_stall"
-        } else {
-            "playback_error"
-        }
+        wasPlaying: Boolean,
+    ): String = when {
+        error != null -> "playback_error"
+        !hasRenderedFirstFrame -> "loading_stall"
+        wasPlaying -> "while_playing"
+        else -> "while_paused"
     }
 
     fun isLoadingStallReportable(

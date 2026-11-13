@@ -638,7 +638,7 @@ class PlayerViewModel @Inject constructor(
                 if (singleMode) add("1 mode")
             }
             val suffix = if (notes.isEmpty()) "" else " · " + notes.joinToString(", ")
-            // Output resolution first, mode-descriptor style ("3840×2160 · 23.98 Hz").
+            // Output resolution first, mode-descriptor style ("3840×2160 · 23.976 Hz").
             // This is the negotiated output MODE, distinct from the Video row's SOURCE
             // resolution above it: a 4K file on a 1080p output reads Video 3840×2160 /
             // Display 1920×1080, making the downscale self-evident. Deliberately no dot
@@ -646,7 +646,7 @@ class PlayerViewModel @Inject constructor(
             val modeSize = if ((displayModeWidth ?: 0) > 0 && (displayModeHeight ?: 0) > 0) {
                 "${displayModeWidth}×${displayModeHeight} · "
             } else ""
-            rows += StatsRow("Display", modeSize + String.format("%.2f Hz", hz) + suffix, dot)
+            rows += StatsRow("Display", modeSize + com.nuvio.tv.core.player.DisplayRefreshMeter.format(hz) + " Hz" + suffix, dot)
         }
         // What the screen really ticks at, timed after the switch: Android only reports the mode it selected.
         com.nuvio.tv.core.player.DisplayRefreshMeter.latest?.takeIf { it.reliable }?.let { reading ->
@@ -1110,8 +1110,8 @@ class PlayerViewModel @Inject constructor(
         controller.pauseForLifecycle()
     }
 
-    fun releaseForBackground() {
-        controller.releaseForBackground()
+    fun releaseForBackground(atPause: Boolean = false) {
+        controller.releaseForBackground(atPause)
     }
 
     fun resumeForLifecycle() {

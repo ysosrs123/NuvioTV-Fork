@@ -30,9 +30,11 @@ internal fun PlayerRuntimeController.rejectPlaceholderStream(
     SeekThumbnails.stopSession(handBackPlayer = false)
     runCatching { _exoPlayer?.stop() }
     cancelNextEpisodeAutoPlayOnFatalError()
+    val card = withSendRule(providerNoticeCard(context, reportSourceLine())) ?: return
     _uiState.update {
         it.copy(
-            error = context.getString(R.string.player_error_placeholder_stream),
+            error = card.message,
+            errorCard = card,
             showLoadingOverlay = false
         )
     }

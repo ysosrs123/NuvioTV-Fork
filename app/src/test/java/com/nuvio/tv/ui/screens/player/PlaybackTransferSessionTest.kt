@@ -42,6 +42,12 @@ class PlaybackTransferSessionTest {
         val owner = owner(); owner.recordLength(url, 100, 900, true, true)
         assertEquals(1000L, owner.snap().contentLength)
     }
+    @Test fun `only the first total length reports as first`() {
+        val owner = owner()
+        assertFalse(owner.recordLength(url, 0, 200, false, true))
+        assertTrue(owner.recordLength(url, 0, 900, true, true))
+        assertFalse(owner.recordLength(url, 400, 500, true, true))
+    }
     @Test fun `ancillary bounded encoded unknown and overflowing lengths cannot set file size`() {
         val owner = owner()
         owner.recordLength("https://origin.example/sub.srt", 0, 90000, true, true)

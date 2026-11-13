@@ -168,11 +168,12 @@ internal fun SubtitleSelectionOverlay(
         ).filter { it.key != SubtitleOffLanguageKey }
     }
     val optionsByLanguage = remember(languageItems, sessionAddonSubtitles) {
+        val addonSubtitlesByLanguage = groupAddonSubtitlesByLanguageKey(sessionAddonSubtitles)
         languageItems.associate { language ->
             language.key to buildSubtitleOptionRailItems(
                 selectedLanguageKey = language.key,
                 internalTracks = sessionInternalTracks,
-                addonSubtitles = sessionAddonSubtitles,
+                addonSubtitles = addonSubtitlesByLanguage[language.key].orEmpty(),
                 installedAddonOrder = sessionInstalledOrder,
                 selectedOptionId = sessionSelectedOptionId,
                 builtInLabel = builtInLabel,
@@ -1440,17 +1441,27 @@ private fun streamProvidedSubtitleTitle(subtitle: Subtitle): String {
     return subtitle.lang
 }
 
-private fun normalizeOverlayLanguageKey(language: String?): String {
+private const val OverlayLanguageKeyCacheLimit = 512
+private val overlayLanguageKeyCache = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+internal fun normalizeOverlayLanguageKey(language: String?): String {
     if (language.isNullOrBlank()) return SubtitleUnknownLanguageKey
+    overlayLanguageKeyCache[language]?.let { return it }
     val normalized = PlayerSubtitleUtils.normalizeLanguageCode(language)
-    return when (normalized) {
+    val key = when (normalized) {
         "pt-br", "es-419", "sr-me" -> normalized
         else -> normalized
             .substringBefore('-')
             .substringBefore('_')
             .ifBlank { SubtitleUnknownLanguageKey }
     }
+    if (overlayLanguageKeyCache.size >= OverlayLanguageKeyCacheLimit) overlayLanguageKeyCache.clear()
+    overlayLanguageKeyCache[language] = key
+    return key
 }
+
+internal fun groupAddonSubtitlesByLanguageKey(addonSubtitles: List<Subtitle>): Map<String, List<Subtitle>> =
+    addonSubtitles.groupBy { normalizeOverlayLanguageKey(it.lang) }
 
 /**
  * Variant-aware language key for embedded tracks. Inspects name/label/trackId

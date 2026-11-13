@@ -41,6 +41,16 @@ object BufferSizing {
     /** About 5 s of a 4K remux at 80 Mbit/s. */
     const val MIN_SIZED_BUFFER_MB = 50
 
+    /**
+     * 1 GB boxes: under the same 1.15 GB edge as [BUFFER_1GB_BOX_MB]. Only these get [oneGbFloorMb]; every bigger box
+     * keeps [MIN_SIZED_BUFFER_MB].
+     */
+    val ONE_GB_BOX_RAM_BYTES: Long = (1.15 * GB).toLong()
+    const val ONE_GB_FLOOR_MIN_MB = 16
+    const val ONE_GB_FLOOR_SECONDS = 8L
+    /** 8 s at 24 Mbit/s while the bitrate is not known: covers 1080p web and most Blu-ray encodes. */
+    const val ONE_GB_FLOOR_UNKNOWN_BITRATE_MB = 24
+
     /** The bitrate the back buffer is sized for while the film's is unknown, a 4K remux at about 80 Mbit/s. */
     const val DEFAULT_BACK_BUFFER_BYTES_PER_SECOND = 10L * MB
     /** 8 Mbit/s: a wrong file size cannot make the back buffer crowd out the buffer ahead. */
@@ -60,6 +70,30 @@ object BufferSizing {
     }
 
     fun isSmallBox(totalMem: Long): Boolean = totalMem <= 0L || totalMem < SMALL_BOX_RAM_BYTES
+
+    /** Total memory decides; Android's low-RAM flag only counts when the total is not known. */
+    fun isOneGbBox(totalMem: Long, lowRamDevice: Boolean): Boolean =
+        if (totalMem > 0L) totalMem < ONE_GB_BOX_RAM_BYTES else lowRamDevice
+
+    @Volatile private var oneGbBoxRead: Boolean? = null
+
+    fun isOneGbBox(context: Context): Boolean = oneGbBoxRead ?: runCatching {
+        val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+        val info = ActivityManager.MemoryInfo()
+        am?.getMemoryInfo(info)
+        isOneGbBox(info.totalMem, am?.isLowRamDevice == true)
+    }.getOrDefault(false).also { oneGbBoxRead = it }
+
+    /**
+     * The least the buffer is sized or cut to. A 1 GB box keeps [ONE_GB_FLOOR_SECONDS] of the film (at least
+     * [ONE_GB_FLOOR_MIN_MB], never more than [MIN_SIZED_BUFFER_MB]); every other box keeps [MIN_SIZED_BUFFER_MB].
+     */
+    fun sizedFloorMb(oneGbBox: Boolean, bitrateBps: Long): Int = when {
+        !oneGbBox -> MIN_SIZED_BUFFER_MB
+        bitrateBps <= 0L -> ONE_GB_FLOOR_UNKNOWN_BITRATE_MB
+        else -> ((bitrateBps / 8L * ONE_GB_FLOOR_SECONDS + MB - 1) / MB)
+            .coerceIn(ONE_GB_FLOOR_MIN_MB.toLong(), MIN_SIZED_BUFFER_MB.toLong()).toInt()
+    }
 
     /** What the sizing keeps for the video decoder and its pictures. */
     fun videoOutputReserveMb(fourKInAppMemory: Boolean): Int =
@@ -100,16 +134,17 @@ object BufferSizing {
         free.availMb - free.thresholdMb - SIZING_MARGIN_MB - videoOutputReserveMb(fourKInAppMemory) -
             outsideBudgetMb + heldByPlayerMb
 
-    /** The box's size, lowered to what is free now, never below [MIN_SIZED_BUFFER_MB] (or the box's size if smaller). */
+    /** The box's size, lowered to what is free now, never below [floorMb] (or the box's size if smaller). */
     fun sizedBudgetMb(
         boxMb: Int,
         free: FreeMemory?,
         outsideBudgetMb: Int,
         heldByPlayerMb: Int,
-        fourKInAppMemory: Boolean = false
+        fourKInAppMemory: Boolean = false,
+        floorMb: Int = MIN_SIZED_BUFFER_MB
     ): Int {
         if (free == null) return boxMb
-        val floor = minOf(MIN_SIZED_BUFFER_MB, boxMb)
+        val floor = minOf(floorMb, boxMb)
         if (free.lowMemory) return floor
         return spareMb(free, outsideBudgetMb, heldByPlayerMb, fourKInAppMemory)
             .coerceIn(floor.toLong(), boxMb.toLong()).toInt()
@@ -170,10 +205,13 @@ object BufferSizing {
         free: FreeMemory?,
         outsideBudgetMb: Int,
         heldByPlayerMb: Int,
-        fourKInAppMemory: Boolean = false
-    ): String =
-        if (free == null) "boxMb=$boxMb sizedMb=$sizedMb free=unknown"
+        fourKInAppMemory: Boolean = false,
+        floorMb: Int = MIN_SIZED_BUFFER_MB
+    ): String {
+        val floor = if (floorMb == MIN_SIZED_BUFFER_MB) "" else " floorMb=$floorMb"
+        return if (free == null) "boxMb=$boxMb sizedMb=$sizedMb free=unknown$floor"
         else "boxMb=$boxMb sizedMb=$sizedMb availMb=${free.availMb} thresholdMb=${free.thresholdMb} " +
             "lowMemory=${free.lowMemory} windowMb=$outsideBudgetMb heldMb=$heldByPlayerMb " +
-            "reserveMb=${videoOutputReserveMb(fourKInAppMemory)}"
+            "reserveMb=${videoOutputReserveMb(fourKInAppMemory)}$floor"
+    }
 }

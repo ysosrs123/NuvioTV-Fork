@@ -44,6 +44,44 @@ internal object MpvStartupWatchdogPolicy {
         val counters: Counters,
     )
 
+    /**
+     * Until the first frame, the MPV progress tick is the only first-frame check and start-up
+     * watchdog, so a pause must not stop it.
+     */
+    fun progressTickMayStop(hasRenderedFirstFrame: Boolean): Boolean = hasRenderedFirstFrame
+
+    /** OK before the first frame keeps the start going, as ExoPlayer does while it buffers. */
+    fun playPauseShouldPause(isPlaying: Boolean, hasRenderedFirstFrame: Boolean): Boolean =
+        isPlaying && hasRenderedFirstFrame
+
+    /** Coming back to an MPV start that never showed a frame: restart the tick. */
+    fun restartTickOnResume(hasRenderedFirstFrame: Boolean, hasStream: Boolean, hasView: Boolean): Boolean =
+        !hasRenderedFirstFrame && hasStream && hasView
+
+    /** A watch party owns play and pause, so only a solo start is unpaused on resume. */
+    fun unpauseOnResume(hasRenderedFirstFrame: Boolean, inParty: Boolean): Boolean =
+        !hasRenderedFirstFrame && !inParty
+
+    /**
+     * The player's own pause state decides, not the manual-pause flag: a retry rebuilt with
+     * startPaused still plays on MPV and must stay watched.
+     */
+    fun watchdogEnabled(
+        hasError: Boolean,
+        releasing: Boolean,
+        failoverTriggered: Boolean,
+        recoveryArmed: Boolean,
+        hasStream: Boolean,
+        inBackground: Boolean,
+        playerPaused: Boolean,
+    ): Boolean = !hasError &&
+        !releasing &&
+        !failoverTriggered &&
+        !recoveryArmed &&
+        hasStream &&
+        !inBackground &&
+        !playerPaused
+
     fun cacheIsProgressing(previousSec: Double, currentSec: Double): Boolean {
         return currentSec > previousSec + MIN_CACHE_GROWTH_SEC
     }
