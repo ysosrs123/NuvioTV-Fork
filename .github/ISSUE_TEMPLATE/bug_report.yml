@@ -5,9 +5,27 @@ body:
   - type: markdown
     attributes:
       value: |
-        Nuvio Arc is a one-person hobby project. I read every issue but can't promise a reply or a fix.
+        **Please send a report from inside Arc first.** It takes a minute and gives me what I need to find the cause: what the player, the decoder, the sound path and the network were doing. Without it there is usually little I can do.
+
+        - **Playback problem** (stutter, buffering, no picture, no sound, a film that won't start): while the film is on screen, open the player controls and press **Report**.
+        - **Anything else** (a screen, a button, sign-in, sync, add-ons, search, a slow Home): **Settings > Report a problem**.
+        - **Arc closed or froze:** open Arc again and it offers to send a report, or use **Settings > Report a problem > Arc closed or froze**.
+
+        Arc shows you what the report contains before it is sent. Stream links, debrid and add-on keys, your account and your email are never in it. After sending, Arc shows a code like **ARC-AB12**. You can find it again under Settings > Report a problem > Sent reports.
+
+        If you only want to tell me about a problem, the report on its own is enough and you don't need to open an issue. Open one here if you want to talk about it, and put the code below so I can match the two.
+
+        Nuvio Arc is a one-person hobby project. I read every issue and every report but can't promise a reply or a fix.
         Please don't report problems from this build to the official Nuvio GitHub or Discord.
         I can't help with finding content, add-ons or providers, and issues that ask for or share links are closed.
+  - type: input
+    id: code
+    attributes:
+      label: Report code from Arc
+      description: The code Arc showed after you sent the report. If the problem is with one film or episode, send the report while it is playing. If you really can't send one, say why.
+      placeholder: e.g. ARC-AB12
+    validations:
+      required: true
   - type: input
     id: box
     attributes:
@@ -19,19 +37,15 @@ body:
     id: version
     attributes:
       label: Nuvio Arc version
-      description: Settings > About
-      placeholder: e.g. 1.1.0-nt.8
+      description: Settings > About. Please give the number, not "newest".
+      placeholder: e.g. 1.1.0-arc.3.1
     validations:
       required: true
-  - type: textarea
-    id: playing
-    attributes:
-      label: What kind of file and source?
-      description: The kind of source (media server, debrid, Usenet, peer-to-peer, plain link) and the picture and sound format if you know them (e.g. 4K Dolby Vision, TrueHD Atmos). Please leave out titles, file names, links and add-on addresses.
   - type: textarea
     id: what
     attributes:
       label: What happened?
+      description: What you did, what you saw, and whether it happens every time or only with some files. Please leave out titles, file names, links and add-on addresses.
     validations:
       required: true
   - type: textarea
@@ -42,4 +56,4 @@ body:
     id: media
     attributes:
       label: Screenshot or short video
-      description: If you can, drop one in here.
+      description: If you can, drop one in here. A photo of the playback stats panel helps a lot with picture and sound problems.
