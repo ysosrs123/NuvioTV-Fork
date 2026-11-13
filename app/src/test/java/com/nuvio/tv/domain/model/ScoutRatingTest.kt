@@ -21,6 +21,21 @@ class ScoutRatingTest {
     }
 
     @Test
+    fun `imported rating keeps its tracker and old ratings read as pressed in Arc`() {
+        val entry = ScoutRatingEntry(title, ScoutRating.LIKE, 3L, "simkl")
+        assertEquals(entry, decodeScoutRating("tt1", encodeScoutRating(entry)))
+        assertNull(decodeScoutRating("tt1", "LOVE1movieA")!!.source)
+    }
+
+    @Test
+    fun `imported titles beyond the cap leave the seeds`() {
+        val own = ScoutRatingEntry(title, ScoutRating.LOVE, 1L)
+        val imported = (1..5).map { ScoutRatingEntry(title.copy(id = "tt$it"), ScoutRating.LOVE, it.toLong(), "trakt") }
+        val kept = (imported + own).limitImported(2)
+        assertEquals(listOf(own.title.id, "tt5", "tt4"), kept.map { it.title.id })
+    }
+
+    @Test
     fun `damaged rating is dropped`() {
         assertNull(decodeScoutRating("tt1", "nonsense"))
         assertNull(decodeScoutRating("tt1", "BAD\u001F1\u001Fmovie\u001FA\u001F"))

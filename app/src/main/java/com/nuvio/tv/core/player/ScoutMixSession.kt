@@ -13,7 +13,9 @@ enum class ScoutMixReturn {
     /** The player's next-episode card counted down: the mix plays its next pick at once. */
     NEXT,
     /** The same, but someone pressed it, so the viewer is still there. */
-    NEXT_PRESSED
+    NEXT_PRESSED,
+    /** Every source was asked and none had a link: the mix tries another episode. */
+    NO_SOURCES
 }
 
 /** What the player offers as the mix's next episode. */
@@ -62,6 +64,14 @@ class ScoutMixSession @Inject constructor() {
 
     fun matches(profileId: Int, contentId: String?, videoId: String?): Boolean =
         playing?.let { it.profileId == profileId && it.contentId == contentId && it.videoId == videoId } == true
+
+    /** The sources page found no link for the episode the mix is playing. False when no mix is playing it. */
+    fun noSources(contentId: String?, videoId: String?): Boolean {
+        val now = playing ?: return false
+        if (now.contentId != contentId || now.videoId != videoId) return false
+        outcome = ScoutMixReturn.NO_SOURCES
+        return true
+    }
 
     /** Tells the mix page how the player closed. False when no mix is playing this show. */
     fun returnFromPlayer(contentId: String?, outcome: ScoutMixReturn): Boolean {

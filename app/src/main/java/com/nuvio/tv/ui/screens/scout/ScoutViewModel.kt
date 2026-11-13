@@ -77,6 +77,8 @@ data class ScoutScreenState(
     val surprise: Boolean = false,
     val moreLike: String? = null,
     val row: List<ScoutPick> = emptyList(),
+    /** Goes up each time the row shows different titles, so the page can start the new row at its first one. */
+    val rowTurn: Int = 0,
     val everyone: Set<String> = emptySet(),
     val rowLoading: Boolean = true,
     val nothing: Boolean = false,
@@ -93,6 +95,9 @@ data class ScoutScreenState(
     /** Unset answers, a surprise or "more like" draw from elsewhere, which is not a query a row could repeat. */
     val canSave: Boolean get() = !surprise && moreLike == null && !asking && !answers.isUnset
 }
+
+internal fun nextRowTurn(shown: List<ScoutPick>, next: List<ScoutPick>, turn: Int): Int =
+    if (shown.map { it.key } == next.map { it.key }) turn else turn + 1
 
 const val SCOUT_FOCUS_FOR_YOU = "tab_you"
 const val SCOUT_FOCUS_THREE_MORE = "tab_more"
@@ -340,7 +345,9 @@ class ScoutViewModel @Inject constructor(
         val everyone = if (others.isEmpty()) emptySet() else picks.filter { pick ->
             pick.key in ownPool && others.all { member -> member.pool?.picked.orEmpty().any { it.key == pick.key } }
         }.map { it.key }.toSet()
-        _state.update { it.copy(row = picks, everyone = everyone, rowLoading = false, nothing = picks.isEmpty()) }
+        _state.update {
+            it.copy(row = picks, rowTurn = nextRowTurn(it.row, picks, it.rowTurn), everyone = everyone, rowLoading = false, nothing = picks.isEmpty())
+        }
         warmMoods()
         picks.firstOrNull()?.let { showHero(it) }
     }
@@ -508,6 +515,9 @@ class ScoutViewModel @Inject constructor(
         val exclusions = finder.exclusions()
         val others = group()
         val ordered = withContext(Dispatchers.Default) { scoutOrderPicks(list, finder.pool(), exclusions, System.nanoTime(), others) }
-        return ordered.filterNot { it.key in shown }
+        val kept = ordered.filterNot { it.key in shown }
+        val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(context) ?: return kept
+        val limit = withContext(Dispatchers.IO) { ratingLimits.activeLimit() } ?: return kept
+        return ratingLimits.keepFitting(limit, kept) { "tmdb:${it.tmdbId}" to if (it.tv) "series" else "movie" }
     }
 }

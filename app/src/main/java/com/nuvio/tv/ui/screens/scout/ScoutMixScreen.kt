@@ -30,6 +30,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
@@ -104,6 +106,7 @@ private val TILE_TALLEST = 216.dp
 private val LOGO_TALL = 80.dp
 private val LOGO_SMALL = 56.dp
 private const val ADD_TILE_KEY = "add"
+private const val ADJUST = "adjust"
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -112,12 +115,14 @@ fun ScoutMixScreen(
     onPlay: (ScoutMixPick.Episode, Boolean) -> Unit,
     onOpenShow: (ScoutMixShow) -> Unit,
     onFindShow: () -> Unit,
+    onAdjust: (recipe: String) -> Unit = {},
     viewModel: ScoutMixViewModel = hiltViewModel()
 ) {
     val mix by viewModel.mix.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val gone by viewModel.gone.collectAsStateWithLifecycle()
     val pickSources by viewModel.pickSources.collectAsStateWithLifecycle()
+    val savedAs by viewModel.savedAs.collectAsStateWithLifecycle()
     var editing by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
@@ -228,6 +233,21 @@ fun ScoutMixScreen(
                     }
                     if (counting) {
                         MixButton(label = stringResource(R.string.scout_mixes_stop), icon = Icons.Default.Stop, onClick = viewModel::stop)
+                    } else if (current != null && current.readyMade) {
+                        MixButton(
+                            label = stringResource(if (savedAs != null) R.string.scout_premix_saved else R.string.scout_premix_save),
+                            icon = if (savedAs != null) Icons.Default.Check else Icons.Default.Add,
+                            enabled = savedAs == null && current.shows.isNotEmpty(),
+                            onClick = viewModel::saveToMine
+                        )
+                        current.recipe?.takeIf { com.nuvio.tv.core.scout.ScoutMixRecipe.decode(it) != null }?.let { recipe ->
+                            MixButton(
+                                label = stringResource(R.string.scout_premix_adjust),
+                                icon = Icons.Default.Tune,
+                                focusRequester = opener(ADJUST),
+                                onClick = { open(ADJUST) { onAdjust(recipe) } }
+                            )
+                        }
                     } else if (current != null) {
                         MixButton(
                             label = stringResource(R.string.scout_mixes_edit),
@@ -241,6 +261,18 @@ fun ScoutMixScreen(
                     }
                 }
                 if (episode != null) MixEpisodeText(episode, state.loading, state.countdown, compact)
+                state.noLink?.let { missed ->
+                    val name = missed.meta.name.ifBlank { missed.show.name } + " " +
+                        stringResource(R.string.scout_mixes_episode_short, missed.video.season ?: 0, missed.video.episode ?: 0)
+                    Text(
+                        text = if (state.noLinkStopped) stringResource(R.string.scout_premix_no_link_stopped)
+                        else stringResource(R.string.scout_premix_no_link_skipped, name),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = NuvioTheme.colors.TextSecondary,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             if (ranOut) {
                 if (offers.isNotEmpty()) {
@@ -268,7 +300,7 @@ fun ScoutMixScreen(
                     items = buildList {
                         add(ScoutTabItem(TAB_COMING, comingWord, state.tabShow == null))
                         current.shows.forEach { add(ScoutTabItem(TAB_SHOW + it.id, it.name, state.tabShow == it.id)) }
-                        add(ScoutTabItem(ADD_TILE_KEY, addWord, false))
+                        if (!current.readyMade) add(ScoutTabItem(ADD_TILE_KEY, addWord, false))
                     },
                     focus = ::focus,
                     onFocused = { item ->

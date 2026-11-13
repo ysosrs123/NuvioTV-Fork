@@ -164,7 +164,7 @@ class ScoutPicksBuilder @Inject constructor(
             val list = scoutInRowGenre(scoutLimitDuplicates(scoutReRank(tally, all, sub, LOOKUPS), all), group.genre).take(ROW_ITEMS)
                 .map { scoutWithReason(it, all[it.key], sub, frequency) }
             ScoutTasteRow("", group.genre, group.language, scoutRowKeyword(sub.topKeywords(own, ROW_KEYWORD_CHOICES), list, all), list)
-        }.filter { it.picks.size >= SCOUT_TASTE_ROW_MIN_PICKS }.let(::scoutWithRowIds)
+        }.filter { ageCeiling != null || it.picks.size >= SCOUT_TASTE_ROW_MIN_PICKS }.let(::scoutWithRowIds)
 
         val newTitles = freshTitles(language, now)
         val trending = trendingTitles(language)
@@ -216,7 +216,8 @@ class ScoutPicksBuilder @Inject constructor(
                     released = (if (tv) credit.firstAirDate else credit.releaseDate)?.takeIf { it.isNotBlank() },
                     rating = credit.voteAverage?.toFloat(),
                     votes = credit.voteCount,
-                    genres = credit.genreIds.orEmpty()
+                    genres = credit.genreIds.orEmpty(),
+                    language = credit.originalLanguage
                 )
             }
     }

@@ -26,6 +26,12 @@
     <string name="scout_ratings_off_note">Hides the Rate button, the thumbs in the menu and the question after a film. Your ratings still count.</string>
     <string name="scout_ask_enabled">Ask how it was after a film</string>
     <string name="scout_ask_enabled_sub">Not for me, like or love when you leave the player</string>
+    <string name="scout_send_ratings">Send my ratings to trackers</string>
+    <string name="scout_send_ratings_sub">Not for me, like and love go to Trakt, Simkl, MDBList and WeTrakr as 3, 7 and 10 out of 10. A rating you gave on a tracker yourself is never changed. Simkl only gets titles you\'ve watched.</string>
+    <string name="scout_send_ratings_none">No tracker is signed in on this profile, so nothing is sent yet.</string>
+    <string name="scout_use_ratings">Use my tracker ratings</string>
+    <string name="scout_use_ratings_sub">Ratings you gave on your trackers become thumbs here: 9 or 10 is love, 6 to 8 like, 1 to 4 not for me. A thumb you press in Arc always wins.</string>
+    <string name="scout_thumb_from">From %1$s</string>
     <string name="scout_your_thumbs">Your thumbs</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d title rated. Open to change or undo</item>

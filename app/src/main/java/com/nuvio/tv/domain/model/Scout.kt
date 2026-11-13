@@ -18,8 +18,22 @@ data class ScoutTitle(
 data class ScoutRatingEntry(
     val title: ScoutTitle,
     val rating: ScoutRating,
-    val ratedAt: Long
-)
+    val ratedAt: Long,
+    /** The tracker a rating was read from; null for a thumb pressed in Arc. */
+    val source: String? = null
+) {
+    val imported: Boolean get() = source != null
+}
+
+/** The newest imported titles only, so a large import cannot crowd out the thumbs pressed in Arc. */
+fun Iterable<ScoutRatingEntry>.limitImported(max: Int): List<ScoutRatingEntry> {
+    val (imported, own) = partition { it.imported }
+    return own + imported.sortedByDescending { it.ratedAt }.take(max)
+}
+
+const val SCOUT_IMPORTED_SEEDS = 50
+const val SCOUT_IMPORTED_TASTE_TITLES = 200
+const val SCOUT_IMPORTED_WEIGHT = 0.7
 
 data class ScoutSettings(
     val ratingsEnabled: Boolean = true,
@@ -30,15 +44,19 @@ data class ScoutSettings(
     val gemsRow: Boolean = true,
     val tilesRow: Boolean = false,
     val leaveOutGenres: Set<Int> = emptySet(),
+    val leaveOutLanguages: Set<String> = emptySet(),
     val savedSlices: List<String> = emptyList(),
-    val tasteRow: String = "titles"
+    val tasteRow: String = "titles",
+    val sendToTrackers: Boolean = false,
+    val useTrackerRatings: Boolean = true
 )
 
 data class ScoutProfile(
     val profileId: Int = 0,
     val settings: ScoutSettings = ScoutSettings(),
     val ratings: Map<String, ScoutRatingEntry> = emptyMap(),
-    val asked: Set<String> = emptySet()
+    val asked: Set<String> = emptySet(),
+    val dismissed: Set<String> = emptySet()
 ) {
     fun rating(contentId: String): ScoutRating? = ratings[contentId]?.rating
 }
@@ -85,8 +103,9 @@ fun scoutAskTargetFor(
 private const val FIELD = '\u001F'
 
 internal fun encodeScoutRating(entry: ScoutRatingEntry): String =
-    listOf(entry.rating.name, entry.ratedAt.toString(), entry.title.type, entry.title.name, entry.title.poster.orEmpty())
-        .joinToString(FIELD.toString())
+    listOfNotNull(
+        entry.rating.name, entry.ratedAt.toString(), entry.title.type, entry.title.name, entry.title.poster.orEmpty(), entry.source
+    ).joinToString(FIELD.toString())
 
 internal fun decodeScoutRating(id: String, raw: String): ScoutRatingEntry? {
     val parts = raw.split(FIELD)
@@ -95,6 +114,7 @@ internal fun decodeScoutRating(id: String, raw: String): ScoutRatingEntry? {
     return ScoutRatingEntry(
         title = ScoutTitle(id, parts[2], parts[3], parts[4].ifBlank { null }),
         rating = rating,
-        ratedAt = parts[1].toLongOrNull() ?: 0L
+        ratedAt = parts[1].toLongOrNull() ?: 0L,
+        source = parts.getOrNull(5)?.ifBlank { null }
     )
 }

@@ -9,6 +9,7 @@ import com.nuvio.tv.core.player.ScoutMixUpNext
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.scout.ScoutMixLibrary
 import com.nuvio.tv.core.scout.ScoutMixSuggestions
+import com.nuvio.tv.core.scout.ScoutReadyMixBuilder
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.data.local.PlayerSettingsDataStore
 import com.nuvio.tv.data.local.ScoutMixStore
@@ -19,6 +20,7 @@ import com.nuvio.tv.domain.model.ScoutMixPick
 import com.nuvio.tv.domain.model.ScoutMixShow
 import com.nuvio.tv.domain.model.ScoutMixEpisodes
 import com.nuvio.tv.domain.model.ScoutMixes
+import com.nuvio.tv.domain.model.keptTo
 import com.nuvio.tv.domain.model.needsLogoLookup
 import com.nuvio.tv.domain.model.pickScoutMixEpisode
 import com.nuvio.tv.domain.model.withFoundLogos
@@ -41,6 +43,8 @@ import javax.inject.Inject
 private const val COUNTDOWN_SECONDS = 8
 private const val COMING_SHOWN = 6
 private const val TAB_SETTLE_MS = 300L
+/** Episodes in a row without a link before the mix stops trying by itself. */
+private const val NO_LINK_TRIES = 3
 
 /** The queue without the episode that is up next: the row shows that one first by itself. */
 internal fun comingWithout(coming: List<ScoutMixPick.Episode>, pick: ScoutMixPick?): List<ScoutMixPick.Episode> {
@@ -59,7 +63,11 @@ data class ScoutMixUiState(
     val offers: List<MetaPreview> = emptyList(),
     val coming: List<ScoutMixPick.Episode> = emptyList(),
     val tabShow: String? = null,
-    val showEpisodes: List<ScoutMixPick.Episode> = emptyList()
+    val showEpisodes: List<ScoutMixPick.Episode> = emptyList(),
+    /** The episode just passed over because no source had a link for it. */
+    val noLink: ScoutMixPick.Episode? = null,
+    /** Several in a row had no link, so the mix waits for the viewer. */
+    val noLinkStopped: Boolean = false
 )
 
 @HiltViewModel
@@ -71,13 +79,18 @@ class ScoutMixViewModel @Inject constructor(
     private val session: ScoutMixSession,
     private val profiles: ProfileManager,
     private val playerSettings: PlayerSettingsDataStore,
+    private val ready: ScoutReadyMixBuilder,
     layoutPreferences: LayoutPreferenceDataStore
 ) : ViewModel() {
     private val mixId: String = savedStateHandle["mixId"] ?: ""
+    private var playOnOpen: Boolean = savedStateHandle.get<String>("play") == "1"
     private val played = mutableSetOf<ScoutMixEpisodeKey>()
     private var lastPlayed: ScoutMixEpisodeKey? = null
     private var lastShowId: String? = null
     private var inARow = 0
+    private var noLinkRow = 0
+    /** Episodes without a link this week, left out like the ones already played. */
+    private var noLinks: Set<ScoutMixEpisodeKey> = emptySet()
     private var pickJob: Job? = null
     private var countdownJob: Job? = null
     private var aheadJob: Job? = null
@@ -90,13 +103,17 @@ class ScoutMixViewModel @Inject constructor(
 
     private val allMixes = store.observe(profileId).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val pickSources = store.observePickSources(profileId).stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val mix: StateFlow<ScoutMix?> = store.observe(profileId).map { mixes -> mixes.firstOrNull { it.id == mixId } }
+    val mix: StateFlow<ScoutMix?> = store.observeAny(profileId).map { mixes -> mixes.firstOrNull { it.id == mixId } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val posterWidthDp = layoutPreferences.posterCardWidthDp.stateIn(viewModelScope, SharingStarted.Eagerly, 126)
     val posterCornerDp = layoutPreferences.posterCardCornerRadiusDp.stateIn(viewModelScope, SharingStarted.Eagerly, 12)
 
     private val _state = MutableStateFlow(ScoutMixUiState())
     val state: StateFlow<ScoutMixUiState> = _state.asStateFlow()
+
+    private val _savedAs = MutableStateFlow<String?>(null)
+    /** The id of the viewer's own copy, once a ready-made mix has been saved. */
+    val savedAs: StateFlow<String?> = _savedAs.asStateFlow()
 
     private val _gone = MutableStateFlow(false)
     val gone: StateFlow<Boolean> = _gone.asStateFlow()
@@ -109,13 +126,41 @@ class ScoutMixViewModel @Inject constructor(
     private val seenLogos = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     init {
-        pickNext()
+        viewModelScope.launch { store.observeNoSources(profileId).collect { noLinks = it } }
+        if (mixId.startsWith(ScoutMixes.READY_PREFIX)) {
+            _state.update { it.copy(loading = true) }
+            viewModelScope.launch {
+                runCatching { ready.ensure(mixId) }
+                pickNext()
+            }
+        } else {
+            pickNext()
+        }
+    }
+
+    /** Keeps a ready-made mix as one of the viewer's own, where it stops changing and can be edited. */
+    fun saveToMine() {
+        val current = mix.value ?: return
+        if (!current.readyMade || _savedAs.value != null) return
+        viewModelScope.launch { _savedAs.value = store.saveCopy(current).id }
+    }
+
+    /** Only the chosen episodes of each show, for a mix that keeps to a list. */
+    private suspend fun offerOf(saved: ScoutMix, show: ScoutMixShow): ScoutMixEpisodes? {
+        val allowed = if (saved.only.isEmpty()) null else saved.only[show.id].orEmpty()
+        return library.episodes(profileId, show)?.keptTo(allowed)
     }
 
     /** The page is showing again: back from the player or the sources page, or opened for the first time. */
     fun onShown() {
         showing = true
         val outcome = session.finish()
+        if (outcome == ScoutMixReturn.NO_SOURCES) {
+            passOver()
+            return
+        }
+        noLinkRow = 0
+        _state.update { it.copy(noLink = null, noLinkStopped = false) }
         if (outcome == ScoutMixReturn.LEFT) {
             pickAgainIfShowsChanged()
             return
@@ -155,6 +200,20 @@ class ScoutMixViewModel @Inject constructor(
         }
     }
 
+    /** No source had a link for the pick: leave that episode out for a week and play another, a few times at most. */
+    private fun passOver() {
+        val failed = _state.value.pick as? ScoutMixPick.Episode ?: return
+        noLinks = noLinks + failed.key
+        played += failed.key
+        viewModelScope.launch { store.markNoSources(failed.key.first, failed.key.second) }
+        noLinkRow += 1
+        val stop = noLinkRow >= NO_LINK_TRIES
+        if (stop) noLinkRow = 0
+        _state.update { it.copy(noLink = failed, noLinkStopped = stop, coming = it.coming.filter { queued -> queued.key != failed.key }) }
+        playOnOpen = !stop
+        pickNext()
+    }
+
     /** A show added from its long-press menu while the page was out of sight gives an empty mix something to play. */
     private fun pickAgainIfShowsChanged() {
         val now = _state.value
@@ -170,6 +229,8 @@ class ScoutMixViewModel @Inject constructor(
     fun remix() {
         stopCountdown()
         inARow = 0
+        noLinkRow = 0
+        _state.update { it.copy(noLink = null, noLinkStopped = false) }
         _state.update { it.copy(coming = emptyList()) }
         pickNext()
     }
@@ -224,11 +285,11 @@ class ScoutMixViewModel @Inject constructor(
             val next = pickScoutMixEpisode(
                 shows = shows,
                 unwatchedOnly = saved.unwatchedOnly,
-                played = taken,
+                played = taken + noLinks,
                 lastPlayed = last?.key,
                 current = last?.key,
                 lastShowId = last?.show?.id,
-                episodes = { show -> looked.getOrPut(show.id) { library.episodes(profileId, show) } }
+                episodes = { show -> looked.getOrPut(show.id) { offerOf(saved, show) } }
             ) as? ScoutMixPick.Episode ?: break
             if (next.key in taken) break
             out += next
@@ -254,15 +315,15 @@ class ScoutMixViewModel @Inject constructor(
         aheadJob?.cancel()
         ahead = null
         aheadJob = viewModelScope.launch {
-            val saved = store.observe(profileId).first().firstOrNull { it.id == mixId } ?: return@launch
+            val saved = store.observeAny(profileId).first().firstOrNull { it.id == mixId } ?: return@launch
             val next = _state.value.coming.firstOrNull { it.key != current.key && it.key !in played } ?: pickScoutMixEpisode(
                 shows = saved.shows,
                 unwatchedOnly = saved.unwatchedOnly,
-                played = played + current.key,
+                played = played + current.key + noLinks,
                 lastPlayed = current.key,
                 current = current.key,
                 lastShowId = current.show.id,
-                episodes = { show -> library.episodes(profileId, show) }
+                episodes = { show -> offerOf(saved, show) }
             ) as? ScoutMixPick.Episode ?: return@launch
             val settings = playerSettings.playerSettings.first()
             val startsByItself = saved.keepPlaying &&
@@ -344,24 +405,24 @@ class ScoutMixViewModel @Inject constructor(
         val current = (_state.value.pick as? ScoutMixPick.Episode)?.key
         _state.update { it.copy(loading = true, countdown = null) }
         pickJob = viewModelScope.launch {
-            val saved = with ?: store.observe(profileId).first().firstOrNull { it.id == mixId }
+            val saved = with ?: store.observeAny(profileId).first().firstOrNull { it.id == mixId }
             if (saved == null) {
                 _gone.value = true
                 return@launch
             }
-            val queued = _state.value.coming.firstOrNull { it.key !in played && it.key != current }
+            val queued = _state.value.coming.firstOrNull { it.key !in played && it.key !in noLinks && it.key != current }
             val resume = if (queued == null && played.isEmpty() && current == null) {
                 runCatching { library.startedEpisode(saved.shows) }.getOrNull()
             } else null
             val pick = queued ?: pickScoutMixEpisode(
                 shows = saved.shows,
                 unwatchedOnly = saved.unwatchedOnly,
-                played = played,
+                played = played + noLinks,
                 lastPlayed = lastPlayed,
                 current = current,
                 lastShowId = lastShowId,
                 resume = resume,
-                episodes = ::episodesOf
+                episodes = { show -> episodesOf(saved, show) }
             )
             val offers = if (pick is ScoutMixPick.AllSeen) suggestions.forMix(saved) else emptyList()
             pickedFrom = saved.shows.map { it.id }
@@ -369,20 +430,23 @@ class ScoutMixViewModel @Inject constructor(
             if (pick is ScoutMixPick.Episode) {
                 fillFromMeta(saved, pick)
                 fillComing(saved, pick)
-                if (andCountDown) countDown()
+                if (playOnOpen) {
+                    playOnOpen = false
+                    play()?.let { _start.trySend(it) }
+                } else if (andCountDown) countDown()
             }
             saveLogos()
             if (!logosLookedUp) {
                 logosLookedUp = true
                 viewModelScope.launch {
-                    saved.shows.filter { it.needsLogoLookup() && !seenLogos.containsKey(it.id) }.forEach { episodesOf(it) }
+                    saved.shows.filter { it.needsLogoLookup() && !seenLogos.containsKey(it.id) }.forEach { episodesOf(saved, it) }
                     saveLogos()
                 }
             }
         }
     }
 
-    private suspend fun episodesOf(show: ScoutMixShow) = library.episodes(profileId, show)?.also { found ->
+    private suspend fun episodesOf(saved: ScoutMix, show: ScoutMixShow) = offerOf(saved, show)?.also { found ->
         if (show.needsLogoLookup() && !seenLogos.containsKey(show.id)) {
             seenLogos[show.id] = library.bestLogo(show) ?: found.meta.logo.orEmpty()
         }

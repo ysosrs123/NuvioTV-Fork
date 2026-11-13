@@ -10,7 +10,11 @@ import com.nuvio.tv.domain.model.ScoutSettings
 import com.nuvio.tv.domain.model.ScoutTitle
 import com.nuvio.tv.domain.model.scoutShouldAsk
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.nuvio.tv.core.tracking.TrackingProviderId
+import com.nuvio.tv.core.tracking.TrackingProviderRegistry
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -20,10 +24,18 @@ import javax.inject.Inject
 class ScoutRatingViewModel @Inject constructor(
     private val store: ScoutStore,
     private val resolver: com.nuvio.tv.core.tmdb.TmdbCollectionSourceResolver,
-    private val mixSession: com.nuvio.tv.core.player.ScoutMixSession = com.nuvio.tv.core.player.ScoutMixSession()
+    private val mixSession: com.nuvio.tv.core.player.ScoutMixSession = com.nuvio.tv.core.player.ScoutMixSession(),
+    private val trackers: TrackingProviderRegistry
 ) : ViewModel() {
     val profile: StateFlow<ScoutProfile> = store.profile
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ScoutProfile())
+
+    /** Whether this profile is signed in to a tracker that takes ratings. */
+    val trackerSignedIn: StateFlow<Boolean> = trackers.providers()
+        .filter { it.descriptor.id != TrackingProviderId.FLOPPY }
+        .map { it.isAuthenticated }
+        .let { flows -> if (flows.isEmpty()) flowOf(false) else combine(flows) { states -> states.any { it } } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
     val pendingAsk: StateFlow<ScoutAskTarget?> = store.pendingAsk
 
     fun setRating(title: ScoutTitle, rating: ScoutRating?) {

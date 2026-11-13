@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Info
@@ -157,6 +158,7 @@ private const val CHOOSING_LENGTH = "length"
 private const val CHOOSING_WHO = "who"
 private const val AVATARS_SHOWN = 3
 private const val FOCUS_TRIES = 8
+private const val WORD_MIXES = "word_mixes"
 private val COMPACT_PAGE = 680.dp
 private const val PICK_TILES = 3
 private const val TASTE_TILES = 4
@@ -192,6 +194,10 @@ fun ScoutScreen(
     onOpenSlice: (sliceId: String) -> Unit,
     onAsk: (() -> Unit)?,
     startOnTaste: Boolean = false,
+    startOnMixes: Boolean = false,
+    onPlayMix: (id: String) -> Unit = {},
+    onOpenMix: (id: String) -> Unit = {},
+    onMixOwn: (recipe: String?) -> Unit = {},
     viewModel: ScoutViewModel = hiltViewModel(),
     posterOptions: PosterOptionsViewModel = hiltViewModel(),
     ratings: ScoutRatingViewModel = hiltViewModel()
@@ -208,6 +214,13 @@ fun ScoutScreen(
     var chosenGenre by rememberSaveable { mutableStateOf<String?>(null) }
     var confirmFresh by rememberSaveable { mutableStateOf(false) }
     var rating by remember { mutableStateOf<ScoutPick?>(null) }
+    var mixesOpen by rememberSaveable { mutableStateOf(startOnMixes) }
+    var mixesOpened by remember { mutableStateOf(false) }
+    if (mixesOpen) mixesOpened = true
+    val readyModel = if (mixesOpened) hiltViewModel<ScoutReadyMixesViewModel>() else null
+    val readyState = readyModel?.state?.collectAsStateWithLifecycle()?.value
+    LaunchedEffect(readyModel, state.answers.family) { readyModel?.setFamily(state.answers.family) }
+    BackHandler(enabled = mixesOpen && !startOnMixes) { mixesOpen = false }
     fun focus(key: String): Modifier = Modifier
         .focusRequester(requesters.getOrPut(key) { FocusRequester() })
         .onFocusChanged { if (it.isFocused && viewModel.focusPending == null) viewModel.focusKey = key }
@@ -223,8 +236,8 @@ fun ScoutScreen(
         }
     }
     BackHandler(enabled = !showThumbs && !startOnTaste && state.tab == ScoutTab.Taste && !state.surprise && state.moreLike == null && !state.asking) { viewModel.leaveTaste() }
-    LaunchedEffect(state.surprise, state.moreLike != null, state.asking, state.pinFor, showThumbs, state.tab == ScoutTab.Taste) {
-        if (state.pinFor != null || showThumbs || state.asking) return@LaunchedEffect
+    LaunchedEffect(state.surprise, state.moreLike != null, state.asking, state.pinFor, showThumbs, state.tab == ScoutTab.Taste, mixesOpen) {
+        if (state.pinFor != null || showThumbs || state.asking || mixesOpen) return@LaunchedEffect
         val first = if (state.surprise) SCOUT_FOCUS_THREE_MORE else SCOUT_FOCUS_FOR_YOU
         repeat(FOCUS_TRIES) {
             val target = requesters[viewModel.focusPending ?: viewModel.focusKey] ?: requesters[first]
@@ -258,7 +271,7 @@ fun ScoutScreen(
         return
     }
 
-    val onTaste = state.tab == ScoutTab.Taste && !state.surprise && state.moreLike == null
+    val onTaste = !mixesOpen && state.tab == ScoutTab.Taste && !state.surprise && state.moreLike == null
     if (state.pinFor == null) BoxWithConstraints(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
         val compact = maxHeight < COMPACT_PAGE
         val tallest = maxHeight * .31f
@@ -266,6 +279,9 @@ fun ScoutScreen(
             picture = if (onTaste) taste?.summary?.backdrops?.firstOrNull() else state.hero?.pick?.backdrop,
             wide = onTaste
         )
+        if (mixesOpen) Box(Modifier.matchParentSize().background(NuvioTheme.colors.Background)) {
+            ScoutBackdrop(readyState?.focusedTile?.art)
+        }
         BoxWithConstraints(
             modifier = Modifier
                 .sidebarPageContent()
@@ -287,12 +303,42 @@ fun ScoutScreen(
                 pictures = pictures,
                 activeId = activeId,
                 focus = ::focus,
-                onWatch = viewModel::pressWatch,
+                onWatch = {
+                    mixesOpen = false
+                    viewModel.pressWatch(it)
+                },
                 onLength = { choosing = CHOOSING_LENGTH },
                 onWho = { choosing = CHOOSING_WHO },
                 onTaste = onTaste,
-                onOpenTaste = { if (onTaste) viewModel.leaveTaste() else viewModel.focusTab(ScoutTab.Taste) }
+                onOpenTaste = {
+                    mixesOpen = false
+                    if (onTaste) viewModel.leaveTaste() else viewModel.focusTab(ScoutTab.Taste)
+                },
+                mixesOn = mixesOpen,
+                onMixes = { mixesOpen = true }
             )
+            if (mixesOpen && readyState != null && readyModel != null) {
+                val entry = { key: String -> requesters.getOrPut(key) { FocusRequester() } }
+                val play = { id: String -> readyModel.prepare(id) { onPlayMix(id) } }
+                val open = { id: String -> readyModel.prepare(id) { onOpenMix(id) } }
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = FOCUS_ROOM),
+                    contentAlignment = BiasAlignment(-1f, HERO_BLOCK_BIAS)
+                ) {
+                    ScoutReadyHero(readyState, ::focus, onPlay = play, onSave = readyModel::save, onAdjust = { onMixOwn(it) })
+                }
+                ScoutReadyRows(
+                    state = readyState,
+                    tileHeight = tileHeight,
+                    focus = ::focus,
+                    entry = entry,
+                    onTab = readyModel::focusTab,
+                    onFocusMix = readyModel::focusMix,
+                    onOpen = open,
+                    onOwn = { onMixOwn(null) }
+                )
+                ScoutReadyFirstFocus(readyState, entry)
+            } else {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -377,6 +423,7 @@ fun ScoutScreen(
                 ScoutPickRow(state, saved, tileHeight, ::focus, viewModel, onOpenTitle) { pick ->
                     posterOptions.controller.show(pick.toPreview(), null)
                 }
+            }
             }
             Spacer(Modifier.height(NuvioTheme.spacing.sm))
         }
@@ -495,7 +542,9 @@ private fun ScoutTopWords(
     onLength: () -> Unit,
     onWho: () -> Unit,
     onTaste: Boolean,
-    onOpenTaste: () -> Unit
+    onOpenTaste: () -> Unit,
+    mixesOn: Boolean,
+    onMixes: () -> Unit
 ) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         ScoutWatch.entries.forEach { watch ->
@@ -503,8 +552,11 @@ private fun ScoutTopWords(
                 label = stringResource(watch.labelRes),
                 onClick = { onWatch(watch) },
                 modifier = Modifier.padding(start = if (watch == ScoutWatch.entries.first()) FOCUS_ROOM - NuvioTheme.spacing.md else 0.dp).then(focus("watch_${watch.code}")),
-                on = answers.watch == watch
+                on = !mixesOn && answers.watch == watch
             )
+        }
+        if (com.nuvio.tv.domain.model.ScoutMixes.available) {
+            ScoutWord(stringResource(R.string.scout_premix_word), onMixes, focus(WORD_MIXES), on = mixesOn)
         }
         Spacer(Modifier.weight(1f))
         ScoutWord(stringResource(answers.time.labelRes), onLength, focus("word_length"), on = answers.time != ScoutTime.ANY)
@@ -696,7 +748,9 @@ private fun ScoutPickRow(
     onLongPress: (ScoutPick) -> Unit
 ) {
     CompositionLocalProvider(LocalBringIntoViewSpec provides NuvioScrollDefaults.smoothScrollSpec) {
+        val list = key(state.rowTurn) { rememberLazyListState() }
         LazyRow(
+            state = list,
             modifier = Modifier.fillMaxWidth().height(height + NuvioTheme.spacing.md).scoutRowBounds(),
             contentPadding = PaddingValues(horizontal = FOCUS_ROOM, vertical = NuvioTheme.spacing.xs),
             horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl)

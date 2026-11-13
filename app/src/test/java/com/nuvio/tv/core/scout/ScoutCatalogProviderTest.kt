@@ -48,7 +48,7 @@ class ScoutCatalogProviderTest {
             every { changes } returns kotlinx.coroutines.flow.emptyFlow()
             coEvery { withoutSeen(any()) } answers { firstArg<List<MetaPreview>>().filterNot { it.id in hide } }
         }
-        return ScoutCatalogProvider(artwork, context, engine, store, resolver, folders, mockk(relaxed = true))
+        return ScoutCatalogProvider(artwork, context, engine, store, resolver, folders, mockk(relaxed = true), mockk(relaxed = true))
     }
 
     private val artwork = mockk<ScoutArtwork> { coEvery { withPattern(any(), any()) } answers { firstArg() } }

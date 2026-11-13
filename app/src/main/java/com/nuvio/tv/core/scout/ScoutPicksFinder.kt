@@ -151,7 +151,8 @@ internal fun ScoutExclusions.withNotForMe(profile: ScoutProfile): ScoutExclusion
         tmdbKeys = tmdbKeys + out.filter { it.title.id.startsWith("tmdb:") }.map {
             (if (it.title.type.trim().lowercase() != "movie") "tv:" else "movie:") + it.title.id.removePrefix("tmdb:")
         },
-        genres = profile.settings.leaveOutGenres
+        genres = profile.settings.leaveOutGenres,
+        languages = scoutLeaveOutLanguageCodes(profile.settings.leaveOutLanguages)
     )
 }
 
@@ -402,6 +403,10 @@ class ScoutPicksFinder @Inject constructor(
             of(country) ?: of("US")
         }
     }.getOrNull()
+
+    /** One page of series for a ready-made mix, in the app's language. */
+    suspend fun discoverSeries(f: TmdbCollectionFilters, page: Int, sortBy: String): List<ScoutPick> =
+        discover(f, true, sortBy, page, tmdbSettings.settings.first().language)
 
     private suspend fun discover(f: TmdbCollectionFilters, tv: Boolean, sortBy: String?, page: Int, language: String): List<ScoutPick> {
         val key = BuildConfig.TMDB_API_KEY

@@ -68,7 +68,8 @@ class ScoutCatalogProvider @Inject constructor(
     private val store: ScoutStore,
     private val resolver: com.nuvio.tv.core.tmdb.TmdbCollectionSourceResolver,
     private val folderSupport: ScoutFolderSupport,
-    private val picksBuilder: ScoutPicksBuilder
+    private val picksBuilder: ScoutPicksBuilder,
+    private val ratingSync: dagger.Lazy<com.nuvio.tv.core.scout.sync.ScoutRatingSync>
 ) : BuiltInCatalogProvider {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val started = java.util.concurrent.atomic.AtomicBoolean(false)
@@ -125,6 +126,10 @@ class ScoutCatalogProvider @Inject constructor(
         scope.launch {
             delay(START_DELAY_MS)
             engine.followProfiles()
+        }
+        scope.launch {
+            delay(START_DELAY_MS)
+            ratingSync.get().follow()
         }
         scope.launch {
             delay(START_DELAY_MS)
@@ -299,7 +304,11 @@ class ScoutCatalogProvider @Inject constructor(
         )
     }
 
-    private fun sourcesFor(slice: ScoutSlice) = titlesOf(slice)?.let { titles ->
+    private fun sourcesFor(slice: ScoutSlice) = slice.award?.takeIf { it.tabs.isNotEmpty() }?.let { choice ->
+        scoutAwardTabs(choice, awardLists).mapNotNull { tab ->
+            awardSource(tab.titleRes, if (tab.series) TmdbCollectionMediaType.TV else TmdbCollectionMediaType.MOVIE, tab.ids)
+        }
+    } ?: titlesOf(slice)?.let { titles ->
         listOfNotNull(
             awardSource(R.string.type_movie, TmdbCollectionMediaType.MOVIE, titles.movies),
             awardSource(R.string.type_series, TmdbCollectionMediaType.TV, titles.series)
@@ -384,7 +393,9 @@ class ScoutCatalogProvider @Inject constructor(
             val result = resolver.resolve(source).first { it !is com.nuvio.tv.core.network.NetworkResult.Loading }
             (result as? com.nuvio.tv.core.network.NetworkResult.Success)?.data?.items.orEmpty()
         }
-        val mixed = (0 until (lists.maxOfOrNull { it.size } ?: 0)).flatMap { i -> lists.mapNotNull { it.getOrNull(i) } }
+        val all = (0 until (lists.maxOfOrNull { it.size } ?: 0)).flatMap { i -> lists.mapNotNull { it.getOrNull(i) } }
+        val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(appContext)
+        val mixed = ratingLimits?.activeLimit()?.let { limit -> ratingLimits.keepFitting(limit, all) { it.id to it.apiType } } ?: all
         return CatalogRow(
             addonId = addonId,
             addonName = addonName,

@@ -7,6 +7,7 @@ import com.nuvio.tv.core.player.ScoutMixSession
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.scout.ScoutMixLibrary
 import com.nuvio.tv.core.scout.ScoutMixSuggestions
+import com.nuvio.tv.core.scout.ScoutReadyMixBuilder
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.PlayerSettingsDataStore
@@ -21,6 +22,7 @@ import com.nuvio.tv.domain.model.ScoutMixPick
 import com.nuvio.tv.domain.model.ScoutMixShow
 import com.nuvio.tv.domain.model.Video
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,7 +78,11 @@ class ScoutMixViewModelTest {
 
     private fun viewModel(keepPlaying: Boolean = true, seenEverything: Boolean = false): ScoutMixViewModel {
         val store = mockk<ScoutMixStore>(relaxed = true)
-        every { store.observe(profile) } returns flowOf(listOf(ScoutMix("m", "Mix", listOf(show), keepPlaying = keepPlaying)))
+        val mixes = listOf(ScoutMix("m", "Mix", listOf(show), keepPlaying = keepPlaying))
+        every { store.observe(profile) } returns flowOf(mixes)
+        every { store.observeAny(profile) } returns flowOf(mixes)
+        every { store.observeNoSources(profile) } returns flowOf(emptySet())
+        lastStore = store
         val library = mockk<ScoutMixLibrary>(relaxed = true)
         coEvery { library.episodes(profile, any()) } returns ScoutMixEpisodes(meta(), if (seenEverything) allWatched else emptySet())
         coEvery { library.episodes(profile, match { it.id == "tt2" }) } returns ScoutMixEpisodes(meta())
@@ -92,8 +98,11 @@ class ScoutMixViewModelTest {
         val layout = mockk<LayoutPreferenceDataStore>(relaxed = true)
         every { layout.posterCardWidthDp } returns flowOf(126)
         every { layout.posterCardCornerRadiusDp } returns flowOf(12)
-        return ScoutMixViewModel(SavedStateHandle(mapOf("mixId" to "m")), store, library, suggestions, session, profiles, settings, layout)
+        val ready = mockk<ScoutReadyMixBuilder>(relaxed = true)
+        return ScoutMixViewModel(SavedStateHandle(mapOf("mixId" to "m")), store, library, suggestions, session, profiles, settings, ready, layout)
     }
+
+    private lateinit var lastStore: ScoutMixStore
 
     @Test
     fun `a mix with nothing left offers shows, and only then`() = runTest(mainDispatcherRule.dispatcher) {
@@ -250,5 +259,49 @@ class ScoutMixViewModelTest {
         val first = vm.play()!!
         runCurrent()
         assertFalse(session.upNextFor(profile, "tt1", first.video.id)!!.startsByItself)
+    }
+
+    @Test
+    fun `an episode without links is left out and the next one plays`() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel()
+        runCurrent()
+        val first = vm.play()!!
+        assertTrue(session.noSources("tt1", first.video.id))
+        vm.onShown()
+        runCurrent()
+
+        val started = vm.start.first()
+        assertTrue(started.video.id != first.video.id)
+        assertEquals(first.video.id, vm.state.value.noLink?.video?.id)
+        assertFalse(vm.state.value.noLinkStopped)
+        coVerify { lastStore.markNoSources("tt1", first.video.id) }
+    }
+
+    @Test
+    fun `three episodes in a row without links stop the mix`() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel()
+        runCurrent()
+        var current = vm.play()!!
+        repeat(2) {
+            assertTrue(session.noSources("tt1", current.video.id))
+            vm.onShown()
+            runCurrent()
+            current = vm.start.first()
+            assertFalse(vm.state.value.noLinkStopped)
+        }
+        assertTrue(session.noSources("tt1", current.video.id))
+        vm.onShown()
+        runCurrent()
+        assertTrue(vm.state.value.noLinkStopped)
+        assertFalse(session.active)
+    }
+
+    @Test
+    fun `a link for another episode does not count as no links`() {
+        session.start(profile, "m", "tt1", "tt1:1:1")
+        assertFalse(session.noSources("tt1", "tt1:1:2"))
+        assertFalse(session.noSources("tt9", "tt1:1:1"))
+        assertTrue(session.noSources("tt1", "tt1:1:1"))
+        assertEquals(ScoutMixReturn.NO_SOURCES, session.finish())
     }
 }

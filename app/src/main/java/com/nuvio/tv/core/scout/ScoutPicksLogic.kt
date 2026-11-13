@@ -1,7 +1,10 @@
 package com.nuvio.tv.core.scout
 
+import com.nuvio.tv.domain.model.SCOUT_IMPORTED_SEEDS
 import com.nuvio.tv.domain.model.SCOUT_MAX_NEGATIVE_SEEDS
 import com.nuvio.tv.domain.model.SCOUT_MIN_SEEDS
+import com.nuvio.tv.domain.model.importWeight
+import com.nuvio.tv.domain.model.limitImported
 import com.nuvio.tv.domain.model.ScoutExclusions
 import com.nuvio.tv.domain.model.ScoutPick
 import com.nuvio.tv.domain.model.ScoutRating
@@ -63,6 +66,7 @@ private const val STRETCH_START = 20
 private const val STRETCH_WINDOW = 120
 private const val STRETCH_RATING = 7f
 private const val STRETCH_VOTES = 100
+private const val AVOID_LANGUAGE_MIN_TITLES = 2
 
 const val SCOUT_ROWS_MAX = 3
 private const val FRESH_MIN_VOTES = 20
@@ -106,8 +110,8 @@ fun scoutSignals(
         ScoutSeed(item.contentId, tv, item.title, weight * DECAY.pow(index), index)
     }
     val known = fromHistory.map { it.contentId }.toSet()
-    val ratedOnly = ratings.filter { it.title.id !in known }.sortedByDescending { it.ratedAt }
-        .map { ScoutSeed(it.title.id, it.title.type.isTv(), it.title.name, it.rating.weight(), null) }
+    val ratedOnly = ratings.limitImported(SCOUT_IMPORTED_SEEDS).filter { it.title.id !in known }.sortedByDescending { it.ratedAt }
+        .map { ScoutSeed(it.title.id, it.title.type.isTv(), it.title.name, it.rating.weight() * it.importWeight(), null) }
     val rated = known + ratedOnly.map { it.contentId }
     val stoppedFilms = startedById.filterKeys { it !in rated }.mapNotNull { (id, rows) ->
         val row = rows.maxBy { it.lastWatched }
@@ -162,7 +166,8 @@ class ScoutTasteVector(
     val total: Double,
     val logVotesMean: Double,
     val logVotesSd: Double,
-    val ageFloor: Int? = null
+    val ageFloor: Int? = null,
+    val avoidedLanguages: Set<String> = emptySet()
 ) {
     fun topKeywords(frequency: Map<String, Int>, count: Int): List<String> = keywords.entries.filter { it.value > 0 }
         .sortedWith(compareByDescending<Map.Entry<String, Double>> { it.value * rarity(it.key, frequency) }.thenBy { it.key })
@@ -237,6 +242,8 @@ fun scoutTasteVector(items: List<Pair<ScoutTasteTitle, Double>>, ratedLove: Set<
     val loved = HashSet<Int>()
     val languages = HashMap<String, Double>()
     val countries = HashMap<String, Double>()
+    val notForMe = HashMap<String, Double>()
+    val notForMeCount = HashMap<String, Int>()
     val logs = ArrayList<Double>()
     var total = 0.0
     items.forEach { (title, weight) ->
@@ -253,12 +260,19 @@ fun scoutTasteVector(items: List<Pair<ScoutTasteTitle, Double>>, ratedLove: Set<
             title.votes?.let { logs += log10(it + 10.0) }
         } else if (weight < 0) {
             title.usefulKeywords().forEach { keywords.merge(it.name, weight * 0.5, Double::plus) }
+            title.language?.let {
+                notForMe.merge(it, -weight, Double::plus)
+                notForMeCount.merge(it, 1, Int::plus)
+            }
         }
     }
     val mean = if (logs.isEmpty()) 3.0 else logs.average()
     val sd = if (logs.size > 1) max(0.4, sqrt(logs.sumOf { (it - mean) * (it - mean) } / logs.size)) else 0.8
     val ages = items.filter { it.second > 0 }.mapNotNull { (title, weight) -> title.ageLevel?.let { it to weight } }
-    return ScoutTasteVector(keywords, ids, people, names, loved, languages, countries, total.coerceAtLeast(1.0), mean, sd, scoutAgeFloor(ages))
+    val avoided = notForMeCount.filter { (language, count) ->
+        count >= AVOID_LANGUAGE_MIN_TITLES && (languages[language] ?: 0.0) < notForMe.getValue(language)
+    }.keys
+    return ScoutTasteVector(keywords, ids, people, names, loved, languages, countries, total.coerceAtLeast(1.0), mean, sd, scoutAgeFloor(ages), avoided)
 }
 
 /** A title Trakt suggested, once its TMDB facts are known. No poster, no pick. */
@@ -272,7 +286,8 @@ fun ScoutTasteTitle.toScoutPick(tmdbId: Int, tv: Boolean): ScoutPick? = ScoutPic
     released = released,
     rating = rating,
     votes = votes,
-    genres = genres
+    genres = genres,
+    language = language
 )
 
 /** Adds a pick's share to its score for each seed that suggested it; extra sources are seeds with no name. */
@@ -396,14 +411,18 @@ fun scoutLimitDuplicates(picks: List<ScoutPick>, facts: Map<String, ScoutTasteTi
     return kept + later
 }
 
-/** Every fifth place goes to a well rated pick from outside the profile's main language or main genres. */
+/**
+ * Every fifth place goes to a well rated pick from outside the profile's main language or main genres,
+ * never in a language the profile keeps marking Not for me.
+ */
 fun scoutAddStretch(picks: List<ScoutPick>, facts: Map<String, ScoutTasteTitle>, taste: ScoutTasteVector): List<ScoutPick> {
     val mainLanguage = taste.languages.maxByOrNull { it.value }?.key
     val common = picks.take(STRETCH_START + 10).flatMap { it.genres }.groupingBy { it }.eachCount()
         .entries.sortedByDescending { it.value }.take(2).map { it.key }.toSet()
     val stretches = picks.take(STRETCH_WINDOW).drop(STRETCH_START).filter { pick ->
-        (pick.rating ?: 0f) >= STRETCH_RATING && (pick.votes ?: 0) >= STRETCH_VOTES &&
-            (facts[pick.key]?.language != mainLanguage || pick.genres.none { it in common })
+        val language = facts[pick.key]?.language ?: pick.language
+        (pick.rating ?: 0f) >= STRETCH_RATING && (pick.votes ?: 0) >= STRETCH_VOTES && language !in taste.avoidedLanguages &&
+            (language != mainLanguage || pick.genres.none { it in common })
     }.iterator()
     val used = HashSet<String>()
     val out = ArrayList<ScoutPick>(picks.size)
@@ -435,6 +454,13 @@ fun scoutWithReason(pick: ScoutPick, fact: ScoutTasteTitle?, taste: ScoutTasteVe
 /** A row named after a genre holds only that genre. Series ids count as their film equivalent. */
 fun scoutInRowGenre(picks: List<ScoutPick>, genre: Int?): List<ScoutPick> =
     if (genre == null) picks else picks.filter { pick -> pick.genres.any { scoutCanonicalGenre(it) == genre } }
+
+/** A short genre row is filled from the profile's other picks in that genre, best first. */
+fun scoutTopUpRow(row: List<ScoutPick>, picks: List<ScoutPick>, genre: Int?, most: Int): List<ScoutPick> {
+    if (row.size >= most) return row
+    val have = row.mapTo(HashSet()) { it.key }
+    return row + scoutInRowGenre(picks, genre).filter { have.add(it.key) }.take(most - row.size)
+}
 
 /** The first keyword most of the row's titles really carry, or none, so the row is just its genre. */
 fun scoutRowKeyword(keywords: List<String>, picks: List<ScoutPick>, facts: Map<String, ScoutTasteTitle>): String? =

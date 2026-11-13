@@ -318,7 +318,8 @@ class ScoutAnswersTest {
     @Test
     fun `regions and the two added countries are in the picker`() {
         val regions = ScoutSlices.inGroup(ScoutSliceGroup.REGION)
-        assertEquals(9, regions.size)
+        assertEquals(10, regions.size)
+        assertEquals("IN|PK|BD|LK|NP|BT|MV|AF", ScoutSlices.byId("region_south_asia")?.movie?.withOriginCountry)
         regions.forEach { slice ->
             assertTrue(slice.id, slice.titleRes != 0)
             assertEquals(slice.id, slice.movie?.withOriginCountry, slice.tv?.withOriginCountry)

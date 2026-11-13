@@ -19,8 +19,70 @@ class ScoutSlicesTest {
     @Test
     fun `award tiles sit above the acclaim tiles`() {
         val ids = ScoutSlices.inGroup(ScoutSliceGroup.ACCLAIM).map { it.id }
-        assertEquals(12, ids.size)
-        assertTrue(ids.take(8).all { it.startsWith("award_") })
+        assertEquals(16, ids.size)
+        assertTrue(ids.take(12).all { it.startsWith("award_") })
+    }
+
+    @Test
+    fun `nominee tiles use the same awards as their winner tiles`() {
+        listOf("bafta", "globes", "emmy").forEach { name ->
+            val winners = ScoutSlices.byId("award_$name")?.award
+            val nominees = ScoutSlices.byId("award_${name}_nominees")?.award
+            assertEquals(name, winners?.awards, nominees?.awards)
+            assertTrue(name, winners!!.winners && !nominees!!.winners)
+        }
+    }
+
+    @Test
+    fun `golden globes count both best picture awards`() {
+        assertEquals(listOf("golden_globe_drama", "golden_globe_comedy"), ScoutSlices.byId("award_globes")?.award?.awards)
+    }
+
+    @Test
+    fun `award tabs keep their order and leave out missing categories`() {
+        val lists = mapOf(
+            "pic" to ScoutAwardLists(wonMovies = (1..10).toList()),
+            "dir" to ScoutAwardLists(wonMovies = (11..20).toList())
+        )
+        val choice = ScoutAwardChoice(
+            listOf("pic"),
+            tabs = listOf(ScoutAwardTab(1, listOf("pic")), ScoutAwardTab(2, listOf("missing")), ScoutAwardTab(3, listOf("dir")))
+        )
+        val tabs = scoutAwardTabs(choice, lists)
+        assertEquals(listOf(1, 3), tabs.map { it.titleRes })
+        assertEquals((11..20).toList(), tabs[1].ids)
+    }
+
+    @Test
+    fun `nominee tabs leave out each category's winners`() {
+        val lists = mapOf("dir" to ScoutAwardLists(wonMovies = listOf(1, 2), nominatedMovies = (1..9).toList()))
+        val choice = ScoutAwardChoice(listOf("dir"), winners = false, tabs = listOf(ScoutAwardTab(7, listOf("dir"))))
+        assertEquals((3..9).toList(), scoutAwardTabs(choice, lists).single().ids)
+    }
+
+    @Test
+    fun `a category of series makes a series tab`() {
+        val lists = mapOf("limited" to ScoutAwardLists(wonSeries = (1..6).toList()))
+        val tab = scoutAwardTabs(ScoutAwardChoice(listOf("limited"), tabs = listOf(ScoutAwardTab(5, listOf("limited")))), lists).single()
+        assertTrue(tab.series)
+    }
+
+    @Test
+    fun `every award with categories starts with its main list`() {
+        ScoutSlices.inGroup(ScoutSliceGroup.ACCLAIM).mapNotNull { it.award }.filter { it.tabs.isNotEmpty() }.forEach { award ->
+            assertTrue(award.awards.toString(), award.tabs.flatMap { it.awards }.containsAll(award.awards))
+        }
+    }
+
+    @Test
+    fun `bafta names its main tab best film`() {
+        assertEquals(com.nuvio.tv.R.string.scout_award_tab_best_film, ScoutSlices.byId("award_bafta")?.award?.tabs?.first()?.titleRes)
+        assertEquals(com.nuvio.tv.R.string.scout_award_tab_picture, ScoutSlices.byId("award_oscar_winners")?.award?.tabs?.first()?.titleRes)
+    }
+
+    @Test
+    fun `criterion reads its own list`() {
+        assertEquals(listOf("criterion_collection"), ScoutSlices.byId("award_criterion")?.award?.awards)
     }
 
     @Test

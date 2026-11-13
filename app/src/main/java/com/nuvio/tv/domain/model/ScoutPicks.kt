@@ -37,7 +37,9 @@ data class ScoutPick(
     val whyLoved: Boolean = false,
     val whyKeyword: String? = null,
     val stretch: Boolean = false,
-    val aiReason: String? = null
+    val aiReason: String? = null,
+    val language: String? = null,
+    val origin: List<String> = emptyList()
 ) {
     val key: String get() = (if (tv) "tv:" else "movie:") + tmdbId
 }
@@ -93,14 +95,16 @@ fun scoutSeeds(watched: List<WatchedItem>, ratings: kotlin.collections.Collectio
         )
     }
     val finishedIds = finished.map { it.contentId }.toSet()
-    val ratedOnly = ratings.filter { it.title.id !in finishedIds }
+    val ratedOnly = ratings.limitImported(SCOUT_IMPORTED_SEEDS).filter { it.title.id !in finishedIds }
         .sortedByDescending { it.ratedAt }
-        .map { ScoutSeed(it.title.id, it.title.type.scoutIsTv(), it.title.name, it.rating.seedWeight(), null) }
+        .map { ScoutSeed(it.title.id, it.title.type.scoutIsTv(), it.title.name, it.rating.seedWeight() * it.importWeight(), null) }
     val all = finished + ratedOnly
     val negative = all.filter { it.weight < 0 }.take(SCOUT_MAX_NEGATIVE_SEEDS)
     val positive = all.filter { it.weight > 0 }.sortedByDescending { it.weight }.take(SCOUT_MAX_SEEDS)
     return positive + negative
 }
+
+internal fun ScoutRatingEntry.importWeight(): Double = if (imported) SCOUT_IMPORTED_WEIGHT else 1.0
 
 private fun ScoutRating.seedWeight(): Double = when (this) {
     ScoutRating.LOVE -> LOVE_WEIGHT
@@ -121,14 +125,16 @@ fun scoutNormalizedName(name: String): String =
         .replace(SCOUT_NOT_LETTER_OR_DIGIT, " ")
         .trim()
 
-/** What must never be offered: anything watched, started or rated, and any left-out genre. */
+/** What must never be offered: anything watched, started or rated, and any left-out genre or language. */
 data class ScoutExclusions(
     val names: Set<String> = emptySet(),
     val tmdbKeys: Set<String> = emptySet(),
-    val genres: Set<Int> = emptySet()
+    val genres: Set<Int> = emptySet(),
+    val languages: Set<String> = emptySet()
 ) {
     fun blocks(pick: ScoutPick): Boolean {
         if (pick.key in tmdbKeys || pick.genres.any { it in genres }) return true
+        if (pick.language != null && pick.language in languages) return true
         val name = scoutNormalizedName(pick.name)
         if (name in names) return true
         val year = pick.released?.take(4)?.toIntOrNull() ?: return false
@@ -185,5 +191,6 @@ fun scoutShouldRefresh(pool: ScoutPool?, signature: String, now: Long): Boolean 
 }
 
 /** Rebuilding is only worth a request when something to base picks on has changed. */
-fun scoutHistorySignature(seeds: List<ScoutSeed>, leftOut: Set<Int>): String =
-    (seeds.map { it.contentId + ":" + it.weight.toInt() } + leftOut.sorted().map(Int::toString)).joinToString(",")
+fun scoutHistorySignature(seeds: List<ScoutSeed>, leftOut: Set<Int>, leftOutLanguages: Set<String> = emptySet()): String =
+    (seeds.map { it.contentId + ":" + it.weight.toInt() } + leftOut.sorted().map(Int::toString) +
+        leftOutLanguages.sorted().map { "lang:$it" }).joinToString(",")

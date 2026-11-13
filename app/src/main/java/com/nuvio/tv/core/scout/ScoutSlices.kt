@@ -17,8 +17,17 @@ enum class ScoutSliceGroup(@StringRes val titleRes: Int, val inPicker: Boolean =
     GENRE(R.string.scout_group_genre, inPicker = false)
 }
 
-/** Which lists of the bundled awards file a tile shows. */
-data class ScoutAwardChoice(val awards: List<String>, val winners: Boolean = true)
+/** One category on an award's page, read from these lists of the bundled awards file. */
+data class ScoutAwardTab(@StringRes val titleRes: Int, val awards: List<String>)
+
+/** Which lists of the bundled awards file a tile shows, and the categories its page offers as tabs. */
+data class ScoutAwardChoice(
+    val awards: List<String>,
+    val winners: Boolean = true,
+    val tabs: List<ScoutAwardTab> = emptyList()
+)
+
+data class ScoutAwardTabTitles(@StringRes val titleRes: Int, val series: Boolean, val ids: List<Int>)
 
 data class ScoutAwardLists(
     val wonMovies: List<Int> = emptyList(),
@@ -67,6 +76,17 @@ fun scoutAwardTitles(choice: ScoutAwardChoice, lists: Map<String, ScoutAwardList
     }
     return ScoutAwardTitles(side({ it.wonMovies }, { it.nominatedMovies }), side({ it.wonSeries }, { it.nominatedSeries }))
 }
+
+/** The categories of an award page, each with the titles it shows. A category with too few titles is left out. */
+fun scoutAwardTabs(choice: ScoutAwardChoice, lists: Map<String, ScoutAwardLists>): List<ScoutAwardTabTitles> =
+    choice.tabs.mapNotNull { tab ->
+        val titles = scoutAwardTitles(ScoutAwardChoice(tab.awards, choice.winners), lists)
+        when {
+            titles.movies.isNotEmpty() -> ScoutAwardTabTitles(tab.titleRes, series = false, ids = titles.movies)
+            titles.series.isNotEmpty() -> ScoutAwardTabTitles(tab.titleRes, series = true, ids = titles.series)
+            else -> null
+        }
+    }
 
 /** One way to slice the catalogue. A side left null means the slice offers only the other type. */
 data class ScoutSlice(
@@ -161,11 +181,48 @@ private fun decade(start: Int): ScoutSlice {
     )
 }
 
-private fun award(id: String, res: Int, vararg awards: String, winners: Boolean = true) = ScoutSlice(
+private fun award(id: String, res: Int, vararg awards: String, winners: Boolean = true, tabs: List<ScoutAwardTab> = emptyList()) = ScoutSlice(
     id = "award_$id",
     group = ScoutSliceGroup.ACCLAIM,
     titleRes = res,
-    award = ScoutAwardChoice(awards.toList(), winners)
+    award = ScoutAwardChoice(awards.toList(), winners, tabs)
+)
+
+private fun tab(res: Int, vararg awards: String) = ScoutAwardTab(res, awards.toList())
+
+private val OSCAR_TABS = listOf(
+    tab(R.string.scout_award_tab_picture, "oscar_best_picture"),
+    tab(R.string.scout_award_tab_director, "oscar_director"),
+    tab(R.string.scout_award_tab_actor, "oscar_actor"),
+    tab(R.string.scout_award_tab_actress, "oscar_actress"),
+    tab(R.string.scout_genre_animation, "oscar_animated"),
+    tab(R.string.scout_award_tab_international, "oscar_international"),
+    tab(R.string.scout_genre_documentary, "oscar_documentary")
+)
+
+private val BAFTA_TABS = listOf(
+    tab(R.string.scout_award_tab_best_film, "bafta_best_film"),
+    tab(R.string.scout_award_tab_director, "bafta_director"),
+    tab(R.string.scout_award_tab_actor, "bafta_actor"),
+    tab(R.string.scout_award_tab_actress, "bafta_actress"),
+    tab(R.string.scout_genre_animation, "bafta_animated"),
+    tab(R.string.scout_award_tab_international, "bafta_international"),
+    tab(R.string.scout_genre_documentary, "bafta_documentary")
+)
+
+private val GLOBE_TABS = listOf(
+    tab(R.string.scout_award_tab_picture, "golden_globe_drama", "golden_globe_comedy"),
+    tab(R.string.scout_award_tab_director, "globe_director"),
+    tab(R.string.scout_award_tab_actor, "globe_actor_drama", "globe_actor_comedy"),
+    tab(R.string.scout_award_tab_actress, "globe_actress_drama", "globe_actress_comedy"),
+    tab(R.string.scout_genre_animation, "globe_animated"),
+    tab(R.string.scout_award_tab_international, "globe_international")
+)
+
+private val EMMY_TABS = listOf(
+    tab(R.string.scout_genre_drama, "emmy_drama"),
+    tab(R.string.scout_genre_comedy, "emmy_comedy"),
+    tab(R.string.scout_award_tab_limited, "emmy_limited")
 )
 
 private fun country(code: String) = ScoutSlice(
@@ -250,6 +307,7 @@ object ScoutSlices {
         region("europe", R.string.scout_region_europe, "FR|DE|IT|ES|PT|NL|BE|AT|CH|SE|NO|DK|FI|IS|PL|CZ|HU|RO|GR"),
         region("nordic", R.string.scout_region_nordic, "SE|NO|DK|FI|IS"),
         region("east_asia", R.string.scout_region_east_asia, "JP|KR|CN|TW|HK"),
+        region("south_asia", R.string.scout_region_south_asia, "IN|PK|BD|LK|NP|BT|MV|AF"),
         region("south_east_asia", R.string.scout_region_south_east_asia, "TH|ID|PH|MY|SG|VN"),
         region("middle_east", R.string.scout_region_middle_east, "TR|IL|IR|SA|AE|EG|LB|JO"),
         region("africa", R.string.scout_region_africa, "NG|ZA|KE|GH|EG|MA|SN"),
@@ -300,14 +358,18 @@ object ScoutSlices {
         genre(53, R.string.scout_genre_thriller, "80|9648"),
         genre(10752, R.string.scout_genre_war, "10768"),
         genre(37, R.string.scout_genre_western, "37"),
-        award("oscar_winners", R.string.scout_award_oscar_winners, "oscar_best_picture"),
-        award("oscar_nominees", R.string.scout_award_oscar_nominees, "oscar_best_picture", winners = false),
+        award("oscar_winners", R.string.scout_award_oscar_winners, "oscar_best_picture", tabs = OSCAR_TABS),
+        award("oscar_nominees", R.string.scout_award_oscar_nominees, "oscar_best_picture", winners = false, tabs = OSCAR_TABS),
         award("palme", R.string.scout_award_palme, "palme_dor"),
         award("lion", R.string.scout_award_lion, "golden_lion"),
-        award("bafta", R.string.scout_award_bafta, "bafta_best_film"),
-        award("globes", R.string.scout_award_globes, "golden_globe_drama"),
-        award("emmy", R.string.scout_award_emmy, "emmy_drama", "emmy_comedy"),
+        award("bafta", R.string.scout_award_bafta, "bafta_best_film", tabs = BAFTA_TABS),
+        award("bafta_nominees", R.string.scout_award_bafta_nominees, "bafta_best_film", winners = false, tabs = BAFTA_TABS),
+        award("globes", R.string.scout_award_globes, "golden_globe_drama", "golden_globe_comedy", tabs = GLOBE_TABS),
+        award("globes_nominees", R.string.scout_award_globes_nominees, "golden_globe_drama", "golden_globe_comedy", winners = false, tabs = GLOBE_TABS),
+        award("emmy", R.string.scout_award_emmy, "emmy_drama", "emmy_comedy", tabs = EMMY_TABS),
+        award("emmy_nominees", R.string.scout_award_emmy_nominees, "emmy_drama", "emmy_comedy", winners = false, tabs = EMMY_TABS),
         award("actor", R.string.scout_award_actor, "actor_award_cast"),
+        award("criterion", R.string.scout_award_criterion, "criterion_collection"),
         slice("acclaim_top", ScoutSliceGroup.ACCLAIM, R.string.scout_slice_top_rated,
             quality(average = 8.0, votes = 5000) to quality(average = 8.3, votes = 1000), TOP),
         slice("acclaim_gems", ScoutSliceGroup.ACCLAIM, R.string.scout_row_gems,

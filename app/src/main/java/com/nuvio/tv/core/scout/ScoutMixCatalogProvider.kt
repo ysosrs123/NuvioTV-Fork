@@ -33,7 +33,8 @@ import javax.inject.Singleton
 @Singleton
 class ScoutMixCatalogProvider @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val store: ScoutMixStore
+    private val store: ScoutMixStore,
+    private val ready: ScoutReadyMixBuilder
 ) : BuiltInCatalogProvider {
     override val addons: Flow<List<Addon>> = flowOf(emptyList())
 
@@ -41,7 +42,8 @@ class ScoutMixCatalogProvider @Inject constructor(
         combine(store.mixes, LocaleCache.tags) { mixes, _ ->
             if (mixes.isEmpty()) emptyList() else {
                 val local = context.withAppLocale()
-                listOf(scoutMixCollection(local.getString(R.string.scout_mixes_title), mixes, homeWords(local)))
+                val own = scoutMixCollection(local.getString(R.string.scout_mixes_title), mixes, homeWords(local))
+                listOf(own.copy(folders = own.folders + readyFolders(local, mixes)))
             }
         }.distinctUntilChanged()
 
@@ -53,6 +55,62 @@ class ScoutMixCatalogProvider @Inject constructor(
             local.getString(R.string.scout_mixes_about, list)
         }
     )
+
+    /** The occasion in season, if any, then the way to every ready-made mix. */
+    private suspend fun readyFolders(local: Context, mixes: List<ScoutMix>): List<CollectionFolder> = buildList {
+        val kind = local.getString(R.string.scout_premix_kind)
+        ScoutReadyMixes.inSeason(java.time.LocalDate.now())?.let { season ->
+            val occasion = season.occasion ?: return@let
+            val episodes = runCatching { ready.occasionEpisodes(occasion) }.getOrDefault(emptyList())
+            if (episodes.size < SCOUT_OCCASION_FEWEST) return@let
+            val shows = episodes.distinctBy { it.imdb }.shuffled(kotlin.random.Random(scoutReadyWeekSeed()))
+            if (shows.isEmpty()) return@let
+            val lead = shows.firstNotNullOfOrNull { it.backdrop }
+            val posters = shows.mapNotNull { it.poster }
+            val deck = ScoutMixArt.deck(lead, posters, mirrored = false)
+            val names = shows.take(HERO_LOGOS).map { it.name }
+            add(
+                CollectionFolder(
+                    id = season.id,
+                    title = local.getString(season.nameRes),
+                    coverImageUrl = deck,
+                    heroBackdropUrl = ScoutMixArt.hero(shows.mapNotNull { it.backdrop }),
+                    tileShape = PosterShape.LANDSCAPE,
+                    scoutMix = ScoutMixTile(
+                        kind = kind,
+                        shows = local.getString(R.string.scout_premix_in_season),
+                        about = local.getString(R.string.scout_premix_desc_occasion, calendarNameList(names, local.resources.configuration.locales[0]) { it.joinToString(", ") }),
+                        genre = null,
+                        logos = emptyList(),
+                        deck = deck,
+                        deckMirrored = ScoutMixArt.deck(lead, posters, mirrored = true)
+                    )
+                )
+            )
+        }
+        val shows = mixes.flatMap { it.shows }
+        val lead = shows.firstNotNullOfOrNull { it.backdrop ?: it.poster }
+        val posters = shows.mapNotNull { it.poster ?: it.backdrop }.distinct()
+        val deck = ScoutMixArt.deck(lead, posters, mirrored = false)
+        add(
+            CollectionFolder(
+                id = FOLDER_MORE,
+                title = local.getString(R.string.scout_premix_more),
+                coverImageUrl = deck,
+                heroBackdropUrl = ScoutMixArt.hero(shows.mapNotNull { it.backdrop ?: it.poster }),
+                tileShape = PosterShape.LANDSCAPE,
+                scoutMix = ScoutMixTile(
+                    kind = kind,
+                    shows = "",
+                    about = local.getString(R.string.scout_premix_more_about),
+                    genre = null,
+                    logos = emptyList(),
+                    deck = deck,
+                    deckMirrored = ScoutMixArt.deck(lead, posters, mirrored = true)
+                )
+            )
+        )
+    }
 
     override val defaultFirstKeys: List<String>
         get() = if (ScoutMixes.available) listOf("collection_$COLLECTION_ID") else emptyList()
@@ -88,6 +146,7 @@ class ScoutMixCatalogProvider @Inject constructor(
 
     companion object {
         const val COLLECTION_ID = "scout_mixes"
+        const val FOLDER_MORE = "ready_more"
     }
 }
 
