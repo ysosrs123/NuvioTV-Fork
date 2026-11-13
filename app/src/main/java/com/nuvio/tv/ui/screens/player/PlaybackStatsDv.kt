@@ -14,13 +14,30 @@ internal object PlaybackStatsDv {
 
     enum class Dv7Layers { RPU_BL_EL, BL_RPU, BL_ONLY }
 
-    /** True when the last video decoder was the Amlogic dual-layer port (native FEL route), not a fallback. */
-    fun isNativeFelDecoder(decoderName: String?): Boolean =
-        decoderName?.startsWith(com.nuvio.tv.core.player.amlfel.AmlDvFelVideoRenderer.DECODER_NAME) == true
+    /**
+     * True when the last video decoder was a native FEL route, not a fallback: the Amlogic dual-layer port
+     * (AM9), or the Fire TV Cube 3 dvfel renderer while its libdvfelplay session runs in FEL mode.
+     */
+    fun isNativeFelDecoder(
+        decoderName: String?,
+        gazelleFelRunning: Boolean = com.nuvio.tv.core.player.dvfel.GazelleFelState.isFelRunning,
+    ): Boolean =
+        decoderName?.startsWith(com.nuvio.tv.core.player.amlfel.AmlDvFelVideoRenderer.DECODER_NAME) == true ||
+            (decoderName?.startsWith(com.nuvio.tv.core.player.dvfel.GazelleDvFelVideoRenderer.DECODER_PREFIX) == true &&
+                gazelleFelRunning)
+
+    /** Either native FEL mode, by its stored name. */
+    fun isNativeFelMode(modeEffective: String?): Boolean =
+        modeEffective in com.nuvio.tv.data.local.Dv7HandlingMode.NATIVE_FEL_NAMES
 
     /** Which layers of a Profile 7 stream reached the picture, or null when the playback does not say. */
-    fun dv7LayersUsed(modeEffective: String?, decoderName: String?, converted: Boolean): Dv7Layers? = when {
-        modeEffective == "NATIVE_FEL" && isNativeFelDecoder(decoderName) -> Dv7Layers.RPU_BL_EL
+    fun dv7LayersUsed(
+        modeEffective: String?,
+        decoderName: String?,
+        converted: Boolean,
+        gazelleFelRunning: Boolean = com.nuvio.tv.core.player.dvfel.GazelleFelState.isFelRunning,
+    ): Dv7Layers? = when {
+        isNativeFelMode(modeEffective) && isNativeFelDecoder(decoderName, gazelleFelRunning) -> Dv7Layers.RPU_BL_EL
         modeEffective == "DV81_LIBDOVI" && converted -> Dv7Layers.BL_RPU
         modeEffective == "HDR10_BASE_LAYER" || modeEffective == "STRIP_DV" -> Dv7Layers.BL_ONLY
         else -> null
@@ -42,7 +59,8 @@ internal object PlaybackStatsDv {
         elType: String?,
         modeEffective: String?,
         sourceCodecs: String?,
-        converting: Boolean
+        converting: Boolean,
+        gazelleFelRunning: Boolean = com.nuvio.tv.core.player.dvfel.GazelleFelState.isFelRunning,
     ): String {
         val profile = sourceProfile.trim().toIntOrNull()
         val name = buildString {
@@ -55,12 +73,25 @@ internal object PlaybackStatsDv {
         if (profile != null && profile != 7) return "$name · native"
         return when (modeEffective) {
             "NATIVE_FEL" -> "$name · RPU + BL + EL"
+            // Only once the libdvfelplay session actually runs in FEL mode.
+            "NATIVE_FEL_CUBE3" -> if (gazelleFelRunning) "$name · RPU + BL + EL" else name
             "DV81_LIBDOVI" -> if (converting) "$name → 8.1" else "$name → 8.1 (not converting)"
             "HDR10_BASE_LAYER" -> "$name → HDR10 base layer"
             "STRIP_DV" -> "$name → HDR10 (RPU stripped)"
             "OFF" -> "$name · MediaCodec"
             else -> name
         }
+    }
+
+    /**
+     * Fire TV Cube 3 FEL rows from a dvfp_stats snapshot (see GazelleFelState.stats): EL pictures decoded vs.
+     * EL access units in, and the pairing drop counters. Null when no snapshot is available.
+     */
+    fun gazelleElRows(stats: LongArray?): Pair<String, String>? {
+        if (stats == null || stats.size < com.nuvio.tv.core.player.dvfel.DvFelPlay.STATS_COUNT) return null
+        val decoded = "decoded ${stats[4]} / in ${stats[5]}"
+        val drops = "overflow ${stats[7]} · no CRC match ${stats[8]} · stale ${stats[9]}"
+        return decoded to drops
     }
 
     fun cmText(dm: DoviBridge.RpuDmInfo): String? = when (dm.cmVersion) {

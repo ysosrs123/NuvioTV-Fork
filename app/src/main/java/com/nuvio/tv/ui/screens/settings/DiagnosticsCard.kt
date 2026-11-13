@@ -125,12 +125,18 @@ internal fun LazyListScope.diagnosticsCardItems(
                     }
                 )
             )
-            val nativeFelDecoded = diagnostics.dv7ModeEffective == "NATIVE_FEL" &&
-                PlaybackStatsDv.isNativeFelDecoder(diagnostics.dv81DecoderName)
+            // Read after playback, when the Cube 3 session is closed: the recorded backend says it ran (a session that
+            // failed to open falls back to AUTO, which records a new playback without it).
+            val gazelleFelRan = diagnostics.nativeFelBackend == com.nuvio.tv.core.player.NativeFelBackend.GAZELLE_DVFEL.name
+            val nativeFelDecoded = PlaybackStatsDv.isNativeFelMode(diagnostics.dv7ModeEffective) &&
+                PlaybackStatsDv.isNativeFelDecoder(diagnostics.dv81DecoderName, gazelleFelRunning = gazelleFelRan)
             DiagnosticRow(
                 stringResource(R.string.diag_label_dv7_decoder),
                 dv(
                     when {
+                        nativeFelDecoded && gazelleFelRan -> diagnostics.dvfelModuleVersion
+                            ?.let { stringResource(R.string.diag_value_dv7_native_route_gazelle) + " · $it" }
+                            ?: stringResource(R.string.diag_value_dv7_native_route_gazelle)
                         nativeFelDecoded -> stringResource(R.string.diag_value_dv7_native_route)
                         diagnostics.codecDv7Supported -> stringResource(R.string.diag_value_available)
                         // Not "not available": devices like the S905X4 decode P7
@@ -145,7 +151,8 @@ internal fun LazyListScope.diagnosticsCardItems(
                 val layers = PlaybackStatsDv.dv7LayersUsed(
                     modeEffective = diagnostics.dv7ModeEffective,
                     decoderName = diagnostics.dv81DecoderName,
-                    converted = diagnostics.dv7DoviSuccess > 0 || diagnostics.dv7DoviSignalRewrites > 0
+                    converted = diagnostics.dv7DoviSuccess > 0 || diagnostics.dv7DoviSignalRewrites > 0,
+                    gazelleFelRunning = gazelleFelRan
                 )
                 val value = when (layers) {
                     PlaybackStatsDv.Dv7Layers.RPU_BL_EL -> stringResource(R.string.diag_value_el_all_layers_fmt, elType)

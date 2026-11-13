@@ -940,6 +940,9 @@ class PlayerRuntimeController(
     // stall) and are re-prepared on the AUTO path.
     internal val nativeFelDisabledStreamUrls: MutableSet<String> = mutableSetOf()
     internal var isNativeFelActiveForCurrentPlayback: Boolean = false
+    /** Native FEL backend of the current playback (NONE when native FEL is not active). */
+    internal var currentNativeFelBackend: com.nuvio.tv.core.player.NativeFelBackend =
+        com.nuvio.tv.core.player.NativeFelBackend.NONE
     // Streams where manual Convert-to-DV8.1 mode 2 failed to play, so the next
     // attempt is forced to libdovi mode 1 before falling back to HDR10 base layer.
     internal val dv7Mode1ForcedStreamUrls: MutableSet<String> = mutableSetOf()

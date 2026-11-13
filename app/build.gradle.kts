@@ -92,6 +92,16 @@ if (gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = tr
     }
 }
 val enableAmlFelNative = resolveProperty(devProperties, localProperties, "AML_FEL_NATIVE_ENABLED", "true").let(::parseBooleanProperty)
+// Fire TV Cube 3 (Gazelle) FEL APK: -PDVFEL_GAZELLE_ENABLED=true builds the libnuvio_dvfel JNI shim and packages
+// the prebuilt src/dvfel/jniLibs/armeabi-v7a/libdvfelplay.so. Off by default, so the normal APK carries neither.
+val enableDvfelGazelle = (providers.gradleProperty("DVFEL_GAZELLE_ENABLED").orNull
+    ?: resolveProperty(devProperties, localProperties, "DVFEL_GAZELLE_ENABLED", "false")).let(::parseBooleanProperty)
+// ABIs to build APKs (and native code) for, comma-separated. The normal APK ships armeabi-v7a and arm64-v8a;
+// the FEL APK only armeabi-v7a, the one ABI libdvfelplay is built for. Set NUVIO_ABIS=armeabi-v7a in
+// local.dev.properties (or -PNUVIO_ABIS=...) for faster local builds.
+val apkAbis = (providers.gradleProperty("NUVIO_ABIS").orNull
+    ?: resolveProperty(devProperties, localProperties, "NUVIO_ABIS", if (enableDvfelGazelle) "armeabi-v7a" else "armeabi-v7a,arm64-v8a"))
+    .split(',').map { it.trim() }.filter { it.isNotEmpty() }
 val doviStaticLibPath = resolveProperty(devProperties, localProperties, "DOVI_LIBDOVI_STATIC_LIB")
 val doviIncludeDirPath = resolveProperty(devProperties, localProperties, "DOVI_LIBDOVI_INCLUDE_DIR")
 val doviPrebuiltRootPath = resolveProperty(devProperties, localProperties, "DOVI_LIBDOVI_PREBUILT_ROOT")
@@ -163,7 +173,14 @@ android {
         buildConfigField("boolean", "DOVI_NATIVE_ENABLED", enableDoviNative.toString())
         buildConfigField("boolean", "DOVI_EXTRACTOR_HOOK_READY", doviExtractorHookReady.toString())
         buildConfigField("boolean", "AML_FEL_NATIVE_ENABLED", enableAmlFelNative.toString())
-        // libnuviothumb is always built; dovi_bridge and aml_fel only when enabled.
+        buildConfigField("boolean", "DVFEL_GAZELLE_ENABLED", enableDvfelGazelle.toString())
+        if (enableDvfelGazelle) {
+            // Build metadata, ignored by the updater's version comparison: 1.1.0-arc.2+fel.
+            versionNameSuffix = "+fel"
+        }
+        // The updater installs the release asset of the same kind: app-full[-fel]-<abi>-release.apk.
+        buildConfigField("String", "UPDATE_APK_PREFIX", if (enableDvfelGazelle) "\"app-full-fel\"" else "\"app-full\"")
+        // libnuviothumb is always built; dovi_bridge, aml_fel and nuvio_dvfel only when enabled.
         externalNativeBuild {
             cmake {
                 arguments(
@@ -171,11 +188,12 @@ android {
                 )
             }
         }
-        if (enableDoviNative || enableAmlFelNative) {
+        if (enableDoviNative || enableAmlFelNative || enableDvfelGazelle) {
             externalNativeBuild {
                 cmake {
                     arguments(
                         "-DAML_FEL_NATIVE_ENABLED=${if (enableAmlFelNative) "ON" else "OFF"}",
+                        "-DDVFEL_GAZELLE_ENABLED=${if (enableDvfelGazelle) "ON" else "OFF"}",
                         "-DDOVI_ENABLE_LIBDOVI=${if (doviEnableRealLink) "ON" else "OFF"}",
                         "-DDOVI_LIBDOVI_STATIC_LIB=${cmakePath(doviStaticLibPath)}",
                         "-DDOVI_LIBDOVI_INCLUDE_DIR=${cmakePath(doviIncludeDirPath)}",
@@ -312,7 +330,7 @@ android {
         abi {
             isEnable = !buildingAppBundle
             reset()
-            include("armeabi-v7a", "arm64-v8a")
+            include(*apkAbis.toTypedArray())
             isUniversalApk = false
         }
     }
@@ -344,6 +362,7 @@ android {
     sourceSets {
         getByName("main") {
             jniLibs.srcDirs("src/main/jniLibs")
+            if (enableDvfelGazelle) jniLibs.srcDir("src/dvfel/jniLibs")
         }
     }
 

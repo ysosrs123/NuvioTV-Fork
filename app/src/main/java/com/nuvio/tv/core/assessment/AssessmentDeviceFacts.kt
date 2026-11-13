@@ -45,8 +45,13 @@ class AssessmentDeviceFacts internal constructor(
                 activity?.let { DisplayCapabilities.detect(it) } ?: DisplayCapabilities.Snapshot.Unknown,
                 DolbyVisionBaseLayerPolicy.resolve(context, DoviBridge.isLibraryLoaded),
                 AudioOutputRouteDetector.detect(context),
-                settings.dv7HandlingMode == com.nuvio.tv.data.local.Dv7HandlingMode.NATIVE_FEL &&
-                    com.nuvio.tv.core.player.amlfel.AmlFelSupport.isDeviceUsable(),
+                when (settings.dv7HandlingMode) {
+                    com.nuvio.tv.data.local.Dv7HandlingMode.NATIVE_FEL ->
+                        com.nuvio.tv.core.player.amlfel.AmlFelSupport.isDeviceUsable()
+                    com.nuvio.tv.data.local.Dv7HandlingMode.NATIVE_FEL_CUBE3 ->
+                        com.nuvio.tv.core.player.dvfel.GazelleFelSupport.isUsable()
+                    else -> false
+                },
                 VodCacheSizing.resolveMaxBytes(
                     PlayerMediaSourceFactory.reclaimableVodCacheSpaceBytes(context),
                     VodCacheSizeMode.AUTO,

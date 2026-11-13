@@ -36,6 +36,42 @@ It installs next to the official Nuvio, and tells you when a new release is out.
 
 Not sure which one? Many boxes run a 32-bit system even with a 64-bit chip. Try 64-bit first. If it says the app isn't compatible, use 32-bit.
 
+## Dolby Vision FEL on the Fire TV Cube 3
+
+Nuvio Arc can play Dolby Vision Profile 7 FEL with its full enhancement layer on a Fire TV Cube 3. The
+box's own Dolby Vision core combines the base layer and the enhancement layer, with no conversion to
+Profile 8.1. This is experimental. It needs all of the following:
+
+1. **A Fire TV Cube 3rd generation** (board `gazelle`). Tested on Fire OS 7.7.1.7. Other Fire TV
+   devices and other boxes can't use it.
+2. **Root** on the Cube.
+3. **signde's Fire TV AV module** ([signde/vlc-fel-android](https://github.com/signde/vlc-fel-android)),
+   installed through root. It loads the `dvfel` kernel helper (version **2026.10.25.2 or newer**), lets
+   apps open `/dev/dvfel` and sets the `debug.dvfp.*` player properties. Nuvio never installs or loads
+   anything with root itself.
+4. **The FEL APK**:
+   [app-full-fel-armeabi-v7a-release.apk](https://github.com/ysosrs123/NuvioTV-Fork/releases/latest/download/app-full-fel-armeabi-v7a-release.apk).
+   Only this APK contains `libdvfelplay`, the FEL helper; the normal 32-bit and 64-bit APKs don't. It
+   installs over the normal Nuvio Arc and keeps your settings. Its in-app updates stay on the FEL APK.
+5. **ExoPlayer** as the player, a **Dolby Vision TV**, and Profile 7 files that have an enhancement layer
+   and aren't encrypted.
+
+Then open **Settings → Playback → Dolby Vision handling** and choose **Native FEL (Fire TV Cube 3)**. The
+option only appears in the FEL APK on a Cube 3. If it says *Fire TV AV module not detected*, the module
+isn't loaded or set up. You can check it with adb:
+
+```bash
+adb shell cat /sys/module/dvfel/version
+```
+
+```bash
+adb shell getprop debug.dvfp.hold_images
+```
+
+The first should print 2026.10.25.2 or later, the second `1`. While a film plays, the Stats panel shows
+`RPU + BL + EL` next to the Dolby Vision mode when FEL is composed. Whenever something is missing, or a
+stream can't take the FEL path, it plays as it would with **Auto**.
+
 ## What it adds
 
 <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"> Only in Arc
@@ -180,6 +216,9 @@ Parts from other projects keep their own licences:
 - dav1d by VideoLAN and the dav1d authors (BSD-2-Clause) for software AV1 decoding, with
   cpu_features by Google (Apache-2.0).
 - libdovi by quietvoid (MIT). Matroska extractor files from AndroidX Media3 (Apache-2.0), changed.
+- libdvfelplay by Team CoreELEC, djnice and signde (GPL-2.0-or-later) for Dolby Vision Profile 7 FEL on the
+  rooted Fire TV Cube 3: source in `third_party/libdvfelplay/` (signde/vlc-fel-android, tag
+  v0.1.0-fc3-experimental, commit 58b7b69), built by `scripts/build-dvfelplay.sh`.
 - Release group lists from TRaSH Guides (MIT).
 - Fonts Atkinson Hyperlegible Next, Source Sans 3, and the subtitle fonts Roboto, Montserrat, Noto Sans and Asap Condensed (SIL Open Font License 1.1, texts in
   `app/src/main/assets/licenses/`).

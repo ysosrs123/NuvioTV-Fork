@@ -86,6 +86,7 @@ private const val ApacheLicenseUrl = "https://www.apache.org/licenses/LICENSE-2.
 private const val HazeLicenseUrl = "https://github.com/chrisbanes/haze/blob/1.7.2/LICENSE"
 private const val LibMpvAndroidUrl = "https://github.com/jarnedemeulemeester/libmpv-android"
 private const val LibDoviUrl = "https://github.com/quietvoid/dovi_tool"
+private const val LibDvFelPlayUrl = "https://github.com/signde/vlc-fel-android/tree/58b7b69259c9ed1839ec6247a562cfcbda751175/libdvfelplay"
 private const val FfmpegUrl = "https://ffmpeg.org/legal.html"
 private const val Dav1dUrl = "https://code.videolan.org/videolan/dav1d"
 private const val KodiUrl = "https://github.com/xbmc/xbmc"
@@ -477,7 +478,7 @@ private fun dataAttributionItems() = listOfNotNull(
 )
 
 @Composable
-private fun playbackLicenseItems() = listOf(
+private fun playbackLicenseItems() = listOfNotNull(
     LicenseAttributionItem(
         title = stringResource(R.string.licenses_attributions_exoplayer_title),
         body = stringResource(R.string.licenses_attributions_exoplayer_body),
@@ -493,6 +494,11 @@ private fun playbackLicenseItems() = listOf(
         body = stringResource(R.string.licenses_attributions_libdovi_body),
         url = LibDoviUrl
     ),
+    LicenseAttributionItem(
+        title = stringResource(R.string.licenses_attributions_libdvfelplay_title),
+        body = stringResource(R.string.licenses_attributions_libdvfelplay_body),
+        url = LibDvFelPlayUrl
+    ).takeIf { com.nuvio.tv.BuildConfig.DVFEL_GAZELLE_ENABLED },
     LicenseAttributionItem(
         title = stringResource(R.string.licenses_attributions_ffmpeg_title),
         body = stringResource(R.string.licenses_attributions_ffmpeg_body),

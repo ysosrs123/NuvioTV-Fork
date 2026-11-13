@@ -90,6 +90,13 @@ class ForkUpdateRepositoryTest {
         assertEquals(asset(), AbiSelector.chooseBestApkAsset(all, listOf("arm64-v8a", "armeabi-v7a")))
         assertEquals(asset("universal"), AbiSelector.chooseBestApkAsset(all, listOf("x86")))
     }
+    @Test fun `the FEL APK updates only to the FEL asset`() {
+        val normal = asset("armeabi-v7a")
+        val fel = normal.copy(name = "app-full-fel-armeabi-v7a-release.apk")
+        assertEquals(normal, AbiSelector.chooseBestApkAsset(listOf(normal, fel), listOf("armeabi-v7a"), "app-full"))
+        assertEquals(fel, AbiSelector.chooseBestApkAsset(listOf(normal, fel), listOf("armeabi-v7a"), "app-full-fel"))
+        assertNull(AbiSelector.chooseBestApkAsset(listOf(normal), listOf("armeabi-v7a"), "app-full-fel"))
+    }
     @Test fun `update keeps the installed APK type on a box that supports both`() {
         val device = listOf("arm64-v8a", "armeabi-v7a", "armeabi")
         val all = listOf(asset("armeabi-v7a"), asset())

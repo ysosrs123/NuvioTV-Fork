@@ -25,6 +25,21 @@ target_link_options(aml_fel PRIVATE "-Wl,-z,max-page-size=16384")
 target_link_libraries(aml_fel ${log-lib} android)
 endif()
 
+# Fire TV Cube 3 (Gazelle) Dolby Vision Profile 7 FEL (core/player/dvfel). A JNI shim that dlopens the
+# prebuilt libdvfelplay.so (src/dvfel/jniLibs/armeabi-v7a, API 26) at run time, so this stays buildable at minSdk 24.
+option(DVFEL_GAZELLE_ENABLED "Build the Gazelle dvfel JNI shim" OFF)
+if(DVFEL_GAZELLE_ENABLED)
+add_library(
+    nuvio_dvfel
+    SHARED
+    dvfel_jni.cpp
+)
+target_compile_features(nuvio_dvfel PRIVATE cxx_std_17)
+target_compile_options(nuvio_dvfel PRIVATE -Wall -Wextra -Werror)
+target_link_options(nuvio_dvfel PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_libraries(nuvio_dvfel ${log-lib} dl)
+endif()
+
 if (NUVIO_BUILD_DOVI)
 add_library(
     dovi_bridge
