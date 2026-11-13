@@ -56,6 +56,7 @@ import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.backup.BackupCrypto
 import com.nuvio.tv.core.backup.BackupDocument
+import com.nuvio.tv.core.backup.BackupHistory
 import com.nuvio.tv.core.backup.BackupPart
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.components.PinPad
@@ -158,6 +159,15 @@ internal fun BackupFlow(state: BackupUiState, viewModel: BackupViewModel) {
                 if (BackupPart.SETTINGS in parts) {
                     SummaryRow(stringResource(R.string.backup_part_settings), stringResource(R.string.backup_part_settings_sub))
                 }
+                if (BackupPart.HISTORY in parts) {
+                    val counts = remember(dialog.saved) {
+                        BackupHistory.counts(dialog.saved.document.entries[BackupPart.HISTORY].orEmpty())
+                    }
+                    SummaryRow(
+                        stringResource(R.string.backup_part_history),
+                        stringResource(R.string.backup_part_history_counts, counts.saved, counts.watched, counts.inProgress)
+                    )
+                }
                 if (BackupPart.SECRETS in parts) {
                     SummaryRow(stringResource(R.string.backup_part_secrets), stringResource(R.string.backup_part_secrets_saved))
                 }
@@ -167,6 +177,10 @@ internal fun BackupFlow(state: BackupUiState, viewModel: BackupViewModel) {
                 if (BackupPart.DEVICE in parts) {
                     SummaryRow(stringResource(R.string.backup_part_device), dialog.saved.document.header.device.model)
                 }
+                SummaryRow(
+                    stringResource(R.string.backup_supporter),
+                    stringResource(if (dialog.saved.supporter) R.string.backup_supporter_yes else R.string.backup_supporter_no)
+                )
             }
             SettingsDialogActionRow {
                 SettingsDialogActionButton(stringResource(R.string.backup_done), viewModel::dismissDialog)
@@ -269,11 +283,15 @@ private fun RestoreDialog(document: BackupDocument, viewModel: BackupViewModel) 
     val available = buildList {
         if (document.entries[BackupPart.PROFILES].orEmpty().isNotEmpty()) add(BackupPart.PROFILES)
         if (document.entries[BackupPart.SETTINGS].orEmpty().isNotEmpty()) add(BackupPart.SETTINGS)
+        if (document.entries[BackupPart.HISTORY].orEmpty().isNotEmpty()) add(BackupPart.HISTORY)
         if (document.sealedSecrets != null) add(BackupPart.SECRETS)
         if (document.entries[BackupPart.DEVICE].orEmpty().isNotEmpty()) add(BackupPart.DEVICE)
     }
     val sections = remember(document) { viewModel.sections.filter { it.id in header.sections } }
-    var chosen by remember(document) { mutableStateOf(available.toSet() - BackupPart.DEVICE) }
+    val historyOff = viewModel.isSignedIn
+    var chosen by remember(document) {
+        mutableStateOf(available.toSet() - BackupPart.DEVICE - setOfNotNull(BackupPart.HISTORY.takeIf { historyOff }))
+    }
     var chosenSections by remember(document) { mutableStateOf(sections.map { it.id }.toSet()) }
     val thisModel = remember { android.os.Build.MODEL.orEmpty() }
     val first = remember { FocusRequester() }
@@ -313,6 +331,9 @@ private fun RestoreDialog(document: BackupDocument, viewModel: BackupViewModel) 
                     BackupPart.PROFILES -> stringResource(R.string.backup_part_profiles_sub)
                     BackupPart.SETTINGS -> stringResource(R.string.backup_part_settings_sub)
                     BackupPart.SECRETS -> stringResource(R.string.backup_part_secrets_needs_pin)
+                    BackupPart.HISTORY -> stringResource(
+                        if (historyOff) R.string.backup_part_history_signed_in else R.string.backup_part_history_sub
+                    )
                     BackupPart.DEVICE -> if (header.device.model == thisModel) {
                         stringResource(R.string.backup_part_device_same, header.device.model)
                     } else {
@@ -324,6 +345,7 @@ private fun RestoreDialog(document: BackupDocument, viewModel: BackupViewModel) 
                     subtitle = subtitle,
                     checked = part in chosen,
                     onToggle = { chosen = if (part in chosen) chosen - part else chosen + part },
+                    enabled = part != BackupPart.HISTORY || !historyOff,
                     modifier = if (index == 0 && (!focusSectionFirst || sections.isEmpty())) Modifier.focusRequester(first) else Modifier
                 )
             }
@@ -401,6 +423,7 @@ private fun partTitle(part: BackupPart): Int = when (part) {
     BackupPart.PROFILES -> R.string.backup_part_profiles
     BackupPart.SETTINGS -> R.string.backup_part_settings
     BackupPart.SECRETS -> R.string.backup_part_secrets
+    BackupPart.HISTORY -> R.string.backup_part_history
     BackupPart.DEVICE -> R.string.backup_part_device
 }
 

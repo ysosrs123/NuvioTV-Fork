@@ -48,7 +48,8 @@ class AuthJwtExpiredSessionTest {
             notices,
             reset,
             reports,
-            config
+            config,
+            dagger.Lazy { SignOutSafetyCopy {} }
         )
         return Fixture(auth, reset, manager)
     }

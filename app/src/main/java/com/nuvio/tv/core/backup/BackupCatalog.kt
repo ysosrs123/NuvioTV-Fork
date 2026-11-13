@@ -13,6 +13,8 @@ data class BackupStoreSpec(
     val deviceKeys: Set<String> = emptySet(),
     val partByKey: Map<String, BackupPart> = emptyMap(),
     val skipKeys: Set<String> = emptySet(),
+    /** Sync positions: never copied, and removed when the part is restored so the next sign-in pulls everything. */
+    val resetKeys: Set<String> = emptySet(),
     /** PROTECTED only: the key the owner encrypts with. */
     val keyAlias: String? = null,
     /** FILE only: the file name in front of `_<profile>.json`. */
@@ -54,6 +56,19 @@ object BackupCatalog {
         BackupStoreSpec(BackupStoreKind.PROFILE_STORE, "trakt_auth_store", BackupPart.SECRETS),
         BackupStoreSpec(BackupStoreKind.PROFILE_STORE, "audio_delay_route_preference", BackupPart.DEVICE),
 
+        history(BackupHistory.LIBRARY, "library_delta_cursor", "library_delta_initialized"),
+        history(
+            BackupHistory.PROGRESS_STATE,
+            "last_successful_push_ms", "watch_progress_delta_cursor", "watch_progress_delta_initialized"
+        ),
+        history(BackupHistory.PROGRESS_RECENT),
+        history(BackupHistory.PROGRESS_ARCHIVE),
+        history(BackupHistory.PENDING),
+        history(
+            BackupHistory.WATCHED,
+            "last_successful_watched_push_ms", "watched_items_delta_cursor", "watched_items_delta_initialized"
+        ),
+
         BackupStoreSpec(
             BackupStoreKind.BOX_STORE, "profile_settings", BackupPart.SETTINGS,
             partByKey = mapOf("profiles_json" to BackupPart.PROFILES),
@@ -77,6 +92,7 @@ object BackupCatalog {
         BackupStoreSpec(BackupStoreKind.PREFS, "watch_party_friends", BackupPart.SECRETS),
         BackupStoreSpec(BackupStoreKind.PREFS, "real_debrid_tokens", BackupPart.SECRETS),
         BackupStoreSpec(BackupStoreKind.PREFS, "nuvio_simkl_auth", BackupPart.SECRETS),
+        BackupStoreSpec(BackupStoreKind.PREFS, BackupSupporter.STORE, BackupPart.SECRETS),
 
         BackupStoreSpec(BackupStoreKind.PROTECTED, "media_servers", BackupPart.SECRETS, keyAlias = "com.nuvio.tv.mediaservers.v1"),
         BackupStoreSpec(BackupStoreKind.PROTECTED, "floppy_auth", BackupPart.SECRETS, keyAlias = "com.nuvio.tv.floppy.credentials.v1"),
@@ -92,7 +108,7 @@ object BackupCatalog {
 
     /** Where one key of [spec] belongs, or null when it is never copied. */
     fun partFor(spec: BackupStoreSpec, key: String): BackupPart? {
-        if (key in spec.skipKeys || neverCopiedPattern.containsMatchIn(key)) return null
+        if (key in spec.skipKeys || key in spec.resetKeys || neverCopiedPattern.containsMatchIn(key)) return null
         spec.partByKey[key]?.let { return it }
         if (spec.part == BackupPart.SECRETS || secretKeyPattern.containsMatchIn(key.lowercase())) return BackupPart.SECRETS
         if (key in spec.deviceKeys) return BackupPart.DEVICE
@@ -119,6 +135,9 @@ object BackupCatalog {
         }
         return result
     }
+
+    private fun history(name: String, vararg resetKeys: String) =
+        BackupStoreSpec(BackupStoreKind.PROFILE_STORE, name, BackupPart.HISTORY, resetKeys = resetKeys.toSet())
 
     private fun profile(name: String, deviceKeys: Set<String> = emptySet(), skipKeys: Set<String> = emptySet()) =
         BackupStoreSpec(BackupStoreKind.PROFILE_STORE, name, BackupPart.SETTINGS, deviceKeys = deviceKeys, skipKeys = skipKeys)

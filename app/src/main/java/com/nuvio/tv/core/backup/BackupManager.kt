@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-data class BackupSaved(val file: SavedBackup, val document: BackupDocument)
+data class BackupSaved(val file: SavedBackup, val document: BackupDocument, val supporter: Boolean = false)
 
 @Singleton
 class BackupManager @Inject constructor(
@@ -49,9 +49,24 @@ class BackupManager @Inject constructor(
         prefs.edit().putBoolean(KEY_SECRETS, include).apply()
     }
 
+    /** A copy without passwords and keys, written before an unexpected sign-out empties the box. */
+    suspend fun saveSafetyCopy() {
+        withContext(Dispatchers.IO) {
+            val sectionData = sections.associate { it.id to it.collect() }
+            val kept = BackupSupporter.placed(BackupSections.merged(stores.collect(), sectionData), sealed = false)
+                .filterKeys { it != BackupPart.SECRETS }
+            if (kept.values.all { it.isEmpty() }) return@withContext
+            val now = System.currentTimeMillis()
+            val parts = kept.filterValues { it.isNotEmpty() }.keys
+            val document = BackupDocument(stores.header(parts, now, BackupSections.summary(sectionData, false)), kept, null)
+            files.save(BackupFormat.encode(document), now, BackupKind.SAFETY)
+        }
+    }
+
     suspend fun backUp(pin: String?): BackupSaved = withContext(Dispatchers.IO) {
         val sectionData = sections.associate { it.id to it.collect() }
-        val entries = BackupSections.merged(stores.collect(), sectionData)
+        val all = BackupSections.merged(stores.collect(), sectionData)
+        val entries = BackupSupporter.placed(all, sealed = pin != null)
         val secrets = entries[BackupPart.SECRETS].orEmpty()
         val sealed = if (pin != null && secrets.isNotEmpty()) {
             BackupCrypto.seal(BackupFormat.encodeEntries(secrets).toString(), pin)
@@ -64,7 +79,7 @@ class BackupManager @Inject constructor(
         val saved = files.save(BackupFormat.encode(document), now)
         _lastBackupMs.value = now
         prefs.edit().putLong(KEY_LAST, now).apply()
-        BackupSaved(saved, document)
+        BackupSaved(saved, document, BackupSupporter.isSupporter(all))
     }
 
     fun read(id: String): BackupDocument? = files.read(id)?.let { runCatching { BackupFormat.decode(it) }.getOrNull() }

@@ -45,8 +45,34 @@ class BackupCatalogTest {
     @Test
     fun `stores the account sign-in lives in are not in the catalogue`() {
         val names = BackupCatalog.stores.map { it.name }.toSet()
-        listOf("auth_session_notice_store", "profile_settings_sync_state", "watch_progress_preferences", "stream_link_cache")
+        listOf("auth_session_notice_store", "profile_settings_sync_state", "member_access", "stream_link_cache")
             .forEach { assertTrue(it !in names) }
+    }
+
+    @Test
+    fun `library and watch history go in their own part without sync bookkeeping`() {
+        val library = spec(BackupStoreKind.PROFILE_STORE, "library_preferences")
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(library, "library_items"))
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(library, "library_sort_option"))
+        assertNull(BackupCatalog.partFor(library, "library_delta_cursor"))
+        assertNull(BackupCatalog.partFor(library, "library_delta_initialized"))
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(library, "library_pending_upserts"))
+        val pending = spec(BackupStoreKind.PROFILE_STORE, "watch_state_pending_mutations")
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(pending, "progress_upserts"))
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(pending, "watched_deletes"))
+        val recent = spec(BackupStoreKind.PROFILE_STORE, "watch_progress_recent_preferences")
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(recent, "watch_progress_map"))
+        val state = spec(BackupStoreKind.PROFILE_STORE, "watch_progress_preferences")
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(state, "watch_progress_storage_version"))
+        assertNull(BackupCatalog.partFor(state, "watch_progress_delta_cursor"))
+        assertNull(BackupCatalog.partFor(state, "last_successful_push_ms"))
+        val watched = spec(BackupStoreKind.PROFILE_STORE, "watched_items_preferences")
+        assertEquals(BackupPart.HISTORY, BackupCatalog.partFor(watched, "watched_items"))
+        assertNull(BackupCatalog.partFor(watched, "watched_items_delta_initialized"))
+        assertEquals(
+            BackupHistory.stores.toSet(),
+            BackupCatalog.stores.filter { it.part == BackupPart.HISTORY }.map { it.name }.toSet()
+        )
     }
 
     @Test

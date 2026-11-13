@@ -7,7 +7,9 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,6 +18,9 @@ private val Context.authSessionNoticeDataStore: DataStore<Preferences> by prefer
     name = "auth_session_notice_store",
     corruptionHandler = androidx.datastore.core.handlers.ReplaceFileCorruptionHandler { androidx.datastore.preferences.core.emptyPreferences() }
 )
+
+internal fun isKeptDataOfAnotherAccount(keptOwner: String?, userId: String): Boolean =
+    keptOwner != null && keptOwner != userId
 
 enum class StartupAuthNotice {
     NUVIO,
@@ -29,6 +34,8 @@ class AuthSessionNoticeDataStore @Inject constructor(
     private val hadNuvioAuthKey = booleanPreferencesKey("had_nuvio_auth")
     private val nuvioExplicitLogoutKey = booleanPreferencesKey("nuvio_explicit_logout")
     private val pendingNuvioNoticeKey = booleanPreferencesKey("pending_nuvio_notice")
+    private val lastNuvioUserKey = stringPreferencesKey("last_nuvio_user")
+    private val keptDataUserKey = stringPreferencesKey("kept_data_user")
 
     private val hadTraktAuthKey = booleanPreferencesKey("had_trakt_auth")
     private val traktExplicitLogoutKey = booleanPreferencesKey("trakt_explicit_logout")
@@ -42,19 +49,34 @@ class AuthSessionNoticeDataStore @Inject constructor(
         }
     }
 
-    suspend fun markNuvioAuthenticated() {
+    suspend fun markNuvioAuthenticated(userId: String) {
         context.authSessionNoticeDataStore.edit { preferences ->
             preferences[hadNuvioAuthKey] = true
             preferences[nuvioExplicitLogoutKey] = false
             preferences[pendingNuvioNoticeKey] = false
+            preferences[lastNuvioUserKey] = userId
+            preferences.remove(keptDataUserKey)
         }
     }
 
-    suspend fun markNuvioExplicitLogout() {
+    /** The box kept its data through an unexpected sign-out; remember whose it is. */
+    suspend fun markDataKeptForLastAccount() {
+        context.authSessionNoticeDataStore.edit { preferences ->
+            val owner = preferences[lastNuvioUserKey]
+            if (owner != null) preferences[keptDataUserKey] = owner else preferences.remove(keptDataUserKey)
+        }
+    }
+
+    /** True when the data kept on the box belongs to someone other than [userId]. */
+    suspend fun keptDataBelongsToAnotherAccount(userId: String): Boolean =
+        isKeptDataOfAnotherAccount(context.authSessionNoticeDataStore.data.first()[keptDataUserKey], userId)
+
+    suspend fun markNuvioExplicitLogout(keepDataOwner: Boolean = false) {
         context.authSessionNoticeDataStore.edit { preferences ->
             preferences[hadNuvioAuthKey] = false
             preferences[nuvioExplicitLogoutKey] = true
             preferences[pendingNuvioNoticeKey] = false
+            if (!keepDataOwner) preferences.remove(keptDataUserKey)
         }
     }
 

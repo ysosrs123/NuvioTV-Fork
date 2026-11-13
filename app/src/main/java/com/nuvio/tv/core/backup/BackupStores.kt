@@ -55,7 +55,8 @@ class BackupStores @Inject constructor(
                     if (!dataStoreFileExists(BackupCatalog.profileStoreFileName(spec.name, profileId))) return@forEach
                     val values = factory.get(profileId, spec.name).data.first().toBackupValues()
                     BackupCatalog.split(spec, values).forEach { (part, partValues) ->
-                        add(part, BackupEntry(spec.kind, spec.name, profileId, partValues))
+                        val kept = if (part == BackupPart.HISTORY) BackupHistory.scrub(partValues) else partValues
+                        add(part, BackupEntry(spec.kind, spec.name, profileId, kept))
                     }
                 }
                 BackupStoreKind.BOX_STORE -> {
@@ -120,9 +121,24 @@ class BackupStores @Inject constructor(
         var written = 0
         var failed = 0
         parts.forEach { part ->
+            if (part == BackupPart.HISTORY && signedIn) return@forEach
             entries[part].orEmpty().forEach { entry ->
                 try {
                     if (write(part, entry, signedIn, restoredProfiles)) written++
+                } catch (error: Exception) {
+                    failed++
+                }
+            }
+        }
+        if (!signedIn && BackupPart.HISTORY in parts) {
+            BackupHistory.storesToEmpty(entries[BackupPart.HISTORY].orEmpty()).forEach { (name, profileId) ->
+                val spec = BackupCatalog.spec(BackupStoreKind.PROFILE_STORE, name) ?: return@forEach
+                if (!dataStoreFileExists(BackupCatalog.profileStoreFileName(name, profileId))) return@forEach
+                try {
+                    factory.get(profileId, name).edit { prefs ->
+                        prefs.replacePart(spec, BackupPart.HISTORY, emptyMap())
+                        spec.resetKeys.forEach { prefs.remove(stringPreferencesKey(it)) }
+                    }
                 } catch (error: Exception) {
                     failed++
                 }
@@ -140,8 +156,11 @@ class BackupStores @Inject constructor(
         when (entry.kind) {
             BackupStoreKind.PROFILE_STORE -> {
                 val profileId = entry.profileId ?: return false
-                factory.get(profileId, spec.name).edit { prefs -> prefs.replacePart(spec, part, entry.values) }
-                restoredProfiles += profileId
+                factory.get(profileId, spec.name).edit { prefs ->
+                    prefs.replacePart(spec, part, entry.values)
+                    if (part == spec.part) spec.resetKeys.forEach { prefs.remove(stringPreferencesKey(it)) }
+                }
+                if (part != BackupPart.HISTORY) restoredProfiles += profileId
             }
             BackupStoreKind.BOX_STORE -> {
                 val values = if (signedIn && spec.name == "profile_settings") {

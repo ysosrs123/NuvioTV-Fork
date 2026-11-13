@@ -18,7 +18,7 @@ import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 
 /** What a restore can bring back, each chosen separately. */
-enum class BackupPart { PROFILES, SETTINGS, SECRETS, DEVICE }
+enum class BackupPart { PROFILES, SETTINGS, SECRETS, DEVICE, HISTORY }
 
 enum class BackupStoreKind {
     /** A settings file per profile: `name` for profile 1, `name_pN` for the others. */

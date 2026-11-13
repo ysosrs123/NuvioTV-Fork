@@ -7,6 +7,8 @@ import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.data.local.DebugSettingsDataStore
 import com.nuvio.tv.data.local.MemberAccessDataStore
+import com.nuvio.tv.data.local.SupporterMarkerStore
+import com.nuvio.tv.data.local.signedOutMemberAccess
 import com.nuvio.tv.data.remote.supabase.MemberAccessRemoteDataSource
 import com.nuvio.tv.domain.model.AuthState
 import com.nuvio.tv.domain.model.MemberAccess
@@ -22,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
@@ -37,14 +40,15 @@ class MemberAccessRepository @Inject constructor(
     debugSettingsDataStore: DebugSettingsDataStore,
     private val authManager: AuthManager,
     private val remoteDataSource: MemberAccessRemoteDataSource,
-    private val memberAccessDataStore: MemberAccessDataStore
+    private val memberAccessDataStore: MemberAccessDataStore,
+    private val supporterMarker: SupporterMarkerStore
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val refreshGeneration = MutableStateFlow(0L)
     private val initialCachedAccess = memberAccessDataStore.getLastKnown()
 
     @Volatile
-    private var optimisticCachedAccess = initialCachedAccess ?: MemberAccess.None
+    private var optimisticCachedAccess = initialCachedAccess ?: signedOutMemberAccess(supporterMarker.get())
 
     @Volatile
     private var lastVerifiedAtMs: Long? = null
@@ -80,6 +84,7 @@ class MemberAccessRepository @Inject constructor(
                         Log.w(MemberAccessTag, "Failed to cache supporter access", error.forLog())
                     }.getOrDefault(remoteAccess)
                     optimisticCachedAccess = persistedAccess
+                    supporterMarker.save(persistedAccess)
                     lastVerifiedUserId = authState.userId
                     lastVerifiedAtMs = SystemClock.elapsedRealtime()
                     emit(persistedAccess)
@@ -96,12 +101,14 @@ class MemberAccessRepository @Inject constructor(
                     lastVerifiedUserId = null
                     lastVerifiedAtMs = null
                     memberAccessDataStore.clear()
+                    emit(signedOutMemberAccess(supporterMarker.get()))
+                } else {
+                    emit(MemberAccess.None)
                 }
-                emit(MemberAccess.None)
             }
         }
         .distinctUntilChanged()
-        .stateIn(scope, SharingStarted.Eagerly, initialCachedAccess ?: MemberAccess.None)
+        .stateIn(scope, SharingStarted.Eagerly, optimisticCachedAccess)
 
     init {
         if (initialCachedAccess == null) {
@@ -114,6 +121,9 @@ class MemberAccessRepository @Inject constructor(
                 optimisticCachedAccess = migratedAccess
                 refreshGeneration.update { it + 1L }
             }
+        }
+        scope.launch {
+            SupporterMarkerStore.cleared.drop(1).collect { refresh() }
         }
         scope.launch {
             while (true) {

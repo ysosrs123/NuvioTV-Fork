@@ -80,7 +80,7 @@ class AuthValidationPublicationSchedulingTest {
             val noNetwork=OkHttpClient.Builder().addInterceptor { throw AssertionError("No network is permitted in this fixture") }.build()
             val rpc=mockk<Postgrest>(relaxed=true)
             every { rpc.serializer } returns KotlinXSerializer(Json { ignoreUnknownKeys=true })
-            val manager=AuthManager(auth,rpc,noNetwork,noNetwork,notices,reset,diagnosticReports(),config)
+            val manager=AuthManager(auth,rpc,noNetwork,noNetwork,notices,reset,diagnosticReports(),config,dagger.Lazy { SignOutSafetyCopy {} })
             val ownedScope=manager.javaClass.getDeclaredField("scope").apply { isAccessible=true }.get(manager) as CoroutineScope
             if(activeObserver) {
                 (auth.sessionStatus as OwnedSessionFlow).initialProcessed.await()

@@ -20,6 +20,24 @@ class AuthSessionValidationPolicyTest {
     }
 
     @Test
+    fun `keeps the session when the server refuses the app itself`() {
+        assertFalse(isInvalidRemoteSessionResponse(401, "Invalid API key"))
+        assertFalse(isInvalidRemoteSessionResponse(401, "No API key found in request"))
+        assertFalse(isInvalidRemoteSessionResponse(null, "Unauthorized Invalid API key"))
+    }
+
+    @Test
+    fun `clears the box only when the server still answers the app`() {
+        assertTrue(shouldClearBoxAfterUnexpectedSignOut(200))
+        assertTrue(shouldClearBoxAfterUnexpectedSignOut(204))
+        assertFalse(shouldClearBoxAfterUnexpectedSignOut(null))
+        assertFalse(shouldClearBoxAfterUnexpectedSignOut(401))
+        assertFalse(shouldClearBoxAfterUnexpectedSignOut(403))
+        assertFalse(shouldClearBoxAfterUnexpectedSignOut(404))
+        assertFalse(shouldClearBoxAfterUnexpectedSignOut(503))
+    }
+
+    @Test
     fun `keeps cached session for transient failures`() {
         assertFalse(isInvalidRemoteSessionResponse(403, "Forbidden"))
         assertFalse(isInvalidRemoteSessionResponse(403, "Request blocked by proxy"))

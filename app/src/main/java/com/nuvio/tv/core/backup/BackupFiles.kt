@@ -18,13 +18,31 @@ import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Each kind of backup keeps its own newest files, so one kind never pushes out another. */
+enum class BackupKind(val prefix: String, val keep: Int) {
+    MANUAL("Arc backup", 2),
+    SAFETY("Arc safety copy", 2);
+
+    companion object {
+        fun of(displayName: String): BackupKind? = entries.firstOrNull { displayName.startsWith(it.prefix) }
+    }
+}
+
 /** A backup file in the box's Downloads folder. */
 data class SavedBackup(
     val id: String,
     val displayName: String,
     val modifiedMs: Long,
     val sizeBytes: Long
-)
+) {
+    val kind: BackupKind get() = BackupKind.of(displayName) ?: BackupKind.MANUAL
+}
+
+/** The files to delete so every kind keeps only its newest ones. */
+internal fun backupsToTrim(backups: List<SavedBackup>): List<SavedBackup> =
+    backups.groupBy { it.kind }.flatMap { (kind, ofKind) ->
+        ofKind.sortedByDescending { it.modifiedMs }.drop(kind.keep)
+    }
 
 /**
  * Backups live in Downloads/Arc backups, outside the app's own data, so uninstalling Arc or clearing its data
@@ -41,21 +59,34 @@ class BackupFiles @Inject constructor(
     fun needsStoragePermission(): Boolean =
         !usesMediaStore && context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
 
-    fun fileName(nowMs: Long = System.currentTimeMillis()): String =
-        "Arc backup ${SimpleDateFormat("yyyy-MM-dd HHmm", Locale.US).format(Date(nowMs))}.json"
+    fun fileName(nowMs: Long = System.currentTimeMillis(), kind: BackupKind = BackupKind.MANUAL): String =
+        "${kind.prefix} ${SimpleDateFormat("yyyy-MM-dd HHmm", Locale.US).format(Date(nowMs))}.json"
 
-    fun save(text: String, nowMs: Long = System.currentTimeMillis()): SavedBackup {
-        val saved = if (usesMediaStore) saveMediaStore(text, fileName(nowMs)) else saveLegacy(text, fileName(nowMs))
+    fun save(text: String, nowMs: Long = System.currentTimeMillis(), kind: BackupKind = BackupKind.MANUAL): SavedBackup {
+        val name = fileName(nowMs, kind)
+        val saved = if (kind == BackupKind.SAFETY) {
+            runCatching {
+                check(!needsStoragePermission())
+                saveInDownloads(text, name)
+            }.getOrElse { saveInAppFolder(text, name) }
+        } else {
+            saveInDownloads(text, name)
+        }
         trim()
         return saved
     }
 
-    fun list(): List<SavedBackup> = runCatching {
-        if (usesMediaStore) listMediaStore() else listLegacy()
-    }.getOrDefault(emptyList()).sortedByDescending { it.modifiedMs }
+    fun list(): List<SavedBackup> {
+        val inDownloads = runCatching {
+            if (usesMediaStore) listMediaStore() else listLegacy()
+        }.getOrDefault(emptyList())
+        return (inDownloads + listAppFolder()).sortedByDescending { it.modifiedMs }
+    }
 
     fun read(id: String): String? = runCatching {
-        if (usesMediaStore) {
+        if (id.startsWith(APP_FOLDER_ID)) {
+            appFolderFile(id)?.readText()
+        } else if (usesMediaStore) {
             context.contentResolver.openInputStream(mediaUri(id))?.use { it.readBytes().toString(Charsets.UTF_8) }
         } else {
             legacyFolder().resolve(id).takeIf { it.isFile }?.readText()
@@ -65,13 +96,59 @@ class BackupFiles @Inject constructor(
     fun readBytes(id: String): ByteArray? = read(id)?.toByteArray(Charsets.UTF_8)
 
     private fun trim() {
-        list().drop(KEEP).forEach { old ->
+        backupsToTrim(list()).forEach { old ->
             runCatching {
-                if (usesMediaStore) context.contentResolver.delete(mediaUri(old.id), null, null)
+                if (old.id.startsWith(APP_FOLDER_ID)) appFolderFile(old.id)?.delete()
+                else if (usesMediaStore) context.contentResolver.delete(mediaUri(old.id), null, null)
                 else legacyFolder().resolve(old.id).delete()
             }
         }
+        if (!usesMediaStore) {
+            runCatching {
+                legacyFolder().listFiles { file -> file.isFile && file.name.endsWith(".json.part") }
+                    ?.forEach { it.delete() }
+            }
+        }
     }
+
+    private fun saveInDownloads(text: String, name: String): SavedBackup =
+        if (usesMediaStore) saveMediaStore(text, name) else saveLegacy(text, name)
+
+    /** Arc's own folders need no permission and are not emptied when the box is cleared after a sign-out. */
+    private fun appFolders(): List<File> =
+        listOfNotNull(context.getExternalFilesDir(null), context.filesDir).map { File(it, FOLDER) }
+
+    private fun saveInAppFolder(text: String, name: String): SavedBackup {
+        var failure: Exception? = null
+        for (folder in appFolders()) {
+            try {
+                folder.mkdirs()
+                val file = File(folder, name)
+                val temp = File(folder, "$name.part")
+                temp.writeText(text)
+                if (!temp.renameTo(file)) {
+                    file.delete()
+                    if (!temp.renameTo(file)) throw IllegalStateException("App folder unavailable")
+                }
+                return SavedBackup(APP_FOLDER_ID + file.name, file.name, file.lastModified(), file.length())
+            } catch (error: Exception) {
+                failure = error
+            }
+        }
+        throw failure ?: IllegalStateException("App folder unavailable")
+    }
+
+    private fun appFolderFiles(): List<File> = appFolders().flatMap { folder ->
+        runCatching {
+            folder.listFiles { file -> file.isFile && BackupKind.of(file.name) != null && file.name.endsWith(".json") }
+        }.getOrNull().orEmpty().toList()
+    }
+
+    private fun listAppFolder(): List<SavedBackup> =
+        appFolderFiles().map { SavedBackup(APP_FOLDER_ID + it.name, it.name, it.lastModified(), it.length()) }
+
+    private fun appFolderFile(id: String): File? =
+        appFolderFiles().firstOrNull { APP_FOLDER_ID + it.name == id }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun saveMediaStore(text: String, name: String): SavedBackup {
@@ -104,8 +181,9 @@ class BackupFiles @Inject constructor(
             MediaStore.Downloads.DATE_MODIFIED,
             MediaStore.Downloads.SIZE
         )
-        val selection = "${MediaStore.Downloads.RELATIVE_PATH} LIKE ? AND ${MediaStore.Downloads.DISPLAY_NAME} LIKE ?"
-        val args = arrayOf("${Environment.DIRECTORY_DOWNLOADS}/$FOLDER%", "Arc backup%")
+        val names = BackupKind.entries.joinToString(" OR ") { "${MediaStore.Downloads.DISPLAY_NAME} LIKE ?" }
+        val selection = "${MediaStore.Downloads.RELATIVE_PATH} LIKE ? AND ($names)"
+        val args = arrayOf("${Environment.DIRECTORY_DOWNLOADS}/$FOLDER%") + BackupKind.entries.map { "${it.prefix}%" }
         val result = mutableListOf<SavedBackup>()
         context.contentResolver.query(MediaStore.Downloads.EXTERNAL_CONTENT_URI, projection, selection, args, null)?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
@@ -143,13 +221,13 @@ class BackupFiles @Inject constructor(
     }
 
     private fun listLegacy(): List<SavedBackup> =
-        legacyFolder().listFiles { file -> file.isFile && file.name.startsWith("Arc backup") && file.name.endsWith(".json") }
+        legacyFolder().listFiles { file -> file.isFile && BackupKind.of(file.name) != null && file.name.endsWith(".json") }
             .orEmpty()
             .map { SavedBackup(it.name, it.name, it.lastModified(), it.length()) }
 
     companion object {
         const val FOLDER = "Arc backups"
         const val MIME = "application/json"
-        const val KEEP = 5
+        private const val APP_FOLDER_ID = "inapp-"
     }
 }

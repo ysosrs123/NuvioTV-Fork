@@ -62,7 +62,9 @@ private const val TAG = "AuthManager"
 private const val AUTH_ENDPOINT_SIGNUP = "/auth/v1/signup"
 private const val AUTH_ENDPOINT_PASSWORD = "/auth/v1/token?grant_type=password"
 private const val AUTH_ENDPOINT_REFRESH = "/auth/v1/token?grant_type=refresh_token"
-private const val AUTH_ENDPOINT_START_DEVICE_LOGIN = "/rest/v1/rpc/start_device_login_session"
+private const val AUTH_ENDPOINT_SETTINGS = "/auth/v1/settings"
+private const val SERVER_STATUS_TIMEOUT_SECONDS = 6L
+private const val AUTH_ENDPOINT_START_DEVICE_LOGIN ="/rest/v1/rpc/start_device_login_session"
 private const val AUTH_ENDPOINT_START_TV_LOGIN = "/rest/v1/rpc/start_tv_login_session"
 private const val AUTH_ENDPOINT_POLL_TV_LOGIN = "/rest/v1/rpc/poll_tv_login_session"
 private const val AUTH_ENDPOINT_EXCHANGE_TV_LOGIN = "/functions/v1/tv-logins-exchange"
@@ -89,7 +91,8 @@ class AuthManager @Inject constructor(
     private val authSessionNoticeDataStore: AuthSessionNoticeDataStore,
     private val accountLocalDataResetService: AccountLocalDataResetService,
     private val authDiagnosticReportRepository: AuthDiagnosticReportRepository,
-    private val serverConfiguration: ServerConfiguration
+    private val serverConfiguration: ServerConfiguration,
+    private val signOutSafetyCopy: dagger.Lazy<SignOutSafetyCopy>
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val json = Json { ignoreUnknownKeys = true }
@@ -145,8 +148,11 @@ class AuthManager @Inject constructor(
                                     Log.d(TAG, "Skipping authentication publication for a superseded user")
                                     return@collect
                                 }
+                                if (authSessionNoticeDataStore.keptDataBelongsToAnotherAccount(user.id)) {
+                                    accountLocalDataResetService.clearAfterSignOut()
+                                }
                                 _authState.value = AuthState.FullAccount(userId = user.id, email = user.email!!)
-                                authSessionNoticeDataStore.markNuvioAuthenticated()
+                                authSessionNoticeDataStore.markNuvioAuthenticated(user.id)
                                 finishStartupAuthDiagnostics("success", "authenticated_session_validated")
                             }
                         } else {
@@ -420,6 +426,17 @@ class AuthManager @Inject constructor(
         accountLocalDataResetService.clearAfterSignOut()
     }
 
+    suspend fun continueWithoutAccount() {
+        val hadSession = auth.currentSessionOrNull() != null || _authState.value is AuthState.FullAccount
+        if (hadSession) {
+            signOut()
+            return
+        }
+        sessionValidator.reset()
+        authSessionNoticeDataStore.markNuvioExplicitLogout(keepDataOwner = true)
+        _authState.value = AuthState.SignedOut
+    }
+
     suspend fun prepareForServerSwitch(): Result<Unit> {
         val hadSession = auth.currentSessionOrNull() != null || _authState.value is AuthState.FullAccount
         sessionValidator.reset()
@@ -442,9 +459,41 @@ class AuthManager @Inject constructor(
         sessionValidator.reset()
         cachedEffectiveUserId = null
         cachedEffectiveUserSourceUserId = null
+        val hadAccount = authSessionNoticeDataStore.markUnexpectedNuvioLogoutIfNeeded()
+        var clearBox = hadAccount && shouldClearBoxAfterUnexpectedSignOut(serverStatusForApp())
+        if (clearBox) {
+            try {
+                signOutSafetyCopy.get().save()
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Throwable) {
+                Log.w(TAG, "Could not save a copy before clearing the box; keeping what is on it", error.forLog())
+                clearBox = false
+            }
+        }
         _authState.value = AuthState.SignedOut
-        if (authSessionNoticeDataStore.markUnexpectedNuvioLogoutIfNeeded()) {
+        if (clearBox) {
             accountLocalDataResetService.clearAfterSignOut()
+        } else if (hadAccount) {
+            Log.w(TAG, "Signed out; keeping what is on the box")
+            authSessionNoticeDataStore.markDataKeptForLastAccount()
+        }
+    }
+
+    /** The status the server gives the app itself, with no account involved. Null when it cannot be reached. */
+    private suspend fun serverStatusForApp(): Int? = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url(supabaseUrl(AUTH_ENDPOINT_SETTINGS))
+            .headers(Headers.Builder().apply { supabaseHeaders().forEach { (name, value) -> add(name, value) } }.build())
+            .get()
+            .build()
+        val client = authHttpClient.newBuilder()
+            .callTimeout(SERVER_STATUS_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+        try {
+            client.newCall(request).execute().use { it.code }
+        } catch (error: IOException) {
+            null
         }
     }
 
