@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Vardai ir paveikslėliai</string>
     <string name="backup_part_settings">„Arc“ nustatymai</string>
     <string name="backup_part_settings_sub">Scout, miniatiūros, DNS, pultelio mygtukai ir kt.</string>
+    <string name="backup_part_history">Biblioteka ir žiūrėjimo istorija</string>
+    <string name="backup_part_history_sub">Išsaugoti pavadinimai, „Tęsti žiūrėjimą“ ir peržiūros žymės</string>
+    <string name="backup_part_history_signed_in">Jūsų „Nuvio“ paskyra tai jau saugo. Atkuriama tik neprisijungusiame įrenginyje.</string>
+    <string name="backup_part_history_counts">Išsaugota: %1$d. Žiūrėta: %2$d. Pradėta: %3$d.</string>
+    <string name="backup_supporter">Rėmėjo būsena</string>
+    <string name="backup_supporter_yes">Taip. Rėmėjo spalvos ir piktogramos išlieka.</string>
+    <string name="backup_supporter_no">Ne</string>
     <string name="backup_part_secrets">Slaptažodžiai ir raktai</string>
     <string name="backup_part_secrets_saved">Užrakinta jūsų PIN kodu</string>
     <string name="backup_part_secrets_needs_pin">Reikia kopijos PIN kodo</string>

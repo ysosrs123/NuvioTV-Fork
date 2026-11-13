@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">الحد العمري</string>
+    <string name="rating_limit_none">بلا حد</string>
+    <string name="rating_limit_preschool">ما قبل المدرسة</string>
+    <string name="rating_limit_young">الأطفال الصغار</string>
+    <string name="rating_limit_pg">الأطفال الأكبر سنًا</string>
+    <string name="rating_limit_teen">المراهقون</string>
+    <string name="rating_limit_hint">ما يمكن لهذا الملف تشغيله دون رمز PIN الخاص بـ %1$s</string>
+    <string name="rating_limit_note">يستخدم تصنيفات TMDB الأمريكية. فوق الحد، أو بلا تصنيف، يطلب زر التشغيل رمز PIN الخاص بـ %1$s.</string>
+    <string name="rating_limit_needs_pin">عيّن أولًا رمز PIN لملف %1$s. الحد العمري يطلبه.</string>
+    <string name="rating_limit_change_heading">أدخل رمز PIN الخاص بـ %1$s لتغيير الحد</string>
+    <string name="rating_limit_change_support">سيصبح الحد العمري لـ %1$s: %2$s</string>
+    <string name="rating_limit_saved">الحد العمري لـ %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">يلزم رمز PIN الخاص بـ %1$s لتشغيل هذا</string>
+    <string name="rating_limit_play_rated">تصنيف %1$s هو %2$s. حد %3$s هو %4$s.</string>
+    <string name="rating_limit_play_unrated">لا يجد Arc تصنيفًا لـ %1$s. حد %2$s هو %3$s.</string>
+    <string name="rating_limit_play_no_pin">عيّن رمز PIN لملف %1$s لتشغيل العناوين التي تتجاوز حد %2$s.</string>
+    <string name="rating_limit_party_heading">لا يمكن لـ %1$s الانضمام إلى حفلة المشاهدة هذه</string>
+    <string name="rating_limit_party_rated">الحفلة تشاهد %1$s بتصنيف %2$s. حد %3$s هو %4$s.</string>
+    <string name="rating_limit_party_unrated">الحفلة تشاهد %1$s، ولا يملك Arc تصنيفًا يمكنه التحقق منه. حد %2$s هو %3$s.</string>
+    <string name="rating_limit_add_heading">أدخل رمز PIN الخاص بـ %1$s لإضافة ملف شخصي</string>
+    <string name="rating_limit_add_support">أحد الملفات الشخصية على هذا الجهاز له حد عمري.</string>
+</resources>

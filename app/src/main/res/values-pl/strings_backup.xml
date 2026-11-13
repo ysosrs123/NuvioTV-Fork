@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Nazwy i obrazy</string>
     <string name="backup_part_settings">Ustawienia Arc</string>
     <string name="backup_part_settings_sub">Scout, miniatury, DNS, przyciski pilota i więcej</string>
+    <string name="backup_part_history">Biblioteka i historia oglądania</string>
+    <string name="backup_part_history_sub">Zapisane tytuły, Kontynuuj oglądanie i oznaczenia obejrzanych</string>
+    <string name="backup_part_history_signed_in">Konto Nuvio już to przechowuje. Przywracane tylko na niezalogowanym urządzeniu.</string>
+    <string name="backup_part_history_counts">Zapisane tytuły: %1$d. Obejrzane: %2$d. W trakcie: %3$d.</string>
+    <string name="backup_supporter">Status wspierającego</string>
+    <string name="backup_supporter_yes">Tak. Kolory i ikony wspierającego zostają.</string>
+    <string name="backup_supporter_no">Nie</string>
     <string name="backup_part_secrets">Hasła i klucze</string>
     <string name="backup_part_secrets_saved">Chronione Twoim PIN-em</string>
     <string name="backup_part_secrets_needs_pin">Wymaga PIN-u kopii</string>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Изостави језике</string>
+    <string name="scout_leave_out_languages_sub">Језици које никад не желиш да видиш</string>
+    <string name="scout_language_indian">Индијски језици</string>
+</resources>

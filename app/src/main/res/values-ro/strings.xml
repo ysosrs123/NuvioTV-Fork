@@ -1919,14 +1919,14 @@
     <string name="report_item_title">Titlu și nume de fișier</string>
     <string name="report_item_note">Adaugă o notă</string>
     <string name="report_item_note_hint">Opțional</string>
-    <string name="report_note_placeholder">Ce ar trebui să știm?</string>
+    <string name="report_note_placeholder">Mai e ceva util de știut?</string>
     <string name="report_never_sent">Nu se trimit niciodată: linkuri de stream, chei debrid sau de add-on, contul sau e-mailul tău. Serviciul de raportare nu îți păstrează adresa IP.</string>
     <string name="report_send">Trimite</string>
     <string name="report_failed_limit">Acest dispozitiv a atins limita de rapoarte pentru azi. Încearcă din nou mâine.</string>
     <string name="report_sent_title">Raport trimis</string>
     <string name="report_sent_qr_description">Cod QR pentru raportul tău</string>
     <string name="report_sent_phone">Scanează cu telefonul ca să adaugi fotografii sau să urmărești raportul. Arc este un proiect de hobby, așa că nu fiecare raport primește un răspuns.</string>
-    <string name="report_sent_no_phone">Mulțumim că ne-ai anunțat. Arc este un proiect de hobby, așa că nu fiecare raport primește un răspuns.</string>
+    <string name="report_sent_no_phone">Mulțumesc pentru raport. Arc este un proiect de hobby, așa că nu fiecare raport primește un răspuns.</string>
     <string name="report_sent_back">Înapoi la vizionare</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Alege tot ce se potrivește. Arc a păstrat ultimul minut.</item>
@@ -1938,7 +1938,7 @@
         <item quantity="few">Setările playerului și ultimele %1$d minute</item>
         <item quantity="other">Setările playerului și ultimele %1$d de minute</item>
     </plurals>
-    <string name="report_settings_subtitle">Spune-ne ce n-a mers sau ce ai vrea să facă Arc</string>
+    <string name="report_settings_subtitle">Spune ce n-a mers sau ce ai vrea să facă Arc</string>
     <string name="report_group_choose">Ce vrei să raportezi?</string>
     <string name="report_group_options">Opțiuni</string>
     <string name="report_row_playback">O problemă de redare</string>
@@ -2011,11 +2011,22 @@
     <string name="display_mode_measured">Măsurat</string>
     <string name="display_mode_measured_off">Ecranul rulează la %1$s Hz, nu la %2$s Hz</string>
     <string name="qms_hint_title">Televizorul nu păstrează rata de cadre a filmului</string>
-    <string name="qms_hint_body_qms">Arc a cerut %1$s Hz. Televizorul a schimbat rata fără o comutare completă (QMS) și rulează la %2$s Hz. Asta se vede ca o mică sacadare regulată.</string>
-    <string name="qms_hint_body">Arc a cerut %1$s Hz, dar ecranul rulează la %2$s Hz. Asta se vede ca o mică sacadare regulată.</string>
     <string name="qms_hint_fix">Cea mai bună soluție: oprește QMS pe televizor</string>
     <string name="qms_hint_fix_hint">În setările proprii ale televizorului pentru această intrare HDMI. Arc nu poate schimba asta.</string>
     <string name="qms_hint_off">Oprește rata de cadre automată</string>
-    <string name="qms_hint_off_hint">De la următorul film, ecranul rămâne la rata obișnuită. O poți reactiva din Setări.</string>
     <string name="qms_hint_keep">Păstrează așa</string>
+    <string name="sub_prefer_addon_subtitles">Întâi subtitrări din suplimente</string>
+    <string name="sub_prefer_addon_subtitles_desc">Alege o subtitrare dintr-un supliment în locul celei din fișier când ambele sunt în limba ta. Cea din fișier este folosită când niciun supliment nu are una.</string>
+    <string name="playback_afr_settle_delay">Întârziere după schimbarea frecvenței</string>
+    <string name="playback_afr_settle_delay_sub">Cât așteaptă un film televizorul după o schimbare de frecvență. Măriți-o dacă filmele pornesc negre sau fără sunet printr-un receiver sau soundbar.</string>
+    <string name="playback_afr_settle_delay_auto">Auto</string>
+    <string name="playback_afr_settle_delay_auto_sub">Două secunde, apoi până revine legătura audio a televizorului</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc a cerut %1$s Hz, dar ecranul rulează la %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc a cerut %1$s Hz. Televizorul a schimbat frecvența fără o comutare completă (QMS) și rulează la %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Este posibil să observați un cadru repetat cam la fiecare %1$d secunde.</string>
+    <string name="qms_hint_effect_judder">Se vede ca o sacadare constantă.</string>
+    <string name="qms_hint_mode_tip">Unele boxe și receivere au o setare pentru frecvențe exacte de film (23,976 Hz), numite adesea frecvențe fracționare. Arc nu o poate schimba.</string>
+    <string name="qms_hint_off_hint_qms">Arc nu mai cere atunci frecvența filmului. Televizorul o poate schimba totuși singur.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

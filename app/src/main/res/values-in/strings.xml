@@ -3531,14 +3531,14 @@
     <string name="report_item_title">Judul dan nama berkas</string>
     <string name="report_item_note">Tambahkan catatan</string>
     <string name="report_item_note_hint">Opsional</string>
-    <string name="report_note_placeholder">Apa yang perlu kami ketahui?</string>
+    <string name="report_note_placeholder">Ada hal lain yang perlu diketahui?</string>
     <string name="report_never_sent">Tidak pernah dikirim: tautan stream, kunci debrid atau addon, akun atau email Anda. Layanan laporan tidak menyimpan alamat IP Anda.</string>
     <string name="report_send">Kirim</string>
     <string name="report_failed_limit">Perangkat ini telah mencapai batas laporan hari ini. Silakan coba lagi besok.</string>
     <string name="report_sent_title">Laporan terkirim</string>
     <string name="report_sent_qr_description">Kode QR untuk laporan Anda</string>
     <string name="report_sent_phone">Pindai dengan ponsel untuk menambahkan foto atau memantau laporan Anda. Arc adalah proyek hobi, jadi tidak semua laporan mendapat balasan.</string>
-    <string name="report_sent_no_phone">Terima kasih sudah memberi tahu kami. Arc adalah proyek hobi, jadi tidak semua laporan mendapat balasan.</string>
+    <string name="report_sent_no_phone">Terima kasih atas laporannya. Arc adalah proyek hobi, jadi tidak semua laporan mendapat balasan.</string>
     <string name="report_sent_back">Kembali menonton</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="other">Pilih semua yang sesuai. Arc menyimpan %1$d menit terakhir.</item>
@@ -3546,7 +3546,7 @@
     <plurals name="report_item_playback_kept">
         <item quantity="other">Pengaturan pemutar dan %1$d menit terakhir</item>
     </plurals>
-    <string name="report_settings_subtitle">Ceritakan apa yang salah atau apa yang Anda inginkan dari Arc</string>
+    <string name="report_settings_subtitle">Jelaskan apa yang salah atau apa yang Anda inginkan dari Arc</string>
     <string name="report_group_choose">Apa yang ingin Anda laporkan?</string>
     <string name="report_group_options">Opsi</string>
     <string name="report_row_playback">Masalah pemutaran</string>
@@ -3615,11 +3615,22 @@
     <string name="display_mode_measured">Terukur</string>
     <string name="display_mode_measured_off">Layar berjalan pada %1$s Hz, bukan %2$s Hz</string>
     <string name="qms_hint_title">TV Anda tidak mengikuti frame rate film</string>
-    <string name="qms_hint_body_qms">Arc meminta %1$s Hz. TV Anda mengubah rate tanpa peralihan penuh (QMS) dan berjalan pada %2$s Hz. Ini terlihat sebagai sendatan kecil yang teratur.</string>
-    <string name="qms_hint_body">Arc meminta %1$s Hz, tetapi layar Anda berjalan pada %2$s Hz. Ini terlihat sebagai sendatan kecil yang teratur.</string>
     <string name="qms_hint_fix">Solusi terbaik: matikan QMS di TV</string>
     <string name="qms_hint_fix_hint">Di pengaturan TV itu sendiri untuk input HDMI ini. Arc tidak dapat mengubahnya.</string>
     <string name="qms_hint_off">Matikan pencocokan frame rate</string>
-    <string name="qms_hint_off_hint">Mulai film berikutnya, layar tetap pada rate biasanya. Anda dapat menyalakannya lagi di Pengaturan.</string>
     <string name="qms_hint_keep">Biarkan apa adanya</string>
+    <string name="sub_prefer_addon_subtitles">Subtitle addon dulu</string>
+    <string name="sub_prefer_addon_subtitles_desc">Pilih subtitle dari addon daripada subtitle bawaan file jika keduanya dalam bahasa Anda. Subtitle bawaan file dipakai jika tidak ada addon yang punya.</string>
+    <string name="playback_afr_settle_delay">Jeda setelah perubahan kecepatan refresh</string>
+    <string name="playback_afr_settle_delay_sub">Berapa lama film menunggu TV setelah perubahan kecepatan. Naikkan jika film dimulai hitam atau tanpa suara melalui receiver atau soundbar.</string>
+    <string name="playback_afr_settle_delay_auto">Otomatis</string>
+    <string name="playback_afr_settle_delay_auto_sub">Dua detik, lalu sampai sambungan audio TV kembali</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d dtk</string>
+    <string name="qms_hint_body_v2">Arc meminta %1$s Hz, tetapi layar Anda berjalan pada %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc meminta %1$s Hz. TV Anda mengganti kecepatan tanpa peralihan penuh (QMS) dan berjalan pada %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Anda mungkin melihat satu bingkai berulang kira-kira setiap %1$d detik.</string>
+    <string name="qms_hint_effect_judder">Ini terlihat sebagai patah-patah yang teratur.</string>
+    <string name="qms_hint_mode_tip">Beberapa box dan receiver punya setelan untuk kecepatan film yang tepat (23,976 Hz), sering disebut kecepatan pecahan. Arc tidak bisa mengubahnya.</string>
+    <string name="qms_hint_off_hint_qms">Arc lalu berhenti meminta kecepatan film. TV Anda tetap bisa mengganti kecepatan sendiri.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

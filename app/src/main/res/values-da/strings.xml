@@ -3787,14 +3787,14 @@
     <string name="report_item_title">Titel og filnavn</string>
     <string name="report_item_note">Tilføj en note</string>
     <string name="report_item_note_hint">Valgfri</string>
-    <string name="report_note_placeholder">Hvad skal vi vide?</string>
+    <string name="report_note_placeholder">Andet, der er godt at vide?</string>
     <string name="report_never_sent">Sendes aldrig: stream-links, debrid- eller addon-nøgler, din konto eller e-mail. Rapporttjenesten gemmer ikke din IP-adresse.</string>
     <string name="report_send">Send</string>
     <string name="report_failed_limit">Denne enhed har nået dagens grænse for rapporter. Prøv igen i morgen.</string>
     <string name="report_sent_title">Rapport sendt</string>
     <string name="report_sent_qr_description">QR-kode til din rapport</string>
     <string name="report_sent_phone">Scan med din telefon for at tilføje billeder eller følge din rapport. Arc er et hobbyprojekt, så ikke alle rapporter får svar.</string>
-    <string name="report_sent_no_phone">Tak, fordi du gav besked. Arc er et hobbyprojekt, så ikke alle rapporter får svar.</string>
+    <string name="report_sent_no_phone">Tak for rapporten. Arc er et hobbyprojekt, så ikke alle rapporter får svar.</string>
     <string name="report_sent_back">Tilbage til videoen</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Vælg alt, der passer. Arc har gemt det sidste minut.</item>
@@ -3804,7 +3804,7 @@
         <item quantity="one">Afspillerindstillinger og det sidste minut</item>
         <item quantity="other">Afspillerindstillinger og de sidste %1$d minutter</item>
     </plurals>
-    <string name="report_settings_subtitle">Fortæl os, hvad der gik galt, eller hvad du gerne vil have, at Arc kan</string>
+    <string name="report_settings_subtitle">Fortæl, hvad der gik galt, eller hvad du gerne vil have, at Arc kan</string>
     <string name="report_group_choose">Hvad vil du rapportere?</string>
     <string name="report_group_options">Valgmuligheder</string>
     <string name="report_row_playback">Et afspilningsproblem</string>
@@ -3875,11 +3875,22 @@
     <string name="display_mode_measured">Målt</string>
     <string name="display_mode_measured_off">Skærmen kører med %1$s Hz, ikke %2$s Hz</string>
     <string name="qms_hint_title">Dit TV holder ikke filmens billedhastighed</string>
-    <string name="qms_hint_body_qms">Arc bad om %1$s Hz. Dit TV skiftede hastighed uden et fuldt skift (QMS) og kører med %2$s Hz. Det ses som små, regelmæssige hak.</string>
-    <string name="qms_hint_body">Arc bad om %1$s Hz, men din skærm kører med %2$s Hz. Det ses som små, regelmæssige hak.</string>
     <string name="qms_hint_fix">Bedste løsning: slå QMS fra på TV\'et</string>
     <string name="qms_hint_fix_hint">I TV\'ets egne indstillinger for denne HDMI-indgang. Arc kan ikke ændre det.</string>
     <string name="qms_hint_off">Slå billedhastighedstilpasning fra</string>
-    <string name="qms_hint_off_hint">Fra næste film bliver skærmen på sin normale hastighed. Du kan slå det til igen i Indstillinger.</string>
     <string name="qms_hint_keep">Behold som nu</string>
+    <string name="sub_prefer_addon_subtitles">Addon-undertekster først</string>
+    <string name="sub_prefer_addon_subtitles_desc">Vælg en addon-undertekst frem for filens egen, når begge er på dit sprog. Filens egen bruges, når ingen addon har en.</string>
+    <string name="playback_afr_settle_delay">Forsinkelse efter skift af opdateringshastighed</string>
+    <string name="playback_afr_settle_delay_sub">Hvor længe en film venter på tv\'et efter et skift. Hæv den, hvis film starter sort eller uden lyd gennem en receiver eller soundbar.</string>
+    <string name="playback_afr_settle_delay_auto">Auto</string>
+    <string name="playback_afr_settle_delay_auto_sub">To sekunder og derefter indtil tv\'ets lydforbindelse er tilbage</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc bad om %1$s Hz, men din skærm kører med %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc bad om %1$s Hz. Dit tv skiftede hastighed uden et fuldt skift (QMS) og kører med %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Du kan se et gentaget billede cirka hvert %1$d. sekund.</string>
+    <string name="qms_hint_effect_judder">Det ses som en jævn hakken.</string>
+    <string name="qms_hint_mode_tip">Nogle bokse og receivere har en indstilling for præcise filmhastigheder (23,976 Hz), ofte kaldet brøkhastigheder. Arc kan ikke ændre den.</string>
+    <string name="qms_hint_off_hint_qms">Arc holder så op med at bede om filmens hastighed. Dit tv kan stadig selv skifte hastighed.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

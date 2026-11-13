@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc đã đọc tệp này nhưng không tìm thấy hình ảnh nào có thể phát. Các tệp dùng để biên tập video, như Apple ProRes, thường như vậy. Hãy chọn một bản khác của nội dung này.</string>
+    <string name="player_error_card_silent_title">Nguồn không phản hồi</string>
+    <string name="player_error_card_silent">Máy chủ của nguồn này không gửi video trong %1$d giây. Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác, hoặc thử lại nguồn này sau.</string>
+    <string name="player_error_card_fault_title">Máy chủ của nguồn đang gặp lỗi</string>
+    <string name="player_error_card_fault">Máy chủ của nguồn này đã trả về lỗi (%1$d). Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác, hoặc thử lại nguồn này sau.</string>
+    <string name="player_error_card_blocked_title">Nguồn đã chặn liên kết này</string>
+    <string name="player_error_card_blocked">Máy chủ của nguồn này đã từ chối liên kết (lỗi %1$d). Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác.</string>
+    <string name="player_error_card_gone_title">Tệp này không còn trên nguồn</string>
+    <string name="player_error_card_gone">Máy chủ cho biết tệp này không còn nữa (lỗi %1$d). Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác.</string>
+    <string name="player_error_card_expired_title">Liên kết này đã hết hạn</string>
+    <string name="player_error_card_expired">Liên kết của nguồn đã hết hạn (lỗi %1$d). Hãy quay lại và mở lại nội dung để lấy liên kết mới, hoặc thử nguồn khác.</string>
+    <string name="player_error_card_limit_title">Dịch vụ đang giới hạn yêu cầu</string>
+    <string name="player_error_card_limit">Dịch vụ này đang yêu cầu Arc chậm lại. Lỗi này đến từ dịch vụ, không phải từ Arc. Hãy chờ một chút rồi thử lại, hoặc chọn nguồn từ máy chủ khác.</string>
+    <string name="player_error_card_unreachable_title">Arc không thể kết nối tới nguồn</string>
+    <string name="player_error_card_unreachable">Không thể kết nối tới máy chủ của nguồn này. Nếu các nguồn khác vẫn phát được, máy chủ đó đang ngừng hoạt động: hãy chọn nguồn khác. Nếu không có gì phát được, hãy kiểm tra kết nối internet của thiết bị.</string>
+    <string name="player_error_card_notice_title">Nhà cung cấp gửi thông báo, không phải phim</string>
+    <string name="player_error_card_notice">Thay vì phim, tiện ích hoặc dịch vụ Debrid đã gửi một video thông báo ngắn. Điều này thường có nghĩa là tệp chưa sẵn sàng, tài khoản của bạn đã đạt giới hạn, hoặc phiên đăng nhập đã hết hạn. Lỗi này đến từ tiện ích, không phải từ Arc. Hãy kiểm tra tiện ích hoặc tài khoản Debrid của bạn, hoặc thử nguồn khác.</string>
+    <string name="player_error_card_not_video_title">Liên kết này không phải video</string>
+    <string name="player_error_card_not_video">Máy chủ đã gửi thứ không phải video, thường là một trang web hoặc tệp nén. Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác.</string>
+    <string name="player_error_card_box_title">Thiết bị này không phát được tệp này</string>
+    <string name="player_error_card_box">Tệp này là %1$s, vượt quá khả năng của chip video trên thiết bị này. Lỗi này đến từ thiết bị, không phải từ Arc. Hãy chọn một bản khác của nội dung này, như 4K hoặc 1080p.</string>
+    <string name="player_error_card_box_no_detail">Định dạng video của tệp này vượt quá khả năng của chip video trên thiết bị này. Lỗi này đến từ thiết bị, không phải từ Arc. Hãy chọn một bản khác của nội dung này, như 4K hoặc 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc không đọc được hình ảnh của tệp này</string>
+    <string name="player_error_facts_no_answer">không phản hồi</string>
+    <string name="player_error_facts_no_connection">không có kết nối</string>
+    <string name="player_error_facts_seconds">%1$d giây</string>
+    <string name="player_error_other_sources">Nguồn khác</string>
+    <string name="report_check_title">Arc đã tìm thấy gì</string>
+    <string name="report_check_hint">Đây có vẻ là sự cố bên ngoài Arc, nên báo cáo không thể khắc phục được. Hãy thử những cách sau trước.</string>
+    <string name="report_check_try_source">Thử nguồn khác</string>
+    <string name="report_check_try_source_notice">hoặc kiểm tra tiện ích hay tài khoản Debrid của bạn</string>
+    <string name="report_check_send_anyway">Vẫn gửi</string>
+    <string name="debrid_busy">Dịch vụ Debrid đang bận (lỗi %1$d). Lỗi này đến từ dịch vụ, không phải từ Arc. Hãy thử lại sau giây lát, hoặc chọn nguồn khác.</string>
+</resources>

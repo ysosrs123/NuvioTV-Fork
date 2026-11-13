@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Deze bron werkt op dit moment niet. Arc kan dat niet oplossen, dus melden is niet nodig. Probeer een andere bron.</string>
+    <string name="report_check_blocked_hint_notice">Deze bron werkt op dit moment niet. Arc kan dat niet oplossen, dus melden is niet nodig. Controleer je add-on of Debrid-account, of probeer een andere bron.</string>
+    <string name="stream_large_file_short">Groot bestand voor dit apparaat</string>
+    <string name="stream_large_file_uhd">Dit is een heel groot 4K-bestand. Apparaten met minder geheugen, zoals dit, hebben vaak moeite met bestanden van deze grootte, dus het afspelen kan haperen of stoppen. Een 1080p-versie van dezelfde film speelt meestal soepeler af.</string>
+    <string name="stream_large_file_other">Dit is een heel groot bestand. Apparaten met minder geheugen, zoals dit, hebben vaak moeite met bestanden van deze grootte, dus het afspelen kan haperen of stoppen. Een kleinere 1080p-versie, gemarkeerd als WEB in plaats van Remux, speelt meestal soepeler af.</string>
+</resources>

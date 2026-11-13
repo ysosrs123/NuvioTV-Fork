@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc hat diese Datei gelesen und kein Bild darin gefunden, das es abspielen kann. Dateien für den Videoschnitt, etwa Apple ProRes, sind so. Wählen Sie eine andere Fassung des Titels.</string>
+    <string name="player_error_card_silent_title">Die Quelle hat nicht geantwortet</string>
+    <string name="player_error_card_silent">Der Server dieser Quelle hat %1$d s lang kein Video gesendet. Das liegt an der Quelle, nicht an Arc. Versuchen Sie eine andere Quelle oder diese später erneut.</string>
+    <string name="player_error_card_fault_title">Der Server der Quelle hat eine Störung</string>
+    <string name="player_error_card_fault">Der Server dieser Quelle hat mit einem Fehler geantwortet (%1$d). Das liegt an der Quelle, nicht an Arc. Versuchen Sie eine andere Quelle oder diese später erneut.</string>
+    <string name="player_error_card_blocked_title">Die Quelle hat diesen Link gesperrt</string>
+    <string name="player_error_card_blocked">Der Server dieser Quelle hat den Link abgelehnt (Fehler %1$d). Das liegt an der Quelle, nicht an Arc. Versuchen Sie eine andere Quelle.</string>
+    <string name="player_error_card_gone_title">Diese Datei ist bei der Quelle nicht mehr da</string>
+    <string name="player_error_card_gone">Laut Server ist diese Datei nicht mehr vorhanden (Fehler %1$d). Das liegt an der Quelle, nicht an Arc. Versuchen Sie eine andere Quelle.</string>
+    <string name="player_error_card_expired_title">Dieser Link ist abgelaufen</string>
+    <string name="player_error_card_expired">Der Link der Quelle ist abgelaufen (Fehler %1$d). Gehen Sie zurück und öffnen Sie den Titel erneut, um einen neuen Link zu erhalten, oder versuchen Sie eine andere Quelle.</string>
+    <string name="player_error_card_limit_title">Der Dienst begrenzt Anfragen</string>
+    <string name="player_error_card_limit">Dieser Dienst bittet Arc, langsamer zu machen. Das liegt am Dienst, nicht an Arc. Warten Sie kurz, bevor Sie es erneut versuchen, oder wählen Sie eine Quelle von einem anderen Server.</string>
+    <string name="player_error_card_unreachable_title">Arc hat die Quelle nicht erreicht</string>
+    <string name="player_error_card_unreachable">Der Server dieser Quelle ist nicht erreichbar. Wenn andere Quellen laufen, ist dieser Server ausgefallen: Wählen Sie eine andere. Wenn nichts läuft, prüfen Sie die Internetverbindung der Box.</string>
+    <string name="player_error_card_notice_title">Der Anbieter sendete einen Hinweis, nicht den Film</string>
+    <string name="player_error_card_notice">Statt des Films hat das Add-on oder der Debrid-Dienst ein kurzes Hinweisvideo gesendet. Meist ist die Datei noch nicht bereit, Ihr Konto hat ein Limit erreicht oder eine Anmeldung ist abgelaufen. Das liegt am Add-on, nicht an Arc. Prüfen Sie das Add-on oder Ihr Debrid-Konto oder versuchen Sie eine andere Quelle.</string>
+    <string name="player_error_card_not_video_title">Dieser Link ist kein Video</string>
+    <string name="player_error_card_not_video">Der Server hat etwas gesendet, das kein Video ist, oft eine Webseite oder ein Archiv. Das liegt an der Quelle, nicht an Arc. Versuchen Sie eine andere Quelle.</string>
+    <string name="player_error_card_box_title">Diese Box kann diese Datei nicht abspielen</string>
+    <string name="player_error_card_box">Diese Datei ist %1$s, mehr als der Videochip dieser Box abspielen kann. Das liegt an der Box, nicht an Arc. Wählen Sie eine andere Fassung des Titels, etwa 4K oder 1080p.</string>
+    <string name="player_error_card_box_no_detail">Das Videoformat dieser Datei ist mehr, als der Videochip dieser Box abspielen kann. Das liegt an der Box, nicht an Arc. Wählen Sie eine andere Fassung des Titels, etwa 4K oder 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc kann das Bild dieser Datei nicht lesen</string>
+    <string name="player_error_facts_no_answer">keine Antwort</string>
+    <string name="player_error_facts_no_connection">keine Verbindung</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Andere Quellen</string>
+    <string name="report_check_title">Was Arc gefunden hat</string>
+    <string name="report_check_hint">Das sieht nach einem Problem außerhalb von Arc aus, eine Meldung kann es also nicht beheben. Versuchen Sie zuerst Folgendes.</string>
+    <string name="report_check_try_source">Andere Quelle versuchen</string>
+    <string name="report_check_try_source_notice">oder prüfen Sie Ihr Add-on oder Debrid-Konto</string>
+    <string name="report_check_send_anyway">Trotzdem senden</string>
+    <string name="debrid_busy">Der Debrid-Dienst ist gerade ausgelastet (Fehler %1$d). Das liegt am Dienst, nicht an Arc. Versuchen Sie es gleich noch einmal oder wählen Sie eine andere Quelle.</string>
+</resources>

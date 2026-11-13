@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Имена и слике</string>
     <string name="backup_part_settings">Arc подешавања</string>
     <string name="backup_part_settings_sub">Scout, сличице, DNS, дугмад даљинског и друго</string>
+    <string name="backup_part_history">Библиотека и историја гледања</string>
+    <string name="backup_part_history_sub">Сачувани наслови, Настави гледање и ознаке одгледаног</string>
+    <string name="backup_part_history_signed_in">Ваш Nuvio налог ово већ чува. Враћа се само на уређају који није пријављен.</string>
+    <string name="backup_part_history_counts">Сачувани наслови: %1$d. Одгледано: %2$d. У току: %3$d.</string>
+    <string name="backup_supporter">Статус подржаваоца</string>
+    <string name="backup_supporter_yes">Да. Боје и иконе подржаваоца остају.</string>
+    <string name="backup_supporter_no">Не</string>
     <string name="backup_part_secrets">Лозинке и кључеви</string>
     <string name="backup_part_secrets_saved">Закључано вашим PIN-ом</string>
     <string name="backup_part_secrets_needs_pin">Потребан је PIN копије</string>

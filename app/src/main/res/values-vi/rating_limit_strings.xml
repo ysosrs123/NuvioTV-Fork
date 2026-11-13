@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Giới hạn độ tuổi</string>
+    <string name="rating_limit_none">Không giới hạn</string>
+    <string name="rating_limit_preschool">Trẻ mẫu giáo</string>
+    <string name="rating_limit_young">Trẻ nhỏ</string>
+    <string name="rating_limit_pg">Trẻ lớn</string>
+    <string name="rating_limit_teen">Thiếu niên</string>
+    <string name="rating_limit_hint">Nội dung hồ sơ này được xem mà không cần mã PIN của %1$s</string>
+    <string name="rating_limit_note">Dùng phân loại Mỹ của TMDB. Vượt giới hạn hoặc chưa có phân loại, Xem sẽ hỏi mã PIN của %1$s.</string>
+    <string name="rating_limit_needs_pin">Hãy đặt mã PIN cho hồ sơ %1$s trước. Giới hạn độ tuổi cần mã này.</string>
+    <string name="rating_limit_change_heading">Nhập mã PIN của %1$s để đổi giới hạn</string>
+    <string name="rating_limit_change_support">Giới hạn độ tuổi của %1$s sẽ là: %2$s</string>
+    <string name="rating_limit_saved">Giới hạn độ tuổi của %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Cần mã PIN của %1$s để phát nội dung này</string>
+    <string name="rating_limit_play_rated">%1$s được phân loại %2$s. Giới hạn của %3$s là %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc không tìm thấy phân loại cho %1$s. Giới hạn của %2$s là %3$s.</string>
+    <string name="rating_limit_play_no_pin">Đặt mã PIN cho hồ sơ %1$s để phát nội dung vượt giới hạn của %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s không thể tham gia buổi xem chung này</string>
+    <string name="rating_limit_party_rated">Nhóm đang xem %1$s, phân loại %2$s. Giới hạn của %3$s là %4$s.</string>
+    <string name="rating_limit_party_unrated">Nhóm đang xem %1$s, nội dung không có phân loại mà Arc kiểm tra được. Giới hạn của %2$s là %3$s.</string>
+    <string name="rating_limit_add_heading">Nhập mã PIN của %1$s để thêm hồ sơ</string>
+    <string name="rating_limit_add_support">Một hồ sơ trên thiết bị này có giới hạn độ tuổi.</string>
+</resources>

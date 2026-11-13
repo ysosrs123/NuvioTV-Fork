@@ -187,8 +187,8 @@
     <string name="scout_genre_western">Western</string>
     <string name="scout_licence_icon_title">Pictograma Scout</string>
     <string name="scout_licence_icon_body">Din Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oscar: câștigători cel mai bun film</string>
-    <string name="scout_award_oscar_nominees">Oscar: nominalizați cel mai bun film</string>
+    <string name="scout_award_oscar_winners">Oscar: câștigători</string>
+    <string name="scout_award_oscar_nominees">Oscar: nominalizați</string>
     <string name="scout_award_lion">Leul de Aur</string>
     <string name="scout_award_globes">Globul de Aur</string>
     <string name="scout_award_palme">Palme d\'Or</string>

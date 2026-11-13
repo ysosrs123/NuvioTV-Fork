@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc a citit acest fișier și nu a găsit în el nicio imagine pe care să o poată reda. Fișierele făcute pentru editare video, cum ar fi Apple ProRes, sunt așa. Alege altă copie a titlului.</string>
+    <string name="player_error_card_silent_title">Sursa nu a răspuns</string>
+    <string name="player_error_card_silent">Serverul acestei surse nu a trimis niciun video timp de %1$d s. Asta vine de la sursă, nu de la Arc. Încearcă altă sursă sau reîncearcă această sursă mai târziu.</string>
+    <string name="player_error_card_fault_title">Serverul sursei are o defecțiune</string>
+    <string name="player_error_card_fault">Serverul acestei surse a răspuns cu o eroare (%1$d). Asta vine de la sursă, nu de la Arc. Încearcă altă sursă sau reîncearcă această sursă mai târziu.</string>
+    <string name="player_error_card_blocked_title">Sursa a blocat acest link</string>
+    <string name="player_error_card_blocked">Serverul acestei surse a refuzat linkul (eroare %1$d). Asta vine de la sursă, nu de la Arc. Încearcă altă sursă.</string>
+    <string name="player_error_card_gone_title">Fișierul nu mai există la sursă</string>
+    <string name="player_error_card_gone">Serverul spune că acest fișier nu mai există (eroare %1$d). Asta vine de la sursă, nu de la Arc. Încearcă altă sursă.</string>
+    <string name="player_error_card_expired_title">Acest link a expirat</string>
+    <string name="player_error_card_expired">Linkul sursei a expirat (eroare %1$d). Întoarce-te și deschide din nou titlul pentru un link nou sau încearcă altă sursă.</string>
+    <string name="player_error_card_limit_title">Serviciul limitează cererile</string>
+    <string name="player_error_card_limit">Acest serviciu îi cere lui Arc să încetinească. Asta vine de la serviciu, nu de la Arc. Așteaptă puțin înainte să încerci din nou sau alege o sursă de pe alt server.</string>
+    <string name="player_error_card_unreachable_title">Arc nu a putut contacta sursa</string>
+    <string name="player_error_card_unreachable">Serverul acestei surse nu poate fi contactat. Dacă alte surse merg, acel server este căzut: alege alta. Dacă nu merge nimic, verifică conexiunea la internet a dispozitivului.</string>
+    <string name="player_error_card_notice_title">Furnizorul a trimis un anunț, nu filmul</string>
+    <string name="player_error_card_notice">În locul filmului, add-onul sau serviciul Debrid a trimis un scurt videoclip cu un anunț. De obicei înseamnă că fișierul nu este încă gata, că contul tău a atins o limită sau că o autentificare a expirat. Asta vine de la add-on, nu de la Arc. Verifică add-onul sau contul tău Debrid ori încearcă altă sursă.</string>
+    <string name="player_error_card_not_video_title">Acest link nu este un video</string>
+    <string name="player_error_card_not_video">Serverul a trimis ceva ce nu este un video, adesea o pagină web sau o arhivă. Asta vine de la sursă, nu de la Arc. Încearcă altă sursă.</string>
+    <string name="player_error_card_box_title">Acest dispozitiv nu poate reda fișierul</string>
+    <string name="player_error_card_box">Acest fișier este %1$s, mai mult decât poate reda cipul video al acestui dispozitiv. Asta vine de la dispozitiv, nu de la Arc. Alege altă copie a titlului, de exemplu 4K sau 1080p.</string>
+    <string name="player_error_card_box_no_detail">Formatul video al acestui fișier depășește ce poate reda cipul video al acestui dispozitiv. Asta vine de la dispozitiv, nu de la Arc. Alege altă copie a titlului, de exemplu 4K sau 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc nu poate citi imaginea acestui fișier</string>
+    <string name="player_error_facts_no_answer">niciun răspuns</string>
+    <string name="player_error_facts_no_connection">fără conexiune</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Alte surse</string>
+    <string name="report_check_title">Ce a găsit Arc</string>
+    <string name="report_check_hint">Pare o problemă din afara Arc, așa că un raport nu o poate rezolva. Iată ce poți încerca mai întâi.</string>
+    <string name="report_check_try_source">Încearcă altă sursă</string>
+    <string name="report_check_try_source_notice">sau verifică add-onul ori contul tău Debrid</string>
+    <string name="report_check_send_anyway">Trimite oricum</string>
+    <string name="debrid_busy">Serviciul Debrid este ocupat acum (eroare %1$d). Asta vine de la serviciu, nu de la Arc. Încearcă din nou peste puțin timp sau alege altă sursă.</string>
+</resources>

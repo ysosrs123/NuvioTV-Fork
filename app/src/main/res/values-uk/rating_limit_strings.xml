@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Вікове обмеження</string>
+    <string name="rating_limit_none">Без обмежень</string>
+    <string name="rating_limit_preschool">Дошкільнята</string>
+    <string name="rating_limit_young">Молодші діти</string>
+    <string name="rating_limit_pg">Старші діти</string>
+    <string name="rating_limit_teen">Підлітки</string>
+    <string name="rating_limit_hint">Що цей профіль може дивитися без PIN-коду профілю %1$s</string>
+    <string name="rating_limit_note">Використовуються рейтинги США з TMDB. Вище обмеження або без рейтингу кнопка «Дивитися» запитає PIN-код профілю %1$s.</string>
+    <string name="rating_limit_needs_pin">Спершу встановіть PIN-код у профілі %1$s. Його запитує вікове обмеження.</string>
+    <string name="rating_limit_change_heading">Введіть PIN-код профілю %1$s, щоб змінити обмеження</string>
+    <string name="rating_limit_change_support">Нове обмеження профілю %1$s: %2$s</string>
+    <string name="rating_limit_saved">Обмеження профілю %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Для перегляду потрібен PIN-код профілю %1$s</string>
+    <string name="rating_limit_play_rated">%1$s: рейтинг %2$s. Обмеження профілю %3$s: %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc не знайшов рейтинг для %1$s. Обмеження профілю %2$s: %3$s.</string>
+    <string name="rating_limit_play_no_pin">Встановіть PIN-код у профілі %1$s, щоб дивитися те, що вище обмеження профілю %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s не може приєднатися до цього перегляду</string>
+    <string name="rating_limit_party_rated">Учасники дивляться %1$s з рейтингом %2$s. Обмеження профілю %3$s: %4$s.</string>
+    <string name="rating_limit_party_unrated">Учасники дивляться %1$s, але Arc не може перевірити рейтинг. Обмеження профілю %2$s: %3$s.</string>
+    <string name="rating_limit_add_heading">Введіть PIN-код профілю %1$s, щоб додати профіль</string>
+    <string name="rating_limit_add_support">Один із профілів на цьому пристрої має вікове обмеження.</string>
+</resources>

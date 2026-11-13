@@ -184,8 +184,8 @@
     <string name="scout_genre_western">Western</string>
     <string name="scout_licence_icon_title">Scout-Symbol</string>
     <string name="scout_licence_icon_body">Von Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oscars: Gewinner Bester Film</string>
-    <string name="scout_award_oscar_nominees">Oscars: Nominierte Bester Film</string>
+    <string name="scout_award_oscar_winners">Oscars: Gewinner</string>
+    <string name="scout_award_oscar_nominees">Oscars: Nominierte</string>
     <string name="scout_award_lion">Goldener Löwe</string>
     <string name="scout_award_globes">Golden Globes</string>
     <string name="scout_award_palme">Palme d\'Or</string>

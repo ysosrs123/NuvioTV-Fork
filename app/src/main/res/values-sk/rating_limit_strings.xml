@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Vekové obmedzenie</string>
+    <string name="rating_limit_none">Bez obmedzenia</string>
+    <string name="rating_limit_preschool">Predškoláci</string>
+    <string name="rating_limit_young">Malé deti</string>
+    <string name="rating_limit_pg">Staršie deti</string>
+    <string name="rating_limit_teen">Tínedžeri</string>
+    <string name="rating_limit_hint">Čo môže tento profil prehrávať bez PIN profilu %1$s</string>
+    <string name="rating_limit_note">Používa americké hodnotenia z TMDB. Nad obmedzením alebo bez hodnotenia si Prehrať vyžiada PIN profilu %1$s.</string>
+    <string name="rating_limit_needs_pin">Najprv nastavte PIN v profile %1$s. Vekové obmedzenie ho vyžaduje.</string>
+    <string name="rating_limit_change_heading">Zadajte PIN profilu %1$s na zmenu obmedzenia</string>
+    <string name="rating_limit_change_support">Nové obmedzenie profilu %1$s: %2$s</string>
+    <string name="rating_limit_saved">Obmedzenie profilu %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Na prehranie treba PIN profilu %1$s</string>
+    <string name="rating_limit_play_rated">%1$s má hodnotenie %2$s. Obmedzenie profilu %3$s je %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc nenašiel hodnotenie pre %1$s. Obmedzenie profilu %2$s je %3$s.</string>
+    <string name="rating_limit_play_no_pin">Nastavte PIN v profile %1$s, aby ste mohli prehrávať tituly nad obmedzením profilu %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s sa nemôže pripojiť k tomuto sledovaniu</string>
+    <string name="rating_limit_party_rated">Skupina sleduje %1$s s hodnotením %2$s. Obmedzenie profilu %3$s je %4$s.</string>
+    <string name="rating_limit_party_unrated">Skupina sleduje %1$s a Arc nevie overiť jeho hodnotenie. Obmedzenie profilu %2$s je %3$s.</string>
+    <string name="rating_limit_add_heading">Zadajte PIN profilu %1$s na pridanie profilu</string>
+    <string name="rating_limit_add_support">Jeden profil v tomto zariadení má vekové obmedzenie.</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Nguồn này hiện không hoạt động. Arc không thể khắc phục, nên bạn không cần báo cáo. Hãy thử nguồn khác.</string>
+    <string name="report_check_blocked_hint_notice">Nguồn này hiện không hoạt động. Arc không thể khắc phục, nên bạn không cần báo cáo. Hãy kiểm tra tiện ích hay tài khoản Debrid của bạn, hoặc thử nguồn khác.</string>
+    <string name="stream_large_file_short">Tệp lớn với thiết bị này</string>
+    <string name="stream_large_file_uhd">Đây là tệp 4K rất lớn. Các thiết bị ít bộ nhớ, như thiết bị này, thường gặp khó với tệp cỡ này, nên có thể bị khựng hoặc dừng phát. Bản 1080p của cùng bộ phim thường phát mượt hơn.</string>
+    <string name="stream_large_file_other">Đây là tệp rất lớn. Các thiết bị ít bộ nhớ, như thiết bị này, thường gặp khó với tệp cỡ này, nên có thể bị khựng hoặc dừng phát. Bản 1080p nhỏ hơn, ghi WEB thay vì Remux, thường phát mượt hơn.</string>
+</resources>

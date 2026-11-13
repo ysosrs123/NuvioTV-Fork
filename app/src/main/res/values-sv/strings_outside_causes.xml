@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Den här källan fungerar inte just nu. Arc kan inte åtgärda det, så du behöver inte rapportera det. Prova en annan källa.</string>
+    <string name="report_check_blocked_hint_notice">Den här källan fungerar inte just nu. Arc kan inte åtgärda det, så du behöver inte rapportera det. Kontrollera ditt tillägg eller Debrid-konto, eller prova en annan källa.</string>
+    <string name="stream_large_file_short">Stor fil för den här boxen</string>
+    <string name="stream_large_file_uhd">Det här är en mycket stor 4K-fil. Boxar med mindre minne, som den här, har ofta svårt med filer av den här storleken, så uppspelningen kan hacka eller stanna. En 1080p-version av samma film spelas oftast upp smidigare.</string>
+    <string name="stream_large_file_other">Det här är en mycket stor fil. Boxar med mindre minne, som den här, har ofta svårt med filer av den här storleken, så uppspelningen kan hacka eller stanna. En mindre 1080p-version, märkt WEB i stället för Remux, spelas oftast upp smidigare.</string>
+</resources>

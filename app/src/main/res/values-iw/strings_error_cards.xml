@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">הקובץ נקרא, אבל Arc לא מצא בו תמונה שאפשר להפעיל. כך זה בקבצים שנוצרו לעריכת וידאו, כמו Apple ProRes. כדאי לבחור עותק אחר של הכותרת.</string>
+    <string name="player_error_card_silent_title">המקור לא הגיב</string>
+    <string name="player_error_card_silent">השרת של המקור הזה לא שלח וידאו במשך %1$d שנ׳. זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר, או לנסות את המקור הזה שוב מאוחר יותר.</string>
+    <string name="player_error_card_fault_title">יש תקלה בשרת של המקור</string>
+    <string name="player_error_card_fault">השרת של המקור הזה החזיר שגיאה (%1$d). זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר, או לנסות את המקור הזה שוב מאוחר יותר.</string>
+    <string name="player_error_card_blocked_title">המקור חסם את הקישור הזה</string>
+    <string name="player_error_card_blocked">השרת של המקור הזה דחה את הקישור (שגיאה %1$d). זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר.</string>
+    <string name="player_error_card_gone_title">הקובץ הזה כבר לא נמצא במקור</string>
+    <string name="player_error_card_gone">השרת מדווח שהקובץ הזה כבר לא קיים (שגיאה %1$d). זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר.</string>
+    <string name="player_error_card_expired_title">פג תוקף הקישור הזה</string>
+    <string name="player_error_card_expired">פג תוקף הקישור של המקור (שגיאה %1$d). כדאי לחזור ולפתוח את הכותרת שוב כדי לקבל קישור חדש, או לנסות מקור אחר.</string>
+    <string name="player_error_card_limit_title">השירות מגביל בקשות</string>
+    <string name="player_error_card_limit">השירות הזה מבקש מ-Arc להאט. זה מגיע מהשירות, לא מ-Arc. כדאי להמתין מעט לפני שמנסים שוב, או לבחור מקור משרת אחר.</string>
+    <string name="player_error_card_unreachable_title">אין גישה למקור</string>
+    <string name="player_error_card_unreachable">אין גישה לשרת של המקור הזה. אם מקורות אחרים מתנגנים, השרת הזה מושבת: כדאי לבחור מקור אחר. אם שום דבר לא מתנגן, כדאי לבדוק את חיבור האינטרנט של המכשיר.</string>
+    <string name="player_error_card_notice_title">הספק שלח הודעה במקום הסרט</string>
+    <string name="player_error_card_notice">במקום הסרט, התוסף או שירות ה-Debrid שלחו סרטון קצר עם הודעה. בדרך כלל זה אומר שהקובץ עוד לא מוכן, שהחשבון הגיע למגבלה, או שפג תוקף ההתחברות. זה מגיע מהתוסף, לא מ-Arc. כדאי לבדוק את התוסף או את חשבון ה-Debrid, או לנסות מקור אחר.</string>
+    <string name="player_error_card_not_video_title">הקישור הזה אינו וידאו</string>
+    <string name="player_error_card_not_video">השרת שלח משהו שאינו וידאו, לרוב דף אינטרנט או קובץ ארכיון. זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר.</string>
+    <string name="player_error_card_box_title">המכשיר הזה לא יכול להפעיל את הקובץ</string>
+    <string name="player_error_card_box">הקובץ הזה (‎%1$s) דורש יותר ממה ששבב הווידאו של המכשיר יכול להפעיל. זה מגיע מהמכשיר, לא מ-Arc. כדאי לבחור עותק אחר של הכותרת, כמו 4K או 1080p.</string>
+    <string name="player_error_card_box_no_detail">פורמט הווידאו של הקובץ הזה דורש יותר ממה ששבב הווידאו של המכשיר יכול להפעיל. זה מגיע מהמכשיר, לא מ-Arc. כדאי לבחור עותק אחר של הכותרת, כמו 4K או 1080p.</string>
+    <string name="player_error_card_unreadable_title">לא ניתן לקרוא את התמונה בקובץ הזה</string>
+    <string name="player_error_facts_no_answer">אין תגובה</string>
+    <string name="player_error_facts_no_connection">אין חיבור</string>
+    <string name="player_error_facts_seconds">%1$d שנ׳</string>
+    <string name="player_error_other_sources">מקורות אחרים</string>
+    <string name="report_check_title">מה Arc מצא</string>
+    <string name="report_check_hint">נראה שזו בעיה מחוץ ל-Arc, ולכן דיווח לא יפתור אותה. הנה מה כדאי לנסות קודם.</string>
+    <string name="report_check_try_source">לנסות מקור אחר</string>
+    <string name="report_check_try_source_notice">או לבדוק את התוסף או את חשבון ה-Debrid</string>
+    <string name="report_check_send_anyway">לשלוח בכל זאת</string>
+    <string name="debrid_busy">שירות ה-Debrid עמוס כרגע (שגיאה %1$d). זה מגיע מהשירות, לא מ-Arc. כדאי לנסות שוב בעוד רגע, או לבחור מקור אחר.</string>
+</resources>

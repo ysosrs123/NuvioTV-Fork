@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Döljer knappen Betygsätt, tummarna i menyn och frågan efter en film. Dina betyg räknas fortfarande.</string>
     <string name="scout_ask_enabled">Fråga hur det var efter en film</string>
     <string name="scout_ask_enabled_sub">Inget för mig, gillar eller älskar när du lämnar spelaren</string>
+    <string name="scout_send_ratings">Skicka mina betyg till trackers</string>
+    <string name="scout_send_ratings_sub">Inget för mig, Gillar och Älskar skickas till Trakt, Simkl, MDBList och WeTrakr som 3, 7 och 10 av 10. Ett betyg du själv har gett på en tracker ändras aldrig. Simkl får bara titlar du har sett.</string>
+    <string name="scout_send_ratings_none">Ingen tracker är inloggad i den här profilen, så inget skickas än.</string>
+    <string name="scout_use_ratings">Använd mina betyg från trackers</string>
+    <string name="scout_use_ratings_sub">Betyg du har gett på dina trackers blir tummar här: 9 eller 10 är Älskar, 6 till 8 Gillar, 1 till 4 Inget för mig. En tumme du trycker i Arc vinner alltid.</string>
+    <string name="scout_thumb_from">Från %1$s</string>
     <string name="scout_your_thumbs">Dina tummar</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d titel betygsatt. Öppna för att ändra eller ångra</item>

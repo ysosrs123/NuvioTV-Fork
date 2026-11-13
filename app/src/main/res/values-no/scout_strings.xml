@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Skjuler knappen Vurder, tomlene i menyen og spørsmålet etter en film. Vurderingene dine teller fortsatt.</string>
     <string name="scout_ask_enabled">Spør hvordan det var etter en film</string>
     <string name="scout_ask_enabled_sub">Ikke noe for meg, liker eller elsker når du forlater spilleren</string>
+    <string name="scout_send_ratings">Send vurderingene mine til trackere</string>
+    <string name="scout_send_ratings_sub">Ikke noe for meg, Liker og Elsker sendes til Trakt, Simkl, MDBList og WeTrakr som 3, 7 og 10 av 10. En vurdering du selv har gitt på en tracker, endres aldri. Simkl får bare titler du har sett.</string>
+    <string name="scout_send_ratings_none">Ingen tracker er logget på denne profilen, så ingenting sendes ennå.</string>
+    <string name="scout_use_ratings">Bruk vurderingene fra trackerne mine</string>
+    <string name="scout_use_ratings_sub">Vurderinger du har gitt på trackerne dine, blir til tomler her: 9 eller 10 er Elsker, 6 til 8 Liker, 1 til 4 Ikke noe for meg. En tommel du trykker i Arc, vinner alltid.</string>
+    <string name="scout_thumb_from">Fra %1$s</string>
     <string name="scout_your_thumbs">Tomlene dine</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d tittel vurdert. Åpne for å endre eller angre</item>

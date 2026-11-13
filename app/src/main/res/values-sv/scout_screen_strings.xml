@@ -184,8 +184,8 @@
     <string name="scout_genre_western">Western</string>
     <string name="scout_licence_icon_title">Scout-ikon</string>
     <string name="scout_licence_icon_body">Från Material Design Icons, Apache-licens 2.0.</string>
-    <string name="scout_award_oscar_winners">Oscars: vinnare av bästa film</string>
-    <string name="scout_award_oscar_nominees">Oscars: nominerade till bästa film</string>
+    <string name="scout_award_oscar_winners">Oscars: vinnare</string>
+    <string name="scout_award_oscar_nominees">Oscars: nominerade</string>
     <string name="scout_award_lion">Guldlejonet</string>
     <string name="scout_award_globes">Golden Globes</string>
     <string name="scout_award_palme">Palme d\'Or</string>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Diese Quelle funktioniert gerade nicht. Arc kann das nicht beheben, eine Meldung ist also nicht nötig. Versuchen Sie eine andere Quelle.</string>
+    <string name="report_check_blocked_hint_notice">Diese Quelle funktioniert gerade nicht. Arc kann das nicht beheben, eine Meldung ist also nicht nötig. Prüfen Sie Ihr Add-on oder Debrid-Konto oder versuchen Sie eine andere Quelle.</string>
+    <string name="stream_large_file_short">Große Datei für diese Box</string>
+    <string name="stream_large_file_uhd">Das ist eine sehr große 4K-Datei. Boxen mit weniger Speicher, wie diese, haben mit Dateien dieser Größe oft Mühe, daher kann die Wiedergabe stocken oder abbrechen. Eine 1080p-Fassung desselben Films läuft meist flüssiger.</string>
+    <string name="stream_large_file_other">Das ist eine sehr große Datei. Boxen mit weniger Speicher, wie diese, haben mit Dateien dieser Größe oft Mühe, daher kann die Wiedergabe stocken oder abbrechen. Eine kleinere 1080p-Fassung mit WEB statt Remux im Namen läuft meist flüssiger.</string>
+</resources>

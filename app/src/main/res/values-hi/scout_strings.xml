@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">रेट बटन, मेन्यू के थंब और फ़िल्म के बाद का सवाल छिपाता है। आपकी रेटिंग फिर भी गिनी जाती हैं।</string>
     <string name="scout_ask_enabled">फ़िल्म के बाद पूछें कि कैसी थी</string>
     <string name="scout_ask_enabled_sub">प्लेयर छोड़ते समय मेरे लिए नहीं, पसंद या बहुत पसंद</string>
+    <string name="scout_send_ratings">मेरी रेटिंग ट्रैकर पर भेजें</string>
+    <string name="scout_send_ratings_sub">मेरे लिए नहीं, मुझे पसंद है और बहुत पसंद है, Trakt, Simkl, MDBList और WeTrakr पर 10 में से 3, 7 और 10 के रूप में जाती हैं। ट्रैकर पर आपकी खुद दी गई रेटिंग कभी नहीं बदली जाती। Simkl को सिर्फ़ वही टाइटल मिलते हैं जो आपने देखे हैं।</string>
+    <string name="scout_send_ratings_none">इस प्रोफ़ाइल पर कोई ट्रैकर साइन इन नहीं है, इसलिए अभी कुछ नहीं भेजा जाता।</string>
+    <string name="scout_use_ratings">मेरी ट्रैकर रेटिंग इस्तेमाल करें</string>
+    <string name="scout_use_ratings_sub">आपके ट्रैकर पर दी गई रेटिंग यहाँ थंब बन जाती हैं: 9 या 10 बहुत पसंद है, 6 से 8 मुझे पसंद है, 1 से 4 मेरे लिए नहीं। Arc में दबाए गए थंब को हमेशा प्राथमिकता मिलती है।</string>
+    <string name="scout_thumb_from">%1$s से</string>
     <string name="scout_your_thumbs">आपके थंब</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d टाइटल रेट किया। बदलने या हटाने के लिए खोलें</item>

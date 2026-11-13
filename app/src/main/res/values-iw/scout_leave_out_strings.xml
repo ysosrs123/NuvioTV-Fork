@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">השמטת שפות</string>
+    <string name="scout_leave_out_languages_sub">שפות שאינך רוצה לראות לעולם</string>
+    <string name="scout_language_indian">שפות הודיות</string>
+</resources>

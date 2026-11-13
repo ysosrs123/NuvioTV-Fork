@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc membaca file ini dan tidak menemukan gambar yang bisa diputar. File untuk penyuntingan video, seperti Apple ProRes, memang seperti ini. Pilih salinan lain dari judul ini.</string>
+    <string name="player_error_card_silent_title">Sumber tidak merespons</string>
+    <string name="player_error_card_silent">Server sumber ini tidak mengirim video selama %1$d detik. Ini berasal dari sumber, bukan dari Arc. Coba sumber lain, atau coba sumber ini lagi nanti.</string>
+    <string name="player_error_card_fault_title">Server sumber sedang bermasalah</string>
+    <string name="player_error_card_fault">Server sumber ini membalas dengan error (%1$d). Ini berasal dari sumber, bukan dari Arc. Coba sumber lain, atau coba sumber ini lagi nanti.</string>
+    <string name="player_error_card_blocked_title">Sumber memblokir tautan ini</string>
+    <string name="player_error_card_blocked">Server sumber ini menolak tautan (error %1$d). Ini berasal dari sumber, bukan dari Arc. Coba sumber lain.</string>
+    <string name="player_error_card_gone_title">File ini sudah tidak ada di sumber</string>
+    <string name="player_error_card_gone">Server menyatakan file ini sudah tidak ada (error %1$d). Ini berasal dari sumber, bukan dari Arc. Coba sumber lain.</string>
+    <string name="player_error_card_expired_title">Tautan ini sudah kedaluwarsa</string>
+    <string name="player_error_card_expired">Tautan sumber sudah kedaluwarsa (error %1$d). Kembali dan buka judul ini lagi untuk tautan baru, atau coba sumber lain.</string>
+    <string name="player_error_card_limit_title">Layanan membatasi permintaan</string>
+    <string name="player_error_card_limit">Layanan ini meminta Arc untuk memperlambat. Ini berasal dari layanan, bukan dari Arc. Tunggu sebentar sebelum mencoba lagi, atau pilih sumber dari server lain.</string>
+    <string name="player_error_card_unreachable_title">Arc tidak dapat menjangkau sumber</string>
+    <string name="player_error_card_unreachable">Server sumber ini tidak dapat dijangkau. Jika sumber lain bisa diputar, server itu sedang mati: pilih sumber lain. Jika tidak ada yang bisa diputar, periksa koneksi internet perangkat.</string>
+    <string name="player_error_card_notice_title">Penyedia mengirim pemberitahuan, bukan film</string>
+    <string name="player_error_card_notice">Alih-alih film, addon atau layanan Debrid mengirim video pemberitahuan singkat. Biasanya ini berarti file belum siap, akun Anda sudah mencapai batas, atau sesi masuk sudah kedaluwarsa. Ini berasal dari addon, bukan dari Arc. Periksa addon atau akun Debrid Anda, atau coba sumber lain.</string>
+    <string name="player_error_card_not_video_title">Tautan ini bukan video</string>
+    <string name="player_error_card_not_video">Server mengirim sesuatu yang bukan video, sering kali halaman web atau arsip. Ini berasal dari sumber, bukan dari Arc. Coba sumber lain.</string>
+    <string name="player_error_card_box_title">Perangkat ini tidak dapat memutar file ini</string>
+    <string name="player_error_card_box">File ini %1$s, melebihi kemampuan chip video perangkat ini. Ini berasal dari perangkat, bukan dari Arc. Pilih salinan lain dari judul ini, seperti 4K atau 1080p.</string>
+    <string name="player_error_card_box_no_detail">Format video file ini melebihi kemampuan chip video perangkat ini. Ini berasal dari perangkat, bukan dari Arc. Pilih salinan lain dari judul ini, seperti 4K atau 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc tidak dapat membaca gambar file ini</string>
+    <string name="player_error_facts_no_answer">tidak ada respons</string>
+    <string name="player_error_facts_no_connection">tidak ada koneksi</string>
+    <string name="player_error_facts_seconds">%1$d dtk</string>
+    <string name="player_error_other_sources">Sumber lain</string>
+    <string name="report_check_title">Temuan Arc</string>
+    <string name="report_check_hint">Ini tampaknya masalah di luar Arc, jadi laporan tidak dapat memperbaikinya. Ini yang bisa dicoba lebih dulu.</string>
+    <string name="report_check_try_source">Coba sumber lain</string>
+    <string name="report_check_try_source_notice">atau periksa addon atau akun Debrid Anda</string>
+    <string name="report_check_send_anyway">Tetap kirim</string>
+    <string name="debrid_busy">Layanan Debrid sedang sibuk (error %1$d). Ini berasal dari layanan, bukan dari Arc. Coba lagi sebentar lagi, atau pilih sumber lain.</string>
+</resources>

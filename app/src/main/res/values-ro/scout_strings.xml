@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Ascunde butonul Evaluează, degetele din meniu și întrebarea de după film. Evaluările tale contează în continuare.</string>
     <string name="scout_ask_enabled">Întreabă cum a fost după un film</string>
     <string name="scout_ask_enabled_sub">Nu e pentru mine, îmi place sau ador când ieși din player</string>
+    <string name="scout_send_ratings">Trimite evaluările mele către trackere</string>
+    <string name="scout_send_ratings_sub">Nu e pentru mine, Îmi place și Ador ajung la Trakt, Simkl, MDBList și WeTrakr ca 3, 7 și 10 din 10. O evaluare dată chiar de tine pe un tracker nu se schimbă niciodată. Simkl primește doar titlurile pe care le-ai văzut.</string>
+    <string name="scout_send_ratings_none">Niciun tracker nu este conectat pe acest profil, așa că încă nu se trimite nimic.</string>
+    <string name="scout_use_ratings">Folosește evaluările mele din trackere</string>
+    <string name="scout_use_ratings_sub">Evaluările date pe trackerele tale devin aici degete: 9 sau 10 înseamnă Ador, între 6 și 8 Îmi place, între 1 și 4 Nu e pentru mine. Un deget apăsat în Arc are mereu prioritate.</string>
+    <string name="scout_thumb_from">De la %1$s</string>
     <string name="scout_your_thumbs">Degetele tale</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d titlu evaluat. Deschide pentru a schimba sau anula</item>

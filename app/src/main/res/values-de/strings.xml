@@ -3358,7 +3358,7 @@
     <string name="report_item_title">Titel und Dateiname</string>
     <string name="report_item_note">Notiz hinzufügen</string>
     <string name="report_item_note_hint">Optional</string>
-    <string name="report_note_placeholder">Was sollten wir wissen?</string>
+    <string name="report_note_placeholder">Gibt es noch etwas Wissenswertes?</string>
     <string name="report_never_sent">Wird nie gesendet: Stream-Links, Debrid- oder Add-on-Schlüssel, Ihr Konto oder Ihre E-Mail. Der Meldedienst speichert Ihre IP-Adresse nicht.</string>
     <string name="report_send">Senden</string>
     <string name="report_failed_limit">Diese Box hat das heutige Limit für Meldungen erreicht. Bitte versuchen Sie es morgen erneut.</string>
@@ -3375,7 +3375,7 @@
         <item quantity="one">Player-Einstellungen und die letzte Minute</item>
         <item quantity="other">Player-Einstellungen und die letzten %1$d Minuten</item>
     </plurals>
-    <string name="report_settings_subtitle">Sagen Sie uns, was schiefgelaufen ist oder was Arc können soll</string>
+    <string name="report_settings_subtitle">Sagen Sie, was schiefgelaufen ist oder was Arc können soll</string>
     <string name="report_group_choose">Was möchten Sie melden?</string>
     <string name="report_group_options">Optionen</string>
     <string name="report_row_playback">Ein Wiedergabeproblem</string>
@@ -3446,11 +3446,22 @@
     <string name="display_mode_measured">Gemessen</string>
     <string name="display_mode_measured_off">Bildschirm läuft mit %1$s Hz statt %2$s Hz</string>
     <string name="qms_hint_title">Ihr TV hält die Bildfrequenz des Films nicht ein</string>
-    <string name="qms_hint_body_qms">Arc hat %1$s Hz angefordert. Ihr TV hat die Frequenz ohne vollständiges Umschalten geändert (QMS) und läuft mit %2$s Hz. Das zeigt sich als kleines, regelmäßiges Ruckeln.</string>
-    <string name="qms_hint_body">Arc hat %1$s Hz angefordert, aber Ihr Bildschirm läuft mit %2$s Hz. Das zeigt sich als kleines, regelmäßiges Ruckeln.</string>
     <string name="qms_hint_fix">Beste Lösung: QMS am TV ausschalten</string>
     <string name="qms_hint_fix_hint">In den eigenen Einstellungen des TVs für diesen HDMI-Eingang. Arc kann das nicht ändern.</string>
     <string name="qms_hint_off">Bildfrequenz-Anpassung ausschalten</string>
-    <string name="qms_hint_off_hint">Ab dem nächsten Film bleibt der Bildschirm bei seiner üblichen Frequenz. In den Optionen können Sie sie wieder einschalten.</string>
     <string name="qms_hint_keep">So lassen</string>
+    <string name="sub_prefer_addon_subtitles">Add-on-Untertitel zuerst</string>
+    <string name="sub_prefer_addon_subtitles_desc">Wählt einen Add-on-Untertitel statt des Untertitels in der Datei, wenn beide in deiner Sprache sind. Der Untertitel der Datei wird genutzt, wenn kein Add-on einen hat.</string>
+    <string name="playback_afr_settle_delay">Verzögerung nach Bildwiederholratenwechsel</string>
+    <string name="playback_afr_settle_delay_sub">Wie lange ein Film nach einem Ratenwechsel auf den Fernseher wartet. Erhöhe den Wert, wenn Filme über einen Receiver oder eine Soundbar schwarz oder ohne Ton starten.</string>
+    <string name="playback_afr_settle_delay_auto">Auto</string>
+    <string name="playback_afr_settle_delay_auto_sub">Zwei Sekunden, dann bis die Tonverbindung des Fernsehers wieder steht</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc hat %1$s Hz angefordert, aber dein Bildschirm läuft mit %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc hat %1$s Hz angefordert. Dein Fernseher hat die Rate ohne vollständigen Wechsel geändert (QMS) und läuft mit %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Etwa alle %1$d Sekunden kann ein Bild doppelt zu sehen sein.</string>
+    <string name="qms_hint_effect_judder">Das zeigt sich als gleichmäßiges Ruckeln.</string>
+    <string name="qms_hint_mode_tip">Manche Boxen und Receiver haben eine Einstellung für exakte Filmraten (23,976 Hz), oft „gebrochene Raten“ genannt. Arc kann das nicht ändern.</string>
+    <string name="qms_hint_off_hint_qms">Arc fordert dann die Rate des Films nicht mehr an. Dein Fernseher kann die Rate trotzdem selbst ändern.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

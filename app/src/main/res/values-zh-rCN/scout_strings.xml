@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">隐藏评分按钮、菜单中的评价项和电影结束后的提问。你的评分仍然有效。</string>
     <string name="scout_ask_enabled">电影结束后询问感受</string>
     <string name="scout_ask_enabled_sub">离开播放器时选择不适合我、喜欢或超爱</string>
+    <string name="scout_send_ratings">将我的评分发送到追踪服务</string>
+    <string name="scout_send_ratings_sub">不适合我、喜欢和超爱会以 10 分制的 3、7、10 分发送到 Trakt、Simkl、MDBList 和 WeTrakr。你在追踪服务上亲自打的分永远不会被更改。Simkl 只会收到你看过的作品。</string>
+    <string name="scout_send_ratings_none">此个人资料没有登录任何追踪服务，因此暂不发送任何内容。</string>
+    <string name="scout_use_ratings">使用我在追踪服务上的评分</string>
+    <string name="scout_use_ratings_sub">你在追踪服务上的评分会在这里变成拇指：9 或 10 分为超爱，6 到 8 分为喜欢，1 到 4 分为不适合我。你在 Arc 中按下的拇指始终优先。</string>
+    <string name="scout_thumb_from">来自 %1$s</string>
     <string name="scout_your_thumbs">你的拇指</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="other">已评分 %1$d 部作品。打开可更改或撤销</item>

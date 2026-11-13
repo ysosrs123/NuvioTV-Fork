@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Nomi e immagini</string>
     <string name="backup_part_settings">Impostazioni di Arc</string>
     <string name="backup_part_settings_sub">Scout, miniature, DNS, tasti del telecomando e altro</string>
+    <string name="backup_part_history">Libreria e cronologia di visione</string>
+    <string name="backup_part_history_sub">Titoli salvati, Continua a guardare e contenuti visti</string>
+    <string name="backup_part_history_signed_in">Il tuo account Nuvio li conserva già. Ripristinati solo su un box senza accesso effettuato.</string>
+    <string name="backup_part_history_counts">Titoli salvati: %1$d. Visti: %2$d. In corso: %3$d.</string>
+    <string name="backup_supporter">Stato di sostenitore</string>
+    <string name="backup_supporter_yes">Sì. Colori e icone da sostenitore vengono mantenuti.</string>
+    <string name="backup_supporter_no">No</string>
     <string name="backup_part_secrets">Password e chiavi</string>
     <string name="backup_part_secrets_saved">Protette dal tuo PIN</string>
     <string name="backup_part_secrets_needs_pin">Serve il PIN del backup</string>

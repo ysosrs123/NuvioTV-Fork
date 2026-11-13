@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Dilleri hariç tut</string>
+    <string name="scout_leave_out_languages_sub">Hiç görmek istemediğin diller</string>
+    <string name="scout_language_indian">Hint dilleri</string>
+</resources>

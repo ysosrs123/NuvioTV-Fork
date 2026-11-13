@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Имена и снимки</string>
     <string name="backup_part_settings">Настройки на Arc</string>
     <string name="backup_part_settings_sub">Scout, миниатюри, DNS, бутони на дистанционното и още</string>
+    <string name="backup_part_history">Библиотека и история на гледане</string>
+    <string name="backup_part_history_sub">Запазени заглавия, „Продължаване на гледането“ и отметки за гледано</string>
+    <string name="backup_part_history_signed_in">Акаунтът ви в Nuvio вече ги пази. Възстановяват се само на устройство, на което не сте влезли.</string>
+    <string name="backup_part_history_counts">Запазени заглавия: %1$d. Гледани: %2$d. Започнати: %3$d.</string>
+    <string name="backup_supporter">Статус на поддръжник</string>
+    <string name="backup_supporter_yes">Да. Цветовете и иконите на поддръжник се запазват.</string>
+    <string name="backup_supporter_no">Не</string>
     <string name="backup_part_secrets">Пароли и ключове</string>
     <string name="backup_part_secrets_saved">Заключени с вашия ПИН</string>
     <string name="backup_part_secrets_needs_pin">Нужен е ПИН кодът на копието</string>

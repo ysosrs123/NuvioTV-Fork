@@ -181,8 +181,8 @@
     <string name="scout_genre_western">西部片</string>
     <string name="scout_licence_icon_title">Scout 圖示</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">奧斯卡：最佳影片得主</string>
-    <string name="scout_award_oscar_nominees">奧斯卡：最佳影片提名</string>
+    <string name="scout_award_oscar_winners">奧斯卡得主</string>
+    <string name="scout_award_oscar_nominees">奧斯卡提名</string>
     <string name="scout_award_lion">金獅獎</string>
     <string name="scout_award_globes">金球獎</string>
     <string name="scout_award_palme">Palme d\'Or</string>

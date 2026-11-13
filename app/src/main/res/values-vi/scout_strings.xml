@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Ẩn nút Đánh giá, ngón tay cái trong menu và câu hỏi sau khi xem phim. Đánh giá của bạn vẫn được tính.</string>
     <string name="scout_ask_enabled">Hỏi cảm nhận sau khi xem phim</string>
     <string name="scout_ask_enabled_sub">Không hợp, thích hoặc rất thích khi bạn rời trình phát</string>
+    <string name="scout_send_ratings">Gửi đánh giá của tôi tới dịch vụ theo dõi</string>
+    <string name="scout_send_ratings_sub">Không hợp với tôi, Tôi thích và Rất thích được gửi tới Trakt, Simkl, MDBList và WeTrakr dưới dạng 3, 7 và 10 trên 10. Điểm bạn tự chấm trên dịch vụ theo dõi sẽ không bao giờ bị thay đổi. Simkl chỉ nhận các phim bạn đã xem.</string>
+    <string name="scout_send_ratings_none">Chưa có dịch vụ theo dõi nào được đăng nhập trên hồ sơ này, nên chưa có gì được gửi.</string>
+    <string name="scout_use_ratings">Dùng điểm từ dịch vụ theo dõi của tôi</string>
+    <string name="scout_use_ratings_sub">Điểm bạn chấm trên các dịch vụ theo dõi sẽ thành đánh giá tại đây: 9 hoặc 10 là Rất thích, 6 đến 8 là Tôi thích, 1 đến 4 là Không hợp với tôi. Đánh giá bạn bấm trong Arc luôn được ưu tiên.</string>
+    <string name="scout_thumb_from">Từ %1$s</string>
     <string name="scout_your_thumbs">Đánh giá của bạn</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="other">Đã đánh giá %1$d phim. Mở để đổi hoặc hoàn tác</item>

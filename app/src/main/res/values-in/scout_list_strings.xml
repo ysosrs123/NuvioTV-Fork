@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Asia Selatan</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: nominasi</string>
+    <string name="scout_award_globes_nominees">Golden Globe: nominasi</string>
+    <string name="scout_award_emmy_nominees">Emmys: nominasi</string>
+    <string name="scout_award_tab_picture">Film terbaik</string>
+    <string name="scout_award_tab_best_film">Film terbaik</string>
+    <string name="scout_award_tab_director">Sutradara</string>
+    <string name="scout_award_tab_actor">Aktor</string>
+    <string name="scout_award_tab_actress">Aktris</string>
+    <string name="scout_award_tab_international">Internasional</string>
+    <string name="scout_award_tab_limited">Serial terbatas</string>
+</resources>

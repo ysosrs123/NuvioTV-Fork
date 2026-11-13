@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc tento soubor přečetl, ale nenašel v něm obraz, který umí přehrát. Takové jsou soubory pro střih videa, například Apple ProRes. Vyberte jinou kopii titulu.</string>
+    <string name="player_error_card_silent_title">Zdroj neodpověděl</string>
+    <string name="player_error_card_silent">Server tohoto zdroje neposlal žádné video po dobu %1$d s. Problém je na straně zdroje, ne Arc. Zkuste jiný zdroj, nebo tento zkuste později znovu.</string>
+    <string name="player_error_card_fault_title">Server zdroje má poruchu</string>
+    <string name="player_error_card_fault">Server tohoto zdroje odpověděl chybou (%1$d). Problém je na straně zdroje, ne Arc. Zkuste jiný zdroj, nebo tento zkuste později znovu.</string>
+    <string name="player_error_card_blocked_title">Zdroj tento odkaz zablokoval</string>
+    <string name="player_error_card_blocked">Server tohoto zdroje odkaz odmítl (chyba %1$d). Problém je na straně zdroje, ne Arc. Zkuste jiný zdroj.</string>
+    <string name="player_error_card_gone_title">Tento soubor už u zdroje není</string>
+    <string name="player_error_card_gone">Server hlásí, že tento soubor už neexistuje (chyba %1$d). Problém je na straně zdroje, ne Arc. Zkuste jiný zdroj.</string>
+    <string name="player_error_card_expired_title">Platnost odkazu vypršela</string>
+    <string name="player_error_card_expired">Platnost odkazu zdroje vypršela (chyba %1$d). Vraťte se a otevřete titul znovu pro nový odkaz, nebo zkuste jiný zdroj.</string>
+    <string name="player_error_card_limit_title">Služba omezuje požadavky</string>
+    <string name="player_error_card_limit">Tato služba žádá Arc, aby zpomalil. Problém je na straně služby, ne Arc. Chvíli počkejte a zkuste to znovu, nebo vyberte zdroj z jiného serveru.</string>
+    <string name="player_error_card_unreachable_title">Arc se nemohl spojit se zdrojem</string>
+    <string name="player_error_card_unreachable">Server tohoto zdroje je nedostupný. Pokud jiné zdroje hrají, je tento server mimo provoz: vyberte jiný. Pokud nehraje nic, zkontrolujte připojení zařízení k internetu.</string>
+    <string name="player_error_card_notice_title">Poskytovatel poslal oznámení místo filmu</string>
+    <string name="player_error_card_notice">Místo filmu poslal doplněk nebo služba Debrid krátké video s oznámením. Obvykle to znamená, že soubor ještě není připraven, váš účet dosáhl limitu nebo vypršelo přihlášení. Problém je na straně doplňku, ne Arc. Zkontrolujte doplněk nebo svůj účet Debrid, případně zkuste jiný zdroj.</string>
+    <string name="player_error_card_not_video_title">Tento odkaz není video</string>
+    <string name="player_error_card_not_video">Server poslal něco, co není video, často webovou stránku nebo archiv. Problém je na straně zdroje, ne Arc. Zkuste jiný zdroj.</string>
+    <string name="player_error_card_box_title">Toto zařízení tento soubor nepřehraje</string>
+    <string name="player_error_card_box">Tento soubor je %1$s, což je víc, než video čip tohoto zařízení zvládne. Problém je na straně zařízení, ne Arc. Vyberte jinou kopii titulu, například 4K nebo 1080p.</string>
+    <string name="player_error_card_box_no_detail">Formát videa tohoto souboru je nad možnosti video čipu tohoto zařízení. Problém je na straně zařízení, ne Arc. Vyberte jinou kopii titulu, například 4K nebo 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc nedokáže přečíst obraz tohoto souboru</string>
+    <string name="player_error_facts_no_answer">bez odpovědi</string>
+    <string name="player_error_facts_no_connection">bez připojení</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Jiné zdroje</string>
+    <string name="report_check_title">Co Arc zjistil</string>
+    <string name="report_check_hint">Vypadá to na problém mimo Arc, takže hlášení ho nevyřeší. Nejdřív zkuste tohle.</string>
+    <string name="report_check_try_source">Zkusit jiný zdroj</string>
+    <string name="report_check_try_source_notice">nebo zkontrolujte doplněk či účet Debrid</string>
+    <string name="report_check_send_anyway">Přesto odeslat</string>
+    <string name="debrid_busy">Služba Debrid je teď přetížená (chyba %1$d). Problém je na straně služby, ne Arc. Zkuste to za chvíli znovu, nebo vyberte jiný zdroj.</string>
+</resources>

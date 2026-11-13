@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Старосно ограничење</string>
+    <string name="rating_limit_none">Без ограничења</string>
+    <string name="rating_limit_preschool">Предшколци</string>
+    <string name="rating_limit_young">Мала деца</string>
+    <string name="rating_limit_pg">Старија деца</string>
+    <string name="rating_limit_teen">Тинејџери</string>
+    <string name="rating_limit_hint">Шта овај профил може да пушта без PIN-а профила %1$s</string>
+    <string name="rating_limit_note">Користи америчке рејтинге са TMDB-а. Изнад ограничења, или без рејтинга, Пусти тражи PIN профила %1$s.</string>
+    <string name="rating_limit_needs_pin">Прво поставите PIN на профилу %1$s. Старосно ограничење га тражи.</string>
+    <string name="rating_limit_change_heading">Унесите PIN профила %1$s да бисте променили ограничење</string>
+    <string name="rating_limit_change_support">Ново ограничење профила %1$s: %2$s</string>
+    <string name="rating_limit_saved">Ограничење профила %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">За пуштање је потребан PIN профила %1$s</string>
+    <string name="rating_limit_play_rated">%1$s има рејтинг %2$s. Ограничење профила %3$s је %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc не може да пронађе рејтинг за %1$s. Ограничење профила %2$s је %3$s.</string>
+    <string name="rating_limit_play_no_pin">Поставите PIN на профилу %1$s да бисте пуштали наслове изнад ограничења профила %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s не може да се придружи овом гледању</string>
+    <string name="rating_limit_party_rated">Група гледа %1$s, рејтинг %2$s. Ограничење профила %3$s је %4$s.</string>
+    <string name="rating_limit_party_unrated">Група гледа %1$s, без рејтинга који Arc може да провери. Ограничење профила %2$s је %3$s.</string>
+    <string name="rating_limit_add_heading">Унесите PIN профила %1$s да бисте додали профил</string>
+    <string name="rating_limit_add_support">Један профил на овом уређају има ограничење узраста.</string>
+</resources>

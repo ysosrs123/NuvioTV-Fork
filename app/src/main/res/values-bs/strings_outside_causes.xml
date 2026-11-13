@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Ovaj izvor trenutno ne radi. Arc to ne može popraviti, pa ga nema potrebe prijavljivati. Probaj drugi izvor.</string>
+    <string name="report_check_blocked_hint_notice">Ovaj izvor trenutno ne radi. Arc to ne može popraviti, pa ga nema potrebe prijavljivati. Provjeri addon ili Debrid račun, ili probaj drugi izvor.</string>
+    <string name="stream_large_file_short">Veliki fajl za ovaj uređaj</string>
+    <string name="stream_large_file_uhd">Ovo je vrlo veliki 4K fajl. Uređaji s manje memorije, poput ovog, često imaju problema s fajlovima ove veličine, pa reprodukcija može zastati ili se prekinuti. Verzija istog filma u 1080p obično se reproducira glađe.</string>
+    <string name="stream_large_file_other">Ovo je vrlo veliki fajl. Uređaji s manje memorije, poput ovog, često imaju problema s fajlovima ove veličine, pa reprodukcija može zastati ili se prekinuti. Manja verzija u 1080p, označena kao WEB, a ne Remux, obično se reproducira glađe.</string>
+</resources>

@@ -190,8 +190,8 @@
     <string name="scout_genre_western">Vesternas</string>
     <string name="scout_licence_icon_title">Scout piktograma</string>
     <string name="scout_licence_icon_body">Iš Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oskarai: geriausio filmo laimėtojai</string>
-    <string name="scout_award_oscar_nominees">Oskarai: geriausio filmo nominantai</string>
+    <string name="scout_award_oscar_winners">Oskarai: laimėtojai</string>
+    <string name="scout_award_oscar_nominees">Oskarai: nominantai</string>
     <string name="scout_award_lion">Auksinis liūtas</string>
     <string name="scout_award_globes">Auksiniai gaubliai</string>
     <string name="scout_award_palme">Palme d\'Or</string>

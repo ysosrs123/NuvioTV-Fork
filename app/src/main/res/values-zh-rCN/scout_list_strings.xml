@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">南亚</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA 提名</string>
+    <string name="scout_award_globes_nominees">金球奖提名</string>
+    <string name="scout_award_emmy_nominees">Emmys 提名</string>
+    <string name="scout_award_tab_picture">最佳影片</string>
+    <string name="scout_award_tab_best_film">最佳影片</string>
+    <string name="scout_award_tab_director">导演</string>
+    <string name="scout_award_tab_actor">男主角</string>
+    <string name="scout_award_tab_actress">女主角</string>
+    <string name="scout_award_tab_international">国际影片</string>
+    <string name="scout_award_tab_limited">限定剧</string>
+</resources>

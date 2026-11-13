@@ -3264,14 +3264,14 @@
     <string name="report_item_title">Naslov in ime datoteke</string>
     <string name="report_item_note">Dodaj opombo</string>
     <string name="report_item_note_hint">Izbirno</string>
-    <string name="report_note_placeholder">Kaj bi morali vedeti?</string>
+    <string name="report_note_placeholder">Še kaj, kar je dobro vedeti?</string>
     <string name="report_never_sent">Nikoli poslano: povezave do pretokov, ključi debrid in dodatkov, vaš račun ali e-pošta. Storitev za prijave ne hrani vašega naslova IP.</string>
     <string name="report_send">Pošlji</string>
     <string name="report_failed_limit">Ta naprava je dosegla današnjo omejitev prijav. Poskusite znova jutri.</string>
     <string name="report_sent_title">Prijava poslana</string>
     <string name="report_sent_qr_description">Koda QR za vašo prijavo</string>
     <string name="report_sent_phone">Skenirajte s telefonom, da dodate fotografije ali spremljate prijavo. Arc je ljubiteljski projekt, zato ne dobi vsaka prijava odgovora.</string>
-    <string name="report_sent_no_phone">Hvala, ker ste nas obvestili. Arc je ljubiteljski projekt, zato ne dobi vsaka prijava odgovora.</string>
+    <string name="report_sent_no_phone">Hvala za prijavo. Arc je ljubiteljski projekt, zato ne dobi vsaka prijava odgovora.</string>
     <string name="report_sent_back">Nazaj na ogled</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Izberite vse, kar velja. Arc je obdržal zadnjo minuto.</item>
@@ -3285,7 +3285,7 @@
         <item quantity="few">Nastavitve predvajalnika in zadnje %1$d minute</item>
         <item quantity="other">Nastavitve predvajalnika in zadnjih %1$d minut</item>
     </plurals>
-    <string name="report_settings_subtitle">Povejte nam, kaj je šlo narobe ali kaj bi radi, da zna Arc</string>
+    <string name="report_settings_subtitle">Povejte, kaj je šlo narobe ali kaj bi radi, da zna Arc</string>
     <string name="report_group_choose">Kaj želite prijaviti?</string>
     <string name="report_group_options">Možnosti</string>
     <string name="report_row_playback">Težava s predvajanjem</string>
@@ -3360,11 +3360,22 @@
     <string name="display_mode_measured">Izmerjeno</string>
     <string name="display_mode_measured_off">Zaslon deluje pri %1$s Hz, ne pri %2$s Hz</string>
     <string name="qms_hint_title">Vaš televizor ne ohranja hitrosti sličic filma</string>
-    <string name="qms_hint_body_qms">Arc je zahteval %1$s Hz. Televizor je spremenil hitrost brez popolnega preklopa (QMS) in deluje pri %2$s Hz. To se kaže kot rahlo, enakomerno zatikanje.</string>
-    <string name="qms_hint_body">Arc je zahteval %1$s Hz, vendar zaslon deluje pri %2$s Hz. To se kaže kot rahlo, enakomerno zatikanje.</string>
     <string name="qms_hint_fix">Najboljša rešitev: izklopite QMS na televizorju</string>
     <string name="qms_hint_fix_hint">V nastavitvah samega televizorja za ta vhod HDMI. Arc tega ne more spremeniti.</string>
     <string name="qms_hint_off">Izklopi samodejno hitrost sličic</string>
-    <string name="qms_hint_off_hint">Od naslednjega filma naprej zaslon ostane pri običajni hitrosti. Znova jo lahko vklopite v Nastavitvah.</string>
     <string name="qms_hint_keep">Pusti, kot je</string>
+    <string name="sub_prefer_addon_subtitles">Najprej podnapisi iz dodatkov</string>
+    <string name="sub_prefer_addon_subtitles_desc">Izbere podnapise iz dodatka namesto podnapisov datoteke, ko so oboji v vašem jeziku. Podnapisi datoteke se uporabijo, ko jih noben dodatek nima.</string>
+    <string name="playback_afr_settle_delay">Zakasnitev po spremembi osveževanja</string>
+    <string name="playback_afr_settle_delay_sub">Kako dolgo film čaka na televizor po spremembi frekvence. Povečajte, če se filmi prek sprejemnika ali zvočne letve začnejo črno ali brez zvoka.</string>
+    <string name="playback_afr_settle_delay_auto">Samodejno</string>
+    <string name="playback_afr_settle_delay_auto_sub">Dve sekundi, nato dokler se zvočna povezava televizorja ne vrne</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc je zahteval %1$s Hz, a zaslon deluje pri %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc je zahteval %1$s Hz. Televizor je spremenil frekvenco brez popolnega preklopa (QMS) in deluje pri %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Približno vsakih %1$d s lahko opazite ponovljeno sličico.</string>
+    <string name="qms_hint_effect_judder">To se vidi kot enakomerno zatikanje.</string>
+    <string name="qms_hint_mode_tip">Nekatere naprave in sprejemniki imajo nastavitev za natančne filmske frekvence (23,976 Hz), pogosto imenovane ulomljene. Arc je ne more spremeniti.</string>
+    <string name="qms_hint_off_hint_qms">Arc potem ne zahteva več frekvence filma. Televizor jo lahko še vedno spremeni sam.</string>
+    <string name="qms_hint_ok">V redu</string>
 </resources>

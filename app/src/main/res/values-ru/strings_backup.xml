@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Имена и изображения</string>
     <string name="backup_part_settings">Настройки Arc</string>
     <string name="backup_part_settings_sub">Scout, миниатюры, DNS, кнопки пульта и другое</string>
+    <string name="backup_part_history">Библиотека и история просмотра</string>
+    <string name="backup_part_history_sub">Сохранённое, «Продолжить просмотр» и отметки о просмотре</string>
+    <string name="backup_part_history_signed_in">Ваш аккаунт Nuvio уже хранит это. Восстанавливается только на приставке без входа в аккаунт.</string>
+    <string name="backup_part_history_counts">Сохранено: %1$d. Просмотрено: %2$d. В процессе: %3$d.</string>
+    <string name="backup_supporter">Статус поддержки</string>
+    <string name="backup_supporter_yes">Да. Цвета и значки поддержки сохранятся.</string>
+    <string name="backup_supporter_no">Нет</string>
     <string name="backup_part_secrets">Пароли и ключи</string>
     <string name="backup_part_secrets_saved">Защищены вашим PIN-кодом</string>
     <string name="backup_part_secrets_needs_pin">Нужен PIN-код копии</string>

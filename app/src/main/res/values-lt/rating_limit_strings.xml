@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Amžiaus riba</string>
+    <string name="rating_limit_none">Be ribos</string>
+    <string name="rating_limit_preschool">Ikimokyklinukai</string>
+    <string name="rating_limit_young">Maži vaikai</string>
+    <string name="rating_limit_pg">Vyresni vaikai</string>
+    <string name="rating_limit_teen">Paaugliai</string>
+    <string name="rating_limit_hint">Ką šis profilis gali leisti be profilio %1$s PIN</string>
+    <string name="rating_limit_note">Naudojami TMDB JAV reitingai. Viršijus ribą arba nesant reitingo, leidžiant prašoma profilio %1$s PIN.</string>
+    <string name="rating_limit_needs_pin">Pirmiausia nustatykite profilio %1$s PIN. Jo reikia amžiaus ribai.</string>
+    <string name="rating_limit_change_heading">Įveskite profilio %1$s PIN, kad pakeistumėte ribą</string>
+    <string name="rating_limit_change_support">Nauja profilio %1$s amžiaus riba: %2$s</string>
+    <string name="rating_limit_saved">Profilio %1$s amžiaus riba: %2$s</string>
+    <string name="rating_limit_play_heading">Norint leisti, reikia profilio %1$s PIN</string>
+    <string name="rating_limit_play_rated">Kūrinio %1$s reitingas yra %2$s. Profilio %3$s riba yra %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc neranda kūrinio %1$s reitingo. Profilio %2$s riba yra %3$s.</string>
+    <string name="rating_limit_play_no_pin">Nustatykite profilio %1$s PIN, kad galėtumėte leisti kūrinius virš profilio %2$s ribos.</string>
+    <string name="rating_limit_party_heading">Profilis %1$s negali prisijungti prie šio bendro žiūrėjimo</string>
+    <string name="rating_limit_party_rated">Bendrai žiūrimas kūrinys %1$s, reitingas %2$s. Profilio %3$s riba yra %4$s.</string>
+    <string name="rating_limit_party_unrated">Bendrai žiūrimas kūrinys %1$s, kurio reitingo Arc negali patikrinti. Profilio %2$s riba yra %3$s.</string>
+    <string name="rating_limit_add_heading">Įveskite profilio %1$s PIN, kad pridėtumėte profilį</string>
+    <string name="rating_limit_add_support">Viename šio įrenginio profilyje nustatyta amžiaus riba.</string>
+</resources>

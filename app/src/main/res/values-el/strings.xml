@@ -4310,14 +4310,14 @@
     <string name="report_item_title">Τίτλος και όνομα αρχείου</string>
     <string name="report_item_note">Προσθήκη σημείωσης</string>
     <string name="report_item_note_hint">Προαιρετικό</string>
-    <string name="report_note_placeholder">Τι πρέπει να γνωρίζουμε;</string>
+    <string name="report_note_placeholder">Κάτι άλλο που αξίζει να αναφερθεί;</string>
     <string name="report_never_sent">Δεν αποστέλλονται ποτέ: σύνδεσμοι ροής, κλειδιά debrid ή πρόσθετων, ο λογαριασμός ή το email σας. Η υπηρεσία αναφορών δεν διατηρεί τη διεύθυνση IP σας.</string>
     <string name="report_send">Αποστολή</string>
     <string name="report_failed_limit">Αυτή η συσκευή έφτασε το σημερινό όριο αναφορών. Δοκιμάστε ξανά αύριο.</string>
     <string name="report_sent_title">Η αναφορά στάλθηκε</string>
     <string name="report_sent_qr_description">Κωδικός QR για την αναφορά σας</string>
     <string name="report_sent_phone">Σαρώστε με το τηλέφωνό σας για να προσθέσετε φωτογραφίες ή να παρακολουθήσετε την αναφορά σας. Το Arc είναι ερασιτεχνικό έργο, οπότε δεν απαντάμε σε κάθε αναφορά.</string>
-    <string name="report_sent_no_phone">Ευχαριστούμε που μας ενημερώσατε. Το Arc είναι ερασιτεχνικό έργο, οπότε δεν απαντάμε σε κάθε αναφορά.</string>
+    <string name="report_sent_no_phone">Ευχαριστώ για την αναφορά. Το Arc είναι ερασιτεχνικό έργο, οπότε δεν απαντάται κάθε αναφορά.</string>
     <string name="report_sent_back">Επιστροφή στην προβολή</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Επιλέξτε ό,τι ισχύει. Το Arc κράτησε το τελευταίο λεπτό.</item>
@@ -4327,7 +4327,7 @@
         <item quantity="one">Ρυθμίσεις αναπαραγωγής και το τελευταίο λεπτό</item>
         <item quantity="other">Ρυθμίσεις αναπαραγωγής και τα τελευταία %1$d λεπτά</item>
     </plurals>
-    <string name="report_settings_subtitle">Πείτε μας τι πήγε στραβά ή τι θα θέλατε να κάνει το Arc</string>
+    <string name="report_settings_subtitle">Πείτε τι πήγε στραβά ή τι θα θέλατε να κάνει το Arc</string>
     <string name="report_group_choose">Τι θέλετε να αναφέρετε;</string>
     <string name="report_group_options">Επιλογές</string>
     <string name="report_row_playback">Πρόβλημα αναπαραγωγής</string>
@@ -4398,11 +4398,22 @@
     <string name="display_mode_measured">Μέτρηση</string>
     <string name="display_mode_measured_off">Η οθόνη λειτουργεί στα %1$s Hz, όχι στα %2$s Hz</string>
     <string name="qms_hint_title">Η τηλεόρασή σας δεν κρατά τον ρυθμό καρέ της ταινίας</string>
-    <string name="qms_hint_body_qms">Το Arc ζήτησε %1$s Hz. Η τηλεόρασή σας άλλαξε ρυθμό χωρίς πλήρη εναλλαγή (QMS) και λειτουργεί στα %2$s Hz. Αυτό φαίνεται ως μικρό, τακτικό κόλλημα στην εικόνα.</string>
-    <string name="qms_hint_body">Το Arc ζήτησε %1$s Hz, αλλά η οθόνη σας λειτουργεί στα %2$s Hz. Αυτό φαίνεται ως μικρό, τακτικό κόλλημα στην εικόνα.</string>
     <string name="qms_hint_fix">Καλύτερη λύση: απενεργοποιήστε το QMS στην τηλεόραση</string>
     <string name="qms_hint_fix_hint">Στις ρυθμίσεις της ίδιας της τηλεόρασης για αυτή την είσοδο HDMI. Το Arc δεν μπορεί να το αλλάξει.</string>
     <string name="qms_hint_off">Απενεργοποίηση ταιριάσματος καρέ</string>
-    <string name="qms_hint_off_hint">Από την επόμενη ταινία, η οθόνη μένει στον συνήθη ρυθμό της. Μπορείτε να το ενεργοποιήσετε ξανά στις Ρυθμίσεις.</string>
     <string name="qms_hint_keep">Να μείνει ως έχει</string>
+    <string name="sub_prefer_addon_subtitles">Πρώτα υπότιτλοι πρόσθετων</string>
+    <string name="sub_prefer_addon_subtitles_desc">Επιλέγει υπότιτλο από πρόσθετο αντί για τον υπότιτλο του αρχείου όταν και οι δύο είναι στη γλώσσα σας. Ο υπότιτλος του αρχείου χρησιμοποιείται όταν κανένα πρόσθετο δεν έχει.</string>
+    <string name="playback_afr_settle_delay">Καθυστέρηση μετά την αλλαγή ρυθμού ανανέωσης</string>
+    <string name="playback_afr_settle_delay_sub">Πόσο περιμένει μια ταινία την τηλεόραση μετά από αλλαγή ρυθμού. Αυξήστε την αν οι ταινίες ξεκινούν μαύρες ή χωρίς ήχο μέσω ενισχυτή ή soundbar.</string>
+    <string name="playback_afr_settle_delay_auto">Αυτόματο</string>
+    <string name="playback_afr_settle_delay_auto_sub">Δύο δευτερόλεπτα, μετά μέχρι να επανέλθει η σύνδεση ήχου της τηλεόρασης</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d δευτ.</string>
+    <string name="qms_hint_body_v2">Το Arc ζήτησε %1$s Hz, αλλά η οθόνη σας λειτουργεί στα %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Το Arc ζήτησε %1$s Hz. Η τηλεόρασή σας άλλαξε ρυθμό χωρίς πλήρη εναλλαγή (QMS) και λειτουργεί στα %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Ίσως δείτε ένα επαναλαμβανόμενο καρέ περίπου κάθε %1$d δευτερόλεπτα.</string>
+    <string name="qms_hint_effect_judder">Φαίνεται ως σταθερό τρεμόπαιγμα της κίνησης.</string>
+    <string name="qms_hint_mode_tip">Ορισμένες συσκευές και ενισχυτές έχουν ρύθμιση για ακριβείς ρυθμούς ταινιών (23,976 Hz), που συχνά λέγονται κλασματικοί. Το Arc δεν μπορεί να την αλλάξει.</string>
+    <string name="qms_hint_off_hint_qms">Τότε το Arc σταματά να ζητά τον ρυθμό της ταινίας. Η τηλεόρασή σας μπορεί ακόμη να αλλάζει ρυθμό μόνη της.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

@@ -3924,14 +3924,14 @@
     <string name="report_item_title">Název a jméno souboru</string>
     <string name="report_item_note">Přidat poznámku</string>
     <string name="report_item_note_hint">Volitelné</string>
-    <string name="report_note_placeholder">Co bychom měli vědět?</string>
+    <string name="report_note_placeholder">Ještě něco, co stojí za zmínku?</string>
     <string name="report_never_sent">Nikdy se neodesílá: odkazy na streamy, klíče debrid nebo doplňků, váš účet ani e-mail. Služba hlášení neuchovává vaši IP adresu.</string>
     <string name="report_send">Odeslat</string>
     <string name="report_failed_limit">Toto zařízení dosáhlo dnešního limitu hlášení. Zkuste to prosím zítra.</string>
     <string name="report_sent_title">Hlášení odesláno</string>
     <string name="report_sent_qr_description">QR kód vašeho hlášení</string>
     <string name="report_sent_phone">Naskenujte telefonem a přidejte fotky nebo sledujte své hlášení. Arc je hobby projekt, proto ne každé hlášení dostane odpověď.</string>
-    <string name="report_sent_no_phone">Děkujeme za upozornění. Arc je hobby projekt, proto ne každé hlášení dostane odpověď.</string>
+    <string name="report_sent_no_phone">Díky za hlášení. Arc je hobby projekt, proto ne každé hlášení dostane odpověď.</string>
     <string name="report_sent_back">Zpět ke sledování</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Vyberte vše, co platí. Arc uchoval poslední minutu.</item>
@@ -3945,7 +3945,7 @@
         <item quantity="many">Nastavení přehrávače a posledních %1$d minuty</item>
         <item quantity="other">Nastavení přehrávače a posledních %1$d minut</item>
     </plurals>
-    <string name="report_settings_subtitle">Řekněte nám, co se pokazilo nebo co byste chtěli, aby Arc uměl</string>
+    <string name="report_settings_subtitle">Napište, co se pokazilo nebo co byste chtěli, aby Arc uměl</string>
     <string name="report_group_choose">Co chcete nahlásit?</string>
     <string name="report_group_options">Možnosti</string>
     <string name="report_row_playback">Problém s přehráváním</string>
@@ -4020,11 +4020,22 @@
     <string name="display_mode_measured">Naměřeno</string>
     <string name="display_mode_measured_off">Obrazovka běží na %1$s Hz, ne na %2$s Hz</string>
     <string name="qms_hint_title">Váš televizor nedrží snímkovou frekvenci filmu</string>
-    <string name="qms_hint_body_qms">Arc požádal o %1$s Hz. Váš televizor změnil frekvenci bez úplného přepnutí (QMS) a běží na %2$s Hz. Projevuje se to jako drobné pravidelné zadrhávání.</string>
-    <string name="qms_hint_body">Arc požádal o %1$s Hz, ale vaše obrazovka běží na %2$s Hz. Projevuje se to jako drobné pravidelné zadrhávání.</string>
     <string name="qms_hint_fix">Nejlepší řešení: vypněte QMS na televizoru</string>
     <string name="qms_hint_fix_hint">Ve vlastním nastavení televizoru pro tento vstup HDMI. Arc to změnit nemůže.</string>
     <string name="qms_hint_off">Vypnout přizpůsobení frekvence</string>
-    <string name="qms_hint_off_hint">Od příštího filmu zůstane obrazovka na své obvyklé frekvenci. Znovu to zapnete v Nastavení.</string>
     <string name="qms_hint_keep">Nechat, jak je</string>
+    <string name="sub_prefer_addon_subtitles">Nejdřív titulky z doplňků</string>
+    <string name="sub_prefer_addon_subtitles_desc">Vybere titulky z doplňku místo titulků v souboru, když jsou oboje ve vašem jazyce. Titulky ze souboru se použijí, když je žádný doplněk nemá.</string>
+    <string name="playback_afr_settle_delay">Prodleva po změně obnovovací frekvence</string>
+    <string name="playback_afr_settle_delay_sub">Jak dlouho film čeká na televizor po změně frekvence. Zvyšte ji, pokud filmy přes receiver nebo soundbar začínají černě nebo bez zvuku.</string>
+    <string name="playback_afr_settle_delay_auto">Auto</string>
+    <string name="playback_afr_settle_delay_auto_sub">Dvě sekundy, pak dokud se neobnoví zvukové spojení televizoru</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc požádal o %1$s Hz, ale obrazovka běží na %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc požádal o %1$s Hz. Televizor změnil frekvenci bez úplného přepnutí (QMS) a běží na %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Přibližně každých %1$d s si můžete všimnout opakovaného snímku.</string>
+    <string name="qms_hint_effect_judder">Projevuje se to jako pravidelné trhání.</string>
+    <string name="qms_hint_mode_tip">Některé boxy a receivery mají nastavení pro přesné filmové frekvence (23,976 Hz), často nazývané zlomkové. Arc ho nemůže změnit.</string>
+    <string name="qms_hint_off_hint_qms">Arc pak přestane žádat o frekvenci filmu. Televizor ji ale může dál měnit sám.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

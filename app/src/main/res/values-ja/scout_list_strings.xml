@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">南アジア</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA ノミネート作</string>
+    <string name="scout_award_globes_nominees">ゴールデングローブ賞 ノミネート作</string>
+    <string name="scout_award_emmy_nominees">Emmys ノミネート作</string>
+    <string name="scout_award_tab_picture">作品賞</string>
+    <string name="scout_award_tab_best_film">作品賞</string>
+    <string name="scout_award_tab_director">監督賞</string>
+    <string name="scout_award_tab_actor">主演男優賞</string>
+    <string name="scout_award_tab_actress">主演女優賞</string>
+    <string name="scout_award_tab_international">国際映画</string>
+    <string name="scout_award_tab_limited">リミテッドシリーズ</string>
+</resources>

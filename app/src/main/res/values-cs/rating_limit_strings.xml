@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Věkový limit</string>
+    <string name="rating_limit_none">Bez limitu</string>
+    <string name="rating_limit_preschool">Předškoláci</string>
+    <string name="rating_limit_young">Malé děti</string>
+    <string name="rating_limit_pg">Starší děti</string>
+    <string name="rating_limit_teen">Dospívající</string>
+    <string name="rating_limit_hint">Co tento profil smí přehrát bez PIN profilu %1$s</string>
+    <string name="rating_limit_note">Používá americká hodnocení z TMDB. Nad limitem nebo bez hodnocení si přehrávání vyžádá PIN profilu %1$s.</string>
+    <string name="rating_limit_needs_pin">Nejprve nastavte PIN pro profil %1$s. Věkový limit ho vyžaduje.</string>
+    <string name="rating_limit_change_heading">Zadejte PIN profilu %1$s pro změnu limitu</string>
+    <string name="rating_limit_change_support">Nový věkový limit profilu %1$s: %2$s</string>
+    <string name="rating_limit_saved">Věkový limit profilu %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">K přehrání je potřeba PIN profilu %1$s</string>
+    <string name="rating_limit_play_rated">Titul %1$s má hodnocení %2$s. Limit profilu %3$s je %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc nenašel hodnocení titulu %1$s. Limit profilu %2$s je %3$s.</string>
+    <string name="rating_limit_play_no_pin">Nastavte PIN pro profil %1$s, abyste mohli přehrávat tituly nad limitem profilu %2$s.</string>
+    <string name="rating_limit_party_heading">Profil %1$s se nemůže připojit ke společnému sledování</string>
+    <string name="rating_limit_party_rated">Společně se sleduje titul %1$s s hodnocením %2$s. Limit profilu %3$s je %4$s.</string>
+    <string name="rating_limit_party_unrated">Společně se sleduje titul %1$s bez hodnocení, které by Arc mohl ověřit. Limit profilu %2$s je %3$s.</string>
+    <string name="rating_limit_add_heading">Zadejte PIN profilu %1$s pro přidání profilu</string>
+    <string name="rating_limit_add_support">Jeden profil v tomto zařízení má věkový limit.</string>
+</resources>

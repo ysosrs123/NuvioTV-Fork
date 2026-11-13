@@ -190,8 +190,8 @@
     <string name="scout_genre_western">מערבון</string>
     <string name="scout_licence_icon_title">סמל Scout</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">אוסקר: זוכי הסרט הטוב ביותר</string>
-    <string name="scout_award_oscar_nominees">אוסקר: מועמדי הסרט הטוב ביותר</string>
+    <string name="scout_award_oscar_winners">אוסקר: זוכים</string>
+    <string name="scout_award_oscar_nominees">אוסקר: מועמדים</string>
     <string name="scout_award_lion">אריה הזהב</string>
     <string name="scout_award_globes">גלובוס הזהב</string>
     <string name="scout_award_palme">Palme d\'Or</string>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Cette source ne fonctionne pas pour le moment. Arc ne peut rien y faire, inutile donc de le signaler. Essayez une autre source.</string>
+    <string name="report_check_blocked_hint_notice">Cette source ne fonctionne pas pour le moment. Arc ne peut rien y faire, inutile donc de le signaler. Vérifiez votre addon ou votre compte Debrid, ou essayez une autre source.</string>
+    <string name="stream_large_file_short">Fichier lourd pour ce boîtier</string>
+    <string name="stream_large_file_uhd">Ce fichier 4K est très volumineux. Les boîtiers qui ont moins de mémoire, comme celui-ci, peinent souvent avec des fichiers de cette taille, la lecture peut donc se figer ou s\'arrêter. Une version 1080p du même film est généralement plus fluide.</string>
+    <string name="stream_large_file_other">Ce fichier est très volumineux. Les boîtiers qui ont moins de mémoire, comme celui-ci, peinent souvent avec des fichiers de cette taille, la lecture peut donc se figer ou s\'arrêter. Une version 1080p plus légère, marquée WEB plutôt que Remux, est généralement plus fluide.</string>
+</resources>

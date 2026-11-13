@@ -184,8 +184,8 @@
     <string name="scout_genre_western">Уестърн</string>
     <string name="scout_licence_icon_title">Икона на Scout</string>
     <string name="scout_licence_icon_body">От Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Оскар: победители за най-добър филм</string>
-    <string name="scout_award_oscar_nominees">Оскар: номинирани за най-добър филм</string>
+    <string name="scout_award_oscar_winners">Оскар: победители</string>
+    <string name="scout_award_oscar_nominees">Оскар: номинирани</string>
     <string name="scout_award_lion">Златен лъв</string>
     <string name="scout_award_globes">Златен глобус</string>
     <string name="scout_award_palme">Palme d\'Or</string>

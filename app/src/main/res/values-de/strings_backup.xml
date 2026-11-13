@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Namen und Bilder</string>
     <string name="backup_part_settings">Arc-Einstellungen</string>
     <string name="backup_part_settings_sub">Scout, Miniaturbilder, DNS, Fernbedienungstasten und mehr</string>
+    <string name="backup_part_history">Bibliothek und Wiedergabeverlauf</string>
+    <string name="backup_part_history_sub">Gespeicherte Titel, Weiter ansehen und Gesehen-Markierungen</string>
+    <string name="backup_part_history_signed_in">Ihr Nuvio-Konto speichert das bereits. Wiederherstellung nur auf einem nicht angemeldeten Gerät.</string>
+    <string name="backup_part_history_counts">Gespeicherte Titel: %1$d. Gesehen: %2$d. Angefangen: %3$d.</string>
+    <string name="backup_supporter">Supporter-Status</string>
+    <string name="backup_supporter_yes">Ja. Supporter-Farben und -Symbole bleiben erhalten.</string>
+    <string name="backup_supporter_no">Nein</string>
     <string name="backup_part_secrets">Passwörter und Schlüssel</string>
     <string name="backup_part_secrets_saved">Mit Ihrer PIN geschützt</string>
     <string name="backup_part_secrets_needs_pin">Benötigt die Sicherungs-PIN</string>

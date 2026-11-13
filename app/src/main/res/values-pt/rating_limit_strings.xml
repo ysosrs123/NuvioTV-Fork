@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Limite de idade</string>
+    <string name="rating_limit_none">Sem limite</string>
+    <string name="rating_limit_preschool">Pré-escolar</string>
+    <string name="rating_limit_young">Crianças pequenas</string>
+    <string name="rating_limit_pg">Crianças mais velhas</string>
+    <string name="rating_limit_teen">Adolescentes</string>
+    <string name="rating_limit_hint">O que este perfil pode reproduzir sem o PIN de %1$s</string>
+    <string name="rating_limit_note">Usa as classificações dos EUA do TMDB. Acima do limite, ou sem classificação, a reprodução pede o PIN de %1$s.</string>
+    <string name="rating_limit_needs_pin">Define primeiro um PIN no perfil de %1$s. O limite de idade pede-o.</string>
+    <string name="rating_limit_change_heading">Introduz o PIN de %1$s para mudar o limite</string>
+    <string name="rating_limit_change_support">O limite de idade de %1$s passa a ser: %2$s</string>
+    <string name="rating_limit_saved">Limite de idade de %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">É preciso o PIN de %1$s para reproduzir isto</string>
+    <string name="rating_limit_play_rated">%1$s tem a classificação %2$s. O limite de %3$s é %4$s.</string>
+    <string name="rating_limit_play_unrated">O Arc não encontra uma classificação para %1$s. O limite de %2$s é %3$s.</string>
+    <string name="rating_limit_play_no_pin">Define um PIN no perfil de %1$s para reproduzir títulos acima do limite de %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s não pode entrar nesta sessão em grupo</string>
+    <string name="rating_limit_party_rated">A sessão está a ver %1$s, com classificação %2$s. O limite de %3$s é %4$s.</string>
+    <string name="rating_limit_party_unrated">A sessão está a ver %1$s, sem classificação que o Arc possa verificar. O limite de %2$s é %3$s.</string>
+    <string name="rating_limit_add_heading">Introduz o PIN de %1$s para adicionar um perfil</string>
+    <string name="rating_limit_add_support">Um perfil neste dispositivo tem um limite de classificação.</string>
+</resources>

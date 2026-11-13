@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Nevek és képek</string>
     <string name="backup_part_settings">Arc-beállítások</string>
     <string name="backup_part_settings_sub">Scout, miniatűrök, DNS, távirányító-gombok és egyebek</string>
+    <string name="backup_part_history">Könyvtár és megtekintési előzmények</string>
+    <string name="backup_part_history_sub">Mentett címek, Megtekintés folytatása és megtekintési jelölések</string>
+    <string name="backup_part_history_signed_in">A Nuvio-fiókod már őrzi ezeket. Visszaállítás csak be nem jelentkezett eszközön.</string>
+    <string name="backup_part_history_counts">Mentett címek: %1$d. Megnézve: %2$d. Folyamatban: %3$d.</string>
+    <string name="backup_supporter">Támogatói állapot</string>
+    <string name="backup_supporter_yes">Igen. A támogatói színek és ikonok megmaradnak.</string>
+    <string name="backup_supporter_no">Nem</string>
     <string name="backup_part_secrets">Jelszavak és kulcsok</string>
     <string name="backup_part_secrets_saved">A PIN-kódoddal védve</string>
     <string name="backup_part_secrets_needs_pin">A mentés PIN-kódja kell hozzá</string>

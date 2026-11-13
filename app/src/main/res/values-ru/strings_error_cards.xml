@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc прочитал этот файл, но не нашёл в нём изображения, которое может воспроизвести. Так бывает с файлами для видеомонтажа, например Apple ProRes. Выберите другую версию.</string>
+    <string name="player_error_card_silent_title">Источник не ответил</string>
+    <string name="player_error_card_silent">Сервер этого источника не присылал видео в течение %1$d с. Причина на стороне источника, а не Arc. Попробуйте другой источник или повторите попытку позже.</string>
+    <string name="player_error_card_fault_title">Сбой на сервере источника</string>
+    <string name="player_error_card_fault">Сервер этого источника ответил ошибкой (%1$d). Причина на стороне источника, а не Arc. Попробуйте другой источник или повторите попытку позже.</string>
+    <string name="player_error_card_blocked_title">Источник заблокировал ссылку</string>
+    <string name="player_error_card_blocked">Сервер этого источника отклонил ссылку (ошибка %1$d). Причина на стороне источника, а не Arc. Попробуйте другой источник.</string>
+    <string name="player_error_card_gone_title">Файла больше нет у источника</string>
+    <string name="player_error_card_gone">Сервер сообщает, что этого файла больше нет (ошибка %1$d). Причина на стороне источника, а не Arc. Попробуйте другой источник.</string>
+    <string name="player_error_card_expired_title">Срок действия ссылки истёк</string>
+    <string name="player_error_card_expired">Ссылка источника устарела (ошибка %1$d). Вернитесь назад и откройте фильм или сериал снова, чтобы получить новую ссылку, или попробуйте другой источник.</string>
+    <string name="player_error_card_limit_title">Сервис ограничивает запросы</string>
+    <string name="player_error_card_limit">Этот сервис просит Arc отправлять запросы реже. Причина на стороне сервиса, а не Arc. Подождите немного и попробуйте снова или выберите источник с другого сервера.</string>
+    <string name="player_error_card_unreachable_title">Arc не может связаться с источником</string>
+    <string name="player_error_card_unreachable">Сервер этого источника недоступен. Если другие источники работают, этот сервер не в сети: выберите другой. Если не работает ничего, проверьте подключение приставки к интернету.</string>
+    <string name="player_error_card_notice_title">Вместо фильма пришло уведомление</string>
+    <string name="player_error_card_notice">Вместо фильма аддон или сервис Debrid прислал короткое видео с уведомлением. Обычно это значит, что файл ещё не готов, в аккаунте исчерпан лимит или истёк срок входа. Причина на стороне аддона, а не Arc. Проверьте аддон или свой аккаунт Debrid либо попробуйте другой источник.</string>
+    <string name="player_error_card_not_video_title">Эта ссылка не ведёт на видео</string>
+    <string name="player_error_card_not_video">Сервер прислал не видео, а чаще всего веб-страницу или архив. Причина на стороне источника, а не Arc. Попробуйте другой источник.</string>
+    <string name="player_error_card_box_title">Приставка не может воспроизвести этот файл</string>
+    <string name="player_error_card_box">Этот файл: %1$s. Это больше, чем может воспроизвести видеочип этой приставки. Причина на стороне приставки, а не Arc. Выберите другую версию, например 4K или 1080p.</string>
+    <string name="player_error_card_box_no_detail">Формат видео этого файла не по силам видеочипу этой приставки. Причина на стороне приставки, а не Arc. Выберите другую версию, например 4K или 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc не может прочитать изображение файла</string>
+    <string name="player_error_facts_no_answer">нет ответа</string>
+    <string name="player_error_facts_no_connection">нет подключения</string>
+    <string name="player_error_facts_seconds">%1$d с</string>
+    <string name="player_error_other_sources">Другие источники</string>
+    <string name="report_check_title">Что нашёл Arc</string>
+    <string name="report_check_hint">Похоже, проблема не в Arc, поэтому отчёт её не решит. Вот что стоит попробовать сначала.</string>
+    <string name="report_check_try_source">Попробовать другой источник</string>
+    <string name="report_check_try_source_notice">или проверьте аддон или аккаунт Debrid</string>
+    <string name="report_check_send_anyway">Всё равно отправить</string>
+    <string name="debrid_busy">Сервис Debrid сейчас перегружен (ошибка %1$d). Причина на стороне сервиса, а не Arc. Попробуйте снова чуть позже или выберите другой источник.</string>
+</resources>

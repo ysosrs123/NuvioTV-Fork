@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Slepia mygtuką Įvertinti, nykščius meniu ir klausimą po filmo. Jūsų įvertinimai vis tiek skaičiuojami.</string>
     <string name="scout_ask_enabled">Paklausti po filmo</string>
     <string name="scout_ask_enabled_sub">Ne man, patinka arba dievinu išeinant iš grotuvo</string>
+    <string name="scout_send_ratings">Siųsti mano įvertinimus į sekimo paslaugas</string>
+    <string name="scout_send_ratings_sub">Ne man, Patinka ir Dievinu siunčiami į Trakt, Simkl, MDBList ir WeTrakr kaip 3, 7 ir 10 iš 10. Įvertinimas, kurį patys davėte sekimo paslaugoje, niekada nekeičiamas. Simkl gauna tik peržiūrėtus pavadinimus.</string>
+    <string name="scout_send_ratings_none">Šiame profilyje neprisijungta prie jokios sekimo paslaugos, todėl kol kas nieko nesiunčiama.</string>
+    <string name="scout_use_ratings">Naudoti mano įvertinimus iš sekimo paslaugų</string>
+    <string name="scout_use_ratings_sub">Sekimo paslaugose duoti įvertinimai čia tampa nykščiais: 9 arba 10 yra Dievinu, nuo 6 iki 8 Patinka, nuo 1 iki 4 Ne man. Arc programoje paspaustas nykštis visada turi pirmenybę.</string>
+    <string name="scout_thumb_from">Šaltinis: %1$s</string>
     <string name="scout_your_thumbs">Jūsų nykščiai</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">Įvertintas %1$d pavadinimas. Atidarykite, jei norite pakeisti ar atšaukti</item>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Starosno ograničenje</string>
+    <string name="rating_limit_none">Bez ograničenja</string>
+    <string name="rating_limit_preschool">Predškolci</string>
+    <string name="rating_limit_young">Mala deca</string>
+    <string name="rating_limit_pg">Starija deca</string>
+    <string name="rating_limit_teen">Tinejdžeri</string>
+    <string name="rating_limit_hint">Šta ovaj profil može da pušta bez PIN-a profila %1$s</string>
+    <string name="rating_limit_note">Koristi američke rejtinge sa TMDB-a. Iznad ograničenja, ili bez rejtinga, Pusti traži PIN profila %1$s.</string>
+    <string name="rating_limit_needs_pin">Prvo postavite PIN na profilu %1$s. Starosno ograničenje ga traži.</string>
+    <string name="rating_limit_change_heading">Unesite PIN profila %1$s da biste promenili ograničenje</string>
+    <string name="rating_limit_change_support">Novo ograničenje profila %1$s: %2$s</string>
+    <string name="rating_limit_saved">Ograničenje profila %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Za puštanje je potreban PIN profila %1$s</string>
+    <string name="rating_limit_play_rated">%1$s ima rejting %2$s. Ograničenje profila %3$s je %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc ne može da pronađe rejting za %1$s. Ograničenje profila %2$s je %3$s.</string>
+    <string name="rating_limit_play_no_pin">Postavite PIN na profilu %1$s da biste puštali naslove iznad ograničenja profila %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s ne može da se pridruži ovom gledanju</string>
+    <string name="rating_limit_party_rated">Grupa gleda %1$s, rejting %2$s. Ograničenje profila %3$s je %4$s.</string>
+    <string name="rating_limit_party_unrated">Grupa gleda %1$s, bez rejtinga koji Arc može da proveri. Ograničenje profila %2$s je %3$s.</string>
+    <string name="rating_limit_add_heading">Unesite PIN profila %1$s da biste dodali profil</string>
+    <string name="rating_limit_add_support">Jedan profil na ovom uređaju ima ograničenje uzrasta.</string>
+</resources>

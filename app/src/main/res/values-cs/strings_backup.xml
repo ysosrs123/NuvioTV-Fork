@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Jména a obrázky</string>
     <string name="backup_part_settings">Nastavení Arc</string>
     <string name="backup_part_settings_sub">Scout, miniatury, DNS, tlačítka ovladače a další</string>
+    <string name="backup_part_history">Knihovna a historie sledování</string>
+    <string name="backup_part_history_sub">Uložené tituly, Pokračovat ve sledování a označení zhlédnutého</string>
+    <string name="backup_part_history_signed_in">Váš účet Nuvio je už uchovává. Obnoví se jen v zařízení, které není přihlášené.</string>
+    <string name="backup_part_history_counts">Uložené tituly: %1$d. Zhlédnuto: %2$d. Rozkoukáno: %3$d.</string>
+    <string name="backup_supporter">Stav podporovatele</string>
+    <string name="backup_supporter_yes">Ano. Barvy a ikony podporovatele zůstanou.</string>
+    <string name="backup_supporter_no">Ne</string>
     <string name="backup_part_secrets">Hesla a klíče</string>
     <string name="backup_part_secrets_saved">Chráněno vaším PINem</string>
     <string name="backup_part_secrets_needs_pin">Vyžaduje PIN zálohy</string>

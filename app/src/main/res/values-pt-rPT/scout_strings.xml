@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Oculta o botão Classificar, os polegares no menu e a pergunta após um filme. As classificações continuam a contar.</string>
     <string name="scout_ask_enabled">Perguntar que tal foi depois de um filme</string>
     <string name="scout_ask_enabled_sub">Não é para mim, gosto ou adoro quando sais do leitor</string>
+    <string name="scout_send_ratings">Enviar as minhas classificações para os trackers</string>
+    <string name="scout_send_ratings_sub">Não é para mim, Gosto disto e Adoro isto vão para o Trakt, Simkl, MDBList e WeTrakr como 3, 7 e 10 em 10. Uma classificação que tenhas dado tu num tracker nunca é alterada. O Simkl só recebe títulos que viste.</string>
+    <string name="scout_send_ratings_none">Nenhum tracker tem sessão iniciada neste perfil, por isso ainda nada é enviado.</string>
+    <string name="scout_use_ratings">Usar as classificações dos meus trackers</string>
+    <string name="scout_use_ratings_sub">As classificações que deste nos teus trackers tornam-se polegares aqui: 9 ou 10 é Adoro isto, 6 a 8 Gosto disto, 1 a 4 Não é para mim. Um polegar que carregues no Arc tem sempre prioridade.</string>
+    <string name="scout_thumb_from">De %1$s</string>
     <string name="scout_your_thumbs">Os teus polegares</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d título classificado. Abre para alterar ou anular</item>

@@ -196,8 +196,8 @@
     <string name="scout_genre_western">غرب أمريكي</string>
     <string name="scout_licence_icon_title">أيقونة Scout</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">الأوسكار: الفائزون بأفضل فيلم</string>
-    <string name="scout_award_oscar_nominees">الأوسكار: المرشحون لأفضل فيلم</string>
+    <string name="scout_award_oscar_winners">الأوسكار: الفائزون</string>
+    <string name="scout_award_oscar_nominees">الأوسكار: المرشحون</string>
     <string name="scout_award_lion">الأسد الذهبي</string>
     <string name="scout_award_globes">غولدن غلوب</string>
     <string name="scout_award_palme">Palme d\'Or</string>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Όριο ηλικίας</string>
+    <string name="rating_limit_none">Χωρίς όριο</string>
+    <string name="rating_limit_preschool">Προσχολική ηλικία</string>
+    <string name="rating_limit_young">Μικρά παιδιά</string>
+    <string name="rating_limit_pg">Μεγαλύτερα παιδιά</string>
+    <string name="rating_limit_teen">Έφηβοι</string>
+    <string name="rating_limit_hint">Τι μπορεί να παίξει αυτό το προφίλ χωρίς το PIN του προφίλ %1$s</string>
+    <string name="rating_limit_note">Χρησιμοποιεί τις αμερικανικές διαβαθμίσεις του TMDB. Πάνω από το όριο ή χωρίς διαβάθμιση, η αναπαραγωγή ζητά το PIN του προφίλ %1$s.</string>
+    <string name="rating_limit_needs_pin">Ορίστε πρώτα PIN στο προφίλ %1$s. Το όριο ηλικίας το χρειάζεται.</string>
+    <string name="rating_limit_change_heading">Εισάγετε το PIN του προφίλ %1$s για αλλαγή του ορίου</string>
+    <string name="rating_limit_change_support">Νέο όριο ηλικίας για το προφίλ %1$s: %2$s</string>
+    <string name="rating_limit_saved">Όριο ηλικίας για το προφίλ %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Για την αναπαραγωγή χρειάζεται το PIN του προφίλ %1$s</string>
+    <string name="rating_limit_play_rated">Το %1$s έχει διαβάθμιση %2$s. Το όριο του προφίλ %3$s είναι %4$s.</string>
+    <string name="rating_limit_play_unrated">Το Arc δεν βρίσκει διαβάθμιση για το %1$s. Το όριο του προφίλ %2$s είναι %3$s.</string>
+    <string name="rating_limit_play_no_pin">Ορίστε PIN στο προφίλ %1$s για να παίζετε τίτλους πάνω από το όριο του προφίλ %2$s.</string>
+    <string name="rating_limit_party_heading">Το προφίλ %1$s δεν μπορεί να μπει σε αυτό το πάρτι προβολής</string>
+    <string name="rating_limit_party_rated">Το πάρτι προβολής παρακολουθεί το %1$s, με διαβάθμιση %2$s. Το όριο του προφίλ %3$s είναι %4$s.</string>
+    <string name="rating_limit_party_unrated">Το πάρτι προβολής παρακολουθεί το %1$s, χωρίς διαβάθμιση που μπορεί να ελέγξει το Arc. Το όριο του προφίλ %2$s είναι %3$s.</string>
+    <string name="rating_limit_add_heading">Εισάγετε το PIN του προφίλ %1$s για προσθήκη προφίλ</string>
+    <string name="rating_limit_add_support">Ένα προφίλ σε αυτή τη συσκευή έχει όριο ηλικίας.</string>
+</resources>

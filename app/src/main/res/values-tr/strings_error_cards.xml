@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc bu dosyayı okudu ancak içinde oynatabileceği bir görüntü bulamadı. Apple ProRes gibi video düzenleme için yapılmış dosyalar böyledir. Bu içeriğin başka bir kopyasını seç.</string>
+    <string name="player_error_card_silent_title">Kaynak yanıt vermedi</string>
+    <string name="player_error_card_silent">Bu kaynağın sunucusu %1$d saniye boyunca video göndermedi. Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene veya bunu daha sonra tekrar dene.</string>
+    <string name="player_error_card_fault_title">Kaynağın sunucusunda arıza var</string>
+    <string name="player_error_card_fault">Bu kaynağın sunucusu bir hatayla yanıt verdi (%1$d). Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene veya bunu daha sonra tekrar dene.</string>
+    <string name="player_error_card_blocked_title">Kaynak bu bağlantıyı engelledi</string>
+    <string name="player_error_card_blocked">Bu kaynağın sunucusu bağlantıyı reddetti (hata %1$d). Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene.</string>
+    <string name="player_error_card_gone_title">Bu dosya artık kaynakta yok</string>
+    <string name="player_error_card_gone">Sunucu bu dosyanın artık orada olmadığını söylüyor (hata %1$d). Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene.</string>
+    <string name="player_error_card_expired_title">Bu bağlantının süresi doldu</string>
+    <string name="player_error_card_expired">Kaynağın bağlantısının süresi doldu (hata %1$d). Yeni bir bağlantı için geri dönüp içeriği tekrar aç veya başka bir kaynak dene.</string>
+    <string name="player_error_card_limit_title">Hizmet istekleri sınırlıyor</string>
+    <string name="player_error_card_limit">Bu hizmet Arc\'tan yavaşlamasını istiyor. Sorun hizmette, Arc\'ta değil. Tekrar denemeden önce biraz bekle veya başka bir sunucudan kaynak seç.</string>
+    <string name="player_error_card_unreachable_title">Arc kaynağa ulaşamadı</string>
+    <string name="player_error_card_unreachable">Bu kaynağın sunucusuna ulaşılamıyor. Diğer kaynaklar oynuyorsa o sunucu çalışmıyordur: başka birini seç. Hiçbir şey oynamıyorsa cihazın internet bağlantısını kontrol et.</string>
+    <string name="player_error_card_notice_title">Sağlayıcı film yerine bir uyarı gönderdi</string>
+    <string name="player_error_card_notice">Eklenti veya Debrid hizmeti film yerine kısa bir uyarı videosu gönderdi. Bu genellikle dosyanın henüz hazır olmadığı, hesabının bir sınıra ulaştığı veya oturumunun süresinin dolduğu anlamına gelir. Sorun eklentide, Arc\'ta değil. Eklentiyi veya Debrid hesabını kontrol et ya da başka bir kaynak dene.</string>
+    <string name="player_error_card_not_video_title">Bu bağlantı bir video değil</string>
+    <string name="player_error_card_not_video">Sunucu video olmayan bir şey gönderdi, genellikle bir web sayfası veya arşiv. Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene.</string>
+    <string name="player_error_card_box_title">Bu cihaz bu dosyayı oynatamıyor</string>
+    <string name="player_error_card_box">Bu dosyanın biçimi (%1$s) cihazın video çipinin oynatabileceğinden fazla. Sorun cihazda, Arc\'ta değil. Bu içeriğin 4K veya 1080p gibi başka bir kopyasını seç.</string>
+    <string name="player_error_card_box_no_detail">Bu dosyanın video biçimi, cihazın video çipinin oynatabileceğinden fazla. Sorun cihazda, Arc\'ta değil. Bu içeriğin 4K veya 1080p gibi başka bir kopyasını seç.</string>
+    <string name="player_error_card_unreadable_title">Arc bu dosyanın görüntüsünü okuyamıyor</string>
+    <string name="player_error_facts_no_answer">yanıt yok</string>
+    <string name="player_error_facts_no_connection">bağlantı yok</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Diğer kaynaklar</string>
+    <string name="report_check_title">Arc ne buldu</string>
+    <string name="report_check_hint">Bu, Arc dışında bir sorun gibi görünüyor, bu yüzden bir rapor bunu düzeltemez. Önce şunu dene.</string>
+    <string name="report_check_try_source">Başka bir kaynak dene</string>
+    <string name="report_check_try_source_notice">veya eklentini ya da Debrid hesabını kontrol et</string>
+    <string name="report_check_send_anyway">Yine de gönder</string>
+    <string name="debrid_busy">Debrid hizmeti şu anda meşgul (hata %1$d). Sorun hizmette, Arc\'ta değil. Biraz sonra tekrar dene veya başka bir kaynak seç.</string>
+</resources>

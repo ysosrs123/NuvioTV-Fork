@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">此来源目前无法使用。Arc 无法修复这个问题，所以无需报告。请尝试其他来源。</string>
+    <string name="report_check_blocked_hint_notice">此来源目前无法使用。Arc 无法修复这个问题，所以无需报告。请检查您的扩展或 Debrid 账户，或尝试其他来源。</string>
+    <string name="stream_large_file_short">对此设备而言文件偏大</string>
+    <string name="stream_large_file_uhd">这是一个非常大的 4K 文件。内存较小的设备（比如这台）经常难以处理这么大的文件，因此可能会卡顿或停止播放。同一部电影的 1080p 版本通常播放更流畅。</string>
+    <string name="stream_large_file_other">这是一个非常大的文件。内存较小的设备（比如这台）经常难以处理这么大的文件，因此可能会卡顿或停止播放。标有 WEB 而不是 Remux 的较小 1080p 版本通常播放更流畅。</string>
+</resources>

@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Скрива дугме Оцени, палчеве у менију и питање после филма. Ваше оцене се и даље рачунају.</string>
     <string name="scout_ask_enabled">Питање како је било после филма</string>
     <string name="scout_ask_enabled_sub">Није за мене, свиђа ми се или обожавам при изласку из плејера</string>
+    <string name="scout_send_ratings">Шаљи моје оцене услугама праћења</string>
+    <string name="scout_send_ratings_sub">Није за мене, Свиђа ми се и Обожавам шаљу се на Trakt, Simkl, MDBList и WeTrakr као 3, 7 и 10 од 10. Ваша оцена дата директно на услузи праћења никад се не мења. Simkl добија само одгледане наслове.</string>
+    <string name="scout_send_ratings_none">На овом профилу није пријављена ниједна услуга праћења, па се још ништа не шаље.</string>
+    <string name="scout_use_ratings">Користи моје оцене са услуга праћења</string>
+    <string name="scout_use_ratings_sub">Оцене са ваших услуга праћења овде постају палчеви: 9 или 10 је Обожавам, 6 до 8 Свиђа ми се, 1 до 4 Није за мене. Палац који притиснете у апликацији Arc увек има предност.</string>
+    <string name="scout_thumb_from">Извор: %1$s</string>
     <string name="scout_your_thumbs">Ваши палчеви</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d оцењен наслов. Отворите за промену или поништавање</item>

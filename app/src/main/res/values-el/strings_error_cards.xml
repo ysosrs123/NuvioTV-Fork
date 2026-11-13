@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Το Arc διάβασε αυτό το αρχείο και δεν βρήκε εικόνα που να μπορεί να αναπαράγει. Έτσι είναι τα αρχεία για επεξεργασία βίντεο, όπως το Apple ProRes. Επιλέξτε άλλο αντίγραφο του τίτλου.</string>
+    <string name="player_error_card_silent_title">Η πηγή δεν απάντησε</string>
+    <string name="player_error_card_silent">Ο διακομιστής αυτής της πηγής δεν έστειλε βίντεο για %1$d s. Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή ή δοκιμάστε ξανά αυτή αργότερα.</string>
+    <string name="player_error_card_fault_title">Βλάβη στον διακομιστή της πηγής</string>
+    <string name="player_error_card_fault">Ο διακομιστής αυτής της πηγής απάντησε με σφάλμα (%1$d). Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή ή δοκιμάστε ξανά αυτή αργότερα.</string>
+    <string name="player_error_card_blocked_title">Η πηγή μπλόκαρε αυτόν τον σύνδεσμο</string>
+    <string name="player_error_card_blocked">Ο διακομιστής αυτής της πηγής απέρριψε τον σύνδεσμο (σφάλμα %1$d). Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή.</string>
+    <string name="player_error_card_gone_title">Το αρχείο δεν υπάρχει πια στην πηγή</string>
+    <string name="player_error_card_gone">Ο διακομιστής αναφέρει ότι το αρχείο δεν υπάρχει πια (σφάλμα %1$d). Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή.</string>
+    <string name="player_error_card_expired_title">Ο σύνδεσμος έληξε</string>
+    <string name="player_error_card_expired">Ο σύνδεσμος της πηγής έληξε (σφάλμα %1$d). Επιστρέψτε και ανοίξτε ξανά τον τίτλο για νέο σύνδεσμο ή δοκιμάστε άλλη πηγή.</string>
+    <string name="player_error_card_limit_title">Η υπηρεσία περιορίζει τα αιτήματα</string>
+    <string name="player_error_card_limit">Η υπηρεσία ζητά από το Arc να επιβραδύνει. Αυτό οφείλεται στην υπηρεσία, όχι στο Arc. Περιμένετε λίγο πριν δοκιμάσετε ξανά ή επιλέξτε πηγή από άλλον διακομιστή.</string>
+    <string name="player_error_card_unreachable_title">Το Arc δεν μπόρεσε να φτάσει στην πηγή</string>
+    <string name="player_error_card_unreachable">Ο διακομιστής αυτής της πηγής δεν είναι προσβάσιμος. Αν άλλες πηγές παίζουν, ο διακομιστής είναι εκτός λειτουργίας: επιλέξτε άλλη. Αν δεν παίζει τίποτα, ελέγξτε τη σύνδεση της συσκευής στο διαδίκτυο.</string>
+    <string name="player_error_card_notice_title">Ο πάροχος έστειλε ειδοποίηση αντί για την ταινία</string>
+    <string name="player_error_card_notice">Αντί για την ταινία, το πρόσθετο ή η υπηρεσία Debrid έστειλε ένα σύντομο βίντεο με ειδοποίηση. Συνήθως αυτό σημαίνει ότι το αρχείο δεν είναι ακόμη έτοιμο, ο λογαριασμός σας έφτασε σε κάποιο όριο ή η σύνδεσή σας έληξε. Αυτό οφείλεται στο πρόσθετο, όχι στο Arc. Ελέγξτε το πρόσθετο ή τον λογαριασμό σας Debrid ή δοκιμάστε άλλη πηγή.</string>
+    <string name="player_error_card_not_video_title">Ο σύνδεσμος δεν είναι βίντεο</string>
+    <string name="player_error_card_not_video">Ο διακομιστής έστειλε κάτι που δεν είναι βίντεο, συχνά μια ιστοσελίδα ή ένα συμπιεσμένο αρχείο. Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή.</string>
+    <string name="player_error_card_box_title">Η συσκευή δεν μπορεί να παίξει αυτό το αρχείο</string>
+    <string name="player_error_card_box">Αυτό το αρχείο είναι %1$s, περισσότερο από όσο μπορεί να αναπαράγει το τσιπ βίντεο της συσκευής. Αυτό οφείλεται στη συσκευή, όχι στο Arc. Επιλέξτε άλλο αντίγραφο του τίτλου, όπως 4K ή 1080p.</string>
+    <string name="player_error_card_box_no_detail">Η μορφή βίντεο αυτού του αρχείου ξεπερνά τις δυνατότητες του τσιπ βίντεο της συσκευής. Αυτό οφείλεται στη συσκευή, όχι στο Arc. Επιλέξτε άλλο αντίγραφο του τίτλου, όπως 4K ή 1080p.</string>
+    <string name="player_error_card_unreadable_title">Το Arc δεν μπορεί να διαβάσει την εικόνα του αρχείου</string>
+    <string name="player_error_facts_no_answer">καμία απάντηση</string>
+    <string name="player_error_facts_no_connection">χωρίς σύνδεση</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Άλλες πηγές</string>
+    <string name="report_check_title">Τι βρήκε το Arc</string>
+    <string name="report_check_hint">Μοιάζει με πρόβλημα εκτός Arc, οπότε μια αναφορά δεν θα το διορθώσει. Δοκιμάστε πρώτα αυτό.</string>
+    <string name="report_check_try_source">Δοκιμάστε άλλη πηγή</string>
+    <string name="report_check_try_source_notice">ή ελέγξτε το πρόσθετο ή τον λογαριασμό Debrid</string>
+    <string name="report_check_send_anyway">Αποστολή ούτως ή άλλως</string>
+    <string name="debrid_busy">Η υπηρεσία Debrid είναι απασχολημένη αυτή τη στιγμή (σφάλμα %1$d). Αυτό οφείλεται στην υπηρεσία, όχι στο Arc. Δοκιμάστε ξανά σε λίγο ή επιλέξτε άλλη πηγή.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">排除语言</string>
+    <string name="scout_leave_out_languages_sub">你从不想看到的语言</string>
+    <string name="scout_language_indian">印度语言</string>
+</resources>

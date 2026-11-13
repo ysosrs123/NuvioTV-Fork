@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arcはこのファイルを読み込みましたが、再生できる映像が見つかりませんでした。Apple ProResなどの動画編集用ファイルはこのようになります。このタイトルの別のファイルを選んでください。</string>
+    <string name="player_error_card_silent_title">ソースが応答しません</string>
+    <string name="player_error_card_silent">このソースのサーバーから%1$d秒間、映像が届きませんでした。原因はArcではなく、ソース側にあります。別のソースを試すか、時間をおいてこのソースをもう一度お試しください。</string>
+    <string name="player_error_card_fault_title">ソースのサーバーに障害があります</string>
+    <string name="player_error_card_fault">このソースのサーバーがエラー（%1$d）を返しました。原因はArcではなく、ソース側にあります。別のソースを試すか、時間をおいてこのソースをもう一度お試しください。</string>
+    <string name="player_error_card_blocked_title">ソースがこのリンクをブロックしました</string>
+    <string name="player_error_card_blocked">このソースのサーバーがリンクを拒否しました（エラー %1$d）。原因はArcではなく、ソース側にあります。別のソースを試してください。</string>
+    <string name="player_error_card_gone_title">このファイルはソースにありません</string>
+    <string name="player_error_card_gone">サーバーによると、このファイルはもう存在しません（エラー %1$d）。原因はArcではなく、ソース側にあります。別のソースを試してください。</string>
+    <string name="player_error_card_expired_title">このリンクは期限切れです</string>
+    <string name="player_error_card_expired">ソースのリンクの有効期限が切れました（エラー %1$d）。戻ってタイトルを開き直すと新しいリンクを取得できます。または別のソースを試してください。</string>
+    <string name="player_error_card_limit_title">サービスがリクエストを制限しています</string>
+    <string name="player_error_card_limit">このサービスがArcにリクエストを控えるよう求めています。原因はArcではなく、サービス側にあります。少し待ってから再試行するか、別のサーバーのソースを選んでください。</string>
+    <string name="player_error_card_unreachable_title">ソースに接続できませんでした</string>
+    <string name="player_error_card_unreachable">このソースのサーバーに接続できません。他のソースが再生できる場合は、そのサーバーが停止しています。別のソースを選んでください。何も再生できない場合は、デバイスのインターネット接続を確認してください。</string>
+    <string name="player_error_card_notice_title">本編ではなくお知らせが届きました</string>
+    <string name="player_error_card_notice">本編の代わりに、アドオンまたはDebridサービスから短いお知らせ動画が送られてきました。通常は、ファイルの準備がまだできていない、アカウントが上限に達した、またはサインインの有効期限が切れたことを意味します。原因はArcではなく、アドオン側にあります。アドオンまたはDebridアカウントを確認するか、別のソースを試してください。</string>
+    <string name="player_error_card_not_video_title">このリンクは動画ではありません</string>
+    <string name="player_error_card_not_video">サーバーから動画ではないもの（多くはウェブページやアーカイブ）が送られてきました。原因はArcではなく、ソース側にあります。別のソースを試してください。</string>
+    <string name="player_error_card_box_title">このデバイスではこのファイルを再生できません</string>
+    <string name="player_error_card_box">このファイルは%1$sで、このデバイスのビデオチップで再生できる範囲を超えています。原因はArcではなく、デバイス側にあります。4Kや1080pなど、このタイトルの別のファイルを選んでください。</string>
+    <string name="player_error_card_box_no_detail">このファイルの映像形式は、このデバイスのビデオチップで再生できる範囲を超えています。原因はArcではなく、デバイス側にあります。4Kや1080pなど、このタイトルの別のファイルを選んでください。</string>
+    <string name="player_error_card_unreadable_title">このファイルの映像を読み取れません</string>
+    <string name="player_error_facts_no_answer">応答なし</string>
+    <string name="player_error_facts_no_connection">接続なし</string>
+    <string name="player_error_facts_seconds">%1$d秒</string>
+    <string name="player_error_other_sources">他のソース</string>
+    <string name="report_check_title">Arcの確認結果</string>
+    <string name="report_check_hint">Arcの外で起きている問題のようなので、レポートでは解決できません。まずは次をお試しください。</string>
+    <string name="report_check_try_source">別のソースを試す</string>
+    <string name="report_check_try_source_notice">またはアドオンやDebridアカウントを確認</string>
+    <string name="report_check_send_anyway">このまま送信</string>
+    <string name="debrid_busy">Debridサービスが現在混み合っています（エラー %1$d）。原因はArcではなく、サービス側にあります。少し待ってから再試行するか、別のソースを選んでください。</string>
+</resources>

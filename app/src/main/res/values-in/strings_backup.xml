@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Nama dan gambar</string>
     <string name="backup_part_settings">Pengaturan Arc</string>
     <string name="backup_part_settings_sub">Scout, thumbnail, DNS, tombol remote, dan lainnya</string>
+    <string name="backup_part_history">Pustaka dan riwayat tontonan</string>
+    <string name="backup_part_history_sub">Judul tersimpan, Lanjutkan Menonton, dan tanda sudah ditonton</string>
+    <string name="backup_part_history_signed_in">Akun Nuvio Anda sudah menyimpannya. Hanya dipulihkan di perangkat yang belum masuk.</string>
+    <string name="backup_part_history_counts">Judul tersimpan: %1$d. Sudah ditonton: %2$d. Sedang ditonton: %3$d.</string>
+    <string name="backup_supporter">Status pendukung</string>
+    <string name="backup_supporter_yes">Ya. Warna dan ikon pendukung tetap ada.</string>
+    <string name="backup_supporter_no">Tidak</string>
     <string name="backup_part_secrets">Kata sandi dan kunci</string>
     <string name="backup_part_secrets_saved">Dikunci dengan PIN Anda</string>
     <string name="backup_part_secrets_needs_pin">Perlu PIN cadangan</string>

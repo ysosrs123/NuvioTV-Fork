@@ -4339,14 +4339,14 @@
     <string name="report_item_title">Заглавие и име на файла</string>
     <string name="report_item_note">Добавяне на бележка</string>
     <string name="report_item_note_hint">По избор</string>
-    <string name="report_note_placeholder">Какво трябва да знаем?</string>
+    <string name="report_note_placeholder">Нещо друго, което е добре да се знае?</string>
     <string name="report_never_sent">Никога не се изпращат: връзки към стриймове, ключове за debrid или добавки, вашият акаунт или имейл. Услугата за доклади не пази вашия IP адрес.</string>
     <string name="report_send">Изпращане</string>
     <string name="report_failed_limit">Това устройство достигна днешния лимит за доклади. Моля, опитайте отново утре.</string>
     <string name="report_sent_title">Докладът е изпратен</string>
     <string name="report_sent_qr_description">QR код за вашия доклад</string>
     <string name="report_sent_phone">Сканирайте с телефона си, за да добавите снимки или да следите доклада си. Arc е хоби проект, затова не всеки доклад получава отговор.</string>
-    <string name="report_sent_no_phone">Благодарим, че ни уведомихте. Arc е хоби проект, затова не всеки доклад получава отговор.</string>
+    <string name="report_sent_no_phone">Благодаря за доклада. Arc е хоби проект, затова не всеки доклад получава отговор.</string>
     <string name="report_sent_back">Обратно към гледането</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Изберете всичко подходящо. Arc е запазил последната минута.</item>
@@ -4356,7 +4356,7 @@
         <item quantity="one">Настройки на плейъра и последната минута</item>
         <item quantity="other">Настройки на плейъра и последните %1$d минути</item>
     </plurals>
-    <string name="report_settings_subtitle">Кажете ни какво не е наред или какво бихте искали Arc да прави</string>
+    <string name="report_settings_subtitle">Кажете какво не е наред или какво бихте искали Arc да прави</string>
     <string name="report_group_choose">За какво искате да докладвате?</string>
     <string name="report_group_options">Опции</string>
     <string name="report_row_playback">Проблем с възпроизвеждането</string>
@@ -4427,11 +4427,22 @@
     <string name="display_mode_measured">Измерено</string>
     <string name="display_mode_measured_off">Екранът работи на %1$s Hz, а не на %2$s Hz</string>
     <string name="qms_hint_title">Телевизорът ви не спазва честотата на кадрите на филма</string>
-    <string name="qms_hint_body_qms">Arc поиска %1$s Hz. Телевизорът ви смени честотата без пълно превключване (QMS) и работи на %2$s Hz. Това се вижда като леко, равномерно насичане.</string>
-    <string name="qms_hint_body">Arc поиска %1$s Hz, но екранът ви работи на %2$s Hz. Това се вижда като леко, равномерно насичане.</string>
     <string name="qms_hint_fix">Най-добро решение: изключете QMS на телевизора</string>
     <string name="qms_hint_fix_hint">В настройките на самия телевизор за този HDMI вход. Arc не може да го промени.</string>
     <string name="qms_hint_off">Изключи съвпадението на кадрите</string>
-    <string name="qms_hint_off_hint">От следващия филм екранът остава на обичайната си честота. Можете да го включите отново в Настройки.</string>
     <string name="qms_hint_keep">Остави както е</string>
+    <string name="sub_prefer_addon_subtitles">Първо субтитри от добавки</string>
+    <string name="sub_prefer_addon_subtitles_desc">Избира субтитри от добавка пред тези във файла, когато и двата са на вашия език. Субтитрите от файла се използват, когато никоя добавка няма такива.</string>
+    <string name="playback_afr_settle_delay">Забавяне след смяна на честотата на опресняване</string>
+    <string name="playback_afr_settle_delay_sub">Колко дълго филмът чака телевизора след смяна на честотата. Увеличете, ако филмите започват с черен екран или без звук през ресийвър или саундбар.</string>
+    <string name="playback_afr_settle_delay_auto">Авто</string>
+    <string name="playback_afr_settle_delay_auto_sub">Две секунди, после докато звуковата връзка на телевизора се възстанови</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d с</string>
+    <string name="qms_hint_body_v2">Arc поиска %1$s Hz, но екранът работи на %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc поиска %1$s Hz. Телевизорът смени честотата без пълно превключване (QMS) и работи на %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Може да забележите повторен кадър приблизително на всеки %1$d секунди.</string>
+    <string name="qms_hint_effect_judder">Това се вижда като равномерно накъсване.</string>
+    <string name="qms_hint_mode_tip">Някои устройства и ресийвъри имат настройка за точни филмови честоти (23,976 Hz), често наричани дробни. Arc не може да я промени.</string>
+    <string name="qms_hint_off_hint_qms">Тогава Arc спира да иска честотата на филма. Телевизорът все пак може сам да смени честотата.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

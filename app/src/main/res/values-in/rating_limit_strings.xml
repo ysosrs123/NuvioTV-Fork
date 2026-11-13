@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Batas usia</string>
+    <string name="rating_limit_none">Tanpa batas</string>
+    <string name="rating_limit_preschool">Anak prasekolah</string>
+    <string name="rating_limit_young">Anak kecil</string>
+    <string name="rating_limit_pg">Anak yang lebih besar</string>
+    <string name="rating_limit_teen">Remaja</string>
+    <string name="rating_limit_hint">Yang bisa diputar profil ini tanpa PIN %1$s</string>
+    <string name="rating_limit_note">Memakai rating AS dari TMDB. Di atas batas, atau tanpa rating, Putar meminta PIN %1$s.</string>
+    <string name="rating_limit_needs_pin">Atur PIN di profil %1$s dulu. Batas usia memerlukannya.</string>
+    <string name="rating_limit_change_heading">Masukkan PIN %1$s untuk mengubah batas</string>
+    <string name="rating_limit_change_support">Batas usia %1$s menjadi: %2$s</string>
+    <string name="rating_limit_saved">Batas usia %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Perlu PIN %1$s untuk memutar ini</string>
+    <string name="rating_limit_play_rated">%1$s memiliki rating %2$s. Batas %3$s adalah %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc tidak menemukan rating untuk %1$s. Batas %2$s adalah %3$s.</string>
+    <string name="rating_limit_play_no_pin">Atur PIN di profil %1$s untuk memutar judul di atas batas %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s tidak bisa bergabung ke nonton bareng ini</string>
+    <string name="rating_limit_party_rated">Nonton bareng ini sedang memutar %1$s, rating %2$s. Batas %3$s adalah %4$s.</string>
+    <string name="rating_limit_party_unrated">Nonton bareng ini sedang memutar %1$s, yang tidak punya rating yang bisa diperiksa Arc. Batas %2$s adalah %3$s.</string>
+    <string name="rating_limit_add_heading">Masukkan PIN %1$s untuk menambah profil</string>
+    <string name="rating_limit_add_support">Salah satu profil di perangkat ini memiliki batas rating.</string>
+</resources>

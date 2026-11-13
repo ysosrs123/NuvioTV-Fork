@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Възрастова граница</string>
+    <string name="rating_limit_none">Без ограничение</string>
+    <string name="rating_limit_preschool">Предучилищна възраст</string>
+    <string name="rating_limit_young">Малки деца</string>
+    <string name="rating_limit_pg">По-големи деца</string>
+    <string name="rating_limit_teen">Тийнейджъри</string>
+    <string name="rating_limit_hint">Какво може да пуска този профил без ПИН кода на %1$s</string>
+    <string name="rating_limit_note">Използва американските рейтинги от TMDB. Над границата или без рейтинг пускането изисква ПИН кода на %1$s.</string>
+    <string name="rating_limit_needs_pin">Първо задайте ПИН код за профила на %1$s. Възрастовата граница го изисква.</string>
+    <string name="rating_limit_change_heading">Въведете ПИН кода на %1$s, за да промените границата</string>
+    <string name="rating_limit_change_support">Нова възрастова граница на %1$s: %2$s</string>
+    <string name="rating_limit_saved">Възрастова граница на %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">За пускане е нужен ПИН кодът на %1$s</string>
+    <string name="rating_limit_play_rated">%1$s е с рейтинг %2$s. Границата на %3$s е %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc не намира рейтинг за %1$s. Границата на %2$s е %3$s.</string>
+    <string name="rating_limit_play_no_pin">Задайте ПИН код за профила на %1$s, за да пускате заглавия над границата на %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s не може да се присъедини към това съвместно гледане</string>
+    <string name="rating_limit_party_rated">В съвместното гледане се гледа %1$s, с рейтинг %2$s. Границата на %3$s е %4$s.</string>
+    <string name="rating_limit_party_unrated">В съвместното гледане се гледа %1$s, без рейтинг, който Arc може да провери. Границата на %2$s е %3$s.</string>
+    <string name="rating_limit_add_heading">Въведете ПИН кода на %1$s, за да добавите профил</string>
+    <string name="rating_limit_add_support">Профил на това устройство има възрастова граница.</string>
+</resources>

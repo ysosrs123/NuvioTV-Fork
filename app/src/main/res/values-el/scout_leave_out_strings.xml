@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Εξαίρεση γλωσσών</string>
+    <string name="scout_leave_out_languages_sub">Γλώσσες που δεν θέλεις να βλέπεις ποτέ</string>
+    <string name="scout_language_indian">Ινδικές γλώσσες</string>
+</resources>

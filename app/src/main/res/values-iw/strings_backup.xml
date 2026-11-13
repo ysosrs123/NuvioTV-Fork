@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">שמות ותמונות</string>
     <string name="backup_part_settings">הגדרות Arc</string>
     <string name="backup_part_settings_sub">Scout, תמונות ממוזערות, DNS, כפתורי השלט ועוד</string>
+    <string name="backup_part_history">ספרייה והיסטוריית צפייה</string>
+    <string name="backup_part_history_sub">כותרים שמורים, המשך בצפייה וסימוני נצפה</string>
+    <string name="backup_part_history_signed_in">חשבון Nuvio שלך כבר שומר אותם. משוחזרים רק במכשיר שלא מחובר לחשבון.</string>
+    <string name="backup_part_history_counts">כותרים שמורים: %1$d. נצפו: %2$d. בצפייה: %3$d.</string>
+    <string name="backup_supporter">סטטוס תומך</string>
+    <string name="backup_supporter_yes">כן. הצבעים והסמלים של תומך נשמרים.</string>
+    <string name="backup_supporter_no">לא</string>
     <string name="backup_part_secrets">סיסמאות ומפתחות</string>
     <string name="backup_part_secrets_saved">נעול בקוד ה-PIN שלך</string>
     <string name="backup_part_secrets_needs_pin">נדרש קוד ה-PIN של הגיבוי</string>

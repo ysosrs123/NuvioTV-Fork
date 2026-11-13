@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">الأسماء والصور</string>
     <string name="backup_part_settings">إعدادات Arc</string>
     <string name="backup_part_settings_sub">Scout والصور المصغرة وDNS وأزرار جهاز التحكم والمزيد</string>
+    <string name="backup_part_history">المكتبة وسجل المشاهدة</string>
+    <string name="backup_part_history_sub">العناوين المحفوظة ومتابعة المشاهدة وعلامات المشاهدة</string>
+    <string name="backup_part_history_signed_in">حسابك في Nuvio يحفظها بالفعل. تُستعاد فقط على جهاز غير مسجّل الدخول.</string>
+    <string name="backup_part_history_counts">العناوين المحفوظة: %1$d. تمت مشاهدتها: %2$d. قيد المشاهدة: %3$d.</string>
+    <string name="backup_supporter">حالة الداعم</string>
+    <string name="backup_supporter_yes">نعم. تبقى ألوان وأيقونات الداعم.</string>
+    <string name="backup_supporter_no">لا</string>
     <string name="backup_part_secrets">كلمات المرور والمفاتيح</string>
     <string name="backup_part_secrets_saved">مقفلة برمز PIN الخاص بك</string>
     <string name="backup_part_secrets_needs_pin">تحتاج إلى رمز PIN للنسخة الاحتياطية</string>

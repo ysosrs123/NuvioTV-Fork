@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">आयु सीमा</string>
+    <string name="rating_limit_none">कोई सीमा नहीं</string>
+    <string name="rating_limit_preschool">प्री-स्कूल बच्चे</string>
+    <string name="rating_limit_young">छोटे बच्चे</string>
+    <string name="rating_limit_pg">बड़े बच्चे</string>
+    <string name="rating_limit_teen">किशोर</string>
+    <string name="rating_limit_hint">यह प्रोफाइल %1$s के PIN के बिना क्या चला सकता है</string>
+    <string name="rating_limit_note">TMDB की US रेटिंग इस्तेमाल होती है। सीमा से ऊपर या बिना रेटिंग वाले टाइटल चलाने पर %1$s का PIN माँगा जाता है।</string>
+    <string name="rating_limit_needs_pin">पहले %1$s के प्रोफाइल पर PIN सेट करें। आयु सीमा के लिए यह ज़रूरी है।</string>
+    <string name="rating_limit_change_heading">सीमा बदलने के लिए %1$s का PIN दर्ज करें</string>
+    <string name="rating_limit_change_support">%1$s की आयु सीमा होगी: %2$s</string>
+    <string name="rating_limit_saved">%1$s की आयु सीमा: %2$s</string>
+    <string name="rating_limit_play_heading">इसे चलाने के लिए %1$s का PIN चाहिए</string>
+    <string name="rating_limit_play_rated">%1$s की रेटिंग %2$s है। %3$s की सीमा %4$s है।</string>
+    <string name="rating_limit_play_unrated">Arc को %1$s की रेटिंग नहीं मिली। %2$s की सीमा %3$s है।</string>
+    <string name="rating_limit_play_no_pin">%2$s की सीमा से ऊपर के टाइटल चलाने के लिए %1$s के प्रोफाइल पर PIN सेट करें।</string>
+    <string name="rating_limit_party_heading">%1$s के लिए यह वॉच पार्टी उपलब्ध नहीं है</string>
+    <string name="rating_limit_party_rated">पार्टी में %1$s देखा जा रहा है, रेटिंग %2$s। %3$s की सीमा %4$s है।</string>
+    <string name="rating_limit_party_unrated">पार्टी में %1$s देखा जा रहा है, जिसकी रेटिंग Arc जाँच नहीं सकता। %2$s की सीमा %3$s है।</string>
+    <string name="rating_limit_add_heading">प्रोफ़ाइल जोड़ने के लिए %1$s का PIN दर्ज करें</string>
+    <string name="rating_limit_add_support">इस डिवाइस की एक प्रोफ़ाइल पर रेटिंग सीमा है।</string>
+</resources>

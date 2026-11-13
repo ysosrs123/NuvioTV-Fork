@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Această sursă nu funcționează acum. Arc nu poate rezolva asta, așa că nu e nevoie să o raportezi. Încearcă altă sursă.</string>
+    <string name="report_check_blocked_hint_notice">Această sursă nu funcționează acum. Arc nu poate rezolva asta, așa că nu e nevoie să o raportezi. Verifică add-onul ori contul tău Debrid sau încearcă altă sursă.</string>
+    <string name="stream_large_file_short">Fișier mare pentru acest dispozitiv</string>
+    <string name="stream_large_file_uhd">Acesta este un fișier 4K foarte mare. Dispozitivele cu mai puțină memorie, ca acesta, se descurcă des greu cu fișiere de această mărime, așa că redarea se poate bloca sau opri. O versiune 1080p a aceluiași film rulează de obicei mai fluid.</string>
+    <string name="stream_large_file_other">Acesta este un fișier foarte mare. Dispozitivele cu mai puțină memorie, ca acesta, se descurcă des greu cu fișiere de această mărime, așa că redarea se poate bloca sau opri. O versiune 1080p mai mică, marcată WEB, nu Remux, rulează de obicei mai fluid.</string>
+</resources>

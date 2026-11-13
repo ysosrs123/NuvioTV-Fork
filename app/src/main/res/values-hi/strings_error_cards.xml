@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc ने यह फ़ाइल पढ़ी, पर इसमें ऐसी कोई तस्वीर नहीं मिली जिसे वह चला सके। वीडियो एडिटिंग के लिए बनी फ़ाइलें, जैसे Apple ProRes, ऐसी ही होती हैं। इस टाइटल की कोई दूसरी कॉपी चुनें।</string>
+    <string name="player_error_card_silent_title">सोर्स ने जवाब नहीं दिया</string>
+    <string name="player_error_card_silent">इस सोर्स के सर्वर ने %1$d सेकंड तक कोई वीडियो नहीं भेजा। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ, या बाद में इसी को फिर से आज़माएँ।</string>
+    <string name="player_error_card_fault_title">सोर्स के सर्वर में खराबी है</string>
+    <string name="player_error_card_fault">इस सोर्स के सर्वर ने त्रुटि के साथ जवाब दिया (%1$d)। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ, या बाद में इसी को फिर से आज़माएँ।</string>
+    <string name="player_error_card_blocked_title">सोर्स ने यह लिंक ब्लॉक कर दिया</string>
+    <string name="player_error_card_blocked">इस सोर्स के सर्वर ने लिंक अस्वीकार कर दिया (त्रुटि %1$d)। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ।</string>
+    <string name="player_error_card_gone_title">यह फ़ाइल अब सोर्स पर नहीं है</string>
+    <string name="player_error_card_gone">सर्वर के अनुसार यह फ़ाइल अब मौजूद नहीं है (त्रुटि %1$d)। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ।</string>
+    <string name="player_error_card_expired_title">इस लिंक की अवधि खत्म हो गई</string>
+    <string name="player_error_card_expired">सोर्स के लिंक की अवधि खत्म हो गई है (त्रुटि %1$d)। नया लिंक पाने के लिए वापस जाकर टाइटल फिर से खोलें, या कोई दूसरा सोर्स आज़माएँ।</string>
+    <string name="player_error_card_limit_title">सेवा अनुरोध सीमित कर रही है</string>
+    <string name="player_error_card_limit">यह सेवा Arc से धीमा होने को कह रही है। यह समस्या सेवा की ओर से है, Arc की ओर से नहीं। दोबारा कोशिश करने से पहले थोड़ा रुकें, या किसी दूसरे सर्वर का सोर्स चुनें।</string>
+    <string name="player_error_card_unreachable_title">Arc सोर्स तक नहीं पहुँच सका</string>
+    <string name="player_error_card_unreachable">इस सोर्स के सर्वर तक पहुँचा नहीं जा सकता। अगर दूसरे सोर्स चल रहे हैं, तो वह सर्वर बंद है: कोई दूसरा चुनें। अगर कुछ भी नहीं चल रहा, तो डिवाइस का इंटरनेट कनेक्शन जांचें।</string>
+    <string name="player_error_card_notice_title">प्रोवाइडर ने फ़िल्म की जगह सूचना भेजी</string>
+    <string name="player_error_card_notice">फ़िल्म की जगह ऐडऑन या Debrid सेवा ने सूचना वाला एक छोटा वीडियो भेजा। आम तौर पर इसका मतलब है कि फ़ाइल अभी तैयार नहीं है, आपका खाता किसी सीमा तक पहुँच गया है, या साइन-इन की अवधि खत्म हो गई है। यह समस्या ऐडऑन की ओर से है, Arc की ओर से नहीं। ऐडऑन या अपना Debrid खाता जांचें, या कोई दूसरा सोर्स आज़माएँ।</string>
+    <string name="player_error_card_not_video_title">यह लिंक वीडियो नहीं है</string>
+    <string name="player_error_card_not_video">सर्वर ने कुछ ऐसा भेजा जो वीडियो नहीं है, अक्सर कोई वेब पेज या आर्काइव। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ।</string>
+    <string name="player_error_card_box_title">यह डिवाइस यह फ़ाइल नहीं चला सकता</string>
+    <string name="player_error_card_box">यह फ़ाइल %1$s है, जो इस डिवाइस की वीडियो चिप की क्षमता से ज़्यादा है। यह समस्या डिवाइस की ओर से है, Arc की ओर से नहीं। इस टाइटल की कोई दूसरी कॉपी चुनें, जैसे 4K या 1080p।</string>
+    <string name="player_error_card_box_no_detail">इस फ़ाइल का वीडियो फ़ॉर्मेट इस डिवाइस की वीडियो चिप की क्षमता से ज़्यादा है। यह समस्या डिवाइस की ओर से है, Arc की ओर से नहीं। इस टाइटल की कोई दूसरी कॉपी चुनें, जैसे 4K या 1080p।</string>
+    <string name="player_error_card_unreadable_title">Arc इस फ़ाइल की तस्वीर नहीं पढ़ सकता</string>
+    <string name="player_error_facts_no_answer">कोई जवाब नहीं</string>
+    <string name="player_error_facts_no_connection">कोई कनेक्शन नहीं</string>
+    <string name="player_error_facts_seconds">%1$d सेकंड</string>
+    <string name="player_error_other_sources">दूसरे सोर्स</string>
+    <string name="report_check_title">Arc को क्या मिला</string>
+    <string name="report_check_hint">यह Arc के बाहर की समस्या लगती है, इसलिए रिपोर्ट से यह ठीक नहीं होगी। पहले यह आज़माएँ।</string>
+    <string name="report_check_try_source">कोई दूसरा सोर्स आज़माएँ</string>
+    <string name="report_check_try_source_notice">या अपना ऐडऑन या Debrid खाता जांचें</string>
+    <string name="report_check_send_anyway">फिर भी भेजें</string>
+    <string name="debrid_busy">Debrid सेवा अभी व्यस्त है (त्रुटि %1$d)। यह समस्या सेवा की ओर से है, Arc की ओर से नहीं। थोड़ी देर में फिर से कोशिश करें, या कोई दूसरा सोर्स चुनें।</string>
+</resources>

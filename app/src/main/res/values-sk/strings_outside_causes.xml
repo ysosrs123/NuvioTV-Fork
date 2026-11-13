@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Tento zdroj teraz nefunguje. Arc to opraviť nevie, takže to netreba nahlasovať. Skúste iný zdroj.</string>
+    <string name="report_check_blocked_hint_notice">Tento zdroj teraz nefunguje. Arc to opraviť nevie, takže to netreba nahlasovať. Skontrolujte doplnok či účet Debrid, alebo skúste iný zdroj.</string>
+    <string name="stream_large_file_short">Veľký súbor pre toto zariadenie</string>
+    <string name="stream_large_file_uhd">Toto je veľmi veľký súbor 4K. Zariadenia s menšou pamäťou, ako je toto, majú so súbormi takejto veľkosti často problémy, takže sa prehrávanie môže zastavovať alebo prerušiť. Verzia 1080p toho istého filmu sa zvyčajne prehráva plynulejšie.</string>
+    <string name="stream_large_file_other">Toto je veľmi veľký súbor. Zariadenia s menšou pamäťou, ako je toto, majú so súbormi takejto veľkosti často problémy, takže sa prehrávanie môže zastavovať alebo prerušiť. Menšia verzia 1080p, označená WEB, nie Remux, sa zvyčajne prehráva plynulejšie.</string>
+</resources>

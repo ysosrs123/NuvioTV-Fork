@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Skjuler knappen Bedøm, tommelfingrene i menuen og spørgsmålet efter en film. Dine bedømmelser tæller stadig.</string>
     <string name="scout_ask_enabled">Spørg hvordan det var efter en film</string>
     <string name="scout_ask_enabled_sub">Ikke noget for mig, kan lide eller elsker, når du forlader afspilleren</string>
+    <string name="scout_send_ratings">Send mine bedømmelser til trackere</string>
+    <string name="scout_send_ratings_sub">Ikke noget for mig, Kan lide og Elsker sendes til Trakt, Simkl, MDBList og WeTrakr som 3, 7 og 10 ud af 10. En bedømmelse, du selv har givet på en tracker, ændres aldrig. Simkl får kun titler, du har set.</string>
+    <string name="scout_send_ratings_none">Ingen tracker er logget ind på denne profil, så intet sendes endnu.</string>
+    <string name="scout_use_ratings">Brug mine tracker-bedømmelser</string>
+    <string name="scout_use_ratings_sub">Bedømmelser, du har givet på dine trackere, bliver til tommelfingre her: 9 eller 10 er Elsker, 6 til 8 Kan lide, 1 til 4 Ikke noget for mig. En tommelfinger, du trykker på i Arc, vinder altid.</string>
+    <string name="scout_thumb_from">Fra %1$s</string>
     <string name="scout_your_thumbs">Dine tommelfingre</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d titel bedømt. Åbn for at ændre eller fortryde</item>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Sydasien</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: nominerade</string>
+    <string name="scout_award_globes_nominees">Golden Globes: nominerade</string>
+    <string name="scout_award_emmy_nominees">Emmys: nominerade</string>
+    <string name="scout_award_tab_picture">Bästa film</string>
+    <string name="scout_award_tab_best_film">Bästa film</string>
+    <string name="scout_award_tab_director">Regi</string>
+    <string name="scout_award_tab_actor">Skådespelare</string>
+    <string name="scout_award_tab_actress">Kvinnlig skådespelare</string>
+    <string name="scout_award_tab_international">Internationell</string>
+    <string name="scout_award_tab_limited">Miniserie</string>
+</resources>

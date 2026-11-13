@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc læste filen og fandt intet billede i den, som kan afspilles. Filer lavet til videoredigering, som Apple ProRes, er sådan. Vælg en anden udgave af titlen.</string>
+    <string name="player_error_card_silent_title">Kilden svarede ikke</string>
+    <string name="player_error_card_silent">Kildens server sendte ingen video i %1$d s. Det skyldes kilden, ikke Arc. Prøv en anden kilde, eller prøv denne igen senere.</string>
+    <string name="player_error_card_fault_title">Kildens server har en fejl</string>
+    <string name="player_error_card_fault">Kildens server svarede med en fejl (%1$d). Det skyldes kilden, ikke Arc. Prøv en anden kilde, eller prøv denne igen senere.</string>
+    <string name="player_error_card_blocked_title">Kilden blokerede linket</string>
+    <string name="player_error_card_blocked">Kildens server afviste linket (fejl %1$d). Det skyldes kilden, ikke Arc. Prøv en anden kilde.</string>
+    <string name="player_error_card_gone_title">Filen findes ikke længere hos kilden</string>
+    <string name="player_error_card_gone">Serveren siger, at filen ikke længere findes (fejl %1$d). Det skyldes kilden, ikke Arc. Prøv en anden kilde.</string>
+    <string name="player_error_card_expired_title">Linket er udløbet</string>
+    <string name="player_error_card_expired">Kildens link er udløbet (fejl %1$d). Gå tilbage, og åbn titlen igen for at få et nyt link, eller prøv en anden kilde.</string>
+    <string name="player_error_card_limit_title">Tjenesten begrænser forespørgsler</string>
+    <string name="player_error_card_limit">Tjenesten beder Arc om at sætte tempoet ned. Det skyldes tjenesten, ikke Arc. Vent lidt, før du prøver igen, eller vælg en kilde fra en anden server.</string>
+    <string name="player_error_card_unreachable_title">Arc kunne ikke nå kilden</string>
+    <string name="player_error_card_unreachable">Kildens server kan ikke nås. Hvis andre kilder virker, er den server nede: vælg en anden. Hvis intet virker, så tjek enhedens internetforbindelse.</string>
+    <string name="player_error_card_notice_title">Udbyderen sendte en besked, ikke filmen</string>
+    <string name="player_error_card_notice">I stedet for filmen sendte addon\'en eller Debrid-tjenesten en kort video med en besked. Det betyder som regel, at filen ikke er klar endnu, at din konto har nået en grænse, eller at et login er udløbet. Det skyldes addon\'en, ikke Arc. Tjek addon\'en eller din Debrid-konto, eller prøv en anden kilde.</string>
+    <string name="player_error_card_not_video_title">Linket er ikke en video</string>
+    <string name="player_error_card_not_video">Serveren sendte noget, der ikke er en video, ofte en webside eller et arkiv. Det skyldes kilden, ikke Arc. Prøv en anden kilde.</string>
+    <string name="player_error_card_box_title">Denne enhed kan ikke afspille filen</string>
+    <string name="player_error_card_box">Filen er %1$s, mere end enhedens videochip kan afspille. Det skyldes enheden, ikke Arc. Vælg en anden udgave af titlen, fx 4K eller 1080p.</string>
+    <string name="player_error_card_box_no_detail">Filens videoformat er mere, end enhedens videochip kan afspille. Det skyldes enheden, ikke Arc. Vælg en anden udgave af titlen, fx 4K eller 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc kan ikke læse filens billede</string>
+    <string name="player_error_facts_no_answer">intet svar</string>
+    <string name="player_error_facts_no_connection">ingen forbindelse</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Andre kilder</string>
+    <string name="report_check_title">Hvad Arc fandt</string>
+    <string name="report_check_hint">Det ligner et problem uden for Arc, så en rapport kan ikke løse det. Prøv dette først.</string>
+    <string name="report_check_try_source">Prøv en anden kilde</string>
+    <string name="report_check_try_source_notice">eller tjek din addon eller Debrid-konto</string>
+    <string name="report_check_send_anyway">Send alligevel</string>
+    <string name="debrid_busy">Debrid-tjenesten har travlt lige nu (fejl %1$d). Det skyldes tjenesten, ikke Arc. Prøv igen om lidt, eller vælg en anden kilde.</string>
+</resources>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_item_log_hint_app">Arcのログの最近の行（同様に処理済み）</string>
+</resources>

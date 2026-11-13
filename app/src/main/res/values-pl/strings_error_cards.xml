@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc odczytał ten plik, ale nie znalazł w nim obrazu, który może odtworzyć. Tak jest z plikami do montażu wideo, np. Apple ProRes. Wybierz inną kopię tytułu.</string>
+    <string name="player_error_card_silent_title">Źródło nie odpowiedziało</string>
+    <string name="player_error_card_silent">Serwer tego źródła nie wysłał obrazu przez %1$d s. Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła albo spróbuj tego ponownie później.</string>
+    <string name="player_error_card_fault_title">Serwer źródła ma awarię</string>
+    <string name="player_error_card_fault">Serwer tego źródła odpowiedział błędem (%1$d). Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła albo spróbuj tego ponownie później.</string>
+    <string name="player_error_card_blocked_title">Źródło zablokowało ten link</string>
+    <string name="player_error_card_blocked">Serwer tego źródła odrzucił link (błąd %1$d). Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła.</string>
+    <string name="player_error_card_gone_title">Tego pliku nie ma już w źródle</string>
+    <string name="player_error_card_gone">Serwer podaje, że tego pliku już nie ma (błąd %1$d). Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła.</string>
+    <string name="player_error_card_expired_title">Ten link wygasł</string>
+    <string name="player_error_card_expired">Link ze źródła wygasł (błąd %1$d). Wróć i otwórz tytuł ponownie, aby dostać nowy link, albo spróbuj innego źródła.</string>
+    <string name="player_error_card_limit_title">Serwis ogranicza żądania</string>
+    <string name="player_error_card_limit">Ten serwis prosi Arc o zwolnienie tempa. Problem leży po stronie serwisu, a nie Arc. Odczekaj chwilę przed ponowną próbą albo wybierz źródło z innego serwera.</string>
+    <string name="player_error_card_unreachable_title">Arc nie może połączyć się ze źródłem</string>
+    <string name="player_error_card_unreachable">Serwer tego źródła jest nieosiągalny. Jeśli inne źródła działają, ten serwer nie działa: wybierz inne. Jeśli nic nie działa, sprawdź połączenie internetowe urządzenia.</string>
+    <string name="player_error_card_notice_title">Dostawca wysłał komunikat zamiast filmu</string>
+    <string name="player_error_card_notice">Zamiast filmu dodatek lub serwis Debrid wysłał krótkie wideo z komunikatem. Zwykle oznacza to, że plik nie jest jeszcze gotowy, konto osiągnęło limit albo logowanie wygasło. Problem leży po stronie dodatku, a nie Arc. Sprawdź dodatek lub konto Debrid albo spróbuj innego źródła.</string>
+    <string name="player_error_card_not_video_title">Ten link to nie wideo</string>
+    <string name="player_error_card_not_video">Serwer wysłał coś, co nie jest wideo, często stronę internetową lub archiwum. Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła.</string>
+    <string name="player_error_card_box_title">To urządzenie nie odtworzy tego pliku</string>
+    <string name="player_error_card_box">Ten plik to %1$s, czyli więcej, niż układ wideo tego urządzenia może odtworzyć. Problem leży po stronie urządzenia, a nie Arc. Wybierz inną kopię tytułu, np. 4K lub 1080p.</string>
+    <string name="player_error_card_box_no_detail">Format wideo tego pliku przekracza możliwości układu wideo tego urządzenia. Problem leży po stronie urządzenia, a nie Arc. Wybierz inną kopię tytułu, np. 4K lub 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc nie może odczytać obrazu tego pliku</string>
+    <string name="player_error_facts_no_answer">brak odpowiedzi</string>
+    <string name="player_error_facts_no_connection">brak połączenia</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Inne źródła</string>
+    <string name="report_check_title">Co znalazł Arc</string>
+    <string name="report_check_hint">Wygląda to na problem poza Arc, więc zgłoszenie go nie rozwiąże. Najpierw spróbuj tego.</string>
+    <string name="report_check_try_source">Spróbuj innego źródła</string>
+    <string name="report_check_try_source_notice">lub sprawdź dodatek albo konto Debrid</string>
+    <string name="report_check_send_anyway">Wyślij mimo to</string>
+    <string name="debrid_busy">Serwis Debrid jest teraz przeciążony (błąd %1$d). Problem leży po stronie serwisu, a nie Arc. Spróbuj ponownie za chwilę albo wybierz inne źródło.</string>
+</resources>

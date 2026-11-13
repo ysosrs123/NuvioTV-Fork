@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Vynechat jazyky</string>
+    <string name="scout_leave_out_languages_sub">Jazyky, které nikdy nechceš vidět</string>
+    <string name="scout_language_indian">Indické jazyky</string>
+</resources>

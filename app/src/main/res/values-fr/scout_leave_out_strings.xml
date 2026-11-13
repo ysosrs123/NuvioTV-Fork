@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Exclure des langues</string>
+    <string name="scout_leave_out_languages_sub">Les langues que vous ne voulez jamais voir</string>
+    <string name="scout_language_indian">Langues indiennes</string>
+</resources>

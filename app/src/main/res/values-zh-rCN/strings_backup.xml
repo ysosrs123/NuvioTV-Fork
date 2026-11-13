@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">名称和头像</string>
     <string name="backup_part_settings">Arc 设置</string>
     <string name="backup_part_settings_sub">Scout、缩略图、DNS、遥控器按键等</string>
+    <string name="backup_part_history">媒体库与观看记录</string>
+    <string name="backup_part_history_sub">已保存的作品、继续观看和已观看标记</string>
+    <string name="backup_part_history_signed_in">您的 Nuvio 账户已保存这些内容。仅在未登录的设备上恢复。</string>
+    <string name="backup_part_history_counts">已保存：%1$d。已观看：%2$d。观看中：%3$d。</string>
+    <string name="backup_supporter">支持者身份</string>
+    <string name="backup_supporter_yes">是。支持者颜色和图标会保留。</string>
+    <string name="backup_supporter_no">否</string>
     <string name="backup_part_secrets">密码和密钥</string>
     <string name="backup_part_secrets_saved">已用您的 PIN 锁定</string>
     <string name="backup_part_secrets_needs_pin">需要备份 PIN</string>

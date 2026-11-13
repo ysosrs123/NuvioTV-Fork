@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Скрива бутона Оцени, палците в менюто и въпроса след филм. Оценките ви продължават да се броят.</string>
     <string name="scout_ask_enabled">Питане как е било след филм</string>
     <string name="scout_ask_enabled_sub">Не е за мен, харесва ми или обожавам го при излизане от плейъра</string>
+    <string name="scout_send_ratings">Изпращане на оценките ми към тракерите</string>
+    <string name="scout_send_ratings_sub">Не е за мен, Харесва ми и Обожавам го отиват в Trakt, Simkl, MDBList и WeTrakr като 3, 7 и 10 от 10. Оценка, която сте дали сами в тракер, никога не се променя. Simkl получава само заглавия, които сте гледали.</string>
+    <string name="scout_send_ratings_none">В този профил няма вписан тракер, затова още нищо не се изпраща.</string>
+    <string name="scout_use_ratings">Използване на оценките ми от тракерите</string>
+    <string name="scout_use_ratings_sub">Оценките от вашите тракери стават палци тук: 9 или 10 е Обожавам го, от 6 до 8 Харесва ми, от 1 до 4 Не е за мен. Палец, натиснат в Arc, винаги има предимство.</string>
+    <string name="scout_thumb_from">От %1$s</string>
     <string name="scout_your_thumbs">Вашите палци</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d оценено заглавие. Отворете, за да промените или отмените</item>

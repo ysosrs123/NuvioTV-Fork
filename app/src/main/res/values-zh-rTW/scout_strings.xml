@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">隱藏評分按鈕、選單中的評價項和電影結束後的提問。你的評分仍然有效。</string>
     <string name="scout_ask_enabled">電影結束後詢問感受</string>
     <string name="scout_ask_enabled_sub">離開播放器時選擇不適合我、喜歡或超愛</string>
+    <string name="scout_send_ratings">將我的評分傳送到追蹤服務</string>
+    <string name="scout_send_ratings_sub">不適合我、喜歡和超愛會以 10 分制的 3、7、10 分傳送到 Trakt、Simkl、MDBList 和 WeTrakr。你在追蹤服務上親自給的評分永遠不會被更改。Simkl 只會收到你看過的作品。</string>
+    <string name="scout_send_ratings_none">此個人檔案未登入任何追蹤服務，因此暫不傳送任何內容。</string>
+    <string name="scout_use_ratings">使用我在追蹤服務上的評分</string>
+    <string name="scout_use_ratings_sub">你在追蹤服務上的評分會在這裡變成拇指：9 或 10 分為超愛，6 到 8 分為喜歡，1 到 4 分為不適合我。你在 Arc 中按下的拇指一律優先。</string>
+    <string name="scout_thumb_from">來自 %1$s</string>
     <string name="scout_your_thumbs">你的拇指</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="other">已評分 %1$d 部作品。開啟可變更或復原</item>

@@ -4409,14 +4409,14 @@
     <string name="report_item_title">כותרת ושם קובץ</string>
     <string name="report_item_note">הוספת הערה</string>
     <string name="report_item_note_hint">אופציונלי</string>
-    <string name="report_note_placeholder">מה כדאי שנדע?</string>
+    <string name="report_note_placeholder">עוד משהו שכדאי לדעת?</string>
     <string name="report_never_sent">לעולם לא נשלחים: קישורי סטרים, מפתחות debrid או תוספים, החשבון או האימייל שלך. שירות הדיווחים לא שומר את כתובת ה-IP שלך.</string>
     <string name="report_send">שליחה</string>
     <string name="report_failed_limit">המכשיר הזה הגיע למגבלת הדיווחים של היום. אפשר לנסות שוב מחר.</string>
     <string name="report_sent_title">הדיווח נשלח</string>
     <string name="report_sent_qr_description">קוד QR לדיווח שלך</string>
     <string name="report_sent_phone">אפשר לסרוק בטלפון כדי להוסיף תמונות או לעקוב אחרי הדיווח. Arc הוא פרויקט תחביב, ולכן לא כל דיווח מקבל תשובה.</string>
-    <string name="report_sent_no_phone">תודה על העדכון. Arc הוא פרויקט תחביב, ולכן לא כל דיווח מקבל תשובה.</string>
+    <string name="report_sent_no_phone">תודה על הדיווח. Arc הוא פרויקט תחביב, ולכן לא כל דיווח מקבל תשובה.</string>
     <string name="report_sent_back">חזרה לצפייה</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">אפשר לבחור את כל מה שמתאים. Arc שמר את הדקה האחרונה.</item>
@@ -4430,7 +4430,7 @@
         <item quantity="many">הגדרות הנגן ו-%1$d הדקות האחרונות</item>
         <item quantity="other">הגדרות הנגן ו-%1$d הדקות האחרונות</item>
     </plurals>
-    <string name="report_settings_subtitle">ספרו לנו מה השתבש או מה הייתם רוצים ש-Arc יעשה</string>
+    <string name="report_settings_subtitle">ספרו מה השתבש או מה הייתם רוצים ש-Arc יעשה</string>
     <string name="report_group_choose">על מה תרצו לדווח?</string>
     <string name="report_group_options">אפשרויות</string>
     <string name="report_row_playback">בעיית הפעלה</string>
@@ -4505,11 +4505,22 @@
     <string name="display_mode_measured">נמדד</string>
     <string name="display_mode_measured_off">המסך פועל ב-%1$s Hz, לא ב-%2$s Hz</string>
     <string name="qms_hint_title">הטלוויזיה שלך לא שומרת על קצב הפריימים של הסרט</string>
-    <string name="qms_hint_body_qms">Arc ביקש %1$s Hz. הטלוויזיה שינתה קצב ללא החלפה מלאה (QMS) ופועלת ב-%2$s Hz. זה נראה כקפיצה קטנה וקבועה.</string>
-    <string name="qms_hint_body">Arc ביקש %1$s Hz, אבל המסך שלך פועל ב-%2$s Hz. זה נראה כקפיצה קטנה וקבועה.</string>
     <string name="qms_hint_fix">הפתרון הטוב ביותר: כיבוי QMS בטלוויזיה</string>
     <string name="qms_hint_fix_hint">בהגדרות הטלוויזיה עצמה עבור כניסת HDMI זו. Arc לא יכול לשנות זאת.</string>
     <string name="qms_hint_off">כיבוי התאמת קצב פריימים</string>
-    <string name="qms_hint_off_hint">החל מהסרט הבא, המסך יישאר בקצב הרגיל שלו. אפשר להפעיל שוב בהגדרות.</string>
     <string name="qms_hint_keep">להשאיר כמו שזה</string>
+    <string name="sub_prefer_addon_subtitles">כתוביות מתוספים קודם</string>
+    <string name="sub_prefer_addon_subtitles_desc">בחירת כתוביות מתוסף במקום הכתוביות של הקובץ כששתיהן בשפה שלך. הכתוביות של הקובץ משמשות כשלאף תוסף אין כתוביות.</string>
+    <string name="playback_afr_settle_delay">השהיה אחרי שינוי קצב רענון</string>
+    <string name="playback_afr_settle_delay_sub">כמה זמן סרט ממתין לטלוויזיה אחרי שינוי קצב. הגדילו אם סרטים מתחילים שחורים או בלי קול דרך רסיבר או מקרן קול.</string>
+    <string name="playback_afr_settle_delay_auto">אוטומטי</string>
+    <string name="playback_afr_settle_delay_auto_sub">שתי שניות, ואז עד שחיבור השמע של הטלוויזיה חוזר</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d שנ׳</string>
+    <string name="qms_hint_body_v2">Arc ביקש %1$s Hz, אבל המסך פועל ב־%2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc ביקש %1$s Hz. הטלוויזיה שינתה קצב בלי החלפה מלאה (QMS) ופועלת ב־%2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">ייתכן שתבחינו בפריים חוזר בערך כל %1$d שניות.</string>
+    <string name="qms_hint_effect_judder">זה נראה כמו קפיצה קבועה בתנועה.</string>
+    <string name="qms_hint_mode_tip">בחלק מהממירים והרסיברים יש הגדרה לקצבי סרט מדויקים (23.976 Hz), שנקראים לעיתים קצבים שבריים. Arc לא יכול לשנות אותה.</string>
+    <string name="qms_hint_off_hint_qms">אז Arc מפסיק לבקש את קצב הסרט. הטלוויזיה עדיין יכולה לשנות קצב בעצמה.</string>
+    <string name="qms_hint_ok">אישור</string>
 </resources>

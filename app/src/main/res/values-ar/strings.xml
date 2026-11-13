@@ -4129,14 +4129,14 @@
     <string name="report_item_title">العنوان واسم الملف</string>
     <string name="report_item_note">إضافة ملاحظة</string>
     <string name="report_item_note_hint">اختياري</string>
-    <string name="report_note_placeholder">ماذا ينبغي أن نعرف؟</string>
+    <string name="report_note_placeholder">هل هناك شيء آخر من المفيد معرفته؟</string>
     <string name="report_never_sent">لا يُرسل أبدًا: روابط البث، مفاتيح debrid أو الإضافات، حسابك أو بريدك الإلكتروني. لا تحتفظ خدمة البلاغات بعنوان IP الخاص بك.</string>
     <string name="report_send">إرسال</string>
     <string name="report_failed_limit">بلغ هذا الجهاز الحد اليومي للبلاغات. يرجى المحاولة مرة أخرى غدًا.</string>
     <string name="report_sent_title">تم إرسال البلاغ</string>
     <string name="report_sent_qr_description">رمز QR لبلاغك</string>
     <string name="report_sent_phone">امسح الرمز بهاتفك لإضافة صور أو متابعة بلاغك. Arc مشروع هواية، لذا لا يحصل كل بلاغ على رد.</string>
-    <string name="report_sent_no_phone">شكرًا لإبلاغنا. Arc مشروع هواية، لذا لا يحصل كل بلاغ على رد.</string>
+    <string name="report_sent_no_phone">شكرًا على البلاغ. Arc مشروع هواية، لذا لا يحصل كل بلاغ على رد.</string>
     <string name="report_sent_back">العودة إلى المشاهدة</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="zero">اختر كل ما ينطبق. احتفظ Arc بآخر %1$d دقيقة.</item>
@@ -4154,7 +4154,7 @@
         <item quantity="many">إعدادات المشغل وآخر %1$d دقيقة</item>
         <item quantity="other">إعدادات المشغل وآخر %1$d دقيقة</item>
     </plurals>
-    <string name="report_settings_subtitle">أخبرنا بما حدث أو بما تريد أن يفعله Arc</string>
+    <string name="report_settings_subtitle">صِف ما حدث من خطأ أو ما تريد أن يفعله Arc</string>
     <string name="report_group_choose">ماذا تريد أن تبلّغ عنه؟</string>
     <string name="report_group_options">خيارات</string>
     <string name="report_row_playback">مشكلة في التشغيل</string>
@@ -4233,11 +4233,22 @@
     <string name="display_mode_measured">القياس</string>
     <string name="display_mode_measured_off">الشاشة تعمل بتردد %1$s Hz وليس %2$s Hz</string>
     <string name="qms_hint_title">تلفازك لا يحافظ على معدل إطارات الفيلم</string>
-    <string name="qms_hint_body_qms">طلب Arc ترددًا قدره %1$s Hz. غيّر تلفازك المعدل دون تبديل كامل (QMS) ويعمل الآن بتردد %2$s Hz. يظهر ذلك كتقطّع بسيط ومنتظم.</string>
-    <string name="qms_hint_body">طلب Arc ترددًا قدره %1$s Hz، لكن شاشتك تعمل بتردد %2$s Hz. يظهر ذلك كتقطّع بسيط ومنتظم.</string>
     <string name="qms_hint_fix">الحل الأفضل: أوقف QMS في التلفاز</string>
     <string name="qms_hint_fix_hint">من إعدادات التلفاز نفسه لمدخل HDMI هذا. لا يستطيع Arc تغييره.</string>
     <string name="qms_hint_off">إيقاف مطابقة معدل الإطارات</string>
-    <string name="qms_hint_off_hint">ابتداءً من الفيلم التالي، تبقى الشاشة على معدلها المعتاد. يمكنك إعادة تشغيلها من الإعدادات.</string>
     <string name="qms_hint_keep">الإبقاء كما هو</string>
+    <string name="sub_prefer_addon_subtitles">ترجمات الإضافات أولًا</string>
+    <string name="sub_prefer_addon_subtitles_desc">اختيار ترجمة من إضافة بدلًا من ترجمة الملف عندما تكون كلتاهما بلغتك. تُستخدم ترجمة الملف عندما لا تتوفر ترجمة من أي إضافة.</string>
+    <string name="playback_afr_settle_delay">التأخير بعد تغيير معدل التحديث</string>
+    <string name="playback_afr_settle_delay_sub">مدة انتظار الفيلم للتلفاز بعد تغيير المعدل. زِدها إذا بدأت الأفلام بشاشة سوداء أو دون صوت عبر جهاز استقبال أو مكبر صوت شريطي.</string>
+    <string name="playback_afr_settle_delay_auto">تلقائي</string>
+    <string name="playback_afr_settle_delay_auto_sub">ثانيتان، ثم حتى يعود اتصال الصوت بالتلفاز</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d ث</string>
+    <string name="qms_hint_body_v2">طلب Arc ترددًا قدره %1$s Hz، لكن شاشتك تعمل بتردد %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">طلب Arc ترددًا قدره %1$s Hz. غيّر تلفازك المعدل دون تبديل كامل (QMS) ويعمل الآن بتردد %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">قد تلاحظ إطارًا مكررًا كل %1$d ثانية تقريبًا.</string>
+    <string name="qms_hint_effect_judder">يظهر ذلك كتقطّع منتظم.</string>
+    <string name="qms_hint_mode_tip">تحتوي بعض الأجهزة وأجهزة الاستقبال على إعداد لمعدلات الأفلام الدقيقة (23.976 Hz)، يُسمى غالبًا المعدلات الكسرية. لا يستطيع Arc تغييره.</string>
+    <string name="qms_hint_off_hint_qms">عندها يتوقف Arc عن طلب معدل الفيلم. وقد يظل تلفازك يغيّر المعدل من تلقاء نفسه.</string>
+    <string name="qms_hint_ok">حسنًا</string>
 </resources>

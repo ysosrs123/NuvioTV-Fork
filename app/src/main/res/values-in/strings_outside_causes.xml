@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Sumber ini sedang tidak berfungsi. Arc tidak bisa memperbaikinya, jadi tidak perlu melaporkannya. Coba sumber lain.</string>
+    <string name="report_check_blocked_hint_notice">Sumber ini sedang tidak berfungsi. Arc tidak bisa memperbaikinya, jadi tidak perlu melaporkannya. Periksa addon atau akun Debrid Anda, atau coba sumber lain.</string>
+    <string name="stream_large_file_short">File besar untuk perangkat ini</string>
+    <string name="stream_large_file_uhd">Ini file 4K yang sangat besar. Perangkat dengan memori lebih kecil, seperti perangkat ini, sering kesulitan dengan file sebesar ini, jadi pemutaran bisa tersendat atau berhenti. Versi 1080p dari film yang sama biasanya diputar lebih lancar.</string>
+    <string name="stream_large_file_other">Ini file yang sangat besar. Perangkat dengan memori lebih kecil, seperti perangkat ini, sering kesulitan dengan file sebesar ini, jadi pemutaran bisa tersendat atau berhenti. Versi 1080p yang lebih kecil, bertanda WEB dan bukan Remux, biasanya diputar lebih lancar.</string>
+</resources>

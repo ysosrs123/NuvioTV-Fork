@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Menyembunyikan tombol Beri nilai, jempol di menu, dan pertanyaan setelah film. Penilaian Anda tetap dihitung.</string>
     <string name="scout_ask_enabled">Tanya kesan setelah film</string>
     <string name="scout_ask_enabled_sub">Bukan untuk saya, suka, atau sangat suka saat keluar dari pemutar</string>
+    <string name="scout_send_ratings">Kirim nilai saya ke pelacak</string>
+    <string name="scout_send_ratings_sub">Bukan untuk saya, Saya suka, dan Sangat suka dikirim ke Trakt, Simkl, MDBList, dan WeTrakr sebagai 3, 7, dan 10 dari 10. Nilai yang Anda berikan sendiri di pelacak tidak pernah diubah. Simkl hanya menerima judul yang sudah Anda tonton.</string>
+    <string name="scout_send_ratings_none">Belum ada pelacak yang masuk di profil ini, jadi belum ada yang dikirim.</string>
+    <string name="scout_use_ratings">Gunakan nilai dari pelacak saya</string>
+    <string name="scout_use_ratings_sub">Nilai yang Anda berikan di pelacak menjadi jempol di sini: 9 atau 10 berarti Sangat suka, 6 sampai 8 Saya suka, 1 sampai 4 Bukan untuk saya. Jempol yang Anda tekan di Arc selalu diutamakan.</string>
+    <string name="scout_thumb_from">Dari %1$s</string>
     <string name="scout_your_thumbs">Jempol Anda</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="other">%1$d judul dinilai. Buka untuk mengubah atau membatalkan</item>

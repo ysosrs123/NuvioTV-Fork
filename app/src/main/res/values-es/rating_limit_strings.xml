@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Límite de edad</string>
+    <string name="rating_limit_none">Sin límite</string>
+    <string name="rating_limit_preschool">Preescolar</string>
+    <string name="rating_limit_young">Niños pequeños</string>
+    <string name="rating_limit_pg">Niños mayores</string>
+    <string name="rating_limit_teen">Adolescentes</string>
+    <string name="rating_limit_hint">Lo que este perfil puede reproducir sin el PIN de %1$s</string>
+    <string name="rating_limit_note">Usa las clasificaciones de EE. UU. de TMDB. Por encima del límite, o sin clasificación, se pide el PIN de %1$s para reproducir.</string>
+    <string name="rating_limit_needs_pin">Primero establece un PIN en el perfil de %1$s. El límite de edad lo necesita.</string>
+    <string name="rating_limit_change_heading">Introduce el PIN de %1$s para cambiar el límite</string>
+    <string name="rating_limit_change_support">Nuevo límite de edad de %1$s: %2$s</string>
+    <string name="rating_limit_saved">Límite de edad de %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Se necesita el PIN de %1$s para reproducir esto</string>
+    <string name="rating_limit_play_rated">%1$s tiene la clasificación %2$s. El límite de %3$s es %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc no encuentra una clasificación para %1$s. El límite de %2$s es %3$s.</string>
+    <string name="rating_limit_play_no_pin">Establece un PIN en el perfil de %1$s para reproducir títulos por encima del límite de %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s no puede unirse a esta fiesta de visionado</string>
+    <string name="rating_limit_party_rated">La fiesta está viendo %1$s, clasificado %2$s. El límite de %3$s es %4$s.</string>
+    <string name="rating_limit_party_unrated">La fiesta está viendo %1$s, que no tiene una clasificación que Arc pueda comprobar. El límite de %2$s es %3$s.</string>
+    <string name="rating_limit_add_heading">Introduce el PIN de %1$s para añadir un perfil</string>
+    <string name="rating_limit_add_support">Un perfil de este dispositivo tiene un límite de clasificación.</string>
+</resources>

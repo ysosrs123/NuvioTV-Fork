@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Ez a forrás most nem működik. Az Arc ezt nem tudja megjavítani, ezért nem kell jelenteni. Próbálj másik forrást.</string>
+    <string name="report_check_blocked_hint_notice">Ez a forrás most nem működik. Az Arc ezt nem tudja megjavítani, ezért nem kell jelenteni. Ellenőrizd a bővítményt vagy a Debrid-fiókodat, vagy próbálj másik forrást.</string>
+    <string name="stream_large_file_short">Nagy fájl ehhez az eszközhöz</string>
+    <string name="stream_large_file_uhd">Ez egy nagyon nagy 4K-s fájl. A kevesebb memóriával rendelkező eszközök, mint ez is, gyakran nehezen birkóznak meg ekkora fájlokkal, ezért a lejátszás megakadhat vagy leállhat. Ugyanennek a filmnek egy 1080p-s változata általában simábban fut.</string>
+    <string name="stream_large_file_other">Ez egy nagyon nagy fájl. A kevesebb memóriával rendelkező eszközök, mint ez is, gyakran nehezen birkóznak meg ekkora fájlokkal, ezért a lejátszás megakadhat vagy leállhat. Egy kisebb, 1080p-s, Remux helyett WEB jelölésű változat általában simábban fut.</string>
+</resources>

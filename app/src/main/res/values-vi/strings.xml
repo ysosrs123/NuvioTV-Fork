@@ -4404,14 +4404,14 @@
     <string name="report_item_title">Tiêu đề và tên tệp</string>
     <string name="report_item_note">Thêm ghi chú</string>
     <string name="report_item_note_hint">Không bắt buộc</string>
-    <string name="report_note_placeholder">Chúng tôi nên biết điều gì?</string>
+    <string name="report_note_placeholder">Còn điều gì khác đáng lưu ý không?</string>
     <string name="report_never_sent">Không bao giờ gửi: liên kết luồng, khoá debrid hoặc tiện ích, tài khoản hoặc email của bạn. Dịch vụ báo cáo không lưu địa chỉ IP của bạn.</string>
     <string name="report_send">Gửi</string>
     <string name="report_failed_limit">Thiết bị này đã đạt giới hạn báo cáo hôm nay. Vui lòng thử lại vào ngày mai.</string>
     <string name="report_sent_title">Đã gửi báo cáo</string>
     <string name="report_sent_qr_description">Mã QR cho báo cáo của bạn</string>
     <string name="report_sent_phone">Quét bằng điện thoại để thêm ảnh hoặc theo dõi báo cáo. Arc là dự án sở thích nên không phải báo cáo nào cũng được phản hồi.</string>
-    <string name="report_sent_no_phone">Cảm ơn bạn đã cho chúng tôi biết. Arc là dự án sở thích nên không phải báo cáo nào cũng được phản hồi.</string>
+    <string name="report_sent_no_phone">Cảm ơn bạn đã báo cáo. Arc là dự án sở thích nên không phải báo cáo nào cũng được phản hồi.</string>
     <string name="report_sent_back">Quay lại xem tiếp</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="other">Chọn tất cả mục phù hợp. Arc đã giữ lại %1$d phút gần nhất.</item>
@@ -4419,7 +4419,7 @@
     <plurals name="report_item_playback_kept">
         <item quantity="other">Cài đặt trình phát và %1$d phút gần nhất</item>
     </plurals>
-    <string name="report_settings_subtitle">Cho chúng tôi biết điều gì đã sai hoặc bạn muốn Arc làm gì</string>
+    <string name="report_settings_subtitle">Mô tả điều gì đã sai hoặc bạn muốn Arc làm gì</string>
     <string name="report_group_choose">Bạn muốn báo cáo điều gì?</string>
     <string name="report_group_options">Tùy chọn</string>
     <string name="report_row_playback">Vấn đề khi phát</string>
@@ -4488,11 +4488,22 @@
     <string name="display_mode_measured">Đo được</string>
     <string name="display_mode_measured_off">Màn hình chạy ở %1$s Hz, không phải %2$s Hz</string>
     <string name="qms_hint_title">TV của bạn không giữ tốc độ khung hình của phim</string>
-    <string name="qms_hint_body_qms">Arc yêu cầu %1$s Hz. TV của bạn đã đổi tần số mà không chuyển chế độ hoàn toàn (QMS) và đang chạy ở %2$s Hz. Điều này hiện ra thành hiện tượng giật nhẹ, đều đặn.</string>
-    <string name="qms_hint_body">Arc yêu cầu %1$s Hz, nhưng màn hình của bạn đang chạy ở %2$s Hz. Điều này hiện ra thành hiện tượng giật nhẹ, đều đặn.</string>
     <string name="qms_hint_fix">Cách tốt nhất: tắt QMS trên TV</string>
     <string name="qms_hint_fix_hint">Trong cài đặt riêng của TV cho cổng HDMI này. Arc không thể thay đổi.</string>
     <string name="qms_hint_off">Tắt khớp tốc độ khung hình</string>
-    <string name="qms_hint_off_hint">Từ phim tiếp theo, màn hình giữ tần số thường dùng. Bạn có thể bật lại trong Cài đặt.</string>
     <string name="qms_hint_keep">Giữ nguyên</string>
+    <string name="sub_prefer_addon_subtitles">Ưu tiên phụ đề từ tiện ích</string>
+    <string name="sub_prefer_addon_subtitles_desc">Chọn phụ đề từ tiện ích thay cho phụ đề có sẵn trong tệp khi cả hai đều bằng ngôn ngữ của bạn. Phụ đề của tệp được dùng khi không tiện ích nào có.</string>
+    <string name="playback_afr_settle_delay">Độ trễ sau khi đổi tần số quét</string>
+    <string name="playback_afr_settle_delay_sub">Thời gian phim chờ TV sau khi đổi tần số. Tăng lên nếu phim bắt đầu với màn hình đen hoặc không có tiếng qua bộ thu hoặc loa thanh.</string>
+    <string name="playback_afr_settle_delay_auto">Tự động</string>
+    <string name="playback_afr_settle_delay_auto_sub">Hai giây, sau đó cho đến khi kết nối âm thanh của TV hoạt động lại</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d giây</string>
+    <string name="qms_hint_body_v2">Arc đã yêu cầu %1$s Hz, nhưng màn hình của bạn đang chạy ở %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc đã yêu cầu %1$s Hz. TV của bạn đổi tần số mà không chuyển hoàn toàn (QMS) và đang chạy ở %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Bạn có thể thấy một khung hình lặp lại khoảng mỗi %1$d giây.</string>
+    <string name="qms_hint_effect_judder">Điều đó hiện ra như hiện tượng giật đều đặn.</string>
+    <string name="qms_hint_mode_tip">Một số đầu phát và bộ thu có cài đặt cho tần số phim chính xác (23,976 Hz), thường gọi là tần số phân số. Arc không thể thay đổi cài đặt đó.</string>
+    <string name="qms_hint_off_hint_qms">Khi đó Arc ngừng yêu cầu tần số của phim. TV của bạn vẫn có thể tự đổi tần số.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

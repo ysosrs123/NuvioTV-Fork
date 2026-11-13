@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Limit wieku</string>
+    <string name="rating_limit_none">Bez limitu</string>
+    <string name="rating_limit_preschool">Przedszkolaki</string>
+    <string name="rating_limit_young">Małe dzieci</string>
+    <string name="rating_limit_pg">Starsze dzieci</string>
+    <string name="rating_limit_teen">Nastolatki</string>
+    <string name="rating_limit_hint">Co ten profil może odtwarzać bez PIN-u profilu %1$s</string>
+    <string name="rating_limit_note">Używa amerykańskich klasyfikacji z TMDB. Powyżej limitu lub bez klasyfikacji odtwarzanie wymaga PIN-u profilu %1$s.</string>
+    <string name="rating_limit_needs_pin">Najpierw ustaw PIN w profilu %1$s. Limit wieku go wymaga.</string>
+    <string name="rating_limit_change_heading">Wprowadź PIN profilu %1$s, aby zmienić limit</string>
+    <string name="rating_limit_change_support">Nowy limit wieku profilu %1$s: %2$s</string>
+    <string name="rating_limit_saved">Limit wieku profilu %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Do odtworzenia potrzebny jest PIN profilu %1$s</string>
+    <string name="rating_limit_play_rated">Tytuł %1$s ma klasyfikację %2$s. Limit profilu %3$s to %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc nie znajduje klasyfikacji tytułu %1$s. Limit profilu %2$s to %3$s.</string>
+    <string name="rating_limit_play_no_pin">Ustaw PIN w profilu %1$s, aby odtwarzać tytuły powyżej limitu profilu %2$s.</string>
+    <string name="rating_limit_party_heading">Profil %1$s nie może dołączyć do wspólnego oglądania</string>
+    <string name="rating_limit_party_rated">Wspólnie oglądany jest tytuł %1$s, klasyfikacja %2$s. Limit profilu %3$s to %4$s.</string>
+    <string name="rating_limit_party_unrated">Wspólnie oglądany jest tytuł %1$s, bez klasyfikacji, którą Arc może sprawdzić. Limit profilu %2$s to %3$s.</string>
+    <string name="rating_limit_add_heading">Wprowadź PIN profilu %1$s, aby dodać profil</string>
+    <string name="rating_limit_add_support">Jeden profil na tym urządzeniu ma limit wiekowy.</string>
+</resources>

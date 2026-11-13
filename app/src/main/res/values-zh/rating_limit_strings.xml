@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">分级限制</string>
+    <string name="rating_limit_none">无限制</string>
+    <string name="rating_limit_preschool">学龄前儿童</string>
+    <string name="rating_limit_young">低龄儿童</string>
+    <string name="rating_limit_pg">大龄儿童</string>
+    <string name="rating_limit_teen">青少年</string>
+    <string name="rating_limit_hint">无需 %1$s 的 PIN 即可在此个人资料中播放的内容</string>
+    <string name="rating_limit_note">使用 TMDB 的美国分级。超出限制或没有分级的内容，播放时需要 %1$s 的 PIN。</string>
+    <string name="rating_limit_needs_pin">请先为 %1$s 的个人资料设置 PIN。分级限制需要它。</string>
+    <string name="rating_limit_change_heading">输入 %1$s 的 PIN 以更改限制</string>
+    <string name="rating_limit_change_support">%1$s 的分级限制将变为：%2$s</string>
+    <string name="rating_limit_saved">%1$s 的分级限制：%2$s</string>
+    <string name="rating_limit_play_heading">需要 %1$s 的 PIN 才能播放</string>
+    <string name="rating_limit_play_rated">%1$s 的分级为 %2$s。%3$s 的限制为 %4$s。</string>
+    <string name="rating_limit_play_unrated">Arc 找不到 %1$s 的分级。%2$s 的限制为 %3$s。</string>
+    <string name="rating_limit_play_no_pin">为 %1$s 的个人资料设置 PIN，才能播放超出 %2$s 限制的内容。</string>
+    <string name="rating_limit_party_heading">%1$s 无法加入此观影派对</string>
+    <string name="rating_limit_party_rated">派对正在观看 %1$s，分级为 %2$s。%3$s 的限制为 %4$s。</string>
+    <string name="rating_limit_party_unrated">派对正在观看 %1$s，Arc 无法核实其分级。%2$s 的限制为 %3$s。</string>
+    <string name="rating_limit_add_heading">输入 %1$s 的 PIN 以添加个人资料</string>
+    <string name="rating_limit_add_support">此设备上有一个个人资料设置了分级限制。</string>
+</resources>

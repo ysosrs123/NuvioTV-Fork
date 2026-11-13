@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">דרום אסיה</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: מועמדים</string>
+    <string name="scout_award_globes_nominees">גלובוס הזהב: מועמדים</string>
+    <string name="scout_award_emmy_nominees">Emmys: מועמדים</string>
+    <string name="scout_award_tab_picture">הסרט הטוב ביותר</string>
+    <string name="scout_award_tab_best_film">הסרט הטוב ביותר</string>
+    <string name="scout_award_tab_director">בימוי</string>
+    <string name="scout_award_tab_actor">שחקן</string>
+    <string name="scout_award_tab_actress">שחקנית</string>
+    <string name="scout_award_tab_international">בינלאומי</string>
+    <string name="scout_award_tab_limited">סדרה מוגבלת</string>
+</resources>

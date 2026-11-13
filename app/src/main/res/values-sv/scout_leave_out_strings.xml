@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Utelämna språk</string>
+    <string name="scout_leave_out_languages_sub">Språk du aldrig vill se</string>
+    <string name="scout_language_indian">Indiska språk</string>
+</resources>

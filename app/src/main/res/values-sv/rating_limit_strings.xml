@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Åldersgräns</string>
+    <string name="rating_limit_none">Ingen gräns</string>
+    <string name="rating_limit_preschool">Förskolebarn</string>
+    <string name="rating_limit_young">Små barn</string>
+    <string name="rating_limit_pg">Större barn</string>
+    <string name="rating_limit_teen">Tonåringar</string>
+    <string name="rating_limit_hint">Vad profilen får spela utan PIN för profilen %1$s</string>
+    <string name="rating_limit_note">Använder amerikanska åldersgränser från TMDB. Över gränsen, eller utan klassning, frågar Spela efter PIN för profilen %1$s.</string>
+    <string name="rating_limit_needs_pin">Ange först en PIN för profilen %1$s. Åldersgränsen kräver den.</string>
+    <string name="rating_limit_change_heading">Ange PIN för profilen %1$s för att ändra gränsen</string>
+    <string name="rating_limit_change_support">Ny åldersgräns för %1$s: %2$s</string>
+    <string name="rating_limit_saved">Åldersgräns för %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">PIN för profilen %1$s krävs för att spela detta</string>
+    <string name="rating_limit_play_rated">%1$s har klassningen %2$s. Gränsen för %3$s är %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc hittar ingen klassning för %1$s. Gränsen för %2$s är %3$s.</string>
+    <string name="rating_limit_play_no_pin">Ange en PIN för profilen %1$s för att spela titlar över gränsen för %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s kan inte gå med i den här tittarfesten</string>
+    <string name="rating_limit_party_rated">På tittarfesten visas %1$s, klassad %2$s. Gränsen för %3$s är %4$s.</string>
+    <string name="rating_limit_party_unrated">På tittarfesten visas %1$s, som saknar en klassning Arc kan kontrollera. Gränsen för %2$s är %3$s.</string>
+    <string name="rating_limit_add_heading">Ange PIN för profilen %1$s för att lägga till en profil</string>
+    <string name="rating_limit_add_support">En profil på den här enheten har en åldersgräns.</string>
+</resources>

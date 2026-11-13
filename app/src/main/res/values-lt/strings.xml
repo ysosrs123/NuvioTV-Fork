@@ -2093,14 +2093,14 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="report_item_title">Pavadinimas ir failo vardas</string>
     <string name="report_item_note">Pridėti pastabą</string>
     <string name="report_item_note_hint">Neprivaloma</string>
-    <string name="report_note_placeholder">Ką turėtume žinoti?</string>
+    <string name="report_note_placeholder">Ar dar kas nors svarbu?</string>
     <string name="report_never_sent">Niekada nesiunčiama: srautų nuorodos, debrid ar priedų raktai, jūsų paskyra ar el. paštas. Pranešimų paslauga nesaugo jūsų IP adreso.</string>
     <string name="report_send">Siųsti</string>
     <string name="report_failed_limit">Šis įrenginys pasiekė šiandienos pranešimų limitą. Bandykite dar kartą rytoj.</string>
     <string name="report_sent_title">Pranešimas išsiųstas</string>
     <string name="report_sent_qr_description">Jūsų pranešimo QR kodas</string>
     <string name="report_sent_phone">Nuskaitykite telefonu, kad pridėtumėte nuotraukų arba stebėtumėte pranešimą. Arc yra hobio projektas, todėl ne į kiekvieną pranešimą atsakoma.</string>
-    <string name="report_sent_no_phone">Ačiū, kad pranešėte. Arc yra hobio projektas, todėl ne į kiekvieną pranešimą atsakoma.</string>
+    <string name="report_sent_no_phone">Ačiū už pranešimą. Arc yra hobio projektas, todėl ne į kiekvieną pranešimą atsakoma.</string>
     <string name="report_sent_back">Grįžti prie žiūrėjimo</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Pasirinkite viską, kas tinka. Arc išsaugojo paskutinę minutę.</item>
@@ -2114,7 +2114,7 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
         <item quantity="many">Grotuvo nustatymai ir paskutinių %1$d minutės</item>
         <item quantity="other">Grotuvo nustatymai ir paskutinės %1$d minučių</item>
     </plurals>
-    <string name="report_settings_subtitle">Papasakokite, kas nepavyko arba ką norėtumėte, kad Arc darytų</string>
+    <string name="report_settings_subtitle">Parašykite, kas nepavyko arba ką norėtumėte, kad Arc darytų</string>
     <string name="report_group_choose">Apie ką norite pranešti?</string>
     <string name="report_group_options">Parinktys</string>
     <string name="report_row_playback">Atkūrimo problema</string>
@@ -2189,11 +2189,22 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="display_mode_measured">Išmatuota</string>
     <string name="display_mode_measured_off">Ekranas veikia %1$s Hz, o ne %2$s Hz dažniu</string>
     <string name="qms_hint_title">Jūsų televizorius neišlaiko filmo kadrų dažnio</string>
-    <string name="qms_hint_body_qms">Arc paprašė %1$s Hz. Jūsų televizorius pakeitė dažnį be visiško perjungimo (QMS) ir veikia %2$s Hz dažniu. Tai matoma kaip nedidelis, reguliarus trūkčiojimas.</string>
-    <string name="qms_hint_body">Arc paprašė %1$s Hz, bet jūsų ekranas veikia %2$s Hz dažniu. Tai matoma kaip nedidelis, reguliarus trūkčiojimas.</string>
     <string name="qms_hint_fix">Geriausias sprendimas: išjunkite QMS televizoriuje</string>
     <string name="qms_hint_fix_hint">Paties televizoriaus nustatymuose, šiai HDMI įvesčiai. Arc to pakeisti negali.</string>
     <string name="qms_hint_off">Išjungti kadrų dažnio derinimą</string>
-    <string name="qms_hint_off_hint">Nuo kito filmo ekranas liks įprastu dažniu. Vėl įjungti galite Nustatymuose.</string>
     <string name="qms_hint_keep">Palikti kaip yra</string>
+    <string name="sub_prefer_addon_subtitles">Pirmiausia priedų subtitrai</string>
+    <string name="sub_prefer_addon_subtitles_desc">Pasirenka priedo subtitrus vietoj failo subtitrų, kai abeji yra jūsų kalba. Failo subtitrai naudojami, kai jokio priedo subtitrų nėra.</string>
+    <string name="playback_afr_settle_delay">Delsa pakeitus atnaujinimo dažnį</string>
+    <string name="playback_afr_settle_delay_sub">Kiek filmas laukia televizoriaus pakeitus dažnį. Padidinkite, jei filmai per stiprintuvą ar garso juostą prasideda juodu ekranu arba be garso.</string>
+    <string name="playback_afr_settle_delay_auto">Automatiškai</string>
+    <string name="playback_afr_settle_delay_auto_sub">Dvi sekundės, tada kol grįš televizoriaus garso ryšys</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc paprašė %1$s Hz, bet ekranas veikia %2$s Hz dažniu. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc paprašė %1$s Hz. Televizorius pakeitė dažnį be visiško perjungimo (QMS) ir veikia %2$s Hz dažniu. %3$s</string>
+    <string name="qms_hint_effect_repeat">Maždaug kas %1$d s galite pastebėti pasikartojantį kadrą.</string>
+    <string name="qms_hint_effect_judder">Tai matyti kaip tolygus trūkčiojimas.</string>
+    <string name="qms_hint_mode_tip">Kai kurie priedėliai ir stiprintuvai turi tikslių filmų dažnių (23,976 Hz) nustatymą, dažnai vadinamą trupmeniniais dažniais. Arc jo pakeisti negali.</string>
+    <string name="qms_hint_off_hint_qms">Tada Arc nebeprašo filmo dažnio. Televizorius vis tiek gali pats keisti dažnį.</string>
+    <string name="qms_hint_ok">Gerai</string>
 </resources>

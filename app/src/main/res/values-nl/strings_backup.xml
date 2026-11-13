@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Namen en afbeeldingen</string>
     <string name="backup_part_settings">Arc-instellingen</string>
     <string name="backup_part_settings_sub">Scout, miniaturen, DNS, afstandsbedieningsknoppen en meer</string>
+    <string name="backup_part_history">Bibliotheek en kijkgeschiedenis</string>
+    <string name="backup_part_history_sub">Opgeslagen titels, Verder kijken en bekeken-markeringen</string>
+    <string name="backup_part_history_signed_in">Je Nuvio-account bewaart dit al. Alleen hersteld op een box die niet is aangemeld.</string>
+    <string name="backup_part_history_counts">Opgeslagen titels: %1$d. Bekeken: %2$d. Bezig: %3$d.</string>
+    <string name="backup_supporter">Supporterstatus</string>
+    <string name="backup_supporter_yes">Ja. Supporterkleuren en -pictogrammen blijven behouden.</string>
+    <string name="backup_supporter_no">Nee</string>
     <string name="backup_part_secrets">Wachtwoorden en sleutels</string>
     <string name="backup_part_secrets_saved">Beveiligd met je pincode</string>
     <string name="backup_part_secrets_needs_pin">Back-uppincode nodig</string>

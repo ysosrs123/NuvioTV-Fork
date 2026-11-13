@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">يخفي زر التقييم والإبهام في القائمة والسؤال بعد الفيلم. تبقى تقييماتك محسوبة.</string>
     <string name="scout_ask_enabled">السؤال عن رأيك بعد الفيلم</string>
     <string name="scout_ask_enabled_sub">ليس لي أو أعجبني أو أحببته كثيرًا عند مغادرة المشغل</string>
+    <string name="scout_send_ratings">إرسال تقييماتي إلى خدمات التتبع</string>
+    <string name="scout_send_ratings_sub">تُرسَل ليس لي وأعجبني وأحببته كثيرًا إلى Trakt وSimkl وMDBList وWeTrakr بقيمة 3 و7 و10 من 10. التقييم الذي وضعته بنفسك في خدمة تتبع لا يتغير أبدًا. يتلقى Simkl فقط العناوين التي شاهدتها.</string>
+    <string name="scout_send_ratings_none">لا توجد خدمة تتبع مسجّل الدخول إليها في هذا الملف الشخصي، لذا لا يُرسَل شيء بعد.</string>
+    <string name="scout_use_ratings">استخدام تقييماتي من خدمات التتبع</string>
+    <string name="scout_use_ratings_sub">تُنقل تقييماتك من خدمات التتبع إلى هنا: 9 أو 10 تعني أحببته كثيرًا، ومن 6 إلى 8 أعجبني، ومن 1 إلى 4 ليس لي. التقييم الذي تختاره في Arc له الأولوية دائمًا.</string>
+    <string name="scout_thumb_from">من %1$s</string>
     <string name="scout_your_thumbs">تقييماتك</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="zero">%1$d عنوان مقيّم. افتح للتغيير أو الإلغاء</item>

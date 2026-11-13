@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Az Arc beolvasta ezt a fájlt, de nem talált benne lejátszható képet. A videószerkesztésre készült fájlok, például az Apple ProRes, ilyenek. Válaszd a cím egy másik változatát.</string>
+    <string name="player_error_card_silent_title">A forrás nem válaszolt</string>
+    <string name="player_error_card_silent">A forrás szervere %1$d másodpercig nem küldött videót. Ez a forrástól ered, nem az Arctól. Próbálj másik forrást, vagy próbáld újra ezt később.</string>
+    <string name="player_error_card_fault_title">A forrás szerverén hiba van</string>
+    <string name="player_error_card_fault">A forrás szervere hibával válaszolt (%1$d). Ez a forrástól ered, nem az Arctól. Próbálj másik forrást, vagy próbáld újra ezt később.</string>
+    <string name="player_error_card_blocked_title">A forrás letiltotta ezt a linket</string>
+    <string name="player_error_card_blocked">A forrás szervere elutasította a linket (hibakód: %1$d). Ez a forrástól ered, nem az Arctól. Próbálj másik forrást.</string>
+    <string name="player_error_card_gone_title">Ez a fájl már nincs meg a forrásnál</string>
+    <string name="player_error_card_gone">A szerver szerint ez a fájl már nem létezik (hibakód: %1$d). Ez a forrástól ered, nem az Arctól. Próbálj másik forrást.</string>
+    <string name="player_error_card_expired_title">Ez a link lejárt</string>
+    <string name="player_error_card_expired">A forrás linkje lejárt (hibakód: %1$d). Lépj vissza, és nyisd meg újra a címet egy friss linkért, vagy próbálj másik forrást.</string>
+    <string name="player_error_card_limit_title">A szolgáltatás korlátozza a kéréseket</string>
+    <string name="player_error_card_limit">Ez a szolgáltatás lassításra kéri az Arcot. Ez a szolgáltatástól ered, nem az Arctól. Várj egy kicsit az újrapróbálás előtt, vagy válassz forrást egy másik szerverről.</string>
+    <string name="player_error_card_unreachable_title">Az Arc nem érte el a forrást</string>
+    <string name="player_error_card_unreachable">A forrás szervere nem érhető el. Ha más források mennek, az a szerver nem működik: válassz másikat. Ha semmi sem megy, ellenőrizd az eszköz internetkapcsolatát.</string>
+    <string name="player_error_card_notice_title">A szolgáltató értesítést küldött, nem a filmet</string>
+    <string name="player_error_card_notice">A film helyett a bővítmény vagy a Debrid-szolgáltatás egy rövid értesítő videót küldött. Ez általában azt jelenti, hogy a fájl még nem áll készen, a fiókod elérte egy korlátját, vagy lejárt egy bejelentkezés. Ez a bővítménytől ered, nem az Arctól. Ellenőrizd a bővítményt vagy a Debrid-fiókodat, vagy próbálj másik forrást.</string>
+    <string name="player_error_card_not_video_title">Ez a link nem videó</string>
+    <string name="player_error_card_not_video">A szerver valami mást küldött, nem videót, gyakran egy weboldalt vagy egy archívumot. Ez a forrástól ered, nem az Arctól. Próbálj másik forrást.</string>
+    <string name="player_error_card_box_title">Ez az eszköz nem tudja lejátszani ezt a fájlt</string>
+    <string name="player_error_card_box">Ez a fájl %1$s, ami több, mint amit az eszköz videochipje le tud játszani. Ez az eszköztől ered, nem az Arctól. Válaszd a cím egy másik változatát, például 4K vagy 1080p felbontásban.</string>
+    <string name="player_error_card_box_no_detail">A fájl videoformátuma több, mint amit az eszköz videochipje le tud játszani. Ez az eszköztől ered, nem az Arctól. Válaszd a cím egy másik változatát, például 4K vagy 1080p felbontásban.</string>
+    <string name="player_error_card_unreadable_title">Az Arc nem tudja beolvasni a fájl képét</string>
+    <string name="player_error_facts_no_answer">nincs válasz</string>
+    <string name="player_error_facts_no_connection">nincs kapcsolat</string>
+    <string name="player_error_facts_seconds">%1$d mp</string>
+    <string name="player_error_other_sources">Más források</string>
+    <string name="report_check_title">Amit az Arc talált</string>
+    <string name="report_check_hint">Ez az Arcon kívüli hibának tűnik, ezért egy jelentés nem javítja meg. Először ezt próbáld ki.</string>
+    <string name="report_check_try_source">Próbálj másik forrást</string>
+    <string name="report_check_try_source_notice">vagy ellenőrizd a bővítményt vagy a Debrid-fiókodat</string>
+    <string name="report_check_send_anyway">Küldés így is</string>
+    <string name="debrid_busy">A Debrid szolgáltatás most túlterhelt (hibakód: %1$d). Ez a szolgáltatástól ered, nem az Arctól. Próbáld újra egy pillanat múlva, vagy válassz másik forrást.</string>
+</resources>

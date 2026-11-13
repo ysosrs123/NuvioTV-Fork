@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">הגבלת גיל</string>
+    <string name="rating_limit_none">ללא הגבלה</string>
+    <string name="rating_limit_preschool">גיל הגן</string>
+    <string name="rating_limit_young">ילדים קטנים</string>
+    <string name="rating_limit_pg">ילדים גדולים</string>
+    <string name="rating_limit_teen">בני נוער</string>
+    <string name="rating_limit_hint">מה הפרופיל הזה יכול להפעיל בלי הסיסמה של %1$s</string>
+    <string name="rating_limit_note">נעשה שימוש בדירוגי ארה״ב מ-TMDB. מעל ההגבלה, או ללא דירוג, ההפעלה תדרוש את הסיסמה של %1$s.</string>
+    <string name="rating_limit_needs_pin">יש להגדיר קודם סיסמה בפרופיל של %1$s. הגבלת הגיל דורשת אותה.</string>
+    <string name="rating_limit_change_heading">יש להזין את הסיסמה של %1$s כדי לשנות את ההגבלה</string>
+    <string name="rating_limit_change_support">הגבלת הגיל של %1$s תהיה: %2$s</string>
+    <string name="rating_limit_saved">הגבלת הגיל של %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">נדרשת הסיסמה של %1$s כדי להפעיל את זה</string>
+    <string name="rating_limit_play_rated">הדירוג של %1$s הוא %2$s. ההגבלה של %3$s היא %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc לא מוצא דירוג עבור %1$s. ההגבלה של %2$s היא %3$s.</string>
+    <string name="rating_limit_play_no_pin">יש להגדיר סיסמה בפרופיל של %1$s כדי להפעיל תכנים מעל ההגבלה של %2$s.</string>
+    <string name="rating_limit_party_heading">אי אפשר לצרף את %1$s למסיבה הזו</string>
+    <string name="rating_limit_party_rated">במסיבה צופים ב-%1$s, בדירוג %2$s. ההגבלה של %3$s היא %4$s.</string>
+    <string name="rating_limit_party_unrated">במסיבה צופים ב-%1$s, ול-Arc אין דירוג שאפשר לבדוק. ההגבלה של %2$s היא %3$s.</string>
+    <string name="rating_limit_add_heading">יש להזין את הסיסמה של %1$s כדי להוסיף פרופיל</string>
+    <string name="rating_limit_add_support">לאחד הפרופילים במכשיר הזה יש הגבלת גיל.</string>
+</resources>

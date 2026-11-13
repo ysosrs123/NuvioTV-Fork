@@ -4281,14 +4281,14 @@
     <string name="report_item_title">標題和檔案名稱</string>
     <string name="report_item_note">新增備註</string>
     <string name="report_item_note_hint">選填</string>
-    <string name="report_note_placeholder">有什麼需要告訴我們的嗎？</string>
+    <string name="report_note_placeholder">還有其他需要說明的嗎？</string>
     <string name="report_never_sent">絕不傳送：串流連結、Debrid 或擴充套件金鑰、您的帳戶或電子郵件。報告服務不會保留您的 IP 位址。</string>
     <string name="report_send">傳送</string>
     <string name="report_failed_limit">此裝置今天的報告次數已達上限。請明天再試。</string>
     <string name="report_sent_title">報告已傳送</string>
     <string name="report_sent_qr_description">您的報告 QR 碼</string>
     <string name="report_sent_phone">用手機掃描即可新增照片或追蹤您的報告。Arc 是業餘專案，並非每份報告都會獲得回覆。</string>
-    <string name="report_sent_no_phone">感謝您告知我們。Arc 是業餘專案，並非每份報告都會獲得回覆。</string>
+    <string name="report_sent_no_phone">感謝您的報告。Arc 是業餘專案，並非每份報告都會獲得回覆。</string>
     <string name="report_sent_back">返回觀看</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="other">選擇所有符合的情況。Arc 已保留最近 %1$d 分鐘。</item>
@@ -4296,7 +4296,7 @@
     <plurals name="report_item_playback_kept">
         <item quantity="other">播放器設定和最近 %1$d 分鐘</item>
     </plurals>
-    <string name="report_settings_subtitle">告訴我們哪裡出了問題，或您希望 Arc 做什麼</string>
+    <string name="report_settings_subtitle">說明哪裡出了問題，或您希望 Arc 做什麼</string>
     <string name="report_group_choose">您想報告什麼？</string>
     <string name="report_group_options">選項</string>
     <string name="report_row_playback">播放問題</string>
@@ -4365,11 +4365,22 @@
     <string name="display_mode_measured">實測</string>
     <string name="display_mode_measured_off">螢幕以 %1$s Hz 運作，而非 %2$s Hz</string>
     <string name="qms_hint_title">您的電視未維持影片的幀率</string>
-    <string name="qms_hint_body_qms">Arc 要求 %1$s Hz。您的電視未經完整切換就改變了更新率 (QMS)，目前以 %2$s Hz 運作。這會呈現為輕微而規律的卡頓。</string>
-    <string name="qms_hint_body">Arc 要求 %1$s Hz，但您的螢幕目前以 %2$s Hz 運作。這會呈現為輕微而規律的卡頓。</string>
     <string name="qms_hint_fix">最佳解決方法：在電視上關閉 QMS</string>
     <string name="qms_hint_fix_hint">在電視本身針對此 HDMI 輸入的設定中。Arc 無法變更。</string>
     <string name="qms_hint_off">關閉幀率匹配</string>
-    <string name="qms_hint_off_hint">從下一部影片起，螢幕會維持平常的更新率。您可以在設定中重新開啟。</string>
     <string name="qms_hint_keep">維持現狀</string>
+    <string name="sub_prefer_addon_subtitles">優先使用擴充套件字幕</string>
+    <string name="sub_prefer_addon_subtitles_desc">兩者都是你的語言時，優先選擇擴充套件提供的字幕，而非檔案內建的字幕。沒有擴充套件提供字幕時，使用檔案內建的字幕。</string>
+    <string name="playback_afr_settle_delay">更新率切換後的延遲</string>
+    <string name="playback_afr_settle_delay_sub">切換更新率後影片等待電視的時間。如果透過擴大機或聲霸播放時影片開頭黑畫面或無聲，請調高。</string>
+    <string name="playback_afr_settle_delay_auto">自動</string>
+    <string name="playback_afr_settle_delay_auto_sub">兩秒，然後等到電視的音訊連線恢復</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d 秒</string>
+    <string name="qms_hint_body_v2">Arc 要求了 %1$s Hz，但你的螢幕正以 %2$s Hz 運作。%3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc 要求了 %1$s Hz。你的電視在沒有完整切換的情況下改變了更新率 (QMS)，現在以 %2$s Hz 運作。%3$s</string>
+    <string name="qms_hint_effect_repeat">你可能會大約每 %1$d 秒看到一格畫面重複。</string>
+    <string name="qms_hint_effect_judder">這會呈現為持續的頓挫。</string>
+    <string name="qms_hint_mode_tip">有些機上盒和擴大機有精確電影幀率 (23.976 Hz) 的設定，通常稱為分數幀率。Arc 無法變更它。</string>
+    <string name="qms_hint_off_hint_qms">之後 Arc 不再要求影片的更新率。你的電視仍可能自行變更更新率。</string>
+    <string name="qms_hint_ok">確定</string>
 </resources>

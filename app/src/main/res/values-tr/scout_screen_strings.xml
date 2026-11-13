@@ -184,8 +184,8 @@
     <string name="scout_genre_western">Vahşi Batı</string>
     <string name="scout_licence_icon_title">Scout simgesi</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oscar: En İyi Film kazananları</string>
-    <string name="scout_award_oscar_nominees">Oscar: En İyi Film adayları</string>
+    <string name="scout_award_oscar_winners">Oscar kazananları</string>
+    <string name="scout_award_oscar_nominees">Oscar adayları</string>
     <string name="scout_award_lion">Altın Aslan</string>
     <string name="scout_award_globes">Altın Küre</string>
     <string name="scout_award_palme">Palme d\'Or</string>

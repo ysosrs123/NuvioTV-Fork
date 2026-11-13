@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Blendet die Bewerten-Taste, die Daumen im Menü und die Frage nach einem Film aus. Deine Bewertungen zählen weiter.</string>
     <string name="scout_ask_enabled">Nach einem Film nachfragen</string>
     <string name="scout_ask_enabled_sub">Nichts für mich, gefällt mir oder liebe ich beim Verlassen des Players</string>
+    <string name="scout_send_ratings">Meine Bewertungen an Tracker senden</string>
+    <string name="scout_send_ratings_sub">Nichts für mich, Gefällt mir und Liebe ich gehen als 3, 7 und 10 von 10 an Trakt, Simkl, MDBList und WeTrakr. Eine Bewertung, die du selbst auf einem Tracker vergeben hast, wird nie geändert. Simkl erhält nur Titel, die du gesehen hast.</string>
+    <string name="scout_send_ratings_none">In diesem Profil ist kein Tracker angemeldet, daher wird noch nichts gesendet.</string>
+    <string name="scout_use_ratings">Meine Tracker-Bewertungen nutzen</string>
+    <string name="scout_use_ratings_sub">Bewertungen von deinen Trackern werden hier zu Daumen: 9 oder 10 ist Liebe ich, 6 bis 8 Gefällt mir, 1 bis 4 Nichts für mich. Ein Daumen, den du in Arc drückst, hat immer Vorrang.</string>
+    <string name="scout_thumb_from">Von %1$s</string>
     <string name="scout_your_thumbs">Deine Daumen</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d Titel bewertet. Öffnen zum Ändern oder Zurücknehmen</item>

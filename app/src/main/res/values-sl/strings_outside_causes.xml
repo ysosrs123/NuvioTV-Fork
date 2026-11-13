@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Ta vir trenutno ne deluje. Arc tega ne more popraviti, zato ga ni treba prijaviti. Poskusite drug vir.</string>
+    <string name="report_check_blocked_hint_notice">Ta vir trenutno ne deluje. Arc tega ne more popraviti, zato ga ni treba prijaviti. Preverite dodatek ali račun Debrid ali poskusite drug vir.</string>
+    <string name="stream_large_file_short">Velika datoteka za to napravo</string>
+    <string name="stream_large_file_uhd">To je zelo velika datoteka 4K. Naprave z manj pomnilnika, kot je ta, imajo z datotekami te velikosti pogosto težave, zato se lahko predvajanje zatika ali ustavi. Različica istega filma v 1080p se navadno predvaja bolj gladko.</string>
+    <string name="stream_large_file_other">To je zelo velika datoteka. Naprave z manj pomnilnika, kot je ta, imajo z datotekami te velikosti pogosto težave, zato se lahko predvajanje zatika ali ustavi. Manjša različica v 1080p, označena z WEB namesto Remux, se navadno predvaja bolj gladko.</string>
+</resources>

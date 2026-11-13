@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Oculta o botão Avaliar, os polegares no menu e a pergunta depois de um filme. Suas avaliações continuam valendo.</string>
     <string name="scout_ask_enabled">Perguntar como foi depois de um filme</string>
     <string name="scout_ask_enabled_sub">Não é para mim, gostei ou amei ao sair do player</string>
+    <string name="scout_send_ratings">Enviar minhas avaliações aos trackers</string>
+    <string name="scout_send_ratings_sub">Não é para mim, Gostei e Amei vão para Trakt, Simkl, MDBList e WeTrakr como 3, 7 e 10 de 10. Uma avaliação que você mesmo deu em um tracker nunca é alterada. O Simkl só recebe títulos que você assistiu.</string>
+    <string name="scout_send_ratings_none">Nenhum tracker está conectado neste perfil, então nada é enviado ainda.</string>
+    <string name="scout_use_ratings">Usar minhas avaliações dos trackers</string>
+    <string name="scout_use_ratings_sub">As avaliações que você deu nos seus trackers viram polegares aqui: 9 ou 10 é Amei, 6 a 8 Gostei, 1 a 4 Não é para mim. Um polegar que você marca no Arc sempre prevalece.</string>
+    <string name="scout_thumb_from">De %1$s</string>
     <string name="scout_your_thumbs">Seus polegares</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d título avaliado. Abra para mudar ou desfazer</item>

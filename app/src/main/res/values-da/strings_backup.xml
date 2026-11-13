@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Navne og billeder</string>
     <string name="backup_part_settings">Arc-indstillinger</string>
     <string name="backup_part_settings_sub">Scout, miniaturer, DNS, fjernbetjeningsknapper og mere</string>
+    <string name="backup_part_history">Bibliotek og visningshistorik</string>
+    <string name="backup_part_history_sub">Gemte titler, Fortsæt med at se og set-markeringer</string>
+    <string name="backup_part_history_signed_in">Din Nuvio-konto gemmer allerede dette. Gendannes kun på en boks, der ikke er logget ind.</string>
+    <string name="backup_part_history_counts">Gemte titler: %1$d. Set: %2$d. I gang: %3$d.</string>
+    <string name="backup_supporter">Supporterstatus</string>
+    <string name="backup_supporter_yes">Ja. Supporterfarver og -ikoner bevares.</string>
+    <string name="backup_supporter_no">Nej</string>
     <string name="backup_part_secrets">Adgangskoder og nøgler</string>
     <string name="backup_part_secrets_saved">Låst med din PIN</string>
     <string name="backup_part_secrets_needs_pin">Kræver sikkerhedskopiens PIN</string>

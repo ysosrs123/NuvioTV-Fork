@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Verbergt de knop Beoordelen, de duimen in het menu en de vraag na een film. Je beoordelingen tellen nog mee.</string>
     <string name="scout_ask_enabled">Na een film vragen hoe het was</string>
     <string name="scout_ask_enabled_sub">Niets voor mij, leuk of geweldig wanneer je de speler verlaat</string>
+    <string name="scout_send_ratings">Mijn beoordelingen naar trackers sturen</string>
+    <string name="scout_send_ratings_sub">Niets voor mij, Vind ik leuk en Geweldig gaan als 3, 7 en 10 van de 10 naar Trakt, Simkl, MDBList en WeTrakr. Een beoordeling die je zelf op een tracker gaf, wordt nooit gewijzigd. Simkl krijgt alleen titels die je hebt bekeken.</string>
+    <string name="scout_send_ratings_none">Er is geen tracker aangemeld op dit profiel, dus er wordt nog niets verstuurd.</string>
+    <string name="scout_use_ratings">Mijn trackerbeoordelingen gebruiken</string>
+    <string name="scout_use_ratings_sub">Beoordelingen die je op je trackers gaf, worden hier duimen: 9 of 10 is Geweldig, 6 tot 8 Vind ik leuk, 1 tot 4 Niets voor mij. Een duim die je in Arc geeft, wint altijd.</string>
+    <string name="scout_thumb_from">Via %1$s</string>
     <string name="scout_your_thumbs">Jouw duimen</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d titel beoordeeld. Open om te wijzigen of ongedaan te maken</item>

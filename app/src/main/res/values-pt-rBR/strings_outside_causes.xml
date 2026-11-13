@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Esta fonte não está funcionando agora. O Arc não consegue resolver isso, então não é preciso relatar. Tente outra fonte.</string>
+    <string name="report_check_blocked_hint_notice">Esta fonte não está funcionando agora. O Arc não consegue resolver isso, então não é preciso relatar. Verifique o addon ou sua conta Debrid, ou tente outra fonte.</string>
+    <string name="stream_large_file_short">Arquivo grande para este dispositivo</string>
+    <string name="stream_large_file_uhd">Este é um arquivo 4K muito grande. Dispositivos com menos memória, como este, costumam ter dificuldade com arquivos desse tamanho, então a reprodução pode travar ou parar. Uma versão 1080p do mesmo filme costuma rodar com mais fluidez.</string>
+    <string name="stream_large_file_other">Este é um arquivo muito grande. Dispositivos com menos memória, como este, costumam ter dificuldade com arquivos desse tamanho, então a reprodução pode travar ou parar. Uma versão 1080p menor, marcada como WEB em vez de Remux, costuma rodar com mais fluidez.</string>
+</resources>

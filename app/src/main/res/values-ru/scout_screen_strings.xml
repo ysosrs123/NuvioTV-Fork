@@ -190,8 +190,8 @@
     <string name="scout_genre_western">Вестерн</string>
     <string name="scout_licence_icon_title">Значок Scout</string>
     <string name="scout_licence_icon_body">Из Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Оскар: победители за лучший фильм</string>
-    <string name="scout_award_oscar_nominees">Оскар: номинанты за лучший фильм</string>
+    <string name="scout_award_oscar_winners">Оскар: победители</string>
+    <string name="scout_award_oscar_nominees">Оскар: номинанты</string>
     <string name="scout_award_lion">Золотой лев</string>
     <string name="scout_award_globes">Золотой глобус</string>
     <string name="scout_award_palme">Palme d\'Or</string>

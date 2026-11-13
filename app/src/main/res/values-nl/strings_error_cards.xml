@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc heeft dit bestand gelezen en er geen beeld in gevonden dat het kan afspelen. Bestanden voor videobewerking, zoals Apple ProRes, zijn zo. Kies een andere versie van de titel.</string>
+    <string name="player_error_card_silent_title">De bron gaf geen antwoord</string>
+    <string name="player_error_card_silent">De server van deze bron heeft %1$d s geen video gestuurd. Dit ligt aan de bron, niet aan Arc. Probeer een andere bron, of probeer deze later opnieuw.</string>
+    <string name="player_error_card_fault_title">De server van de bron heeft een storing</string>
+    <string name="player_error_card_fault">De server van deze bron antwoordde met een fout (%1$d). Dit ligt aan de bron, niet aan Arc. Probeer een andere bron, of probeer deze later opnieuw.</string>
+    <string name="player_error_card_blocked_title">De bron heeft deze link geblokkeerd</string>
+    <string name="player_error_card_blocked">De server van deze bron weigerde de link (fout %1$d). Dit ligt aan de bron, niet aan Arc. Probeer een andere bron.</string>
+    <string name="player_error_card_gone_title">Dit bestand staat niet meer bij de bron</string>
+    <string name="player_error_card_gone">De server meldt dat dit bestand er niet meer is (fout %1$d). Dit ligt aan de bron, niet aan Arc. Probeer een andere bron.</string>
+    <string name="player_error_card_expired_title">Deze link is verlopen</string>
+    <string name="player_error_card_expired">De link van de bron is verlopen (fout %1$d). Ga terug en open de titel opnieuw voor een nieuwe link, of probeer een andere bron.</string>
+    <string name="player_error_card_limit_title">De dienst beperkt verzoeken</string>
+    <string name="player_error_card_limit">Deze dienst vraagt Arc om het rustiger aan te doen. Dit ligt aan de dienst, niet aan Arc. Wacht even voordat je het opnieuw probeert, of kies een bron van een andere server.</string>
+    <string name="player_error_card_unreachable_title">Arc kon de bron niet bereiken</string>
+    <string name="player_error_card_unreachable">De server van deze bron is niet bereikbaar. Als andere bronnen wel spelen, ligt die server plat: kies een andere. Als niets speelt, controleer dan de internetverbinding van het apparaat.</string>
+    <string name="player_error_card_notice_title">De provider stuurde een melding, niet de film</string>
+    <string name="player_error_card_notice">In plaats van de film stuurde de add-on of Debrid-dienst een korte video met een melding. Meestal is het bestand nog niet klaar, heeft je account een limiet bereikt of is een aanmelding verlopen. Dit ligt aan de add-on, niet aan Arc. Controleer de add-on of je Debrid-account, of probeer een andere bron.</string>
+    <string name="player_error_card_not_video_title">Deze link is geen video</string>
+    <string name="player_error_card_not_video">De server stuurde iets wat geen video is, vaak een webpagina of een archief. Dit ligt aan de bron, niet aan Arc. Probeer een andere bron.</string>
+    <string name="player_error_card_box_title">Dit apparaat kan dit bestand niet afspelen</string>
+    <string name="player_error_card_box">Dit bestand is %1$s, meer dan de videochip van dit apparaat aankan. Dit ligt aan het apparaat, niet aan Arc. Kies een andere versie van de titel, zoals 4K of 1080p.</string>
+    <string name="player_error_card_box_no_detail">Het videoformaat van dit bestand is meer dan de videochip van dit apparaat aankan. Dit ligt aan het apparaat, niet aan Arc. Kies een andere versie van de titel, zoals 4K of 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc kan het beeld van dit bestand niet lezen</string>
+    <string name="player_error_facts_no_answer">geen antwoord</string>
+    <string name="player_error_facts_no_connection">geen verbinding</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Andere bronnen</string>
+    <string name="report_check_title">Wat Arc vond</string>
+    <string name="report_check_hint">Dit lijkt een probleem buiten Arc, dus een melding lost het niet op. Probeer eerst dit.</string>
+    <string name="report_check_try_source">Probeer een andere bron</string>
+    <string name="report_check_try_source_notice">of controleer je add-on of Debrid-account</string>
+    <string name="report_check_send_anyway">Toch verzenden</string>
+    <string name="debrid_busy">De Debrid-dienst is nu even druk (fout %1$d). Dit ligt aan de dienst, niet aan Arc. Probeer het zo opnieuw, of kies een andere bron.</string>
+</resources>

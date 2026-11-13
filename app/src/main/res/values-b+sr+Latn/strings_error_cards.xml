@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc je pročitao ovaj fajl, ali u njemu nije našao sliku koju može da pusti. Takvi su fajlovi za video montažu, kao što je Apple ProRes. Izaberite drugu verziju naslova.</string>
+    <string name="player_error_card_silent_title">Izvor nije odgovorio</string>
+    <string name="player_error_card_silent">Server ovog izvora nije poslao video tokom %1$d s. Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor ili ovaj ponovo kasnije.</string>
+    <string name="player_error_card_fault_title">Server izvora ima kvar</string>
+    <string name="player_error_card_fault">Server ovog izvora je odgovorio greškom (%1$d). Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor ili ovaj ponovo kasnije.</string>
+    <string name="player_error_card_blocked_title">Izvor je blokirao ovaj link</string>
+    <string name="player_error_card_blocked">Server ovog izvora je odbio link (greška %1$d). Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor.</string>
+    <string name="player_error_card_gone_title">Ovog fajla više nema kod izvora</string>
+    <string name="player_error_card_gone">Server kaže da ovog fajla više nema (greška %1$d). Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor.</string>
+    <string name="player_error_card_expired_title">Ovaj link je istekao</string>
+    <string name="player_error_card_expired">Link izvora je istekao (greška %1$d). Vratite se i ponovo otvorite naslov da biste dobili novi link ili probajte drugi izvor.</string>
+    <string name="player_error_card_limit_title">Usluga ograničava zahteve</string>
+    <string name="player_error_card_limit">Ova usluga traži od aplikacije Arc da uspori. Uzrok je na strani usluge, a ne aplikacije Arc. Sačekajte malo pre novog pokušaja ili izaberite izvor sa drugog servera.</string>
+    <string name="player_error_card_unreachable_title">Arc ne može da dođe do izvora</string>
+    <string name="player_error_card_unreachable">Server ovog izvora nije dostupan. Ako drugi izvori rade, taj server ne radi: izaberite drugi. Ako ništa ne radi, proverite internet vezu uređaja.</string>
+    <string name="player_error_card_notice_title">Dobavljač je poslao obaveštenje, ne film</string>
+    <string name="player_error_card_notice">Umesto filma, dodatak ili Debrid usluga poslali su kratak video sa obaveštenjem. To obično znači da fajl još nije spreman, da je vaš nalog dostigao ograničenje ili da je prijava istekla. Uzrok je na strani dodatka, a ne aplikacije Arc. Proverite dodatak ili svoj Debrid nalog ili probajte drugi izvor.</string>
+    <string name="player_error_card_not_video_title">Ovaj link nije video</string>
+    <string name="player_error_card_not_video">Server je poslao nešto što nije video, često veb stranicu ili arhivu. Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor.</string>
+    <string name="player_error_card_box_title">Ovaj uređaj ne može da pusti ovaj fajl</string>
+    <string name="player_error_card_box">Ovaj fajl je %1$s, više nego što video čip ovog uređaja može da pusti. Uzrok je na strani uređaja, a ne aplikacije Arc. Izaberite drugu verziju naslova, na primer 4K ili 1080p.</string>
+    <string name="player_error_card_box_no_detail">Video format ovog fajla je zahtevniji nego što video čip ovog uređaja može da pusti. Uzrok je na strani uređaja, a ne aplikacije Arc. Izaberite drugu verziju naslova, na primer 4K ili 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc ne može da pročita sliku ovog fajla</string>
+    <string name="player_error_facts_no_answer">nema odgovora</string>
+    <string name="player_error_facts_no_connection">nema veze</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Drugi izvori</string>
+    <string name="report_check_title">Šta je Arc pronašao</string>
+    <string name="report_check_hint">Ovo izgleda kao problem van aplikacije Arc, pa ga prijava ne može rešiti. Evo šta prvo da probate.</string>
+    <string name="report_check_try_source">Probajte drugi izvor</string>
+    <string name="report_check_try_source_notice">ili proverite dodatak ili Debrid nalog</string>
+    <string name="report_check_send_anyway">Ipak pošalji</string>
+    <string name="debrid_busy">Debrid usluga je trenutno zauzeta (greška %1$d). Uzrok je na strani usluge, a ne aplikacije Arc. Pokušajte ponovo za trenutak ili izaberite drugi izvor.</string>
+</resources>

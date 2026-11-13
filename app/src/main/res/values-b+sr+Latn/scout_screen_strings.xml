@@ -187,8 +187,8 @@
     <string name="scout_genre_western">Vestern</string>
     <string name="scout_licence_icon_title">Ikona Scout</string>
     <string name="scout_licence_icon_body">Iz Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oskari: pobednici za najbolji film</string>
-    <string name="scout_award_oscar_nominees">Oskari: nominovani za najbolji film</string>
+    <string name="scout_award_oscar_winners">Oskari: pobednici</string>
+    <string name="scout_award_oscar_nominees">Oskari: nominovani</string>
     <string name="scout_award_lion">Zlatni lav</string>
     <string name="scout_award_globes">Zlatni globus</string>
     <string name="scout_award_palme">Palme d\'Or</string>

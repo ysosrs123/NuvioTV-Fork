@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Aldersgrense</string>
+    <string name="rating_limit_none">Ingen grense</string>
+    <string name="rating_limit_preschool">Førskolebarn</string>
+    <string name="rating_limit_young">Små barn</string>
+    <string name="rating_limit_pg">Større barn</string>
+    <string name="rating_limit_teen">Tenåringer</string>
+    <string name="rating_limit_hint">Hva denne profilen kan spille av uten PIN for %1$s</string>
+    <string name="rating_limit_note">Bruker amerikanske aldersmerkinger fra TMDB. Over grensen, eller uten merking, ber avspilling om PIN for %1$s.</string>
+    <string name="rating_limit_needs_pin">Angi først en PIN på profilen til %1$s. Aldersgrensen ber om den.</string>
+    <string name="rating_limit_change_heading">Skriv inn PIN for %1$s for å endre grensen</string>
+    <string name="rating_limit_change_support">Ny aldersgrense for %1$s: %2$s</string>
+    <string name="rating_limit_saved">Aldersgrense for %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">PIN for %1$s trengs for å spille av dette</string>
+    <string name="rating_limit_play_rated">%1$s er merket %2$s. Grensen for %3$s er %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc finner ingen aldersmerking for %1$s. Grensen for %2$s er %3$s.</string>
+    <string name="rating_limit_play_no_pin">Angi en PIN på profilen til %1$s for å spille av titler over grensen for %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s kan ikke bli med på denne seerfesten</string>
+    <string name="rating_limit_party_rated">Seerfesten ser på %1$s, merket %2$s. Grensen for %3$s er %4$s.</string>
+    <string name="rating_limit_party_unrated">Seerfesten ser på %1$s, som ikke har en merking Arc kan sjekke. Grensen for %2$s er %3$s.</string>
+    <string name="rating_limit_add_heading">Skriv inn PIN for %1$s for å legge til en profil</string>
+    <string name="rating_limit_add_support">En profil på denne enheten har en aldersgrense.</string>
+</resources>

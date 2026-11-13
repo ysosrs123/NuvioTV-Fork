@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Limite d\'âge</string>
+    <string name="rating_limit_none">Aucune limite</string>
+    <string name="rating_limit_preschool">Tout-petits</string>
+    <string name="rating_limit_young">Jeunes enfants</string>
+    <string name="rating_limit_pg">Grands enfants</string>
+    <string name="rating_limit_teen">Adolescents</string>
+    <string name="rating_limit_hint">Ce que ce profil peut lire sans le code PIN de %1$s</string>
+    <string name="rating_limit_note">Utilise les classifications américaines de TMDB. Au-delà de la limite, ou sans classification, la lecture demande le code PIN de %1$s.</string>
+    <string name="rating_limit_needs_pin">Définissez d\'abord un code PIN sur le profil de %1$s. La limite d\'âge en a besoin.</string>
+    <string name="rating_limit_change_heading">Saisir le code PIN de %1$s pour changer la limite</string>
+    <string name="rating_limit_change_support">Nouvelle limite d\'âge de %1$s : %2$s</string>
+    <string name="rating_limit_saved">Limite d\'âge de %1$s : %2$s</string>
+    <string name="rating_limit_play_heading">Le code PIN de %1$s est requis pour lire ce titre</string>
+    <string name="rating_limit_play_rated">%1$s est classé %2$s. La limite de %3$s est %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc ne trouve pas de classification pour %1$s. La limite de %2$s est %3$s.</string>
+    <string name="rating_limit_play_no_pin">Définissez un code PIN sur le profil de %1$s pour lire les titres au-delà de la limite de %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s ne peut pas rejoindre cette watch party</string>
+    <string name="rating_limit_party_rated">La watch party regarde %1$s, classé %2$s. La limite de %3$s est %4$s.</string>
+    <string name="rating_limit_party_unrated">La watch party regarde %1$s, sans classification vérifiable par Arc. La limite de %2$s est %3$s.</string>
+    <string name="rating_limit_add_heading">Saisir le code PIN de %1$s pour ajouter un profil</string>
+    <string name="rating_limit_add_support">Un profil de cet appareil a une limite d\'âge.</string>
+</resources>

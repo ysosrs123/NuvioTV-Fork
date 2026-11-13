@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Южна Азия</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: номинирани</string>
+    <string name="scout_award_globes_nominees">Златен глобус: номинирани</string>
+    <string name="scout_award_emmy_nominees">Emmys: номинирани</string>
+    <string name="scout_award_tab_picture">Най-добър филм</string>
+    <string name="scout_award_tab_best_film">Най-добър филм</string>
+    <string name="scout_award_tab_director">Режисура</string>
+    <string name="scout_award_tab_actor">Актьор</string>
+    <string name="scout_award_tab_actress">Актриса</string>
+    <string name="scout_award_tab_international">Международен</string>
+    <string name="scout_award_tab_limited">Минисериал</string>
+</resources>

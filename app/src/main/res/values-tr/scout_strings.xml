@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Puanla düğmesini, menüdeki başparmakları ve film sonrası soruyu gizler. Puanlarınız sayılmaya devam eder.</string>
     <string name="scout_ask_enabled">Film sonrası nasıl olduğunu sor</string>
     <string name="scout_ask_enabled_sub">Oynatıcıdan çıkarken bana göre değil, beğendim veya bayıldım</string>
+    <string name="scout_send_ratings">Puanlarımı takip servislerine gönder</string>
+    <string name="scout_send_ratings_sub">Bana göre değil, Beğendim ve Bayıldım; Trakt, Simkl, MDBList ve WeTrakr\'a 10 üzerinden 3, 7 ve 10 olarak gider. Bir takip servisinde kendiniz verdiğiniz puan asla değiştirilmez. Simkl yalnızca izlediğiniz içerikleri alır.</string>
+    <string name="scout_send_ratings_none">Bu profilde oturum açmış bir takip servisi yok, bu yüzden henüz hiçbir şey gönderilmiyor.</string>
+    <string name="scout_use_ratings">Takip servisi puanlarımı kullan</string>
+    <string name="scout_use_ratings_sub">Takip servislerinde verdiğiniz puanlar burada başparmağa dönüşür: 9 veya 10 Bayıldım, 6-8 Beğendim, 1-4 Bana göre değil. Arc\'ta bastığınız başparmak her zaman önceliklidir.</string>
+    <string name="scout_thumb_from">Kaynak: %1$s</string>
     <string name="scout_your_thumbs">Başparmaklarınız</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="other">%1$d içerik puanlandı. Değiştirmek veya geri almak için açın</item>

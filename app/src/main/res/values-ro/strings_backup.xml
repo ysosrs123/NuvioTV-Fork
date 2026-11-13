@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Nume și imagini</string>
     <string name="backup_part_settings">Setări Arc</string>
     <string name="backup_part_settings_sub">Scout, miniaturi, DNS, butoane telecomandă și altele</string>
+    <string name="backup_part_history">Bibliotecă și istoric de vizionare</string>
+    <string name="backup_part_history_sub">Titluri salvate, Continuă vizionarea și marcaje de vizionare</string>
+    <string name="backup_part_history_signed_in">Contul tău Nuvio le păstrează deja. Se restaurează doar pe un dispozitiv neconectat.</string>
+    <string name="backup_part_history_counts">Titluri salvate: %1$d. Vizionate: %2$d. În curs: %3$d.</string>
+    <string name="backup_supporter">Statut de susținător</string>
+    <string name="backup_supporter_yes">Da. Culorile și pictogramele de susținător se păstrează.</string>
+    <string name="backup_supporter_no">Nu</string>
     <string name="backup_part_secrets">Parole și chei</string>
     <string name="backup_part_secrets_saved">Protejate cu PIN-ul tău</string>
     <string name="backup_part_secrets_needs_pin">Necesită PIN-ul backupului</string>

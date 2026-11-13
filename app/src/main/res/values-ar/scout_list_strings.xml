@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">جنوب آسيا</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: المرشحون</string>
+    <string name="scout_award_globes_nominees">غولدن غلوب: المرشحون</string>
+    <string name="scout_award_emmy_nominees">Emmys: المرشحون</string>
+    <string name="scout_award_tab_picture">أفضل فيلم</string>
+    <string name="scout_award_tab_best_film">أفضل فيلم</string>
+    <string name="scout_award_tab_director">الإخراج</string>
+    <string name="scout_award_tab_actor">ممثل</string>
+    <string name="scout_award_tab_actress">ممثلة</string>
+    <string name="scout_award_tab_international">دولي</string>
+    <string name="scout_award_tab_limited">مسلسل محدود</string>
+</resources>

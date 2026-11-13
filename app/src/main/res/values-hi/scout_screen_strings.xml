@@ -184,8 +184,8 @@
     <string name="scout_genre_western">वेस्टर्न</string>
     <string name="scout_licence_icon_title">Scout आइकन</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">ऑस्कर: सर्वश्रेष्ठ फ़िल्म विजेता</string>
-    <string name="scout_award_oscar_nominees">ऑस्कर: सर्वश्रेष्ठ फ़िल्म नामांकित</string>
+    <string name="scout_award_oscar_winners">ऑस्कर: विजेता</string>
+    <string name="scout_award_oscar_nominees">ऑस्कर: नामांकित</string>
     <string name="scout_award_lion">गोल्डन लायन</string>
     <string name="scout_award_globes">गोल्डन ग्लोब</string>
     <string name="scout_award_palme">Palme d\'Or</string>

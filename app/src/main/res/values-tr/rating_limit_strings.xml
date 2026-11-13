@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Yaş sınırı</string>
+    <string name="rating_limit_none">Sınır yok</string>
+    <string name="rating_limit_preschool">Okul öncesi</string>
+    <string name="rating_limit_young">Küçük çocuklar</string>
+    <string name="rating_limit_pg">Büyük çocuklar</string>
+    <string name="rating_limit_teen">Gençler</string>
+    <string name="rating_limit_hint">%1$s profilinin PIN kodu olmadan bu profilde oynatılabilecekler</string>
+    <string name="rating_limit_note">TMDB üzerindeki ABD derecelendirmelerini kullanır. Sınırın üstünde veya derecelendirme yoksa Oynat, %1$s profilinin PIN kodunu ister.</string>
+    <string name="rating_limit_needs_pin">Önce %1$s profiline bir PIN belirleyin. Yaş sınırı için gereklidir.</string>
+    <string name="rating_limit_change_heading">Sınırı değiştirmek için %1$s profilinin PIN kodunu girin</string>
+    <string name="rating_limit_change_support">%1$s profilinin yeni yaş sınırı: %2$s</string>
+    <string name="rating_limit_saved">%1$s profilinin yaş sınırı: %2$s</string>
+    <string name="rating_limit_play_heading">Bunu oynatmak için %1$s profilinin PIN kodu gerekli</string>
+    <string name="rating_limit_play_rated">%1$s, %2$s olarak derecelendirilmiş. %3$s profilinin sınırı: %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc, %1$s için derecelendirme bulamıyor. %2$s profilinin sınırı: %3$s.</string>
+    <string name="rating_limit_play_no_pin">%2$s profilinin sınırı üstündeki içerikleri oynatmak için %1$s profiline bir PIN belirleyin.</string>
+    <string name="rating_limit_party_heading">%1$s bu partiye katılamaz</string>
+    <string name="rating_limit_party_rated">Partide %1$s izleniyor, derecelendirme: %2$s. %3$s profilinin sınırı: %4$s.</string>
+    <string name="rating_limit_party_unrated">Partide %1$s izleniyor ve Arc derecelendirmesini kontrol edemiyor. %2$s profilinin sınırı: %3$s.</string>
+    <string name="rating_limit_add_heading">Profil eklemek için %1$s profilinin PIN kodunu girin</string>
+    <string name="rating_limit_add_support">Bu cihazdaki bir profilin yaş sınırı var.</string>
+</resources>

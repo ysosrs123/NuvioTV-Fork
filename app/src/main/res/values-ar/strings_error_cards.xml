@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">قرأ Arc هذا الملف ولم يجد فيه صورة يمكنه تشغيلها. ملفات تحرير الفيديو، مثل Apple ProRes، تكون هكذا. اختر نسخة أخرى من العنوان.</string>
+    <string name="player_error_card_silent_title">لم يستجب المصدر</string>
+    <string name="player_error_card_silent">لم يرسل خادم هذا المصدر أي فيديو خلال %1$d ث. هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر، أو أعد تجربة هذا المصدر لاحقًا.</string>
+    <string name="player_error_card_fault_title">خادم المصدر به عطل</string>
+    <string name="player_error_card_fault">ردّ خادم هذا المصدر بخطأ (%1$d). هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر، أو أعد تجربة هذا المصدر لاحقًا.</string>
+    <string name="player_error_card_blocked_title">حظر المصدر هذا الرابط</string>
+    <string name="player_error_card_blocked">رفض خادم هذا المصدر الرابط (الخطأ %1$d). هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر.</string>
+    <string name="player_error_card_gone_title">لم يعد هذا الملف متوفرًا لدى المصدر</string>
+    <string name="player_error_card_gone">يفيد الخادم بأن هذا الملف لم يعد موجودًا (الخطأ %1$d). هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر.</string>
+    <string name="player_error_card_expired_title">انتهت صلاحية هذا الرابط</string>
+    <string name="player_error_card_expired">انتهت صلاحية رابط المصدر (الخطأ %1$d). ارجع وافتح العنوان مجددًا للحصول على رابط جديد، أو جرّب مصدرًا آخر.</string>
+    <string name="player_error_card_limit_title">الخدمة تحدّ من الطلبات</string>
+    <string name="player_error_card_limit">تطلب هذه الخدمة من Arc الإبطاء. هذه المشكلة من الخدمة، وليست من Arc. انتظر قليلًا قبل المحاولة مجددًا، أو اختر مصدرًا من خادم آخر.</string>
+    <string name="player_error_card_unreachable_title">تعذّر على Arc الوصول إلى المصدر</string>
+    <string name="player_error_card_unreachable">يتعذّر الوصول إلى خادم هذا المصدر. إذا كانت مصادر أخرى تعمل، فهذا الخادم متوقف: اختر مصدرًا آخر. وإذا لم يعمل أي شيء، فتحقق من اتصال الجهاز بالإنترنت.</string>
+    <string name="player_error_card_notice_title">أرسل المزوّد إشعارًا بدلًا من الفيلم</string>
+    <string name="player_error_card_notice">بدلًا من الفيلم، أرسلت الإضافة أو خدمة Debrid مقطع فيديو قصيرًا فيه إشعار. يعني ذلك عادةً أن الملف لم يجهز بعد، أو أن حسابك بلغ حدًّا معيّنًا، أو أن تسجيل الدخول انتهت صلاحيته. هذه المشكلة من الإضافة، وليست من Arc. تحقق من الإضافة أو من حساب Debrid، أو جرّب مصدرًا آخر.</string>
+    <string name="player_error_card_not_video_title">هذا الرابط ليس فيديو</string>
+    <string name="player_error_card_not_video">أرسل الخادم شيئًا ليس فيديو، غالبًا صفحة ويب أو ملفًا مضغوطًا. هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر.</string>
+    <string name="player_error_card_box_title">لا يستطيع هذا الجهاز تشغيل هذا الملف</string>
+    <string name="player_error_card_box">هذا الملف (‎%1$s) أكبر مما تستطيع شريحة الفيديو في هذا الجهاز تشغيله. هذه المشكلة من الجهاز، وليست من Arc. اختر نسخة أخرى من العنوان، مثل 4K أو 1080p.</string>
+    <string name="player_error_card_box_no_detail">صيغة الفيديو في هذا الملف أكبر مما تستطيع شريحة الفيديو في هذا الجهاز تشغيله. هذه المشكلة من الجهاز، وليست من Arc. اختر نسخة أخرى من العنوان، مثل 4K أو 1080p.</string>
+    <string name="player_error_card_unreadable_title">لا يستطيع Arc قراءة صورة هذا الملف</string>
+    <string name="player_error_facts_no_answer">لا رد</string>
+    <string name="player_error_facts_no_connection">لا اتصال</string>
+    <string name="player_error_facts_seconds">%1$d ث</string>
+    <string name="player_error_other_sources">مصادر أخرى</string>
+    <string name="report_check_title">ما وجده Arc</string>
+    <string name="report_check_hint">يبدو أن هذه مشكلة خارج Arc، لذا لن يحلّها البلاغ. إليك ما يمكنك تجربته أولًا.</string>
+    <string name="report_check_try_source">جرّب مصدرًا آخر</string>
+    <string name="report_check_try_source_notice">أو تحقق من الإضافة أو من حساب Debrid</string>
+    <string name="report_check_send_anyway">إرسال على أي حال</string>
+    <string name="debrid_busy">خدمة Debrid مشغولة الآن (الخطأ %1$d). هذه المشكلة من الخدمة، وليست من Arc. حاول مجددًا بعد لحظة، أو اختر مصدرًا آخر.</string>
+</resources>

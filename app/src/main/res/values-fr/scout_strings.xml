@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Masque le bouton Noter, les pouces du menu et la question après un film. Vos notes comptent toujours.</string>
     <string name="scout_ask_enabled">Demander mon avis après un film</string>
     <string name="scout_ask_enabled_sub">Pas pour moi, j\'aime ou j\'adore en quittant le lecteur</string>
+    <string name="scout_send_ratings">Envoyer mes notes aux trackers</string>
+    <string name="scout_send_ratings_sub">Pas pour moi, J\'aime et J\'adore sont envoyés à Trakt, Simkl, MDBList et WeTrakr en 3, 7 et 10 sur 10. Une note que vous avez donnée vous-même sur un tracker n\'est jamais modifiée. Simkl ne reçoit que les titres que vous avez regardés.</string>
+    <string name="scout_send_ratings_none">Aucun tracker n\'est connecté sur ce profil, rien n\'est donc encore envoyé.</string>
+    <string name="scout_use_ratings">Utiliser les notes de mes trackers</string>
+    <string name="scout_use_ratings_sub">Les notes données sur vos trackers deviennent ici des pouces : 9 ou 10 donne J\'adore, 6 à 8 J\'aime, 1 à 4 Pas pour moi. Un pouce attribué dans Arc l\'emporte toujours.</string>
+    <string name="scout_thumb_from">Via %1$s</string>
     <string name="scout_your_thumbs">Vos pouces</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d titre noté. Ouvrez pour modifier ou annuler</item>

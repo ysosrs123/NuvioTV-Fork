@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Korhatár</string>
+    <string name="rating_limit_none">Nincs korhatár</string>
+    <string name="rating_limit_preschool">Óvodások</string>
+    <string name="rating_limit_young">Kisgyerekek</string>
+    <string name="rating_limit_pg">Nagyobb gyerekek</string>
+    <string name="rating_limit_teen">Tinédzserek</string>
+    <string name="rating_limit_hint">Mit játszhat le ez a profil %1$s PIN-kódja nélkül</string>
+    <string name="rating_limit_note">A TMDB amerikai korhatár-besorolásait használja. A korhatár felett vagy besorolás nélkül a lejátszás %1$s PIN-kódját kéri.</string>
+    <string name="rating_limit_needs_pin">Előbb állíts be PIN-kódot %1$s profiljához. A korhatárhoz szükség van rá.</string>
+    <string name="rating_limit_change_heading">A korhatár módosításához add meg %1$s PIN-kódját</string>
+    <string name="rating_limit_change_support">%1$s új korhatára: %2$s</string>
+    <string name="rating_limit_saved">%1$s korhatára: %2$s</string>
+    <string name="rating_limit_play_heading">A lejátszáshoz %1$s PIN-kódja kell</string>
+    <string name="rating_limit_play_rated">%1$s besorolása: %2$s. %3$s korhatára: %4$s.</string>
+    <string name="rating_limit_play_unrated">Az Arc nem talál besorolást ehhez: %1$s. %2$s korhatára: %3$s.</string>
+    <string name="rating_limit_play_no_pin">%2$s korhatára feletti címekhez állíts be PIN-kódot %1$s profiljához.</string>
+    <string name="rating_limit_party_heading">%1$s nem csatlakozhat ehhez a nézőpartihoz</string>
+    <string name="rating_limit_party_rated">A nézőparti ezt nézi: %1$s, besorolás: %2$s. %3$s korhatára: %4$s.</string>
+    <string name="rating_limit_party_unrated">A nézőparti ezt nézi: %1$s, amelynek nincs az Arc által ellenőrizhető besorolása. %2$s korhatára: %3$s.</string>
+    <string name="rating_limit_add_heading">Profil hozzáadásához add meg %1$s PIN-kódját</string>
+    <string name="rating_limit_add_support">Az eszköz egyik profiljának korhatára van.</string>
+</resources>

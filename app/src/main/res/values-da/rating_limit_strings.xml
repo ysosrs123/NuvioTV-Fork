@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Aldersgrænse</string>
+    <string name="rating_limit_none">Ingen grænse</string>
+    <string name="rating_limit_preschool">Førskolebørn</string>
+    <string name="rating_limit_young">Små børn</string>
+    <string name="rating_limit_pg">Større børn</string>
+    <string name="rating_limit_teen">Teenagere</string>
+    <string name="rating_limit_hint">Hvad denne profil må afspille uden PIN for %1$s</string>
+    <string name="rating_limit_note">Bruger de amerikanske aldersmærkninger fra TMDB. Over grænsen, eller uden mærkning, beder afspilning om PIN for %1$s.</string>
+    <string name="rating_limit_needs_pin">Indstil først en PIN på profilen for %1$s. Aldersgrænsen beder om den.</string>
+    <string name="rating_limit_change_heading">Indtast PIN for %1$s for at ændre grænsen</string>
+    <string name="rating_limit_change_support">Ny aldersgrænse for %1$s: %2$s</string>
+    <string name="rating_limit_saved">Aldersgrænse for %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">PIN for %1$s kræves for at afspille dette</string>
+    <string name="rating_limit_play_rated">%1$s er mærket %2$s. Grænsen for %3$s er %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc kan ikke finde en aldersmærkning for %1$s. Grænsen for %2$s er %3$s.</string>
+    <string name="rating_limit_play_no_pin">Indstil en PIN på profilen for %1$s for at afspille titler over grænsen for %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s kan ikke deltage i denne seerfest</string>
+    <string name="rating_limit_party_rated">Seerfesten ser %1$s, mærket %2$s. Grænsen for %3$s er %4$s.</string>
+    <string name="rating_limit_party_unrated">Seerfesten ser %1$s, som ikke har en mærkning, Arc kan tjekke. Grænsen for %2$s er %3$s.</string>
+    <string name="rating_limit_add_heading">Indtast PIN for %1$s for at tilføje en profil</string>
+    <string name="rating_limit_add_support">En profil på denne enhed har en aldersgrænse.</string>
+</resources>

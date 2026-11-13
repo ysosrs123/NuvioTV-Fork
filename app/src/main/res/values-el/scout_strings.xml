@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Κρύβει το κουμπί Βαθμολογία, τους αντίχειρες στο μενού και την ερώτηση μετά από ταινία. Οι βαθμολογίες σας μετρούν ακόμη.</string>
     <string name="scout_ask_enabled">Ερώτηση μετά από ταινία</string>
     <string name="scout_ask_enabled_sub">Όχι για μένα, μου αρέσει ή το λατρεύω όταν βγαίνετε από την αναπαραγωγή</string>
+    <string name="scout_send_ratings">Αποστολή βαθμολογιών στις υπηρεσίες παρακολούθησης</string>
+    <string name="scout_send_ratings_sub">Τα Όχι για μένα, Μου αρέσει και Το λατρεύω στέλνονται στα Trakt, Simkl, MDBList και WeTrakr ως 3, 7 και 10 στα 10. Μια βαθμολογία που δώσατε μόνοι σας σε μια υπηρεσία παρακολούθησης δεν αλλάζει ποτέ. Το Simkl λαμβάνει μόνο τίτλους που έχετε δει.</string>
+    <string name="scout_send_ratings_none">Καμία υπηρεσία παρακολούθησης δεν είναι συνδεδεμένη σε αυτό το προφίλ, οπότε δεν στέλνεται τίποτα ακόμα.</string>
+    <string name="scout_use_ratings">Χρήση βαθμολογιών από υπηρεσίες παρακολούθησης</string>
+    <string name="scout_use_ratings_sub">Οι βαθμολογίες από τις υπηρεσίες παρακολούθησής σας γίνονται εδώ αντίχειρες: 9 ή 10 είναι Το λατρεύω, 6 έως 8 Μου αρέσει, 1 έως 4 Όχι για μένα. Ένας αντίχειρας που πατάτε στο Arc υπερισχύει πάντα.</string>
+    <string name="scout_thumb_from">Από %1$s</string>
     <string name="scout_your_thumbs">Οι αντίχειρές σας</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d τίτλος βαθμολογήθηκε. Ανοίξτε για αλλαγή ή αναίρεση</item>

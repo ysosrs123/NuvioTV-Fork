@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Adlar ve resimler</string>
     <string name="backup_part_settings">Arc ayarları</string>
     <string name="backup_part_settings_sub">Scout, küçük resimler, DNS, kumanda tuşları ve daha fazlası</string>
+    <string name="backup_part_history">Kütüphanem ve izleme geçmişi</string>
+    <string name="backup_part_history_sub">Kaydedilen içerikler, İzlemeye Devam Et ve izlendi işaretleri</string>
+    <string name="backup_part_history_signed_in">Nuvio hesabınız bunları zaten saklıyor. Yalnızca oturum açılmamış cihazda geri yüklenir.</string>
+    <string name="backup_part_history_counts">Kaydedilen: %1$d. İzlenen: %2$d. Devam eden: %3$d.</string>
+    <string name="backup_supporter">Destekçi durumu</string>
+    <string name="backup_supporter_yes">Evet. Destekçi renkleri ve simgeleri korunur.</string>
+    <string name="backup_supporter_no">Hayır</string>
     <string name="backup_part_secrets">Şifreler ve anahtarlar</string>
     <string name="backup_part_secrets_saved">PIN\'inizle korunur</string>
     <string name="backup_part_secrets_needs_pin">Yedek PIN\'i gerekir</string>

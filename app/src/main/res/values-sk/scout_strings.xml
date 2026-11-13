@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Skryje tlačidlo Hodnotiť, palce v ponuke a otázku po filme. Vaše hodnotenia sa ďalej počítajú.</string>
     <string name="scout_ask_enabled">Po filme sa spýtať, aký bol</string>
     <string name="scout_ask_enabled_sub">Nič pre mňa, páči sa mi alebo milujem pri odchode z prehrávača</string>
+    <string name="scout_send_ratings">Posielať moje hodnotenia do trackerov</string>
+    <string name="scout_send_ratings_sub">Nič pre mňa, Páči sa mi a Milujem sa posielajú do Trakt, Simkl, MDBList a WeTrakr ako 3, 7 a 10 z 10. Hodnotenie, ktoré ste sami zadali v trackeri, sa nikdy nezmení. Simkl dostáva len tituly, ktoré ste videli.</string>
+    <string name="scout_send_ratings_none">Na tomto profile nie je prihlásený žiadny tracker, takže sa zatiaľ nič neposiela.</string>
+    <string name="scout_use_ratings">Používať moje hodnotenia z trackerov</string>
+    <string name="scout_use_ratings_sub">Hodnotenia z vašich trackerov sa tu zmenia na palce: 9 alebo 10 je Milujem, 6 až 8 Páči sa mi, 1 až 4 Nič pre mňa. Palec stlačený v Arc má vždy prednosť.</string>
+    <string name="scout_thumb_from">Z %1$s</string>
     <string name="scout_your_thumbs">Vaše palce</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">Ohodnotený %1$d titul. Otvorte na zmenu alebo zrušenie</item>

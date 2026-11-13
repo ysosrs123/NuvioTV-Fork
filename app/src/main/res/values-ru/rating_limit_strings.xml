@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Возрастное ограничение</string>
+    <string name="rating_limit_none">Без ограничений</string>
+    <string name="rating_limit_preschool">Дошкольники</string>
+    <string name="rating_limit_young">Младшие дети</string>
+    <string name="rating_limit_pg">Дети постарше</string>
+    <string name="rating_limit_teen">Подростки</string>
+    <string name="rating_limit_hint">Что этот профиль может смотреть без PIN-кода профиля %1$s</string>
+    <string name="rating_limit_note">Используются рейтинги США из TMDB. Выше ограничения или без рейтинга кнопка «Смотреть» запросит PIN-код профиля %1$s.</string>
+    <string name="rating_limit_needs_pin">Сначала задайте PIN-код в профиле %1$s. Его запрашивает возрастное ограничение.</string>
+    <string name="rating_limit_change_heading">Введите PIN-код профиля %1$s, чтобы изменить ограничение</string>
+    <string name="rating_limit_change_support">Новое ограничение профиля %1$s: %2$s</string>
+    <string name="rating_limit_saved">Ограничение профиля %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Для просмотра нужен PIN-код профиля %1$s</string>
+    <string name="rating_limit_play_rated">%1$s: рейтинг %2$s. Ограничение профиля %3$s: %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc не нашёл рейтинг для %1$s. Ограничение профиля %2$s: %3$s.</string>
+    <string name="rating_limit_play_no_pin">Задайте PIN-код в профиле %1$s, чтобы смотреть то, что выше ограничения профиля %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s не может присоединиться к этому просмотру</string>
+    <string name="rating_limit_party_rated">Участники смотрят %1$s с рейтингом %2$s. Ограничение профиля %3$s: %4$s.</string>
+    <string name="rating_limit_party_unrated">Участники смотрят %1$s, но Arc не может проверить рейтинг. Ограничение профиля %2$s: %3$s.</string>
+    <string name="rating_limit_add_heading">Введите PIN-код профиля %1$s, чтобы добавить профиль</string>
+    <string name="rating_limit_add_support">У одного из профилей на этом устройстве есть возрастное ограничение.</string>
+</resources>

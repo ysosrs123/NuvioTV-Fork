@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc 读取了此文件，但没有找到可以播放的画面。Apple ProRes 等用于视频剪辑的文件就是这样。请选择该标题的其他版本。</string>
+    <string name="player_error_card_silent_title">来源没有响应</string>
+    <string name="player_error_card_silent">此来源的服务器在 %1$d 秒内没有发送任何视频。问题出在来源一方，而不是 Arc。请尝试其他来源，或稍后再试此来源。</string>
+    <string name="player_error_card_fault_title">来源服务器出现故障</string>
+    <string name="player_error_card_fault">此来源的服务器返回了错误（%1$d）。问题出在来源一方，而不是 Arc。请尝试其他来源，或稍后再试此来源。</string>
+    <string name="player_error_card_blocked_title">来源拦截了此链接</string>
+    <string name="player_error_card_blocked">此来源的服务器拒绝了该链接（错误 %1$d）。问题出在来源一方，而不是 Arc。请尝试其他来源。</string>
+    <string name="player_error_card_gone_title">来源上已没有此文件</string>
+    <string name="player_error_card_gone">服务器表示此文件已不存在（错误 %1$d）。问题出在来源一方，而不是 Arc。请尝试其他来源。</string>
+    <string name="player_error_card_expired_title">此链接已过期</string>
+    <string name="player_error_card_expired">来源的链接已失效（错误 %1$d）。请返回并重新打开该标题以获取新链接，或尝试其他来源。</string>
+    <string name="player_error_card_limit_title">服务正在限制请求</string>
+    <string name="player_error_card_limit">此服务要求 Arc 放慢请求速度。问题出在服务一方，而不是 Arc。请稍等片刻再试，或选择其他服务器的来源。</string>
+    <string name="player_error_card_unreachable_title">Arc 无法连接到来源</string>
+    <string name="player_error_card_unreachable">无法连接到此来源的服务器。如果其他来源可以播放，说明该服务器暂时无法使用，请选择其他来源。如果都无法播放，请检查设备的网络连接。</string>
+    <string name="player_error_card_notice_title">提供者发来的是通知，不是正片</string>
+    <string name="player_error_card_notice">扩展或 Debrid 服务发来了一段简短的通知视频，而不是正片。这通常表示文件尚未准备好、您的账户已达到上限，或登录已过期。问题出在扩展一方，而不是 Arc。请检查扩展或您的 Debrid 账户，或尝试其他来源。</string>
+    <string name="player_error_card_not_video_title">此链接不是视频</string>
+    <string name="player_error_card_not_video">服务器发送的内容不是视频，通常是网页或压缩包。问题出在来源一方，而不是 Arc。请尝试其他来源。</string>
+    <string name="player_error_card_box_title">此设备无法播放此文件</string>
+    <string name="player_error_card_box">此文件为 %1$s，超出了此设备视频芯片的播放能力。问题出在设备一方，而不是 Arc。请选择该标题的其他版本，例如 4K 或 1080p。</string>
+    <string name="player_error_card_box_no_detail">此文件的视频格式超出了此设备视频芯片的播放能力。问题出在设备一方，而不是 Arc。请选择该标题的其他版本，例如 4K 或 1080p。</string>
+    <string name="player_error_card_unreadable_title">Arc 无法读取此文件的画面</string>
+    <string name="player_error_facts_no_answer">无响应</string>
+    <string name="player_error_facts_no_connection">无连接</string>
+    <string name="player_error_facts_seconds">%1$d 秒</string>
+    <string name="player_error_other_sources">其他来源</string>
+    <string name="report_check_title">Arc 的检查结果</string>
+    <string name="report_check_hint">这看起来是 Arc 之外的问题，提交报告无法解决。请先试试以下方法。</string>
+    <string name="report_check_try_source">尝试其他来源</string>
+    <string name="report_check_try_source_notice">或检查您的扩展或 Debrid 账户</string>
+    <string name="report_check_send_anyway">仍然发送</string>
+    <string name="debrid_busy">Debrid 服务当前繁忙（错误 %1$d）。问题出在服务一方，而不是 Arc。请稍后再试，或选择其他来源。</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">दक्षिण एशिया</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: नामांकित</string>
+    <string name="scout_award_globes_nominees">गोल्डन ग्लोब: नामांकित</string>
+    <string name="scout_award_emmy_nominees">Emmys: नामांकित</string>
+    <string name="scout_award_tab_picture">सर्वश्रेष्ठ फ़िल्म</string>
+    <string name="scout_award_tab_best_film">सर्वश्रेष्ठ फ़िल्म</string>
+    <string name="scout_award_tab_director">निर्देशन</string>
+    <string name="scout_award_tab_actor">अभिनेता</string>
+    <string name="scout_award_tab_actress">अभिनेत्री</string>
+    <string name="scout_award_tab_international">अंतरराष्ट्रीय</string>
+    <string name="scout_award_tab_limited">लिमिटेड सीरीज़</string>
+</resources>

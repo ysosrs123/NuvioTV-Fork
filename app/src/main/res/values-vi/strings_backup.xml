@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Tên và ảnh</string>
     <string name="backup_part_settings">Cài đặt Arc</string>
     <string name="backup_part_settings_sub">Scout, ảnh thu nhỏ, DNS, nút điều khiển và hơn nữa</string>
+    <string name="backup_part_history">Thư viện và lịch sử xem</string>
+    <string name="backup_part_history_sub">Tựa phim đã lưu, Tiếp tục xem và dấu đã xem</string>
+    <string name="backup_part_history_signed_in">Tài khoản Nuvio của bạn đã lưu những mục này. Chỉ khôi phục trên thiết bị chưa đăng nhập.</string>
+    <string name="backup_part_history_counts">Đã lưu: %1$d. Đã xem: %2$d. Đang xem: %3$d.</string>
+    <string name="backup_supporter">Trạng thái người ủng hộ</string>
+    <string name="backup_supporter_yes">Có. Màu và biểu tượng người ủng hộ được giữ lại.</string>
+    <string name="backup_supporter_no">Không</string>
     <string name="backup_part_secrets">Mật khẩu và khóa</string>
     <string name="backup_part_secrets_saved">Đã khóa bằng mã PIN của bạn</string>
     <string name="backup_part_secrets_needs_pin">Cần mã PIN sao lưu</string>

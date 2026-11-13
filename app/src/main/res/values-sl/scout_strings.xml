@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Skrije gumb Oceni, palce v meniju in vprašanje po filmu. Vaše ocene še vedno štejejo.</string>
     <string name="scout_ask_enabled">Vprašanje, kako je bilo, po filmu</string>
     <string name="scout_ask_enabled_sub">Ni zame, všeč mi je ali obožujem ob izhodu iz predvajalnika</string>
+    <string name="scout_send_ratings">Pošlji moje ocene storitvam za sledenje</string>
+    <string name="scout_send_ratings_sub">Ni zame, Všeč mi je in Obožujem gredo v Trakt, Simkl, MDBList in WeTrakr kot 3, 7 in 10 od 10. Ocena, ki ste jo sami dali v storitvi za sledenje, se nikoli ne spremeni. Simkl dobi le naslove, ki ste jih gledali.</string>
+    <string name="scout_send_ratings_none">V tem profilu ni prijavljena nobena storitev za sledenje, zato se še nič ne pošilja.</string>
+    <string name="scout_use_ratings">Uporabi moje ocene iz storitev za sledenje</string>
+    <string name="scout_use_ratings_sub">Ocene iz vaših storitev za sledenje tukaj postanejo palci: 9 ali 10 je Obožujem, od 6 do 8 Všeč mi je, od 1 do 4 Ni zame. Palec, ki ga pritisnete v Arc, ima vedno prednost.</string>
+    <string name="scout_thumb_from">Vir: %1$s</string>
     <string name="scout_your_thumbs">Vaši palci</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d naslov ocenjen. Odprite za spremembo ali razveljavitev</item>

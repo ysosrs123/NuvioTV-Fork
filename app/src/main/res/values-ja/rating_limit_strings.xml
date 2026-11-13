@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">視聴制限</string>
+    <string name="rating_limit_none">制限なし</string>
+    <string name="rating_limit_preschool">未就学児</string>
+    <string name="rating_limit_young">低年齢の子ども</string>
+    <string name="rating_limit_pg">年長の子ども</string>
+    <string name="rating_limit_teen">ティーン</string>
+    <string name="rating_limit_hint">このプロフィールが%1$sのPINなしで再生できる作品</string>
+    <string name="rating_limit_note">TMDBの米国レーティングを使用します。制限を超える作品やレーティングのない作品は、再生時に%1$sのPINが必要です。</string>
+    <string name="rating_limit_needs_pin">先に%1$sのプロフィールにPINを設定してください。視聴制限に必要です。</string>
+    <string name="rating_limit_change_heading">制限を変更するには%1$sのPINを入力</string>
+    <string name="rating_limit_change_support">%1$sの新しい視聴制限: %2$s</string>
+    <string name="rating_limit_saved">%1$sの視聴制限: %2$s</string>
+    <string name="rating_limit_play_heading">再生には%1$sのPINが必要です</string>
+    <string name="rating_limit_play_rated">%1$sのレーティングは%2$sです。%3$sの制限は%4$sです。</string>
+    <string name="rating_limit_play_unrated">Arcは%1$sのレーティングを見つけられません。%2$sの制限は%3$sです。</string>
+    <string name="rating_limit_play_no_pin">%2$sの制限を超える作品を再生するには、%1$sのプロフィールにPINを設定してください。</string>
+    <string name="rating_limit_party_heading">%1$sはこのパーティーに参加できません</string>
+    <string name="rating_limit_party_rated">パーティーで視聴中の%1$sのレーティングは%2$sです。%3$sの制限は%4$sです。</string>
+    <string name="rating_limit_party_unrated">パーティーで視聴中の%1$sには、Arcが確認できるレーティングがありません。%2$sの制限は%3$sです。</string>
+    <string name="rating_limit_add_heading">プロフィールを追加するには%1$sのPINを入力</string>
+    <string name="rating_limit_add_support">この端末には年齢制限のあるプロフィールがあります。</string>
+</resources>

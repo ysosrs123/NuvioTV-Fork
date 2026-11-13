@@ -184,8 +184,8 @@
     <string name="scout_genre_western">Γουέστερν</string>
     <string name="scout_licence_icon_title">Εικονίδιο Scout</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Όσκαρ: νικητές καλύτερης ταινίας</string>
-    <string name="scout_award_oscar_nominees">Όσκαρ: υποψήφιοι καλύτερης ταινίας</string>
+    <string name="scout_award_oscar_winners">Όσκαρ: νικητές</string>
+    <string name="scout_award_oscar_nominees">Όσκαρ: υποψήφιοι</string>
     <string name="scout_award_lion">Χρυσός Λέων</string>
     <string name="scout_award_globes">Χρυσές Σφαίρες</string>
     <string name="scout_award_palme">Palme d\'Or</string>

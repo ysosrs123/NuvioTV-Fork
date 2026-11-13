@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Südasien</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: Nominierte</string>
+    <string name="scout_award_globes_nominees">Golden Globes: Nominierte</string>
+    <string name="scout_award_emmy_nominees">Emmys: Nominierte</string>
+    <string name="scout_award_tab_picture">Bester Film</string>
+    <string name="scout_award_tab_best_film">Bester Film</string>
+    <string name="scout_award_tab_director">Regie</string>
+    <string name="scout_award_tab_actor">Hauptdarsteller</string>
+    <string name="scout_award_tab_actress">Hauptdarstellerin</string>
+    <string name="scout_award_tab_international">International</string>
+    <string name="scout_award_tab_limited">Miniserie</string>
+</resources>

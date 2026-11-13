@@ -190,8 +190,8 @@
     <string name="scout_genre_western">Western</string>
     <string name="scout_licence_icon_title">Ikona Scout</string>
     <string name="scout_licence_icon_body">Z Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oscary: víťazi za najlepší film</string>
-    <string name="scout_award_oscar_nominees">Oscary: nominácie na najlepší film</string>
+    <string name="scout_award_oscar_winners">Oscary: víťazi</string>
+    <string name="scout_award_oscar_nominees">Oscary: nominácie</string>
     <string name="scout_award_lion">Zlatý lev</string>
     <string name="scout_award_globes">Zlaté glóbusy</string>
     <string name="scout_award_palme">Palme d\'Or</string>

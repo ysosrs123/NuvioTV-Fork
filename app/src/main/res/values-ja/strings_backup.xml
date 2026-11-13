@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">名前と画像</string>
     <string name="backup_part_settings">Arcの設定</string>
     <string name="backup_part_settings_sub">Scout、サムネイル、DNS、リモコンのボタンなど</string>
+    <string name="backup_part_history">ライブラリと視聴履歴</string>
+    <string name="backup_part_history_sub">保存した作品、視聴を続ける、視聴済みマーク</string>
+    <string name="backup_part_history_signed_in">Nuvioアカウントに保存済みです。サインインしていないデバイスでのみ復元されます。</string>
+    <string name="backup_part_history_counts">保存した作品: %1$d。視聴済み: %2$d。視聴中: %3$d。</string>
+    <string name="backup_supporter">サポーターステータス</string>
+    <string name="backup_supporter_yes">はい。サポーターの色とアイコンは保持されます。</string>
+    <string name="backup_supporter_no">いいえ</string>
     <string name="backup_part_secrets">パスワードとキー</string>
     <string name="backup_part_secrets_saved">PINでロック済み</string>
     <string name="backup_part_secrets_needs_pin">バックアップのPINが必要です</string>

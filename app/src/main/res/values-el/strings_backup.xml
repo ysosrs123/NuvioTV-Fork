@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Ονόματα και εικόνες</string>
     <string name="backup_part_settings">Ρυθμίσεις Arc</string>
     <string name="backup_part_settings_sub">Scout, μικρογραφίες, DNS, κουμπιά τηλεχειριστηρίου και άλλα</string>
+    <string name="backup_part_history">Βιβλιοθήκη και ιστορικό προβολής</string>
+    <string name="backup_part_history_sub">Αποθηκευμένοι τίτλοι, Συνέχεια παρακολούθησης και σημάνσεις προβολής</string>
+    <string name="backup_part_history_signed_in">Ο λογαριασμός σας Nuvio τα κρατά ήδη. Επαναφέρονται μόνο σε συσκευή χωρίς συνδεδεμένο λογαριασμό.</string>
+    <string name="backup_part_history_counts">Αποθηκευμένοι τίτλοι: %1$d. Προβλήθηκαν: %2$d. Σε εξέλιξη: %3$d.</string>
+    <string name="backup_supporter">Κατάσταση υποστηρικτή</string>
+    <string name="backup_supporter_yes">Ναι. Τα χρώματα και τα εικονίδια υποστηρικτή διατηρούνται.</string>
+    <string name="backup_supporter_no">Όχι</string>
     <string name="backup_part_secrets">Κωδικοί και κλειδιά</string>
     <string name="backup_part_secrets_saved">Κλειδωμένα με το PIN σας</string>
     <string name="backup_part_secrets_needs_pin">Χρειάζεται το PIN του αντιγράφου</string>

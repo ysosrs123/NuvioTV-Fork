@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Dél-Ázsia</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: jelöltek</string>
+    <string name="scout_award_globes_nominees">Golden Globe: jelöltek</string>
+    <string name="scout_award_emmy_nominees">Emmys: jelöltek</string>
+    <string name="scout_award_tab_picture">Legjobb film</string>
+    <string name="scout_award_tab_best_film">Legjobb film</string>
+    <string name="scout_award_tab_director">Rendező</string>
+    <string name="scout_award_tab_actor">Színész</string>
+    <string name="scout_award_tab_actress">Színésznő</string>
+    <string name="scout_award_tab_international">Nemzetközi</string>
+    <string name="scout_award_tab_limited">Minisorozat</string>
+</resources>

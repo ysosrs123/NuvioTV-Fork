@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Kecualikan bahasa</string>
+    <string name="scout_leave_out_languages_sub">Bahasa yang tidak pernah ingin kamu lihat</string>
+    <string name="scout_language_indian">Bahasa India</string>
+</resources>

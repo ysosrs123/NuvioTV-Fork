@@ -181,8 +181,8 @@
     <string name="scout_genre_western">西部劇</string>
     <string name="scout_licence_icon_title">Scoutアイコン</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">アカデミー賞 作品賞受賞作</string>
-    <string name="scout_award_oscar_nominees">アカデミー賞 作品賞ノミネート作</string>
+    <string name="scout_award_oscar_winners">アカデミー賞 受賞作</string>
+    <string name="scout_award_oscar_nominees">アカデミー賞 ノミネート作</string>
     <string name="scout_award_lion">金獅子賞</string>
     <string name="scout_award_globes">ゴールデングローブ賞</string>
     <string name="scout_award_palme">Palme d\'Or</string>

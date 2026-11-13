@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">このソースは現在利用できません。Arcでは解決できないため、報告する必要はありません。別のソースを試してください。</string>
+    <string name="report_check_blocked_hint_notice">このソースは現在利用できません。Arcでは解決できないため、報告する必要はありません。アドオンやDebridアカウントを確認するか、別のソースを試してください。</string>
+    <string name="stream_large_file_short">このデバイスには大きいファイル</string>
+    <string name="stream_large_file_uhd">これは非常に大きな4Kファイルです。このデバイスのようにメモリが少ない機種は、このサイズのファイルを苦手とすることが多く、一時停止したり再生が止まったりする場合があります。同じ映画の1080p版のほうが、たいていスムーズに再生できます。</string>
+    <string name="stream_large_file_other">これは非常に大きなファイルです。このデバイスのようにメモリが少ない機種は、このサイズのファイルを苦手とすることが多く、一時停止したり再生が止まったりする場合があります。RemuxではなくWEBと表示された、より小さい1080p版のほうが、たいていスムーズに再生できます。</string>
+</resources>

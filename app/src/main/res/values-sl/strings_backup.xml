@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Imena in slike</string>
     <string name="backup_part_settings">Nastavitve Arc</string>
     <string name="backup_part_settings_sub">Scout, sličice, DNS, gumbi daljinca in drugo</string>
+    <string name="backup_part_history">Knjižnica in zgodovina ogledov</string>
+    <string name="backup_part_history_sub">Shranjeni naslovi, Nadaljuj z gledanjem in oznake ogledanega</string>
+    <string name="backup_part_history_signed_in">Vaš račun Nuvio to že hrani. Obnovi se samo na napravi, ki ni prijavljena.</string>
+    <string name="backup_part_history_counts">Shranjeni naslovi: %1$d. Ogledano: %2$d. V teku: %3$d.</string>
+    <string name="backup_supporter">Status podpornika</string>
+    <string name="backup_supporter_yes">Da. Barve in ikone podpornika se ohranijo.</string>
+    <string name="backup_supporter_no">Ne</string>
     <string name="backup_part_secrets">Gesla in ključi</string>
     <string name="backup_part_secrets_saved">Zaklenjeno z vašo kodo PIN</string>
     <string name="backup_part_secrets_needs_pin">Potrebna je koda PIN kopije</string>

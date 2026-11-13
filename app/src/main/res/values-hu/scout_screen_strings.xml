@@ -184,8 +184,8 @@
     <string name="scout_genre_western">Western</string>
     <string name="scout_licence_icon_title">Scout ikon</string>
     <string name="scout_licence_icon_body">Forrás: Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oscar: legjobb film díjazottak</string>
-    <string name="scout_award_oscar_nominees">Oscar: legjobb film jelöltek</string>
+    <string name="scout_award_oscar_winners">Oscar: díjazottak</string>
+    <string name="scout_award_oscar_nominees">Oscar: jelöltek</string>
     <string name="scout_award_lion">Arany Oroszlán</string>
     <string name="scout_award_globes">Golden Globe</string>
     <string name="scout_award_palme">Palme d\'Or</string>

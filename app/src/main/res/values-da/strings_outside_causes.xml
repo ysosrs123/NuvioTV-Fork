@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Denne kilde virker ikke lige nu. Arc kan ikke rette det, så der er ingen grund til at rapportere det. Prøv en anden kilde.</string>
+    <string name="report_check_blocked_hint_notice">Denne kilde virker ikke lige nu. Arc kan ikke rette det, så der er ingen grund til at rapportere det. Tjek din addon eller Debrid-konto, eller prøv en anden kilde.</string>
+    <string name="stream_large_file_short">Stor fil til denne enhed</string>
+    <string name="stream_large_file_uhd">Dette er en meget stor 4K-fil. Enheder med mindre hukommelse, som denne, har ofte svært ved filer af denne størrelse, så afspilningen kan gå i stå eller stoppe. En 1080p-udgave af den samme film afspilles som regel mere jævnt.</string>
+    <string name="stream_large_file_other">Dette er en meget stor fil. Enheder med mindre hukommelse, som denne, har ofte svært ved filer af denne størrelse, så afspilningen kan gå i stå eller stoppe. En mindre 1080p-udgave, mærket WEB i stedet for Remux, afspilles som regel mere jævnt.</string>
+</resources>

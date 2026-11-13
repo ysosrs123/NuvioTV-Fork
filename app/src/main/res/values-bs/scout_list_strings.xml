@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Južna Azija</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: nominovani</string>
+    <string name="scout_award_globes_nominees">Zlatni globus: nominovani</string>
+    <string name="scout_award_emmy_nominees">Emmys: nominovani</string>
+    <string name="scout_award_tab_picture">Najbolji film</string>
+    <string name="scout_award_tab_best_film">Najbolji film</string>
+    <string name="scout_award_tab_director">Režija</string>
+    <string name="scout_award_tab_actor">Glumac</string>
+    <string name="scout_award_tab_actress">Glumica</string>
+    <string name="scout_award_tab_international">Međunarodni</string>
+    <string name="scout_award_tab_limited">Miniserija</string>
+</resources>

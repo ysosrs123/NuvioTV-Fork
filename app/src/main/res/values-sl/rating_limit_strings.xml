@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Starostna omejitev</string>
+    <string name="rating_limit_none">Brez omejitve</string>
+    <string name="rating_limit_preschool">Predšolski otroci</string>
+    <string name="rating_limit_young">Mlajši otroci</string>
+    <string name="rating_limit_pg">Starejši otroci</string>
+    <string name="rating_limit_teen">Najstniki</string>
+    <string name="rating_limit_hint">Kaj lahko ta profil predvaja brez kode PIN profila %1$s</string>
+    <string name="rating_limit_note">Uporablja ameriške oznake s TMDB. Nad omejitvijo ali brez oznake Predvajaj zahteva kodo PIN profila %1$s.</string>
+    <string name="rating_limit_needs_pin">Najprej nastavite kodo PIN za profil %1$s. Starostna omejitev jo zahteva.</string>
+    <string name="rating_limit_change_heading">Vnesite kodo PIN profila %1$s za spremembo omejitve</string>
+    <string name="rating_limit_change_support">Nova omejitev profila %1$s: %2$s</string>
+    <string name="rating_limit_saved">Omejitev profila %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Za predvajanje je potrebna koda PIN profila %1$s</string>
+    <string name="rating_limit_play_rated">%1$s ima oznako %2$s. Omejitev profila %3$s je %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc ne najde oznake za %1$s. Omejitev profila %2$s je %3$s.</string>
+    <string name="rating_limit_play_no_pin">Nastavite kodo PIN za profil %1$s, da boste lahko predvajali naslove nad omejitvijo profila %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s se ne more pridružiti temu ogledu</string>
+    <string name="rating_limit_party_rated">Skupina gleda %1$s z oznako %2$s. Omejitev profila %3$s je %4$s.</string>
+    <string name="rating_limit_party_unrated">Skupina gleda %1$s, Arc pa ne more preveriti oznake. Omejitev profila %2$s je %3$s.</string>
+    <string name="rating_limit_add_heading">Vnesite kodo PIN profila %1$s za dodajanje profila</string>
+    <string name="rating_limit_add_support">En profil v tej napravi ima starostno omejitev.</string>
+</resources>

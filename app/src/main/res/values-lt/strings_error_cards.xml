@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc perskaitė šį failą, bet nerado jame vaizdo, kurį galėtų paleisti. Tokie būna vaizdo montavimui skirti failai, pvz., Apple ProRes. Pasirinkite kitą šio kūrinio kopiją.</string>
+    <string name="player_error_card_silent_title">Šaltinis neatsakė</string>
+    <string name="player_error_card_silent">Šio šaltinio serveris nesiuntė vaizdo %1$d s. Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį arba bandykite šį vėliau dar kartą.</string>
+    <string name="player_error_card_fault_title">Šaltinio serveryje gedimas</string>
+    <string name="player_error_card_fault">Šio šaltinio serveris atsakė klaida (%1$d). Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį arba bandykite šį vėliau dar kartą.</string>
+    <string name="player_error_card_blocked_title">Šaltinis užblokavo šią nuorodą</string>
+    <string name="player_error_card_blocked">Šio šaltinio serveris atmetė nuorodą (klaida %1$d). Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį.</string>
+    <string name="player_error_card_gone_title">Šio failo šaltinyje nebėra</string>
+    <string name="player_error_card_gone">Serveris praneša, kad šio failo nebėra (klaida %1$d). Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį.</string>
+    <string name="player_error_card_expired_title">Ši nuoroda nebegalioja</string>
+    <string name="player_error_card_expired">Šaltinio nuorodos galiojimas baigėsi (klaida %1$d). Grįžkite ir vėl atidarykite kūrinį, kad gautumėte naują nuorodą, arba pabandykite kitą šaltinį.</string>
+    <string name="player_error_card_limit_title">Paslauga riboja užklausas</string>
+    <string name="player_error_card_limit">Ši paslauga prašo Arc sulėtinti tempą. Tai paslaugos problema, ne Arc. Šiek tiek palaukite ir bandykite dar kartą arba pasirinkite šaltinį iš kito serverio.</string>
+    <string name="player_error_card_unreachable_title">Arc nepavyko pasiekti šaltinio</string>
+    <string name="player_error_card_unreachable">Šio šaltinio serveris nepasiekiamas. Jei kiti šaltiniai veikia, tas serveris neveikia: pasirinkite kitą. Jei niekas neveikia, patikrinkite įrenginio interneto ryšį.</string>
+    <string name="player_error_card_notice_title">Teikėjas atsiuntė pranešimą, o ne filmą</string>
+    <string name="player_error_card_notice">Vietoj filmo priedas arba Debrid paslauga atsiuntė trumpą vaizdo pranešimą. Dažniausiai tai reiškia, kad failas dar neparuoštas, jūsų paskyra pasiekė limitą arba baigėsi prisijungimo galiojimas. Tai priedo problema, ne Arc. Patikrinkite priedą ar savo Debrid paskyrą arba pabandykite kitą šaltinį.</string>
+    <string name="player_error_card_not_video_title">Ši nuoroda nėra vaizdo įrašas</string>
+    <string name="player_error_card_not_video">Serveris atsiuntė ne vaizdo įrašą, o dažnai tinklalapį arba archyvą. Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį.</string>
+    <string name="player_error_card_box_title">Šis įrenginys negali paleisti šio failo</string>
+    <string name="player_error_card_box">Šis failas yra %1$s, o tai daugiau, nei gali paleisti šio įrenginio vaizdo lustas. Tai įrenginio problema, ne Arc. Pasirinkite kitą šio kūrinio kopiją, pvz., 4K arba 1080p.</string>
+    <string name="player_error_card_box_no_detail">Šio failo vaizdo formatas viršija šio įrenginio vaizdo lusto galimybes. Tai įrenginio problema, ne Arc. Pasirinkite kitą šio kūrinio kopiją, pvz., 4K arba 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc negali perskaityti šio failo vaizdo</string>
+    <string name="player_error_facts_no_answer">nėra atsakymo</string>
+    <string name="player_error_facts_no_connection">nėra ryšio</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Kiti šaltiniai</string>
+    <string name="report_check_title">Ką rado Arc</string>
+    <string name="report_check_hint">Panašu, kad problema yra už Arc ribų, todėl pranešimas jos neišspręs. Pirmiausia pabandykite štai ką.</string>
+    <string name="report_check_try_source">Pabandyti kitą šaltinį</string>
+    <string name="report_check_try_source_notice">arba patikrinkite priedą ar Debrid paskyrą</string>
+    <string name="report_check_send_anyway">Vis tiek siųsti</string>
+    <string name="debrid_busy">Debrid paslauga šiuo metu užimta (klaida %1$d). Tai paslaugos problema, ne Arc. Bandykite dar kartą po akimirkos arba pasirinkite kitą šaltinį.</string>
+</resources>

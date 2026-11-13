@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Južna Azija</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: nominiranci</string>
+    <string name="scout_award_globes_nominees">Zlati globusi: nominiranci</string>
+    <string name="scout_award_emmy_nominees">Emmys: nominiranci</string>
+    <string name="scout_award_tab_picture">Najboljši film</string>
+    <string name="scout_award_tab_best_film">Najboljši film</string>
+    <string name="scout_award_tab_director">Režija</string>
+    <string name="scout_award_tab_actor">Igralec</string>
+    <string name="scout_award_tab_actress">Igralka</string>
+    <string name="scout_award_tab_international">Mednarodni</string>
+    <string name="scout_award_tab_limited">Miniserija</string>
+</resources>

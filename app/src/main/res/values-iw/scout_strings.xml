@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">מסתיר את כפתור הדירוג, את האגודלים בתפריט ואת השאלה אחרי סרט. הדירוגים עדיין נספרים.</string>
     <string name="scout_ask_enabled">לשאול איך היה אחרי סרט</string>
     <string name="scout_ask_enabled_sub">לא בשבילי, אהבתי או אהבתי מאוד ביציאה מהנגן</string>
+    <string name="scout_send_ratings">שליחת הדירוגים שלי לשירותי מעקב</string>
+    <string name="scout_send_ratings_sub">לא בשבילי, אהבתי ואהבתי מאוד נשלחים ל-Trakt, Simkl, MDBList ו-WeTrakr כ-3, 7 ו-10 מתוך 10. דירוג שניתן ידנית בשירות מעקב לא משתנה אף פעם. Simkl מקבל רק כותרים שנצפו.</string>
+    <string name="scout_send_ratings_none">אין שירות מעקב מחובר בפרופיל הזה, ולכן עדיין לא נשלח דבר.</string>
+    <string name="scout_use_ratings">שימוש בדירוגים שלי משירותי המעקב</string>
+    <string name="scout_use_ratings_sub">דירוגים משירותי המעקב הופכים כאן לאגודלים: 9 או 10 הם אהבתי מאוד, 6 עד 8 אהבתי, 1 עד 4 לא בשבילי. אגודל שנבחר ב-Arc תמיד גובר.</string>
+    <string name="scout_thumb_from">מ-%1$s</string>
     <string name="scout_your_thumbs">האגודלים שלך</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">כותר %1$d דורג. פתיחה לשינוי או ביטול</item>

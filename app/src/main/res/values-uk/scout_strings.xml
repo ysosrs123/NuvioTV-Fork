@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Приховує кнопку Оцінити, пальці в меню та запитання після фільму. Ваші оцінки й далі враховуються.</string>
     <string name="scout_ask_enabled">Запитувати про фільм після перегляду</string>
     <string name="scout_ask_enabled_sub">Не для мене, подобається чи обожнюю під час виходу з плеєра</string>
+    <string name="scout_send_ratings">Надсилати мої оцінки в трекери</string>
+    <string name="scout_send_ratings_sub">Не для мене, Подобається та Обожнюю надходять у Trakt, Simkl, MDBList і WeTrakr як 3, 7 і 10 з 10. Оцінка, яку ви самі поставили в трекері, ніколи не змінюється. Simkl отримує лише переглянуті тайтли.</string>
+    <string name="scout_send_ratings_none">У цьому профілі не підключено жодного трекера, тож поки нічого не надсилається.</string>
+    <string name="scout_use_ratings">Використовувати мої оцінки з трекерів</string>
+    <string name="scout_use_ratings_sub">Оцінки з ваших трекерів переносяться сюди: 9 або 10 означає Обожнюю, від 6 до 8 Подобається, від 1 до 4 Не для мене. Оцінка, поставлена в Arc, завжди важливіша.</string>
+    <string name="scout_thumb_from">З %1$s</string>
     <string name="scout_your_thumbs">Ваші оцінки</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">Оцінено %1$d тайтл. Відкрийте, щоб змінити або скасувати</item>

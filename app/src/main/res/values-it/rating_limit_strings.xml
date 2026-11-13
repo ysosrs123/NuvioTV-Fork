@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Limite di età</string>
+    <string name="rating_limit_none">Nessun limite</string>
+    <string name="rating_limit_preschool">Età prescolare</string>
+    <string name="rating_limit_young">Bambini piccoli</string>
+    <string name="rating_limit_pg">Bambini più grandi</string>
+    <string name="rating_limit_teen">Adolescenti</string>
+    <string name="rating_limit_hint">Cosa può riprodurre questo profilo senza il PIN di %1$s</string>
+    <string name="rating_limit_note">Usa le classificazioni USA di TMDB. Oltre il limite, o senza classificazione, la riproduzione chiede il PIN di %1$s.</string>
+    <string name="rating_limit_needs_pin">Imposta prima un PIN sul profilo di %1$s. Il limite di età lo richiede.</string>
+    <string name="rating_limit_change_heading">Inserisci il PIN di %1$s per cambiare il limite</string>
+    <string name="rating_limit_change_support">Nuovo limite di età di %1$s: %2$s</string>
+    <string name="rating_limit_saved">Limite di età di %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Serve il PIN di %1$s per riprodurre questo titolo</string>
+    <string name="rating_limit_play_rated">%1$s è classificato %2$s. Il limite di %3$s è %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc non trova una classificazione per %1$s. Il limite di %2$s è %3$s.</string>
+    <string name="rating_limit_play_no_pin">Imposta un PIN sul profilo di %1$s per riprodurre titoli oltre il limite di %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s non può unirsi a questo watch party</string>
+    <string name="rating_limit_party_rated">Il watch party sta guardando %1$s, classificato %2$s. Il limite di %3$s è %4$s.</string>
+    <string name="rating_limit_party_unrated">Il watch party sta guardando %1$s, senza una classificazione che Arc possa verificare. Il limite di %2$s è %3$s.</string>
+    <string name="rating_limit_add_heading">Inserisci il PIN di %1$s per aggiungere un profilo</string>
+    <string name="rating_limit_add_support">Un profilo su questo dispositivo ha un limite di età.</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Šis šaltinis šiuo metu neveikia. Arc to sutaisyti negali, todėl apie tai pranešti nereikia. Pabandykite kitą šaltinį.</string>
+    <string name="report_check_blocked_hint_notice">Šis šaltinis šiuo metu neveikia. Arc to sutaisyti negali, todėl apie tai pranešti nereikia. Patikrinkite priedą ar Debrid paskyrą arba pabandykite kitą šaltinį.</string>
+    <string name="stream_large_file_short">Didelis failas šiam įrenginiui</string>
+    <string name="stream_large_file_uhd">Tai labai didelis 4K failas. Įrenginiai su mažiau atminties, kaip šis, dažnai sunkiai susidoroja su tokio dydžio failais, todėl atkūrimas gali strigti arba nutrūkti. To paties filmo 1080p versija paprastai rodoma sklandžiau.</string>
+    <string name="stream_large_file_other">Tai labai didelis failas. Įrenginiai su mažiau atminties, kaip šis, dažnai sunkiai susidoroja su tokio dydžio failais, todėl atkūrimas gali strigti arba nutrūkti. Mažesnė 1080p versija, pažymėta WEB, o ne Remux, paprastai rodoma sklandžiau.</string>
+</resources>

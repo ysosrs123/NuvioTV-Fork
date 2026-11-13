@@ -4408,14 +4408,14 @@
     <string name="report_item_title">Titre et nom du fichier</string>
     <string name="report_item_note">Ajouter une note</string>
     <string name="report_item_note_hint">Facultatif</string>
-    <string name="report_note_placeholder">Que devons-nous savoir ?</string>
+    <string name="report_note_placeholder">Autre chose à savoir ?</string>
     <string name="report_never_sent">Jamais envoyés : liens de flux, clés debrid ou d\'addons, votre compte ou e-mail. Le service de signalement ne conserve pas votre adresse IP.</string>
     <string name="report_send">Envoyer</string>
     <string name="report_failed_limit">Ce boîtier a atteint la limite de signalements du jour. Veuillez réessayer demain.</string>
     <string name="report_sent_title">Signalement envoyé</string>
     <string name="report_sent_qr_description">Code QR de votre signalement</string>
     <string name="report_sent_phone">Scannez avec votre téléphone pour ajouter des photos ou suivre votre signalement. Arc est un projet amateur, tous les signalements ne reçoivent donc pas de réponse.</string>
-    <string name="report_sent_no_phone">Merci de nous l\'avoir signalé. Arc est un projet amateur, tous les signalements ne reçoivent donc pas de réponse.</string>
+    <string name="report_sent_no_phone">Merci pour le signalement. Arc est un projet amateur, tous les signalements ne reçoivent donc pas de réponse.</string>
     <string name="report_sent_back">Retour à la vidéo</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="one">Choisissez tout ce qui s\'applique. Arc a gardé la dernière minute.</item>
@@ -4425,7 +4425,7 @@
         <item quantity="one">Réglages du lecteur et dernière minute</item>
         <item quantity="other">Réglages du lecteur et %1$d dernières minutes</item>
     </plurals>
-    <string name="report_settings_subtitle">Dites-nous ce qui n\'a pas marché ou ce que vous aimeriez qu\'Arc fasse</string>
+    <string name="report_settings_subtitle">Dites ce qui n\'a pas marché ou ce que vous aimeriez qu\'Arc fasse</string>
     <string name="report_group_choose">Que souhaitez-vous signaler ?</string>
     <string name="report_group_options">Options</string>
     <string name="report_row_playback">Un problème de lecture</string>
@@ -4496,11 +4496,22 @@
     <string name="display_mode_measured">Mesuré</string>
     <string name="display_mode_measured_off">L’écran tourne à %1$s Hz, et non à %2$s Hz</string>
     <string name="qms_hint_title">Votre TV ne garde pas la fréquence d’images du film</string>
-    <string name="qms_hint_body_qms">Arc a demandé %1$s Hz. Votre TV a changé de fréquence sans bascule complète (QMS) et tourne à %2$s Hz. Cela se voit par une petite saccade régulière.</string>
-    <string name="qms_hint_body">Arc a demandé %1$s Hz, mais votre écran tourne à %2$s Hz. Cela se voit par une petite saccade régulière.</string>
     <string name="qms_hint_fix">Meilleure solution : désactiver QMS sur la TV</string>
     <string name="qms_hint_fix_hint">Dans les réglages de la TV elle-même, pour cette entrée HDMI. Arc ne peut pas le modifier.</string>
     <string name="qms_hint_off">Désactiver l’adaptation de fréquence</string>
-    <string name="qms_hint_off_hint">Dès le prochain film, l’écran reste à sa fréquence habituelle. Vous pouvez la réactiver dans les Paramètres.</string>
     <string name="qms_hint_keep">Ne rien changer</string>
+    <string name="sub_prefer_addon_subtitles">Sous-titres des addons d\'abord</string>
+    <string name="sub_prefer_addon_subtitles_desc">Choisit un sous-titre d\'addon plutôt que celui du fichier quand les deux sont dans votre langue. Celui du fichier sert quand aucun addon n\'en a.</string>
+    <string name="playback_afr_settle_delay">Délai après changement de fréquence</string>
+    <string name="playback_afr_settle_delay_sub">Durée pendant laquelle un film attend le téléviseur après un changement de fréquence. Augmentez-la si les films démarrent sans image ou sans son via un ampli ou une barre de son.</string>
+    <string name="playback_afr_settle_delay_auto">Auto</string>
+    <string name="playback_afr_settle_delay_auto_sub">Deux secondes, puis jusqu\'au retour de la liaison audio du téléviseur</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc a demandé %1$s Hz, mais votre écran fonctionne à %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc a demandé %1$s Hz. Votre téléviseur a changé de fréquence sans changement complet (QMS) et fonctionne à %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Une image peut être répétée environ toutes les %1$d secondes.</string>
+    <string name="qms_hint_effect_judder">Cela se voit comme une saccade régulière.</string>
+    <string name="qms_hint_mode_tip">Certains boîtiers et amplis ont un réglage pour les fréquences de film exactes (23,976 Hz), souvent appelées fréquences fractionnaires. Arc ne peut pas le modifier.</string>
+    <string name="qms_hint_off_hint_qms">Arc cesse alors de demander la fréquence du film. Votre téléviseur peut quand même changer de fréquence de lui-même.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>

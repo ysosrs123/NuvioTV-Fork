@@ -4420,14 +4420,14 @@
     <string name="report_item_title">Başlık ve dosya adı</string>
     <string name="report_item_note">Not ekle</string>
     <string name="report_item_note_hint">İsteğe bağlı</string>
-    <string name="report_note_placeholder">Bilmemiz gereken ne var?</string>
+    <string name="report_note_placeholder">Bilinmesi gereken başka bir şey var mı?</string>
     <string name="report_never_sent">Asla gönderilmez: yayın bağlantıları, debrid veya eklenti anahtarları, hesabın veya e-postan. Rapor hizmeti IP adresini saklamaz.</string>
     <string name="report_send">Gönder</string>
     <string name="report_failed_limit">Bu cihaz bugünkü rapor sınırına ulaştı. Lütfen yarın tekrar dene.</string>
     <string name="report_sent_title">Rapor gönderildi</string>
     <string name="report_sent_qr_description">Raporun için QR kod</string>
     <string name="report_sent_phone">Fotoğraf eklemek veya raporunu takip etmek için telefonunla tara. Arc bir hobi projesi, bu yüzden her rapora yanıt verilemiyor.</string>
-    <string name="report_sent_no_phone">Bize bildirdiğin için teşekkürler. Arc bir hobi projesi, bu yüzden her rapora yanıt verilemiyor.</string>
+    <string name="report_sent_no_phone">Rapor için teşekkürler. Arc bir hobi projesi, bu yüzden her rapora yanıt verilemiyor.</string>
     <string name="report_sent_back">İzlemeye dön</string>
     <plurals name="report_panel_what_hint_kept">
         <item quantity="other">Uygun olanların hepsini seç. Arc son %1$d dakikayı sakladı.</item>
@@ -4435,7 +4435,7 @@
     <plurals name="report_item_playback_kept">
         <item quantity="other">Oynatıcı ayarları ve son %1$d dakika</item>
     </plurals>
-    <string name="report_settings_subtitle">Neyin ters gittiğini veya Arc\'tan ne istediğini anlat</string>
+    <string name="report_settings_subtitle">Neyin ters gittiğini veya Arc\'ın ne yapmasını istediğini anlat</string>
     <string name="report_group_choose">Ne bildirmek istiyorsun?</string>
     <string name="report_group_options">Seçenekler</string>
     <string name="report_row_playback">Oynatma sorunu</string>
@@ -4506,11 +4506,22 @@
     <string name="display_mode_measured">Ölçülen</string>
     <string name="display_mode_measured_off">Ekran %1$s Hz hızında çalışıyor, %2$s Hz değil</string>
     <string name="qms_hint_title">TV\'niz filmin kare hızını korumuyor</string>
-    <string name="qms_hint_body_qms">Arc %1$s Hz istedi. TV\'niz tam geçiş yapmadan hız değiştirdi (QMS) ve %2$s Hz hızında çalışıyor. Bu, küçük ve düzenli bir takılma olarak görünür.</string>
-    <string name="qms_hint_body">Arc %1$s Hz istedi, ancak ekranınız %2$s Hz hızında çalışıyor. Bu, küçük ve düzenli bir takılma olarak görünür.</string>
     <string name="qms_hint_fix">En iyi çözüm: TV\'de QMS\'yi kapatın</string>
     <string name="qms_hint_fix_hint">TV\'nin bu HDMI girişine ait kendi ayarlarında. Arc bunu değiştiremez.</string>
     <string name="qms_hint_off">Kare hızı eşleştirmeyi kapat</string>
-    <string name="qms_hint_off_hint">Sonraki filmden itibaren ekran normal hızında kalır. Ayarlar\'dan yeniden açabilirsiniz.</string>
     <string name="qms_hint_keep">Olduğu gibi bırak</string>
+    <string name="sub_prefer_addon_subtitles">Önce eklenti altyazıları</string>
+    <string name="sub_prefer_addon_subtitles_desc">İkisi de sizin dilinizdeyse dosyanın kendi altyazısı yerine eklenti altyazısını seçer. Hiçbir eklentide yoksa dosyanın kendi altyazısı kullanılır.</string>
+    <string name="playback_afr_settle_delay">Yenileme hızı değişiminden sonra gecikme</string>
+    <string name="playback_afr_settle_delay_sub">Bir hız değişiminden sonra filmin televizyonu ne kadar bekleyeceği. Filmler bir alıcı veya ses çubuğu üzerinden siyah ekranla ya da sessiz başlıyorsa artırın.</string>
+    <string name="playback_afr_settle_delay_auto">Otomatik</string>
+    <string name="playback_afr_settle_delay_auto_sub">İki saniye, ardından televizyonun ses bağlantısı geri gelene kadar</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d sn</string>
+    <string name="qms_hint_body_v2">Arc %1$s Hz istedi, ancak ekranınız %2$s Hz\'de çalışıyor. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc %1$s Hz istedi. Televizyonunuz tam geçiş yapmadan hızı değiştirdi (QMS) ve %2$s Hz\'de çalışıyor. %3$s</string>
+    <string name="qms_hint_effect_repeat">Yaklaşık her %1$d saniyede bir kare tekrarlanabilir.</string>
+    <string name="qms_hint_effect_judder">Bu, düzenli bir takılma olarak görünür.</string>
+    <string name="qms_hint_mode_tip">Bazı kutular ve alıcılarda tam film hızları (23,976 Hz) için, genellikle kesirli hızlar denen bir ayar vardır. Arc bunu değiştiremez.</string>
+    <string name="qms_hint_off_hint_qms">Arc bu durumda filmin hızını istemeyi bırakır. Televizyonunuz yine de hızı kendisi değiştirebilir.</string>
+    <string name="qms_hint_ok">Tamam</string>
 </resources>

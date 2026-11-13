@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">Elrejti az Értékelés gombot, a menü hüvelykujjait és a film utáni kérdést. Az értékeléseid továbbra is számítanak.</string>
     <string name="scout_ask_enabled">Rákérdezés film után</string>
     <string name="scout_ask_enabled_sub">Nem nekem való, tetszik vagy imádom, amikor kilépsz a lejátszóból</string>
+    <string name="scout_send_ratings">Értékeléseim küldése a trackereknek</string>
+    <string name="scout_send_ratings_sub">A Nem nekem való, a Tetszik és az Imádom 10-ből 3, 7 és 10 pontként jut el a Trakt, Simkl, MDBList és WeTrakr szolgáltatásba. Amit saját magad értékeltél egy trackeren, az sosem változik. A Simkl csak a már megnézett címeket kapja meg.</string>
+    <string name="scout_send_ratings_none">Ezen a profilon nincs bejelentkezett tracker, így egyelőre semmi sem megy el.</string>
+    <string name="scout_use_ratings">Tracker-értékeléseim használata</string>
+    <string name="scout_use_ratings_sub">A trackereken adott értékeléseid itt hüvelykujjakká válnak: a 9 vagy 10 Imádom, a 6-8 Tetszik, az 1-4 Nem nekem való. Az Arc alkalmazásban megnyomott hüvelykujj mindig elsőbbséget élvez.</string>
+    <string name="scout_thumb_from">Forrás: %1$s</string>
     <string name="scout_your_thumbs">Hüvelykujjaid</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="one">%1$d cím értékelve. Nyisd meg a módosításhoz vagy visszavonáshoz</item>

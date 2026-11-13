@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_region_south_asia">Južná Ázia</string>
+    <string name="scout_award_criterion">Criterion Collection</string>
+    <string name="scout_award_bafta_nominees">BAFTA: nominácie</string>
+    <string name="scout_award_globes_nominees">Zlaté glóbusy: nominácie</string>
+    <string name="scout_award_emmy_nominees">Emmys: nominácie</string>
+    <string name="scout_award_tab_picture">Najlepší film</string>
+    <string name="scout_award_tab_best_film">Najlepší film</string>
+    <string name="scout_award_tab_director">Réžia</string>
+    <string name="scout_award_tab_actor">Herec</string>
+    <string name="scout_award_tab_actress">Herečka</string>
+    <string name="scout_award_tab_international">Medzinárodný</string>
+    <string name="scout_award_tab_limited">Minisériál</string>
+</resources>

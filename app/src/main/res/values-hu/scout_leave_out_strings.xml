@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Nyelvek kihagyása</string>
+    <string name="scout_leave_out_languages_sub">Nyelvek, amelyeket soha nem akarsz látni</string>
+    <string name="scout_language_indian">Indiai nyelvek</string>
+</resources>

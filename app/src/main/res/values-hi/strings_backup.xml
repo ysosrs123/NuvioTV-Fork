@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">नाम और तस्वीरें</string>
     <string name="backup_part_settings">Arc सेटिंग्स</string>
     <string name="backup_part_settings_sub">Scout, थंबनेल, DNS, रिमोट बटन और भी बहुत कुछ</string>
+    <string name="backup_part_history">लाइब्रेरी और देखने का इतिहास</string>
+    <string name="backup_part_history_sub">सेव किए गए टाइटल, देखना जारी रखें और देखे जाने के निशान</string>
+    <string name="backup_part_history_signed_in">आपका Nuvio अकाउंट इन्हें पहले से रखता है। सिर्फ़ बिना साइन इन वाले डिवाइस पर रीस्टोर होते हैं।</string>
+    <string name="backup_part_history_counts">सेव किए गए टाइटल: %1$d। देखे गए: %2$d। अधूरे: %3$d।</string>
+    <string name="backup_supporter">सपोर्टर स्टेटस</string>
+    <string name="backup_supporter_yes">हां। सपोर्टर के रंग और आइकन बने रहते हैं।</string>
+    <string name="backup_supporter_no">नहीं</string>
     <string name="backup_part_secrets">पासवर्ड और कीज़</string>
     <string name="backup_part_secrets_saved">आपके PIN से लॉक</string>
     <string name="backup_part_secrets_needs_pin">बैकअप PIN ज़रूरी है</string>

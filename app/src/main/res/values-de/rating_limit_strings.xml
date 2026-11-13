@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Altersgrenze</string>
+    <string name="rating_limit_none">Keine Grenze</string>
+    <string name="rating_limit_preschool">Vorschulkinder</string>
+    <string name="rating_limit_young">Jüngere Kinder</string>
+    <string name="rating_limit_pg">Ältere Kinder</string>
+    <string name="rating_limit_teen">Teenager</string>
+    <string name="rating_limit_hint">Was dieses Profil ohne die PIN von %1$s abspielen darf</string>
+    <string name="rating_limit_note">Nutzt die US-Altersfreigaben von TMDB. Über der Grenze oder ohne Freigabe fragt Abspielen nach der PIN von %1$s.</string>
+    <string name="rating_limit_needs_pin">Lege zuerst eine PIN für das Profil von %1$s fest. Die Altersgrenze braucht sie.</string>
+    <string name="rating_limit_change_heading">PIN von %1$s eingeben, um die Grenze zu ändern</string>
+    <string name="rating_limit_change_support">Neue Altersgrenze für %1$s: %2$s</string>
+    <string name="rating_limit_saved">Altersgrenze für %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Zum Abspielen ist die PIN von %1$s nötig</string>
+    <string name="rating_limit_play_rated">%1$s hat die Freigabe %2$s. Die Grenze für %3$s ist %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc findet keine Freigabe für %1$s. Die Grenze für %2$s ist %3$s.</string>
+    <string name="rating_limit_play_no_pin">Lege eine PIN für das Profil von %1$s fest, um Titel über der Grenze für %2$s abzuspielen.</string>
+    <string name="rating_limit_party_heading">%1$s kann dieser Watch-Party nicht beitreten</string>
+    <string name="rating_limit_party_rated">Die Watch-Party schaut %1$s, Freigabe %2$s. Die Grenze für %3$s ist %4$s.</string>
+    <string name="rating_limit_party_unrated">Die Watch-Party schaut %1$s, für das Arc keine Freigabe prüfen kann. Die Grenze für %2$s ist %3$s.</string>
+    <string name="rating_limit_add_heading">PIN von %1$s eingeben, um ein Profil hinzuzufügen</string>
+    <string name="rating_limit_add_support">Ein Profil auf diesem Gerät hat eine Altersgrenze.</string>
+</resources>

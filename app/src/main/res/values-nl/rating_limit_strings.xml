@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Leeftijdsgrens</string>
+    <string name="rating_limit_none">Geen grens</string>
+    <string name="rating_limit_preschool">Kleuters</string>
+    <string name="rating_limit_young">Jonge kinderen</string>
+    <string name="rating_limit_pg">Oudere kinderen</string>
+    <string name="rating_limit_teen">Tieners</string>
+    <string name="rating_limit_hint">Wat dit profiel zonder de pincode van %1$s mag afspelen</string>
+    <string name="rating_limit_note">Gebruikt de Amerikaanse classificaties van TMDB. Boven de grens, of zonder classificatie, wordt bij het afspelen om de pincode van %1$s gevraagd.</string>
+    <string name="rating_limit_needs_pin">Stel eerst een pincode in op het profiel van %1$s. De leeftijdsgrens heeft die nodig.</string>
+    <string name="rating_limit_change_heading">Voer de pincode van %1$s in om de grens te wijzigen</string>
+    <string name="rating_limit_change_support">Nieuwe leeftijdsgrens van %1$s: %2$s</string>
+    <string name="rating_limit_saved">Leeftijdsgrens van %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">De pincode van %1$s is nodig om dit af te spelen</string>
+    <string name="rating_limit_play_rated">%1$s heeft classificatie %2$s. De grens van %3$s is %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc vindt geen classificatie voor %1$s. De grens van %2$s is %3$s.</string>
+    <string name="rating_limit_play_no_pin">Stel een pincode in op het profiel van %1$s om titels boven de grens van %2$s af te spelen.</string>
+    <string name="rating_limit_party_heading">%1$s kan niet meedoen aan deze watchparty</string>
+    <string name="rating_limit_party_rated">De watchparty kijkt naar %1$s, classificatie %2$s. De grens van %3$s is %4$s.</string>
+    <string name="rating_limit_party_unrated">De watchparty kijkt naar %1$s, zonder classificatie die Arc kan controleren. De grens van %2$s is %3$s.</string>
+    <string name="rating_limit_add_heading">Voer de pincode van %1$s in om een profiel toe te voegen</string>
+    <string name="rating_limit_add_support">Een profiel op dit apparaat heeft een leeftijdsgrens.</string>
+</resources>

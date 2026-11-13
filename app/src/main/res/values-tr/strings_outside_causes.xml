@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_check_blocked_hint">Bu kaynak şu anda çalışmıyor. Arc bunu düzeltemez, bu yüzden bildirmene gerek yok. Başka bir kaynak dene.</string>
+    <string name="report_check_blocked_hint_notice">Bu kaynak şu anda çalışmıyor. Arc bunu düzeltemez, bu yüzden bildirmene gerek yok. Eklentini ya da Debrid hesabını kontrol et veya başka bir kaynak dene.</string>
+    <string name="stream_large_file_short">Bu cihaz için büyük dosya</string>
+    <string name="stream_large_file_uhd">Bu çok büyük bir 4K dosyası. Bu cihaz gibi belleği az olan cihazlar bu boyuttaki dosyalarda sık sık zorlanır, bu yüzden oynatma takılabilir veya durabilir. Aynı filmin 1080p sürümü genellikle daha akıcı oynar.</string>
+    <string name="stream_large_file_other">Bu çok büyük bir dosya. Bu cihaz gibi belleği az olan cihazlar bu boyuttaki dosyalarda sık sık zorlanır, bu yüzden oynatma takılabilir veya durabilir. Remux yerine WEB olarak işaretlenmiş, daha küçük bir 1080p sürümü genellikle daha akıcı oynar.</string>
+</resources>

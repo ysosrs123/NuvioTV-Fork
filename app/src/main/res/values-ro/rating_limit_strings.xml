@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Limită de vârstă</string>
+    <string name="rating_limit_none">Fără limită</string>
+    <string name="rating_limit_preschool">Preșcolari</string>
+    <string name="rating_limit_young">Copii mici</string>
+    <string name="rating_limit_pg">Copii mai mari</string>
+    <string name="rating_limit_teen">Adolescenți</string>
+    <string name="rating_limit_hint">Ce poate reda acest profil fără PIN-ul profilului %1$s</string>
+    <string name="rating_limit_note">Folosește clasificările din SUA de pe TMDB. Peste limită sau fără clasificare, Redă cere PIN-ul profilului %1$s.</string>
+    <string name="rating_limit_needs_pin">Setează mai întâi un PIN pentru profilul %1$s. Limita de vârstă are nevoie de el.</string>
+    <string name="rating_limit_change_heading">Introdu PIN-ul profilului %1$s pentru a schimba limita</string>
+    <string name="rating_limit_change_support">Noua limită pentru %1$s: %2$s</string>
+    <string name="rating_limit_saved">Limita pentru %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">E nevoie de PIN-ul profilului %1$s pentru redare</string>
+    <string name="rating_limit_play_rated">%1$s are clasificarea %2$s. Limita pentru %3$s este %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc nu găsește o clasificare pentru %1$s. Limita pentru %2$s este %3$s.</string>
+    <string name="rating_limit_play_no_pin">Setează un PIN pentru profilul %1$s ca să redai titluri peste limita pentru %2$s.</string>
+    <string name="rating_limit_party_heading">%1$s nu se poate alătura acestei petreceri</string>
+    <string name="rating_limit_party_rated">La petrecere se urmărește %1$s, clasificat %2$s. Limita pentru %3$s este %4$s.</string>
+    <string name="rating_limit_party_unrated">La petrecere se urmărește %1$s, fără o clasificare pe care Arc o poate verifica. Limita pentru %2$s este %3$s.</string>
+    <string name="rating_limit_add_heading">Introdu PIN-ul profilului %1$s pentru a adăuga un profil</string>
+    <string name="rating_limit_add_support">Un profil de pe acest dispozitiv are o limită de vârstă.</string>
+</resources>

@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Nomes e imagens</string>
     <string name="backup_part_settings">Definições do Arc</string>
     <string name="backup_part_settings_sub">Scout, miniaturas, DNS, botões do comando e mais</string>
+    <string name="backup_part_history">Biblioteca e histórico de visualização</string>
+    <string name="backup_part_history_sub">Títulos guardados, Continuar a ver e marcas de visto</string>
+    <string name="backup_part_history_signed_in">A tua conta Nuvio já guarda isto. Só é restaurado numa box sem sessão iniciada.</string>
+    <string name="backup_part_history_counts">Títulos guardados: %1$d. Vistos: %2$d. Em curso: %3$d.</string>
+    <string name="backup_supporter">Estado de apoiante</string>
+    <string name="backup_supporter_yes">Sim. As cores e os ícones de apoiante mantêm-se.</string>
+    <string name="backup_supporter_no">Não</string>
     <string name="backup_part_secrets">Palavras-passe e chaves</string>
     <string name="backup_part_secrets_saved">Protegidas com o teu PIN</string>
     <string name="backup_part_secrets_needs_pin">Precisa do PIN da cópia</string>

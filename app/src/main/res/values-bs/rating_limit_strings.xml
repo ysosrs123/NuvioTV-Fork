@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_limit_tab">Dobna granica</string>
+    <string name="rating_limit_none">Bez ograničenja</string>
+    <string name="rating_limit_preschool">Predškolci</string>
+    <string name="rating_limit_young">Mala djeca</string>
+    <string name="rating_limit_pg">Starija djeca</string>
+    <string name="rating_limit_teen">Tinejdžeri</string>
+    <string name="rating_limit_hint">Šta ovaj profil smije pustiti bez PIN-a profila %1$s</string>
+    <string name="rating_limit_note">Koristi američke oznake iz baze TMDB. Iznad granice ili bez oznake puštanje traži PIN profila %1$s.</string>
+    <string name="rating_limit_needs_pin">Prvo postavi PIN na profilu %1$s. Dobna granica ga traži.</string>
+    <string name="rating_limit_change_heading">Unesi PIN profila %1$s za promjenu granice</string>
+    <string name="rating_limit_change_support">Nova dobna granica profila %1$s: %2$s</string>
+    <string name="rating_limit_saved">Dobna granica profila %1$s: %2$s</string>
+    <string name="rating_limit_play_heading">Za puštanje je potreban PIN profila %1$s</string>
+    <string name="rating_limit_play_rated">Naslov %1$s ima oznaku %2$s. Granica profila %3$s je %4$s.</string>
+    <string name="rating_limit_play_unrated">Arc ne može pronaći oznaku za naslov %1$s. Granica profila %2$s je %3$s.</string>
+    <string name="rating_limit_play_no_pin">Postavi PIN na profilu %1$s za puštanje naslova iznad granice profila %2$s.</string>
+    <string name="rating_limit_party_heading">Profil %1$s se ne može pridružiti zajedničkom gledanju</string>
+    <string name="rating_limit_party_rated">Na zajedničkom gledanju je naslov %1$s, oznaka %2$s. Granica profila %3$s je %4$s.</string>
+    <string name="rating_limit_party_unrated">Na zajedničkom gledanju je naslov %1$s, bez oznake koju Arc može provjeriti. Granica profila %2$s je %3$s.</string>
+    <string name="rating_limit_add_heading">Unesi PIN profila %1$s za dodavanje profila</string>
+    <string name="rating_limit_add_support">Jedan profil na ovom uređaju ima dobnu granicu.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_leave_out_languages">Loại trừ ngôn ngữ</string>
+    <string name="scout_leave_out_languages_sub">Những ngôn ngữ bạn không bao giờ muốn xem</string>
+    <string name="scout_language_indian">Các ngôn ngữ Ấn Độ</string>
+</resources>

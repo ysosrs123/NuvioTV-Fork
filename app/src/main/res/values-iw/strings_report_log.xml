@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="report_item_log_hint_app">שורות אחרונות מהלוג של Arc, מנוקות באותו אופן</string>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_error_startup_video_track_unreadable">Arc je prebral to datoteko, a v njej ni našel slike, ki bi jo lahko predvajal. Takšne so datoteke za video montažo, na primer Apple ProRes. Izberite drugo različico naslova.</string>
+    <string name="player_error_card_silent_title">Vir se ni odzval</string>
+    <string name="player_error_card_silent">Strežnik tega vira %1$d s ni poslal videa. Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir ali ta vir znova pozneje.</string>
+    <string name="player_error_card_fault_title">Strežnik vira ima napako</string>
+    <string name="player_error_card_fault">Strežnik tega vira je odgovoril z napako (%1$d). Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir ali ta vir znova pozneje.</string>
+    <string name="player_error_card_blocked_title">Vir je blokiral to povezavo</string>
+    <string name="player_error_card_blocked">Strežnik tega vira je zavrnil povezavo (napaka %1$d). Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir.</string>
+    <string name="player_error_card_gone_title">Te datoteke pri viru ni več</string>
+    <string name="player_error_card_gone">Strežnik sporoča, da te datoteke ni več (napaka %1$d). Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir.</string>
+    <string name="player_error_card_expired_title">Ta povezava je potekla</string>
+    <string name="player_error_card_expired">Povezava vira je potekla (napaka %1$d). Vrnite se in znova odprite naslov za novo povezavo ali poskusite drug vir.</string>
+    <string name="player_error_card_limit_title">Storitev omejuje zahteve</string>
+    <string name="player_error_card_limit">Ta storitev prosi Arc, naj pošilja zahteve redkeje. Vzrok je pri storitvi, ne v aplikaciji Arc. Malo počakajte, preden poskusite znova, ali izberite vir z drugega strežnika.</string>
+    <string name="player_error_card_unreachable_title">Arc ne more doseči vira</string>
+    <string name="player_error_card_unreachable">Strežnik tega vira ni dosegljiv. Če drugi viri delujejo, ta strežnik ne deluje: izberite drugega. Če nič ne deluje, preverite internetno povezavo naprave.</string>
+    <string name="player_error_card_notice_title">Ponudnik je poslal obvestilo, ne filma</string>
+    <string name="player_error_card_notice">Namesto filma je dodatek ali storitev Debrid poslala kratek video z obvestilom. To običajno pomeni, da datoteka še ni pripravljena, da je vaš račun dosegel omejitev ali da je prijava potekla. Vzrok je pri dodatku, ne v aplikaciji Arc. Preverite dodatek ali svoj račun Debrid ali poskusite drug vir.</string>
+    <string name="player_error_card_not_video_title">Ta povezava ni video</string>
+    <string name="player_error_card_not_video">Strežnik je poslal nekaj, kar ni video, pogosto spletno stran ali arhiv. Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir.</string>
+    <string name="player_error_card_box_title">Ta naprava ne more predvajati te datoteke</string>
+    <string name="player_error_card_box">Ta datoteka je %1$s, več, kot zmore predvajati video čip te naprave. Vzrok je pri napravi, ne v aplikaciji Arc. Izberite drugo različico naslova, na primer 4K ali 1080p.</string>
+    <string name="player_error_card_box_no_detail">Video format te datoteke je zahtevnejši, kot zmore predvajati video čip te naprave. Vzrok je pri napravi, ne v aplikaciji Arc. Izberite drugo različico naslova, na primer 4K ali 1080p.</string>
+    <string name="player_error_card_unreadable_title">Arc ne more prebrati slike te datoteke</string>
+    <string name="player_error_facts_no_answer">ni odziva</string>
+    <string name="player_error_facts_no_connection">ni povezave</string>
+    <string name="player_error_facts_seconds">%1$d s</string>
+    <string name="player_error_other_sources">Drugi viri</string>
+    <string name="report_check_title">Kaj je našel Arc</string>
+    <string name="report_check_hint">Videti je, da je težava zunaj aplikacije Arc, zato je prijava ne more odpraviti. Najprej poskusite tole.</string>
+    <string name="report_check_try_source">Poskusite drug vir</string>
+    <string name="report_check_try_source_notice">ali preverite dodatek ali račun Debrid</string>
+    <string name="report_check_send_anyway">Vseeno pošlji</string>
+    <string name="debrid_busy">Storitev Debrid je trenutno preobremenjena (napaka %1$d). Vzrok je pri storitvi, ne v aplikaciji Arc. Poskusite znova čez trenutek ali izberite drug vir.</string>
+</resources>

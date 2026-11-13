@@ -25,6 +25,12 @@
     <string name="scout_ratings_off_note">評価ボタン、メニュー内の評価項目、映画の後の質問を非表示にします。これまでの評価は引き続き反映されます。</string>
     <string name="scout_ask_enabled">映画の後に感想を聞く</string>
     <string name="scout_ask_enabled_sub">プレーヤーを閉じるときに 好みじゃない・好き・大好き</string>
+    <string name="scout_send_ratings">評価をトラッカーに送信</string>
+    <string name="scout_send_ratings_sub">好みじゃない・好き・大好きは、Trakt、Simkl、MDBList、WeTrakrに10点中3・7・10点として送信されます。トラッカーで自分で付けた評価は変更されません。Simklには視聴済みの作品のみ送信されます。</string>
+    <string name="scout_send_ratings_none">このプロフィールにはサインイン中のトラッカーがないため、まだ何も送信されません。</string>
+    <string name="scout_use_ratings">トラッカーの評価を使う</string>
+    <string name="scout_use_ratings_sub">トラッカーで付けた評価がここでの評価になります：9か10は大好き、6〜8は好き、1〜4は好みじゃない。Arcで付けた評価が常に優先されます。</string>
+    <string name="scout_thumb_from">%1$sから</string>
     <string name="scout_your_thumbs">あなたの評価</string>
     <plurals name="scout_your_thumbs_sub">
         <item quantity="other">%1$d作品を評価済み。開いて変更・取り消し</item>

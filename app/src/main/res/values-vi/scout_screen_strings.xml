@@ -181,8 +181,8 @@
     <string name="scout_genre_western">Viễn Tây</string>
     <string name="scout_licence_icon_title">Biểu tượng Scout</string>
     <string name="scout_licence_icon_body">From Material Design Icons, Apache License 2.0.</string>
-    <string name="scout_award_oscar_winners">Oscar: Phim hay nhất đoạt giải</string>
-    <string name="scout_award_oscar_nominees">Oscar: Phim hay nhất được đề cử</string>
+    <string name="scout_award_oscar_winners">Oscar: đoạt giải</string>
+    <string name="scout_award_oscar_nominees">Oscar: được đề cử</string>
     <string name="scout_award_lion">Sư tử Vàng</string>
     <string name="scout_award_globes">Quả Cầu Vàng</string>
     <string name="scout_award_palme">Palme d\'Or</string>

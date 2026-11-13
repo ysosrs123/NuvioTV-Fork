@@ -23,6 +23,13 @@
     <string name="backup_part_profiles_sub">Imena i slike</string>
     <string name="backup_part_settings">Arc postavke</string>
     <string name="backup_part_settings_sub">Scout, sličice, DNS, gumbi daljinskog i ostalo</string>
+    <string name="backup_part_history">Biblioteka i povijest gledanja</string>
+    <string name="backup_part_history_sub">Spremljeni naslovi, Nastavi gledati i oznake pogledanog</string>
+    <string name="backup_part_history_signed_in">Tvoj Nuvio račun ovo već čuva. Vraća se samo na uređaju koji nije prijavljen.</string>
+    <string name="backup_part_history_counts">Spremljeni naslovi: %1$d. Pogledano: %2$d. U tijeku: %3$d.</string>
+    <string name="backup_supporter">Status podržavatelja</string>
+    <string name="backup_supporter_yes">Da. Boje i ikone podržavatelja ostaju.</string>
+    <string name="backup_supporter_no">Ne</string>
     <string name="backup_part_secrets">Lozinke i ključevi</string>
     <string name="backup_part_secrets_saved">Zaključano tvojim PIN-om</string>
     <string name="backup_part_secrets_needs_pin">Potreban je PIN kopije</string>

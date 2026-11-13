@@ -4191,7 +4191,7 @@
     <string name="report_item_title">Titel en bestandsnaam</string>
     <string name="report_item_note">Notitie toevoegen</string>
     <string name="report_item_note_hint">Optioneel</string>
-    <string name="report_note_placeholder">Wat moeten we weten?</string>
+    <string name="report_note_placeholder">Nog iets wat handig is om te weten?</string>
     <string name="report_never_sent">Nooit verzonden: streamlinks, debrid- of add-onsleutels, je account of e-mail. De meldingsdienst bewaart je IP-adres niet.</string>
     <string name="report_send">Verzenden</string>
     <string name="report_failed_limit">Dit apparaat heeft de limiet voor meldingen van vandaag bereikt. Probeer het morgen opnieuw.</string>
@@ -4279,11 +4279,22 @@
     <string name="display_mode_measured">Gemeten</string>
     <string name="display_mode_measured_off">Scherm draait op %1$s Hz, niet op %2$s Hz</string>
     <string name="qms_hint_title">Je tv houdt de framerate van de film niet aan</string>
-    <string name="qms_hint_body_qms">Arc vroeg om %1$s Hz. Je tv is van frequentie gewisseld zonder volledige omschakeling (QMS) en draait op %2$s Hz. Dat zie je als een kleine, regelmatige hapering.</string>
-    <string name="qms_hint_body">Arc vroeg om %1$s Hz, maar je scherm draait op %2$s Hz. Dat zie je als een kleine, regelmatige hapering.</string>
     <string name="qms_hint_fix">Beste oplossing: zet QMS uit op de tv</string>
     <string name="qms_hint_fix_hint">In de eigen instellingen van de tv voor deze HDMI-ingang. Arc kan dit niet wijzigen.</string>
     <string name="qms_hint_off">Framerate-aanpassing uitzetten</string>
-    <string name="qms_hint_off_hint">Vanaf de volgende film blijft het scherm op de gebruikelijke frequentie. Je kunt dit weer aanzetten in Instellingen.</string>
     <string name="qms_hint_keep">Zo laten</string>
+    <string name="sub_prefer_addon_subtitles">Eerst ondertiteling van add-ons</string>
+    <string name="sub_prefer_addon_subtitles_desc">Kiest ondertiteling van een add-on boven die van het bestand als beide in je taal zijn. Die van het bestand wordt gebruikt als geen add-on er een heeft.</string>
+    <string name="playback_afr_settle_delay">Vertraging na wisseling van verversingssnelheid</string>
+    <string name="playback_afr_settle_delay_sub">Hoelang een film op de tv wacht na een wisseling van snelheid. Verhoog dit als films via een receiver of soundbar zwart of zonder geluid beginnen.</string>
+    <string name="playback_afr_settle_delay_auto">Auto</string>
+    <string name="playback_afr_settle_delay_auto_sub">Twee seconden, daarna tot de geluidsverbinding van de tv terug is</string>
+    <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="qms_hint_body_v2">Arc vroeg om %1$s Hz, maar je scherm draait op %2$s Hz. %3$s</string>
+    <string name="qms_hint_body_qms_v2">Arc vroeg om %1$s Hz. Je tv veranderde de snelheid zonder volledige wissel (QMS) en draait op %2$s Hz. %3$s</string>
+    <string name="qms_hint_effect_repeat">Je ziet mogelijk ongeveer elke %1$d seconden een herhaald beeld.</string>
+    <string name="qms_hint_effect_judder">Dat zie je als een gelijkmatig haperen.</string>
+    <string name="qms_hint_mode_tip">Sommige boxen en receivers hebben een instelling voor exacte filmsnelheden (23,976 Hz), vaak fractionele snelheden genoemd. Arc kan dat niet wijzigen.</string>
+    <string name="qms_hint_off_hint_qms">Arc vraagt dan niet meer om de snelheid van de film. Je tv kan de snelheid nog steeds zelf veranderen.</string>
+    <string name="qms_hint_ok">OK</string>
 </resources>
