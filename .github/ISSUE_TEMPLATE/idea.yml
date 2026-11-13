@@ -6,6 +6,7 @@ body:
     attributes:
       value: |
         Nuvio Arc is a one-person hobby project. I read every issue but can't promise a reply or that an idea gets built.
+        You can also send an idea straight from Arc: Settings > Report a problem > An idea or request. Use an issue here if you want others to see it and add to it.
   - type: textarea
     id: idea
     attributes:
