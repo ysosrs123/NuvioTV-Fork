@@ -55,7 +55,8 @@ class ProfileSyncService @Inject constructor(
     private val postgrest: Postgrest,
     private val profileDataStore: ProfileDataStore,
     private val profileManager: ProfileManager,
-    private val syncClientIdentity: SyncClientIdentity
+    private val syncClientIdentity: SyncClientIdentity,
+    private val offlinePinStore: com.nuvio.tv.core.profile.OfflinePinStore
 ) {
     private val pullMutex = Mutex()
     private var pullFreshness = ProfilePullFreshness()
@@ -215,6 +216,7 @@ class ProfileSyncService @Inject constructor(
             withJwtRefreshRetry {
                 postgrest.rpc("set_profile_pin", params)
             }
+            offlinePinStore.remember(profileId, pin)
             SetProfilePinResult.Success
         } catch (e: Exception) {
             Log.e(TAG, "Failed to set profile PIN", e.forLog())
@@ -240,6 +242,7 @@ class ProfileSyncService @Inject constructor(
             withJwtRefreshRetry {
                 postgrest.rpc("clear_profile_pin", params)
             }
+            offlinePinStore.forget(profileId)
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to clear profile PIN", e.forLog())
@@ -248,6 +251,9 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun verifyProfilePin(profileId: Int, pin: String): Result<SupabaseProfilePinVerifyResult> = withContext(Dispatchers.IO) {
+        if (authManager.authState.value !is AuthState.FullAccount) {
+            return@withContext offlinePinAnswer(profileId, pin, IllegalStateException("Not signed in"))
+        }
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
@@ -258,10 +264,31 @@ class ProfileSyncService @Inject constructor(
             }
             val decoded = response.decodeList<SupabaseProfilePinVerifyResult>().firstOrNull()
                 ?: SupabaseProfilePinVerifyResult(unlocked = false, retryAfterSeconds = 0)
+            when {
+                decoded.unlocked -> offlinePinStore.remember(profileId, pin)
+                // A refusal with a wait is the server's own lockout, not a changed PIN.
+                decoded.retryAfterSeconds <= 0 -> offlinePinStore.forgetIfMatches(profileId, pin)
+            }
             Result.success(decoded)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to verify profile PIN", e.forLog())
-            Result.failure(e)
+            offlinePinAnswer(profileId, pin, e)
         }
     }
+
+    // The server could not be asked: the box answers from the last PIN the server accepted, if it has one.
+    private fun offlinePinAnswer(
+        profileId: Int,
+        pin: String,
+        cause: Exception
+    ): Result<SupabaseProfilePinVerifyResult> =
+        when (val answer = offlinePinStore.check(profileId, pin)) {
+            com.nuvio.tv.core.profile.OfflinePinVault.Answer.NoCopy -> Result.failure(cause)
+            com.nuvio.tv.core.profile.OfflinePinVault.Answer.Unlocked ->
+                Result.success(SupabaseProfilePinVerifyResult(unlocked = true, retryAfterSeconds = 0))
+            is com.nuvio.tv.core.profile.OfflinePinVault.Answer.Refused ->
+                Result.success(SupabaseProfilePinVerifyResult(unlocked = false, retryAfterSeconds = answer.retryAfterSeconds))
+        }
 }

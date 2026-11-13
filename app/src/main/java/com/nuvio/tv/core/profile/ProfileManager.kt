@@ -75,6 +75,8 @@ class ProfileManager @Inject constructor(
     val canCreateProfile: Boolean
         get() = profiles.value.size < MAX_PROFILES
 
+    suspend fun savedActiveProfileId(): Int = profileDataStore.activeProfileId.first()
+
     suspend fun setActiveProfile(id: Int) = snapshotStorage.lifecycleMutex.withLock {
         val exists = profileDataStore.profilesList.first().any { it.id == id }
         if (exists) {
@@ -166,6 +168,7 @@ class ProfileManager @Inject constructor(
     private suspend fun removeLocalProfileData(id: Int) {
         if (id == 1) return
         credentialStores.forEach { store -> store.removeProfile(id) }
+        runCatching { com.nuvio.tv.core.ratinglimit.ratingLimitGate(context).forgetProfile(id) }
         snapshotStorage.clearProfile(id, retire = true)
         deleteProfileDataAsync(id)
     }

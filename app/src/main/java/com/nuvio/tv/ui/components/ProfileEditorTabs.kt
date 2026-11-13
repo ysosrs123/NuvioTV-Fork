@@ -34,7 +34,8 @@ import com.nuvio.tv.ui.theme.NuvioTheme
 
 enum class ProfileEditorTab {
     Avatar,
-    Background
+    Background,
+    RatingLimit
 }
 
 @Composable
@@ -42,7 +43,8 @@ fun ProfileEditorTabs(
     selectedTab: ProfileEditorTab,
     showBackgroundTab: Boolean,
     onTabSelected: (ProfileEditorTab) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showRatingLimitTab: Boolean = false
 ) {
     Row(
         modifier = modifier,
@@ -58,6 +60,13 @@ fun ProfileEditorTabs(
                 label = stringResource(R.string.profile_editor_tab_background),
                 isSelected = selectedTab == ProfileEditorTab.Background,
                 onClick = { onTabSelected(ProfileEditorTab.Background) }
+            )
+        }
+        if (showRatingLimitTab) {
+            ProfileEditorTabItem(
+                label = stringResource(R.string.rating_limit_tab),
+                isSelected = selectedTab == ProfileEditorTab.RatingLimit,
+                onClick = { onTabSelected(ProfileEditorTab.RatingLimit) }
             )
         }
     }

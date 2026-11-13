@@ -78,7 +78,7 @@ class ProfilePullUserOwnershipSchedulingTest {
                 }
                 PostgrestResult(json,Headers.Empty,rpc)
             }
-            service=ProfileSyncService(auth,rpc,store,mockk<ProfileManager>(relaxed=true),mockk<SyncClientIdentity>(relaxed=true))
+            service=ProfileSyncService(auth,rpc,store,mockk<ProfileManager>(relaxed=true),mockk<SyncClientIdentity>(relaxed=true),mockk(relaxed=true))
         }
         suspend fun seed() { store.replaceAllProfiles(listOf(UserProfile(id=2,name="Fresh current",avatarColorHex="#1E88E5"))) }
         @Suppress("UNCHECKED_CAST")

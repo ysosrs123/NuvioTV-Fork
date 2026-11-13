@@ -54,9 +54,15 @@ class ProfileSelectionViewModel @Inject constructor(
     private val profileBackgroundRepository: ProfileBackgroundRepository,
     memberAccessRepository: MemberAccessRepository,
     private val profileLockStateDataStore: ProfileLockStateDataStore,
-    private val localAvatars: LocalProfileAvatars
+    private val localAvatars: LocalProfileAvatars,
+    private val ratingLimits: com.nuvio.tv.core.ratinglimit.RatingLimitGate
 ) : ViewModel() {
     val activeProfileId: StateFlow<Int> = profileManager.activeProfileId
+
+    val profileRatingLimits: StateFlow<Map<Int, com.nuvio.tv.core.ratinglimit.RatingLimit>> = ratingLimits.limits
+        .also { viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) { ratingLimits.limitFor(profileManager.activeProfileId.value) } }
+
+    fun setRatingLimit(profileId: Int, limit: com.nuvio.tv.core.ratinglimit.RatingLimit?) = ratingLimits.setLimit(profileId, limit)
     val profiles: StateFlow<List<UserProfile>> = combine(profileManager.profiles, localAvatars.avatars) { list, _ ->
         list.map(localAvatars::shown)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, profileManager.profiles.value.map(localAvatars::shown))
