@@ -14,6 +14,7 @@ import com.nuvio.tv.domain.model.Collection
 import com.nuvio.tv.domain.model.HomeLayout
 import com.nuvio.tv.domain.model.catalogRowStableKey
 import com.nuvio.tv.domain.model.enabledAddons
+import com.nuvio.tv.core.ratinglimit.withRatedCatalogsOnly
 import com.nuvio.tv.domain.model.legacyKey
 import com.nuvio.tv.domain.model.mergeCatalogPage
 import com.nuvio.tv.domain.model.nextCatalogSkip
@@ -139,12 +140,20 @@ internal fun HomeViewModel.observeTmdbSettingsPipeline() {
 @OptIn(FlowPreview::class)
 internal fun HomeViewModel.observeInstalledAddonsPipeline() {
     viewModelScope.launch {
-        combine(addonRepository.getInstalledAddons(), serverCatalog.addons, builtInCatalogs.addons) { installed, servers, builtIn ->
+        val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(appContext)
+        val limited = if (ratingLimits == null) {
+            kotlinx.coroutines.flow.flowOf(false)
+        } else {
+            kotlinx.coroutines.withContext(Dispatchers.IO) { ratingLimits.limitFor(profileManager.activeProfileId.value) }
+            combine(profileManager.activeProfileId, ratingLimits.limits) { id, _ -> ratingLimits.limitFor(id) != null }
+        }
+        combine(addonRepository.getInstalledAddons(), serverCatalog.addons, builtInCatalogs.addons, limited) { installed, servers, builtIn, isLimited ->
             val hidden = layoutPreferenceDataStore.hideNewCatalogsByDefault(
                 ServerCatalog.hiddenByDefaultKeys(servers) + builtInCatalogs.hiddenByDefaultKeys(builtIn)
             )
             if (hidden.isNotEmpty()) disabledHomeCatalogKeys = disabledHomeCatalogKeys + hidden
-            installed.enabledAddons() + servers + builtIn
+            val own = installed.enabledAddons()
+            (if (isLimited) own.withRatedCatalogsOnly() else own) + servers + builtIn
         }
             .distinctUntilChanged()
             .collectLatest { addons ->

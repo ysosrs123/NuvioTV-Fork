@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.home
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.nuvio.tv.ui.util.StableList
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -69,6 +70,20 @@ class PreparedHeroSceneTest {
         request.value = mutableStateOf(scene("spider", play = false, url = null))
         assertFalse(prepared.value.shouldPlayTrailer)
         assertNull(prepared.value.trailerUrl)
+    }
+
+    private fun timeLeft(owner: String, text: String) = scene(owner).copy(
+        preview = HeroPreview(
+            title = "Film", logo = null, description = null, contentTypeText = null, yearText = null,
+            secondaryHighlightText = text, imdbText = null, genres = StableList(emptyList()),
+            poster = null, backdrop = null, imageUrl = null
+        )
+    )
+
+    @Test fun `time left follows the row while the same title stays in the hero`() {
+        val shown = timeLeft("cw", "2H 39M LEFT")
+        assertEquals("2H 35M LEFT", presentedHeroScene(shown, timeLeft("cw", "2H 35M LEFT")).preview?.secondaryHighlightText)
+        assertEquals("2H 39M LEFT", presentedHeroScene(shown, timeLeft("other", "1H LEFT")).preview?.secondaryHighlightText)
     }
 
     @Test fun `nothing prepared yet shows the neutral hero of the requested title`() {

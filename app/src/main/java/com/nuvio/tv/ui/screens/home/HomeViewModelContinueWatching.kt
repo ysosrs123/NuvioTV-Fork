@@ -82,6 +82,7 @@ private data class ContinueWatchingSettingsSnapshot(
  * Drops cast, crew, trailers, streams, release dates, and other heavy fields
  * that are never read by continue-watching or badge evaluation.
  */
+@kotlinx.serialization.Serializable
 internal data class CwMetaSummary(
     val id: String,
     val name: String,
@@ -167,6 +168,7 @@ internal data class CwMetaSummary(
         )
 }
 
+@kotlinx.serialization.Serializable
 internal data class CwVideoSummary(
     val id: String,
     val title: String?,
@@ -2468,6 +2470,7 @@ private suspend fun HomeViewModel.resolveMetaForProgress(
     debug: CwDebugSession? = null,
     refreshWhenDue: Boolean = false
 ): CwMetaSummary? {
+    if (metaCache === cwMetaCache) ensureCwMetaStoreLoaded()
     val startedAtMs = SystemClock.elapsedRealtime()
     val cacheKey = "${progress.contentType}:${progress.contentId}"
     val playerOpen = refreshWhenDue && PlayerSessionTracker.isSessionOpen.first()
@@ -2601,7 +2604,9 @@ private suspend fun HomeViewModel.resolveMetaForProgress(
             metaCache[cacheKey] = resolved
             cwMetaNegativeCacheTimestamps.remove(cacheKey)
             cwMetaStaleKeys -= cacheKey
-            cwMetaRefreshAtMs[cacheKey] = cwMetaRefreshDueAtMs(
+            cwMetaRefreshAtMs[cacheKey] = cwMetaKeepUntilMs(
+                isFilm = progress.contentType.equals("movie", ignoreCase = true),
+                ended = isEndedSeriesStatus(resolved.status),
                 nextEpisodeAirMs = resolved.earliestUpcomingEpisodeMs(Instant.ofEpochMilli(nowMs)),
                 nowMs = nowMs
             )
@@ -2615,6 +2620,7 @@ private suspend fun HomeViewModel.resolveMetaForProgress(
             cwMetaNegativeCacheTimestamps[cacheKey] = SystemClock.elapsedRealtime()
         }
     }
+    if (resolved != null && metaCache === cwMetaCache) scheduleCwMetaStoreSave()
     shuffleHomeRefresh.update { it.copy(metadata = it.metadata + 1) }
     return resolved ?: dueSummary
 }

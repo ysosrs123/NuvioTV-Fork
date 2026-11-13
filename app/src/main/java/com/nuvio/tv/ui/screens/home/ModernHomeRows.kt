@@ -1860,7 +1860,6 @@ private fun ModernCarouselCard(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(cardShape)
                     .clearAndSetSemantics {}
                     .nuvioCardDepth(
                         shape = cardShape,
@@ -2139,8 +2138,8 @@ private fun BoxScope.ScoutMixCardWords(name: String, shows: String, rtl: Boolean
             .drawWithCache {
                 val stops = arrayOf(
                     0f to page.copy(alpha = .86f),
-                    .44f to page.copy(alpha = .45f),
-                    .72f to page.copy(alpha = .05f),
+                    .56f to page.copy(alpha = .5f),
+                    .8f to page.copy(alpha = .05f),
                     1f to Color.Transparent
                 )
                 val brush = if (rtl) Brush.horizontalGradient(*stops, startX = size.width, endX = 0f)
@@ -2151,7 +2150,7 @@ private fun BoxScope.ScoutMixCardWords(name: String, shows: String, rtl: Boolean
     Column(
         modifier = Modifier
             .align(Alignment.BottomStart)
-            .fillMaxWidth(.46f)
+            .fillMaxWidth(.62f)
             .padding(start = NuvioTheme.spacing.md, end = NuvioTheme.spacing.xs, bottom = NuvioTheme.spacing.md),
         verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
     ) {

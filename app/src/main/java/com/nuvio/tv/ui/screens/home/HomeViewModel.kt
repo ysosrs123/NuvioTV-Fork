@@ -456,6 +456,14 @@ class HomeViewModel @Inject constructor(
     internal val cwMetaNegativeCacheTimestamps: MutableMap<String, Long> = createLruMap(MAX_CW_CACHE_SIZE)
     internal val cwMetaRefreshAtMs: MutableMap<String, Long> = createLruMap(MAX_CW_CACHE_SIZE)
     internal val cwMetaStaleKeys: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    internal val cwMetaStore: ContinueWatchingMetaStore? by lazy {
+        runCatching { appContext.filesDir?.takeIf { it.isDirectory } }.getOrNull()
+            ?.let { ContinueWatchingMetaStore(java.io.File(it, "cw_meta")) }
+    }
+    internal val cwMetaStoreMutex = kotlinx.coroutines.sync.Mutex()
+    @Volatile internal var cwMetaStoreLoadedFor: String? = null
+    @Volatile internal var cwMetaStoreProfileId: Int? = null
+    internal var cwMetaStoreSaveJob: Job? = null
     internal val cwEpisodeLists = MutableStateFlow<Map<String, Set<Pair<Int, Int>>>>(emptyMap())
     /** Ultra-light cache for badge evaluation: contentId → set of aired (season, episode) pairs. */
     internal val cwBadgeEpisodeCache: MutableMap<String, Set<Pair<Int, Int>>?> = createLruMap(MAX_CW_CACHE_SIZE)

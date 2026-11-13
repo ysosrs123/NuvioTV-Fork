@@ -676,6 +676,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
         return
     }
     val stepWaitMs = focusStepPace.onFocus(System.nanoTime() / 1_000_000L)
+    val focusSettledAtMs = android.os.SystemClock.elapsedRealtime()
     if (pendingTmdbEnrichItemId != item.id) {
         tmdbEnrichFocusJob?.cancel()
         pendingTmdbEnrichItemId = null
@@ -713,7 +714,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
                 pendingTmdbEnrichItemId = item.id
                 tmdbEnrichFocusJob = viewModelScope.launch(Dispatchers.IO) {
                     delay(HomeViewModel.EXTERNAL_META_PREFETCH_FOCUS_DEBOUNCE_MS)
-                    prefetchFocusedDetails(item)
+                    prefetchFocusedDetails(item, focusSettledAtMs)
                 }
             }
             return
@@ -748,7 +749,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
             if (!externalEnrichmentOutstanding(item.id)) {
                 if (_enrichingItemId.value == item.id) setEnrichingItemId(null)
                 // Still prefetch full meta in background for instant detail screen.
-                prefetchFocusedDetails(item)
+                prefetchFocusedDetails(item, focusSettledAtMs)
                 return@launch
             }
         }
@@ -845,7 +846,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
             }
 
             // Always prefetch full meta in background for instant detail screen loading.
-            prefetchFocusedDetails(item)
+            prefetchFocusedDetails(item, focusSettledAtMs)
 
             // Warm up watch progress pipeline so detail screen reads are fast.
             viewModelScope.launch {
@@ -877,6 +878,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
 internal fun HomeViewModel.preloadAdjacentItemPipeline(item: MetaPreview) {
     if (startupGracePeriodActive) return
     if (pendingTmdbEnrichItemId == item.id) return
+    val launchedAtMs = android.os.SystemClock.elapsedRealtime()
     adjacentItemPrefetchJobs.launch(viewModelScope, item.id, Dispatchers.IO) {
         val tmdbEnabledForCurrentLayout = currentTmdbSettings.enabled &&
             (_uiState.value.homeLayout != HomeLayout.MODERN || currentTmdbSettings.modernHomeEnabled)
@@ -942,6 +944,7 @@ internal fun HomeViewModel.preloadAdjacentItemPipeline(item: MetaPreview) {
         if (preview.backdropUrl != initialPreview.backdropUrl || preview.logo != initialPreview.logo) prefetchHeroArtwork(preview)
 
         // Background prefetch for detail screen cache.
+        delay(DetailsPrefetchRest.remainingMs(launchedAtMs, android.os.SystemClock.elapsedRealtime()))
         prefetchDetailsMeta(item)
 
     }
@@ -951,7 +954,7 @@ internal fun HomeViewModel.preloadAdjacentItemPipeline(item: MetaPreview) {
  * reuse; a session-long attempted-id marker must not suppress retries or expired data.
  * Runs in the caller's bounded focus/neighbour job, not a detached ViewModel job.
  */
-private suspend fun HomeViewModel.prefetchFocusedDetails(item: MetaPreview) {
+private suspend fun HomeViewModel.prefetchFocusedDetails(item: MetaPreview, settledAtMs: Long) {
     try {
     if (_uiState.value.homeLayout == HomeLayout.MODERN && currentTmdbSettings.enabled &&
         currentTmdbSettings.modernHomeEnabled && currentTmdbSettings.useDetails &&
@@ -968,6 +971,8 @@ private suspend fun HomeViewModel.prefetchFocusedDetails(item: MetaPreview) {
     }
     } catch (e: CancellationException) { throw e }
     catch (e: Exception) { Log.w(HomeViewModel.TAG, "Optional Home age rating unavailable: ${e.javaClass.simpleName}") }
+    // The hero's age rating above keeps its timing; only the details page's own fetch waits for the rest.
+    delay(DetailsPrefetchRest.remainingMs(settledAtMs, android.os.SystemClock.elapsedRealtime()))
     prefetchDetailsMeta(item)
 }
 

@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
@@ -33,7 +34,13 @@ object PictureMemoryRelease {
         withTimeoutOrNull(WAIT_MS) { work.await() }
     }
 
-    private fun release(context: Context) {
+    /** Android's last memory warning while a film plays: the same release, in the background. */
+    fun releaseOnLastWarning(context: Context) {
+        val app = context.applicationContext
+        scope.launch { release(app, "on low memory") }
+    }
+
+    private fun release(context: Context, reason: String = "before playback") {
         val before = BufferSizing.read(context)
         val held = runCatching {
             val cache = SingletonImageLoader.get(context).memoryCache
@@ -47,7 +54,7 @@ object PictureMemoryRelease {
         // The bitmaps' native and graphics memory only goes back once they are collected.
         Runtime.getRuntime().gc()
         val after = BufferSizing.read(context)
-        Log.i(TAG, "MEMORY_RELEASE: pictures freed before playback cacheMb=${held / MB} " +
+        Log.i(TAG, "MEMORY_RELEASE: pictures freed $reason cacheMb=${held / MB} " +
             "beforeAvailMb=${before?.availMb ?: -1} afterAvailMb=${after?.availMb ?: -1}")
     }
 }

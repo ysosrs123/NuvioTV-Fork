@@ -12,11 +12,11 @@ class ContinueWatchingRefreshPolicyTest {
     private val day = 24 * hour
 
     @Test
-    fun `stored episode list is fetched again after six hours`() {
+    fun `stored episode list is fetched again after a day`() {
         val refreshAt = cwMetaRefreshDueAtMs(nextEpisodeAirMs = null, nowMs = now)
 
-        assertFalse(shouldRefreshCwMeta(refreshAt, now + 6 * hour - 1, playerOpen = false))
-        assertTrue(shouldRefreshCwMeta(refreshAt, now + 6 * hour, playerOpen = false))
+        assertFalse(shouldRefreshCwMeta(refreshAt, now + day - 1, playerOpen = false))
+        assertTrue(shouldRefreshCwMeta(refreshAt, now + day, playerOpen = false))
     }
 
     @Test
@@ -30,17 +30,25 @@ class ContinueWatchingRefreshPolicyTest {
     }
 
     @Test
-    fun `an air date further out than six hours does not delay the refresh`() {
+    fun `an air date further out than a day does not delay the refresh`() {
         val refreshAt = cwMetaRefreshDueAtMs(nextEpisodeAirMs = now + 3 * day, nowMs = now)
 
-        assertEquals(now + 6 * hour, refreshAt)
+        assertEquals(now + day, refreshAt)
     }
 
     @Test
-    fun `an air date already passed falls back to six hours`() {
+    fun `an air date already passed falls back to a day`() {
         val refreshAt = cwMetaRefreshDueAtMs(nextEpisodeAirMs = now - hour, nowMs = now)
 
-        assertEquals(now + 6 * hour, refreshAt)
+        assertEquals(now + day, refreshAt)
+    }
+
+    @Test
+    fun `film details stay fresh for 30 days, an ended show for 7, a running show until its next episode`() {
+        assertEquals(now + 30 * day, cwMetaKeepUntilMs(isFilm = true, ended = false, nextEpisodeAirMs = now + hour, nowMs = now))
+        assertEquals(now + 7 * day, cwMetaKeepUntilMs(isFilm = false, ended = true, nextEpisodeAirMs = null, nowMs = now))
+        assertEquals(now + 2 * hour, cwMetaKeepUntilMs(isFilm = false, ended = false, nextEpisodeAirMs = now + 2 * hour, nowMs = now))
+        assertEquals(now + day, cwMetaKeepUntilMs(isFilm = false, ended = false, nextEpisodeAirMs = null, nowMs = now))
     }
 
     @Test

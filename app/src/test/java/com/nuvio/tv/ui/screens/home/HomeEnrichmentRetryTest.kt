@@ -321,8 +321,8 @@ class HomeEnrichmentRetryTest {
 
     private suspend fun focusAndSettle(viewModel: HomeViewModel, item: MetaPreview) {
         viewModel.onItemFocusPipeline(item)
-        // Debounce plus the fetch itself; the assertions that need a specific count poll instead.
-        delay(HomeViewModel.EXTERNAL_META_PREFETCH_FOCUS_DEBOUNCE_MS + 400)
+        // A settled focus rests long enough for the details pre-fetch, plus the fetch itself.
+        delay(maxOf(HomeViewModel.EXTERNAL_META_PREFETCH_FOCUS_DEBOUNCE_MS, DetailsPrefetchRest.AFTER_SETTLE_MS) + 400)
     }
 
     /**

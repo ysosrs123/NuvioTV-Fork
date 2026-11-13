@@ -2,7 +2,6 @@ package com.nuvio.tv.ui.components
 
 import android.os.Build
 import android.view.KeyEvent as AndroidKeyEvent
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -77,10 +76,6 @@ fun LightweightCard(
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val pressed by interactionSource.collectIsPressedAsState()
-    val zIndex = animateFloatAsState(
-        targetValue = if (focused) FOCUSED_Z_INDEX else NON_FOCUSED_Z_INDEX,
-        label = "zIndex"
-    )
     val border = if (focused || pressed) focusedBorder else Border.None
     val glow = if (focused && !pressed) focusedGlow else Glow.None
     val glowColor = if (glow.elevationColor == MaterialTheme.colorScheme.surface) {
@@ -137,7 +132,7 @@ fun LightweightCard(
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) {
-                        placeable.place(0, 0, zIndex = zIndex.value)
+                        placeable.place(0, 0, zIndex = if (focused) FOCUSED_Z_INDEX else NON_FOCUSED_Z_INDEX)
                     }
                 }
                 .then(if (border != Border.None) CardBorderElement(shape, border) else Modifier)

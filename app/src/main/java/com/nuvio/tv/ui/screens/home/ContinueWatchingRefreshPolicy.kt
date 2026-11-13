@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.home
 
-internal const val CW_META_MAX_AGE_MS = 6L * 60 * 60 * 1000
+internal const val CW_META_MAX_AGE_MS = 24L * 60 * 60 * 1000
+internal const val CW_FILM_META_MAX_AGE_MS = 30L * 24 * 60 * 60 * 1000
 internal const val CW_CAUGHT_UP_RECHECK_MS = 24L * 60 * 60 * 1000
 internal const val CW_ENDED_SERIES_RECHECK_MS = 7L * 24 * 60 * 60 * 1000
 
@@ -15,6 +16,13 @@ internal fun cwMetaRefreshDueAtMs(nextEpisodeAirMs: Long?, nowMs: Long): Long {
     } else {
         maxAgeMs
     }
+}
+
+/** How long stored details count as fresh: a film 30 days, an ended show 7 days, a running show until its next episode airs. */
+internal fun cwMetaKeepUntilMs(isFilm: Boolean, ended: Boolean, nextEpisodeAirMs: Long?, nowMs: Long): Long = when {
+    isFilm -> nowMs + CW_FILM_META_MAX_AGE_MS
+    ended -> nowMs + CW_ENDED_SERIES_RECHECK_MS
+    else -> cwMetaRefreshDueAtMs(nextEpisodeAirMs, nowMs)
 }
 
 /** A stored episode list is fetched again once it is due, but never while the player is open. */

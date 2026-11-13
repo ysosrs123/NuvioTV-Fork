@@ -149,6 +149,7 @@ internal fun presentedHeroScene(shown: ModernHeroSceneState, live: ModernHeroSce
                 languageText = live.preview?.languageText ?: shown.preview.languageText,
                 description = live.preview?.description ?: shown.preview.description,
                 runtimeText = live.preview?.runtimeText ?: shown.preview.runtimeText,
+                secondaryHighlightText = live.preview?.secondaryHighlightText ?: shown.preview.secondaryHighlightText,
                 yearText = live.preview?.yearText ?: shown.preview.yearText,
                 ageRatingText = live.preview?.ageRatingText ?: shown.preview.ageRatingText,
                 statusText = live.preview?.statusText ?: shown.preview.statusText,
