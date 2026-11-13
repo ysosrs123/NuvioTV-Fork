@@ -204,3 +204,25 @@ data class TraktHiddenItemDto(
     @Json(name = "show") val show: TraktShowDto? = null,
     @Json(name = "movie") val movie: TraktMovieDto? = null
 )
+
+@JsonClass(generateAdapter = true)
+data class TraktRatingItemDto(
+    @Json(name = "rated_at") val ratedAt: String? = null,
+    @Json(name = "rating") val rating: Int? = null,
+    @Json(name = "type") val type: String? = null,
+    @Json(name = "movie") val movie: TraktMovieDto? = null,
+    @Json(name = "show") val show: TraktShowDto? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class TraktRatingEntryDto(
+    @Json(name = "ids") val ids: TraktIdsDto,
+    @Json(name = "rating") val rating: Int? = null,
+    @Json(name = "rated_at") val ratedAt: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class TraktRatingsRequestDto(
+    @Json(name = "movies") val movies: List<TraktRatingEntryDto>? = null,
+    @Json(name = "shows") val shows: List<TraktRatingEntryDto>? = null
+)

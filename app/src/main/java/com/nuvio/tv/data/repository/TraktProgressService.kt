@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
@@ -587,6 +588,7 @@ class TraktProgressService @Inject constructor(
         }
             .filterNotNull()
             .distinctUntilChanged()
+            .flowOn(Dispatchers.Default)
     }
 
     fun observeRemoteProgressLoaded(): Flow<Boolean> {

@@ -59,6 +59,7 @@ internal class CueTrackingTextOutput(
     override fun onCues(cueGroup: CueGroup) {
         delegate.onCues(cueGroup)
         onCuesShown(cueGroup.cues)
+        noteForReport(cueGroup.cues)
     }
 
     @Deprecated("Uses the deprecated Media3 callback for text outputs.")
@@ -66,5 +67,10 @@ internal class CueTrackingTextOutput(
         @Suppress("DEPRECATION")
         delegate.onCues(cues)
         onCuesShown(cues)
+    }
+
+    private fun noteForReport(cues: List<Cue>) {
+        if (cues.isEmpty()) return
+        com.nuvio.tv.core.report.PlaybackRecorder.noteCues(cues.size, cues.any { it.bitmap != null })
     }
 }
