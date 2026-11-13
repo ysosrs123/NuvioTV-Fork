@@ -37,6 +37,35 @@ class ArcReportExtrasTest {
         assertTrue(ExitFacts.lines(exit(UnexpectedExitKind.Crash), "", null, null, emptyMap()).none { it.startsWith("Signal") })
     }
 
+    @Test fun factsNameTheBuildThatEndedWhenANewerOneSendsTheReport() {
+        val dir = Files.createTempDirectory("builds").toFile()
+        val log = File(dir, "arc-builds.txt")
+        val old = ArcBuildLog.Entry(1_000L, 1619, "c2aff7c2e", "1.1.0-arc.2")
+        val new = ArcBuildLog.Entry(9_000L, 1626, "959c70a44", "1.1.0-arc.3")
+        ArcBuildLog.note(log, old)
+        ArcBuildLog.note(log, old.copy(sinceMs = 5_000L))
+        ArcBuildLog.note(log, new)
+        assertNull(ArcBuildLog.at(log, 500L))
+        assertEquals(old, ArcBuildLog.at(log, 8_000L))
+        assertEquals(new, ArcBuildLog.at(log, 10_000L))
+
+        val crash = exit(UnexpectedExitKind.NotResponding)
+        val after = ExitFacts.lines(crash, "959c70a44", null, null, emptyMap(), ArcBuildLog.at(log, 8_000L), "1.1.0-arc.3 (1626)")
+        assertEquals("Build commit: c2aff7c2e", after[1])
+        assertEquals("Ended on: 1.1.0-arc.2 (1619), report sent from 1.1.0-arc.3 (1626)", after[2])
+        val same = ExitFacts.lines(crash, "959c70a44", null, null, emptyMap(), ArcBuildLog.at(log, 10_000L), "1.1.0-arc.3 (1626)")
+        assertEquals("Build commit: 959c70a44", same[1])
+        assertTrue(same.none { it.startsWith("Ended on") })
+    }
+
+    @Test fun theBuildLogKeepsOnlyTheLastFewBuilds() {
+        val log = File(Files.createTempDirectory("builds").toFile(), "arc-builds.txt")
+        (1..9).forEach { ArcBuildLog.note(log, ArcBuildLog.Entry(it * 1_000L, 1600L + it, "c$it", "v$it")) }
+        assertEquals(6, log.readLines().size)
+        assertNull(ArcBuildLog.at(log, 3_500L))
+        assertEquals(1609L, ArcBuildLog.at(log, 99_000L)!!.versionCode)
+    }
+
     @Test fun anAnrDumpPutsMainAndArcThreadsFirstAndShortensIdleOnes() {
         val dump = listOf(
             "Subject: Input dispatching timed out",

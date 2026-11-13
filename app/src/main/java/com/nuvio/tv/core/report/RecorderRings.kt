@@ -32,7 +32,14 @@ internal enum class RecorderEvent(val label: String) {
     AUDIO_PATH("audio_path"),
     HDMI("hdmi"),
     AUDIO_DELAY("audio_delay"),
-    SURROUND("surround_format")
+    SURROUND("surround_format"),
+    UNDERRUN("audio_underrun"),
+    AUDIO_CLOCK("audio_clock"),
+    WRITE_STALL("audio_write_stall"),
+    AUDIO_CLOCK_GAP("audio_clock_gap"),
+    DISPLAY_CHANGE("display_change"),
+    HDMI_PLUG("hdmi_plug"),
+    AUDIO_OUTPUT("audio_output")
 }
 
 /** Columns run oldest to newest. Every Int column uses [RECORDER_UNKNOWN] for a value that was not measured. */
@@ -62,6 +69,18 @@ class RecorderSamples internal constructor(
     val speedPercent: IntArray = IntArray(count) { RECORDER_UNKNOWN },
     val connections: IntArray = IntArray(count) { RECORDER_UNKNOWN },
     val watchedMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val swapFreeKb: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val gcCount: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val gcMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val gcBlockingMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val audioQueueMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val busyFlags: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val subtitleCues: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val subtitlePictureCues: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val audioHeadMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val audioLatencyMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val audioClockSource: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val audioWriteStalls: IntArray = IntArray(count) { RECORDER_UNKNOWN },
     /** [FRAME_BUCKET_COUNT] counts per sample, flat; null outside a recording. */
     val frameBuckets: IntArray? = null
 ) {
@@ -91,6 +110,18 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
     private val speedPercent = IntArray(capacity)
     private val connections = IntArray(capacity)
     private val watchedMs = IntArray(capacity)
+    private val swapFreeKb = IntArray(capacity)
+    private val gcCount = IntArray(capacity)
+    private val gcMs = IntArray(capacity)
+    private val gcBlockingMs = IntArray(capacity)
+    private val audioQueueMs = IntArray(capacity)
+    private val busyFlags = IntArray(capacity)
+    private val subtitleCues = IntArray(capacity)
+    private val subtitlePictureCues = IntArray(capacity)
+    private val audioHeadMs = IntArray(capacity)
+    private val audioLatencyMs = IntArray(capacity)
+    private val audioClockSource = IntArray(capacity)
+    private val audioWriteStalls = IntArray(capacity)
     private val frameBuckets = if (withFrameBuckets) IntArray(capacity * FRAME_BUCKET_COUNT) else null
     private val timeMs = LongArray(capacity)
     private val readyAheadMs = IntArray(capacity)
@@ -133,9 +164,25 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
         speedPercent: Int = RECORDER_UNKNOWN,
         connections: Int = RECORDER_UNKNOWN,
         watchedMs: Int = RECORDER_UNKNOWN,
+        swapFreeKb: Int = RECORDER_UNKNOWN,
+        gcCount: Int = RECORDER_UNKNOWN,
+        gcMs: Int = RECORDER_UNKNOWN,
+        gcBlockingMs: Int = RECORDER_UNKNOWN,
+        audioQueueMs: Int = RECORDER_UNKNOWN,
+        busyFlags: Int = RECORDER_UNKNOWN,
+        subtitleCues: Int = RECORDER_UNKNOWN,
+        subtitlePictureCues: Int = RECORDER_UNKNOWN,
+        audioHeadMs: Int = RECORDER_UNKNOWN,
+        audioLatencyMs: Int = RECORDER_UNKNOWN,
+        audioClockSource: Int = RECORDER_UNKNOWN,
+        audioWriteStalls: Int = RECORDER_UNKNOWN,
         frameBuckets: IntArray? = null
     ) {
         val slot = next
+        this.audioHeadMs[slot] = audioHeadMs
+        this.audioLatencyMs[slot] = audioLatencyMs
+        this.audioClockSource[slot] = audioClockSource
+        this.audioWriteStalls[slot] = audioWriteStalls
         this.skippedFrames[slot] = skippedFrames
         this.frameLeadUs[slot] = frameLeadUs
         this.audioJitterAvgMs[slot] = audioJitterAvgMs
@@ -145,6 +192,14 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
         this.speedPercent[slot] = speedPercent
         this.connections[slot] = connections
         this.watchedMs[slot] = watchedMs
+        this.swapFreeKb[slot] = swapFreeKb
+        this.gcCount[slot] = gcCount
+        this.gcMs[slot] = gcMs
+        this.gcBlockingMs[slot] = gcBlockingMs
+        this.audioQueueMs[slot] = audioQueueMs
+        this.busyFlags[slot] = busyFlags
+        this.subtitleCues[slot] = subtitleCues
+        this.subtitlePictureCues[slot] = subtitlePictureCues
         this.frameBuckets?.let { store ->
             for (i in 0 until FRAME_BUCKET_COUNT) {
                 store[slot * FRAME_BUCKET_COUNT + i] = frameBuckets?.getOrNull(i) ?: 0
@@ -204,6 +259,18 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
             speedPercent = ints(speedPercent),
             connections = ints(connections),
             watchedMs = ints(watchedMs),
+            swapFreeKb = ints(swapFreeKb),
+            gcCount = ints(gcCount),
+            gcMs = ints(gcMs),
+            gcBlockingMs = ints(gcBlockingMs),
+            audioQueueMs = ints(audioQueueMs),
+            busyFlags = ints(busyFlags),
+            subtitleCues = ints(subtitleCues),
+            subtitlePictureCues = ints(subtitlePictureCues),
+            audioHeadMs = ints(audioHeadMs),
+            audioLatencyMs = ints(audioLatencyMs),
+            audioClockSource = ints(audioClockSource),
+            audioWriteStalls = ints(audioWriteStalls),
             frameBuckets = frameBuckets?.let { store ->
                 IntArray(count * FRAME_BUCKET_COUNT) { store[((first + it / FRAME_BUCKET_COUNT) % capacity) * FRAME_BUCKET_COUNT + it % FRAME_BUCKET_COUNT] }
             }
@@ -291,6 +358,7 @@ internal object ProcParsers {
     private const val STIME_TOKEN = 12
     private const val RSS_TOKEN = 21
     private val MEM_AVAILABLE = "MemAvailable:".toByteArray(Charsets.US_ASCII)
+    private val SWAP_FREE = "SwapFree:".toByteArray(Charsets.US_ASCII)
 
     /** Fills [out] with total CPU ticks (user plus system) and resident pages; false if the text does not parse. */
     fun parseStat(buffer: ByteArray, length: Int, out: LongArray): Boolean {
@@ -319,14 +387,18 @@ internal object ProcParsers {
         return true
     }
 
-    fun parseMemAvailableKb(buffer: ByteArray, length: Int): Int {
+    fun parseMemAvailableKb(buffer: ByteArray, length: Int): Int = parseMeminfoKb(buffer, length, MEM_AVAILABLE)
+
+    fun parseSwapFreeKb(buffer: ByteArray, length: Int): Int = parseMeminfoKb(buffer, length, SWAP_FREE)
+
+    private fun parseMeminfoKb(buffer: ByteArray, length: Int, name: ByteArray): Int {
         var found = -1
         var i = 0
-        val last = length - MEM_AVAILABLE.size
+        val last = length - name.size
         while (i <= last && found < 0) {
             var matched = 0
-            while (matched < MEM_AVAILABLE.size && buffer[i + matched] == MEM_AVAILABLE[matched]) matched += 1
-            if (matched == MEM_AVAILABLE.size) found = i + MEM_AVAILABLE.size
+            while (matched < name.size && buffer[i + matched] == name[matched]) matched += 1
+            if (matched == name.size) found = i + name.size
             i += 1
         }
         if (found < 0) return RECORDER_UNKNOWN

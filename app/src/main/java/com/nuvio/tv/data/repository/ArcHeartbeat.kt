@@ -20,12 +20,15 @@ import java.util.concurrent.TimeUnit
 
 /**
  * A small snapshot written once a minute: an app ended by Android for a freeze or for memory gets no last chance to
- * write, so the next report reads what the last minute looked like. One file, overwritten.
+ * write, so the next report reads what the last minute looked like. One file per run, overwritten; three runs kept.
  */
 object ArcHeartbeat {
     private const val FILE_NAME = "arc-heartbeat.txt"
     private const val PREVIOUS_NAME = "arc-heartbeat-previous.txt"
+    private const val OLDER_NAME = "arc-heartbeat-older.txt"
     private const val EVERY_S = 60L
+    private const val FIRST_AFTER_S = 15L
+    private const val SAME_RUN_MAX_MS = 12L * 60 * 60 * 1000
     private const val TRIMS_KEPT = 10
     private const val POOLS_SHOWN = 10
     private const val MATCH_BEFORE_MS = 150_000L
@@ -33,8 +36,7 @@ object ArcHeartbeat {
     internal const val HEADER = "--- Arc last minute before the exit ---"
     private val RUNNING_NUMBER = Regex("[-_ #]?\\d+$")
 
-    @Volatile private var file: File? = null
-    @Volatile private var previous: File? = null
+    @Volatile private var files: List<File> = emptyList()
     private val trims = ArrayDeque<String>(TRIMS_KEPT)
     private var lastGcCount = -1L
     private var lastGcMs = -1L
@@ -42,34 +44,34 @@ object ArcHeartbeat {
     @Volatile private var playing: () -> Boolean = { false }
 
     fun start(context: Context, isPlaying: () -> Boolean) {
-        if (file != null) return
+        if (files.isNotEmpty()) return
         playing = isPlaying
-        val dir = context.noBackupFilesDir
-        val target = File(dir, FILE_NAME)
-        val earlier = File(dir, PREVIOUS_NAME)
-        if (target.exists()) runCatching { earlier.delete(); target.renameTo(earlier) }
-        previous = earlier
-        file = target
+        val rotated = RunFiles.rotate(context.noBackupFilesDir, FILE_NAME, PREVIOUS_NAME, OLDER_NAME)
+        files = rotated
+        val target = rotated.first()
         val app = context.applicationContext
         ArcSetupSize.attach(runCatching { File(app.applicationInfo.dataDir) }.getOrNull())
         MemoryPressure.register(app)
         MemoryPressure.addListener(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE) { level -> noteTrim(level) }
         Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "arc-heartbeat").apply { isDaemon = true } }
-            .scheduleWithFixedDelay({ runCatching { write(app, target) } }, EVERY_S, EVERY_S, TimeUnit.SECONDS)
+            .scheduleWithFixedDelay({ runCatching { write(app, target) } }, FIRST_AFTER_S, EVERY_S, TimeUnit.SECONDS)
     }
 
-    /** The snapshot written within the last couple of minutes before an exit Android recorded at [exitMs]. */
-    fun linesFor(exitMs: Long): List<String>? = linesFor(listOfNotNull(file, previous), exitMs)
+    /**
+     * The last snapshot of the run that ended at [exitMs]: the one written by process [exitPid] when Android named it,
+     * else one written within the last couple of minutes before the exit.
+     */
+    fun linesFor(exitMs: Long, exitPid: Int = 0): List<String>? = linesFor(files, exitMs, exitPid)
 
-    internal fun linesFor(targets: List<File>, exitMs: Long): List<String>? {
-        for (target in targets) {
-            val lines = runCatching { if (target.exists()) target.readLines() else null }.getOrNull() ?: continue
-            val at = lines.firstOrNull()?.removePrefix("time=")?.toLongOrNull() ?: continue
-            if (exitMs - at in 0..MATCH_BEFORE_MS || at - exitMs in 0..MATCH_AFTER_MS) {
-                return listOf(HEADER) + lines.drop(1)
-            }
-        }
-        return null
+    internal fun linesFor(targets: List<File>, exitMs: Long, exitPid: Int = 0): List<String>? {
+        val read = targets.map { target -> runCatching { if (target.exists()) target.readLines() else null }.getOrNull() }
+        val times = read.map { lines -> lines?.firstOrNull()?.removePrefix("time=")?.toLongOrNull() }
+        val samePid = RunFiles.byPid(read.map { it?.let(RunFiles::pidOf) }, exitPid)
+        val index = samePid.takeIf { it >= 0 && times[it]?.let { at -> at - exitMs <= MATCH_AFTER_MS && exitMs - at <= SAME_RUN_MAX_MS } == true }
+            ?: times.indexOfFirst { at -> at != null && (exitMs - at in 0..MATCH_BEFORE_MS || at - exitMs in 0..MATCH_AFTER_MS) }
+        if (index < 0) return null
+        val lines = read[index] ?: return null
+        return listOf(HEADER) + lines.drop(1).filterNot { it.startsWith(RunFiles.PID_PREFIX) }
     }
 
     private fun noteTrim(level: Int) {
@@ -115,6 +117,7 @@ object ArcHeartbeat {
         val names = threadNames()
         val lines = buildList {
             add("time=${System.currentTimeMillis()}")
+            add("${RunFiles.PID_PREFIX}${android.os.Process.myPid()}")
             add("Written: ${SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())}")
             add("Process up: ${(SystemClock.uptimeMillis() - android.os.Process.getStartUptimeMillis()) / 1000} s")
             add("Threads in process: ${names.size} Java, ${ArcCrashFile.processThreadCount() ?: "unknown"} total")
@@ -126,6 +129,7 @@ object ArcHeartbeat {
                 (swap?.let { ", swap free ${it.swapFreeMb} of ${it.swapTotalMb} MB" } ?: ""))
             add("Thermal status: $thermal")
             MemoryDetail.line()?.let(::add)
+            runCatching { NativeMemoryItems.line(context, names) }.getOrNull()?.let(::add)
             OpenFilesGuard.line()?.let(::add)
             val isPlaying = runCatching(playing).getOrDefault(false)
             add("Playing: ${if (isPlaying) "yes" else "no"}")
@@ -133,7 +137,7 @@ object ArcHeartbeat {
             add("Threads: ${names.size} (${pools(names)})")
             addAll(ArcSetupSize.lines())
             synchronized(trims) { if (trims.isNotEmpty()) add("Memory warnings: ${trims.joinToString("; ")}") }
-            add("Recent: ${ArcBreadcrumbs.recent().takeLast(4).joinToString("; ")}")
+            add("Recent: ${ArcBreadcrumbs.recent().joinToString("; ")}")
         }
         val temp = File(target.parentFile, "$FILE_NAME.tmp")
         temp.writeText(lines.joinToString("\n"))

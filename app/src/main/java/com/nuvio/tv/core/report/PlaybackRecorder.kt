@@ -37,7 +37,13 @@ internal class SampleExtras(
     val fillerCount: Int = RECORDER_UNKNOWN,
     val audioPositionMs: Int = RECORDER_UNKNOWN,
     val speedPercent: Int = RECORDER_UNKNOWN,
-    val connections: Int = RECORDER_UNKNOWN
+    val connections: Int = RECORDER_UNKNOWN,
+    val audioQueueMs: Int = RECORDER_UNKNOWN,
+    val busyFlags: Int = RECORDER_UNKNOWN,
+    val audioHeadMs: Int = RECORDER_UNKNOWN,
+    val audioLatencyMs: Int = RECORDER_UNKNOWN,
+    val audioClockSource: Int = RECORDER_UNKNOWN,
+    val audioWriteStalls: Int = RECORDER_UNKNOWN
 )
 
 data class RecordingStatus(
@@ -101,6 +107,9 @@ internal object PlaybackRecorder {
     private var lastTunnelled: Boolean? = null
     private var lastSkipped = RECORDER_UNKNOWN
     private var lastFiller = RECORDER_UNKNOWN
+    private var lastUnderruns = RECORDER_UNKNOWN
+    private var lastClockSource = RECORDER_UNKNOWN
+    private var lastWriteStalls = RECORDER_UNKNOWN
     private var watchedMs = 0L
     private var lastWatchedAtMs = 0L
 
@@ -118,7 +127,7 @@ internal object PlaybackRecorder {
     private val executor = Dispatchers.IO.asExecutor()
     private val busy = AtomicBoolean(false)
     private val statBuffer = ByteArray(1024)
-    private val memBuffer = ByteArray(256)
+    private val memBuffer = ByteArray(1024)
     private val statValues = LongArray(2)
     private var lastCpuTicks = -1L
     private var lastCpuAtMs = 0L
@@ -133,6 +142,10 @@ internal object PlaybackRecorder {
     private var pendingPlaying = 0
     private var pendingExtras = NO_EXTRAS
     private var pendingWatchedMs = 0
+    private var pendingCues = RECORDER_UNKNOWN
+    private var pendingPictureCues = RECORDER_UNKNOWN
+    private val cues = java.util.concurrent.atomic.AtomicInteger(0)
+    private val pictureCues = java.util.concurrent.atomic.AtomicInteger(0)
 
     private val clockTicks: Long by lazy { runCatching { Os.sysconf(OsConstants._SC_CLK_TCK) }.getOrDefault(100L) }
     private val pageKb: Long by lazy { runCatching { Os.sysconf(OsConstants._SC_PAGESIZE) / 1024L }.getOrDefault(4L) }
@@ -152,6 +165,9 @@ internal object PlaybackRecorder {
         lastTunnelled = null
         lastSkipped = RECORDER_UNKNOWN
         lastFiller = RECORDER_UNKNOWN
+        lastUnderruns = RECORDER_UNKNOWN
+        lastClockSource = RECORDER_UNKNOWN
+        lastWriteStalls = RECORDER_UNKNOWN
         watchedMs = 0L
         lastWatchedAtMs = 0L
         frameLead.reset()
@@ -259,6 +275,13 @@ internal object PlaybackRecorder {
         frameBuckets.onFrame(System.nanoTime())
     }
 
+    /** A subtitle change reached the screen; [picture] for picture subtitles such as PGS. */
+    fun noteCues(shown: Int, picture: Boolean) {
+        if (shown <= 0 || (!enabled && !recordingOn)) return
+        cues.incrementAndGet()
+        if (picture) pictureCues.incrementAndGet()
+    }
+
     /** Playback thread: the audio clock moved by [sizeMs] more or less than the wall clock allowed. */
     fun noteClockJump(sizeMs: Long) {
         if (!enabled && !recordingOn) return
@@ -281,6 +304,7 @@ internal object PlaybackRecorder {
             event(RecorderEvent.OPEN, if (engine == ENGINE_EXO) "engine=EXO" else "engine=MPV")
         }
         noteSampleChanges(tunnelled, extras)
+        noteUnderruns(audioUnderruns, extras.audioQueueMs)
         if (!busy.compareAndSet(false, true)) return
         val now = SystemClock.elapsedRealtime()
         if (playing && lastWatchedAtMs != 0L && now - lastWatchedAtMs in 1L..LONGEST_WATCHED_GAP_MS) {
@@ -298,6 +322,8 @@ internal object PlaybackRecorder {
         pendingPlaying = if (playing) 1 else 0
         pendingExtras = extras
         pendingWatchedMs = watchedMs.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        pendingCues = if (engine == ENGINE_EXO) cues.getAndSet(0) else RECORDER_UNKNOWN
+        pendingPictureCues = if (engine == ENGINE_EXO) pictureCues.getAndSet(0) else RECORDER_UNKNOWN
         try {
             executor.execute(sampleTask)
         } catch (_: RuntimeException) {
@@ -322,8 +348,26 @@ internal object PlaybackRecorder {
             }
             lastFiller = extras.fillerCount
         }
+        clockSourceChange(lastClockSource, extras.audioClockSource)?.let { event(RecorderEvent.AUDIO_CLOCK, "source=$it") }
+        if (clockSourceLabel(extras.audioClockSource) != null) lastClockSource = extras.audioClockSource
+        if (extras.audioWriteStalls >= 0) {
+            val added = underrunsAdded(lastWriteStalls, extras.audioWriteStalls)
+            lastWriteStalls = extras.audioWriteStalls
+            if (added > 0) event(RecorderEvent.WRITE_STALL, "count=$added total=${extras.audioWriteStalls}")
+        }
         jumps.drain { sizeMs, wallMs, positionMs ->
             if (abs(sizeMs) >= CLOCK_JUMP_MIN_MS) eventAt(RecorderEvent.CLOCK_JUMP, "ms=$sizeMs", wallMs, positionMs)
+        }
+    }
+
+    /** A count that went down belongs to a new output and starts over without a line. */
+    private fun noteUnderruns(total: Int, queueLowMs: Int) {
+        if (!enabled && !recordingOn) return
+        if (total < 0) return
+        val added = underrunsAdded(lastUnderruns, total)
+        lastUnderruns = total
+        if (added > 0) {
+            event(RecorderEvent.UNDERRUN, "count=$added total=$total" + if (queueLowMs >= 0) " queueLowMs=$queueLowMs" else "")
         }
     }
 
@@ -448,6 +492,7 @@ internal object PlaybackRecorder {
         MemoryPressure.register(context)
         MemoryPressure.addListener(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE, trimListener)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) runCatching { registerThermal(context) }
+        PlaybackOutputWatch.start(context)
     }
 
     private fun stopListening() {
@@ -455,6 +500,7 @@ internal object PlaybackRecorder {
         listening = false
         lastNetwork = null
         MemoryPressure.removeListener(trimListener)
+        PlaybackOutputWatch.stop()
         val context = appContext
         if (context != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) runCatching { unregisterThermal(context) }
         thermalStatus = RECORDER_UNKNOWN
@@ -493,6 +539,10 @@ internal object PlaybackRecorder {
         val nativeKb = (Debug.getNativeHeapAllocatedSize() / 1024L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         val memLength = readInto("/proc/meminfo", memBuffer)
         val memAvailableKb = if (memLength > 0) ProcParsers.parseMemAvailableKb(memBuffer, memLength) else RECORDER_UNKNOWN
+        val swapFreeKb = if (memLength > 0) ProcParsers.parseSwapFreeKb(memBuffer, memLength) else RECORDER_UNKNOWN
+        val gcCount = runtimeStat("art.gc.gc-count")
+        val gcMs = runtimeStat("art.gc.gc-time")
+        val gcBlockingMs = runtimeStat("art.gc.blocking-gc-time")
         val extras = pendingExtras
         synchronized(lock) {
             samples?.add(
@@ -518,7 +568,19 @@ internal object PlaybackRecorder {
                 audioPositionMs = extras.audioPositionMs,
                 speedPercent = extras.speedPercent,
                 connections = extras.connections,
-                watchedMs = pendingWatchedMs
+                watchedMs = pendingWatchedMs,
+                swapFreeKb = swapFreeKb,
+                gcCount = gcCount,
+                gcMs = gcMs,
+                gcBlockingMs = gcBlockingMs,
+                audioQueueMs = extras.audioQueueMs,
+                busyFlags = extras.busyFlags,
+                subtitleCues = pendingCues,
+                subtitlePictureCues = pendingPictureCues,
+                audioHeadMs = extras.audioHeadMs,
+                audioLatencyMs = extras.audioLatencyMs,
+                audioClockSource = extras.audioClockSource,
+                audioWriteStalls = extras.audioWriteStalls
             )
             recording?.let { current ->
                 frameBuckets.drainInto(bucketScratch)
@@ -546,11 +608,27 @@ internal object PlaybackRecorder {
                     speedPercent = extras.speedPercent,
                     connections = extras.connections,
                     watchedMs = pendingWatchedMs,
+                    swapFreeKb = swapFreeKb,
+                    gcCount = gcCount,
+                    gcMs = gcMs,
+                    gcBlockingMs = gcBlockingMs,
+                    audioQueueMs = extras.audioQueueMs,
+                    busyFlags = extras.busyFlags,
+                    subtitleCues = pendingCues,
+                    subtitlePictureCues = pendingPictureCues,
+                    audioHeadMs = extras.audioHeadMs,
+                    audioLatencyMs = extras.audioLatencyMs,
+                    audioClockSource = extras.audioClockSource,
+                    audioWriteStalls = extras.audioWriteStalls,
                     frameBuckets = bucketScratch
                 )
             }
         }
     }
+
+    private fun runtimeStat(name: String): Int =
+        runCatching { Debug.getRuntimeStat(name)?.toLongOrNull() }.getOrNull()
+            ?.coerceIn(0L, Int.MAX_VALUE.toLong())?.toInt() ?: RECORDER_UNKNOWN
 
     private fun readInto(path: String, buffer: ByteArray): Int = try {
         FileInputStream(path).use { it.read(buffer) }

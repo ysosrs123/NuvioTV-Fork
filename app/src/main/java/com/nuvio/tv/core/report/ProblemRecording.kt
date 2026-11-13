@@ -102,6 +102,24 @@ internal class FrameLeadTracker {
     }
 }
 
+/** Underruns since the last sample; nothing for the first reading or for a count that went back down. */
+internal fun underrunsAdded(previous: Int, total: Int): Int =
+    if (previous < 0 || total <= previous) 0 else total - previous
+
+/** How the sound position was worked out; null for "held at the end of what was written", which is not a way of its own. */
+internal fun clockSourceLabel(source: Int): String? = when (source) {
+    0 -> "head"
+    1 -> "timestamp"
+    2 -> "steadied"
+    else -> null
+}
+
+/** The new way's name when it differs from the one before; nothing for the first reading. */
+internal fun clockSourceChange(previous: Int, current: Int): String? {
+    val label = clockSourceLabel(current) ?: return null
+    return if (clockSourceLabel(previous) == null || previous == current) null else label
+}
+
 internal enum class ReportKeyAction { OPEN_PANEL, ADD_MARK, UNAVAILABLE }
 
 /** What the "Report a problem / mark" remote job does: add a mark while recording, otherwise open the panel. */

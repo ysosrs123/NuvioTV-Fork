@@ -253,6 +253,7 @@ private fun ReportFormDialog(
                 playbackRowTitle = null,
                 titleLabel = null,
                 showLogRow = includeLog,
+                logHint = stringResource(R.string.report_item_log_hint_app),
                 note = note,
                 noteHint = stringResource(
                     if (kind == AppReportKind.Bug) R.string.report_item_note_bug_hint else R.string.report_item_note_idea_hint

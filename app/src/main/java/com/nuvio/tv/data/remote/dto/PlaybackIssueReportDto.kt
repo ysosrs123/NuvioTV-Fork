@@ -21,7 +21,23 @@ data class PlaybackIssueReportRequestDto(
     @Json(name = "recorder") val recorder: PlaybackIssueRecorderDto? = null,
     @Json(name = "network") val network: PlaybackIssueNetworkDto? = null,
     @Json(name = "box") val box: PlaybackIssueBoxDto? = null,
+    @Json(name = "display") val display: PlaybackIssueDisplayDto? = null,
     @Json(name = "extra") val extra: Map<String, String>? = null
+)
+
+/** The screen mode while the report is built, and how the film's frame rate fits it. */
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueDisplayDto(
+    @Json(name = "refreshHz") val refreshHz: Float?,
+    @Json(name = "width") val width: Int?,
+    @Json(name = "height") val height: Int?,
+    @Json(name = "refreshRatesAtThisSize") val refreshRatesAtThisSize: List<Float> = emptyList(),
+    @Json(name = "hdrTypes") val hdrTypes: List<String> = emptyList(),
+    @Json(name = "systemMatchFrameRate") val systemMatchFrameRate: String = "unknown",
+    @Json(name = "arcFrameRateMatching") val arcFrameRateMatching: String? = null,
+    @Json(name = "filmFps") val filmFps: Float? = null,
+    @Json(name = "measuredHz") val measuredHz: Float? = null,
+    @Json(name = "cadence") val cadence: String = "unknown"
 )
 
 @JsonClass(generateAdapter = true)
@@ -36,7 +52,8 @@ data class PlaybackIssueRecorderDto(
     @Json(name = "trimmedSamples") val trimmedSamples: Int = 0,
     @Json(name = "trimmedEventLines") val trimmedEventLines: Int = 0,
     @Json(name = "settings") val settings: Map<String, String>? = null,
-    @Json(name = "route") val route: Map<String, String>? = null
+    @Json(name = "route") val route: Map<String, String>? = null,
+    @Json(name = "logLines") val logLines: List<String> = emptyList()
 )
 
 @JsonClass(generateAdapter = true)
@@ -81,6 +98,18 @@ data class PlaybackIssueRecorderSamplesDto(
     @Json(name = "speedPercent") val speedPercent: List<Int?> = emptyList(),
     @Json(name = "connections") val connections: List<Int?> = emptyList(),
     @Json(name = "watchedMs") val watchedMs: List<Int?> = emptyList(),
+    @Json(name = "swapFreeKb") val swapFreeKb: List<Int?> = emptyList(),
+    @Json(name = "gcCount") val gcCount: List<Int?> = emptyList(),
+    @Json(name = "gcMs") val gcMs: List<Int?> = emptyList(),
+    @Json(name = "gcBlockingMs") val gcBlockingMs: List<Int?> = emptyList(),
+    @Json(name = "audioQueueMs") val audioQueueMs: List<Int?> = emptyList(),
+    @Json(name = "busyFlags") val busyFlags: List<Int?> = emptyList(),
+    @Json(name = "subtitleCues") val subtitleCues: List<Int?> = emptyList(),
+    @Json(name = "subtitlePictureCues") val subtitlePictureCues: List<Int?> = emptyList(),
+    @Json(name = "audioHeadMs") val audioHeadMs: List<Int?> = emptyList(),
+    @Json(name = "audioLatencyMs") val audioLatencyMs: List<Int?> = emptyList(),
+    @Json(name = "audioClockSource") val audioClockSource: List<Int?> = emptyList(),
+    @Json(name = "audioWriteStalls") val audioWriteStalls: List<Int?> = emptyList(),
     @Json(name = "frameBuckets") val frameBuckets: List<List<Int>> = emptyList()
 )
 
@@ -101,14 +130,16 @@ data class PlaybackIssueBoxDto(
     @Json(name = "totalMemoryMb") val totalMemoryMb: Long?,
     @Json(name = "lowRamDevice") val lowRamDevice: Boolean?,
     @Json(name = "freeStorageMb") val freeStorageMb: Long?,
-    @Json(name = "uptimeSeconds") val uptimeSeconds: Long
+    @Json(name = "uptimeSeconds") val uptimeSeconds: Long,
+    @Json(name = "swapTotalMb") val swapTotalMb: Long? = null
 )
 
 @JsonClass(generateAdapter = true)
 data class PlaybackIssueViewerDto(
     @Json(name = "problems") val problems: List<String>,
     @Json(name = "whenHappened") val whenHappened: String? = null,
-    @Json(name = "note") val note: String? = null
+    @Json(name = "note") val note: String? = null,
+    @Json(name = "checkShown") val checkShown: String? = null
 )
 
 @JsonClass(generateAdapter = true)

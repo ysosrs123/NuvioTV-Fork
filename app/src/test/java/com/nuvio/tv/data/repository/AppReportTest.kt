@@ -51,6 +51,78 @@ class AppReportTest {
         assertFalse(lines[1].contains("tb-cdn"))
     }
 
+    @Test fun `a problem report from Settings adds the last screens and Arc's own log lines, cleaned`() {
+        val log = listOf(
+            "11-12 20:01:02.123 W/JankStats( 4242): JANK: 412ms | states: []",
+            "11-12 20:01:03.456 D/Home( 4242): row loaded from https://addon.example.com/catalog?token=SECRETSECRET123456"
+        )
+        val lines = buildAppReport(
+            AppReportChoices(AppReportKind.Bug, "home", includeLog = true), 42L, app, device, network = null, box = null,
+            events = emptyList(), recent = listOf("20:00:59 screen home"), log = log
+        ).logLines!!
+        assertEquals(
+            listOf(APP_REPORT_RECENT_HEADER, "20:00:59 screen home", ArcCrashFile.LOG_HEADER, log[0]),
+            lines.take(4)
+        )
+        assertEquals(5, lines.size)
+        assertFalse(lines[4].contains("SECRETSECRET"))
+        assertFalse(lines[4].contains("addon.example.com"))
+    }
+
+    @Test fun `Arc's own log lines keep the newest within their budget and need the log switch`() {
+        val log = List(APP_REPORT_LOG_MAX_CHARS / 200 + 50) { "line $it " + "x".repeat(200 - "line $it ".length) }
+        val kept = appReportLogLines(emptyList(), emptyList(), log)
+        assertEquals(ArcCrashFile.LOG_HEADER, kept.first())
+        assertEquals(log.last(), kept.last())
+        assertEquals(APP_REPORT_LOG_MAX_CHARS / 200, kept.size - 1)
+        assertTrue(appReportLogLines(emptyList(), emptyList(), emptyList()).isEmpty())
+        val off = buildAppReport(
+            AppReportChoices(AppReportKind.Bug, includeLog = false), 42L, app, device, network = null, box = null,
+            events = events(), recent = listOf("screen home"), log = log
+        )
+        assertNull(off.logLines)
+    }
+
+    @Test fun `slow frames are counted per minute and screen and outlive a long walk through Settings`() {
+        ArcSlowFrames.clear()
+        val start = 1_794_516_000_000L / 60_000L * 60_000L
+        ArcSlowFrames.note(60, "home", start + 1_000)
+        ArcSlowFrames.note(332, "home", start + 20_000)
+        ArcSlowFrames.note(101, "home", start + 59_000)
+        ArcSlowFrames.note(70, "settings", start + 59_500)
+        ArcSlowFrames.note(80, null, start + 61_000)
+        repeat(500) { ArcSlowFrames.note(55, "settings", start + 120_000) }
+        val lines = ArcSlowFrames.lines()
+        assertEquals(4, lines.size)
+        assertTrue(lines[0].endsWith(" home: 3 slow frames, 2 over 100 ms, worst 332 ms"))
+        assertTrue(lines[1].endsWith(" settings: 1 slow frames, 0 over 100 ms, worst 70 ms"))
+        assertTrue(lines[2].endsWith(" unknown: 1 slow frames, 0 over 100 ms, worst 80 ms"))
+        assertTrue(lines[3].endsWith(" settings: 500 slow frames, 0 over 100 ms, worst 55 ms"))
+        val sent = appReportLogLines(emptyList(), emptyList(), emptyList(), lines)
+        assertEquals(APP_REPORT_SLOW_HEADER, sent.first())
+        assertEquals(5, sent.size)
+        ArcSlowFrames.clear()
+    }
+
+    @Test fun `the slow frame list keeps only its newest minutes`() {
+        ArcSlowFrames.clear()
+        repeat(60) { ArcSlowFrames.note(60, "home", it * 60_000L) }
+        assertEquals(40, ArcSlowFrames.lines().size)
+        ArcSlowFrames.clear()
+    }
+
+    @Test fun `system lines about remote keys and hidden methods do not use up the log lines`() {
+        val noise = List(APP_REPORT_LOG_LINES * 2) {
+            "11-13 06:46:37.151 W/AmazonKeyEventLogging( 4195): remote_perf key event latency detected [KeyCode: KEYCODE_XXXX]"
+        }
+        val log = listOf("11-13 06:44:00.000 W/JankStats( 4195): JANK: 332ms | states: [Screen: home]") + noise +
+            listOf("11-13 06:47:00.000 W/m.nuvio.tv.tes( 4195): Accessing hidden method Landroid/graphics/Canvas;->drawPatch")
+        val kept = appReportLogLines(emptyList(), emptyList(), log)
+        assertEquals(listOf(ArcCrashFile.LOG_HEADER, log.first()), kept)
+        val many = List(APP_REPORT_LOG_LINES + 30) { "line $it" }
+        assertEquals(APP_REPORT_LOG_LINES, appReportLogLines(emptyList(), emptyList(), many).size - 1)
+    }
+
     private val crash = AppReportCrashDto("anr", 6, 100, 0, "user request after error", 9L, listOf("main thread"))
 
     @Test fun `a crash report carries what Android said and never the recorder log`() {

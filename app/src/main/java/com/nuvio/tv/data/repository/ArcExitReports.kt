@@ -35,7 +35,8 @@ data class UnexpectedExit(
     val status: Int,
     val description: String?,
     val timestampMs: Long,
-    val hasTrace: Boolean = false
+    val hasTrace: Boolean = false,
+    val pid: Int = 0
 )
 
 internal data class ExitRecord(
@@ -43,7 +44,8 @@ internal data class ExitRecord(
     val importance: Int,
     val status: Int,
     val description: String?,
-    val timestampMs: Long
+    val timestampMs: Long,
+    val pid: Int = 0
 )
 
 internal object ExitRules {
@@ -58,8 +60,18 @@ internal object ExitRules {
             ApplicationExitInfo.REASON_LOW_MEMORY -> UnexpectedExitKind.LowMemory
             else -> return null
         }
-        return UnexpectedExit(kind, record.reason, record.importance, record.status, record.description, record.timestampMs)
+        return UnexpectedExit(
+            kind, record.reason, record.importance, record.status, record.description, record.timestampMs, pid = record.pid
+        )
     }
+
+    /**
+     * What an exit report carries when the viewer includes details: Arc's own capture first, then the facts, the last
+     * snapshot and Android's trace. The facts always go, so a freeze Android kept no trace for still says which build,
+     * which box and what happened in the minute before.
+     */
+    fun traceLines(own: List<String>, facts: List<String>, heartbeat: List<String>, android: List<String>): List<String> =
+        ExitTrace.capped((own + facts + heartbeat + android).asSequence())
 
     /** Only Arc's very last exit is offered, and each one once. */
     fun forPrompt(records: List<ExitRecord>, handledMs: Long): UnexpectedExit? =
@@ -148,33 +160,27 @@ class ArcExitReports @Inject constructor(@ApplicationContext private val context
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun ApplicationExitInfo.toRecord() = ExitRecord(reason, importance, status, description, timestamp)
+    private fun ApplicationExitInfo.toRecord() = ExitRecord(reason, importance, status, description, timestamp, pid)
 
-    private fun UnexpectedExit.withTraceFlag(): UnexpectedExit {
-        val own = ArcHeartbeat.linesFor(timestampMs) != null || when (kind) {
-            UnexpectedExitKind.Crash -> ArcCrashFile.linesFor(timestampMs) != null
-            UnexpectedExitKind.NotResponding -> ArcMainWatchdog.linesFor(timestampMs) != null
-            else -> false
-        }
-        if (own || kind == UnexpectedExitKind.Crash || kind == UnexpectedExitKind.LowMemory) return copy(hasTrace = own)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return this
-        val found = exitInfos().firstOrNull { it.timestamp == timestampMs }
-        return copy(hasTrace = runCatching { found?.traceInputStream?.use { true } ?: false }.getOrDefault(false))
-    }
+    /** The facts can always be sent, so every exit offers its details, whether or not a trace was kept. */
+    private fun UnexpectedExit.withTraceFlag(): UnexpectedExit = copy(hasTrace = true)
 
     private fun readTrace(exit: UnexpectedExit): List<String>? {
-        val facts = ExitFacts.lines(exit, BuildConfig.GIT_COMMIT, Build.FINGERPRINT, Build.VERSION.SECURITY_PATCH, recentExits())
-        val heartbeat = ArcHeartbeat.linesFor(exit.timestampMs).orEmpty()
+        val facts = ExitFacts.lines(
+            exit, BuildConfig.GIT_COMMIT, Build.FINGERPRINT, Build.VERSION.SECURITY_PATCH, recentExits(),
+            ended = ArcBuildLog.at(exit.timestampMs),
+            sender = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+        )
+        val heartbeat = ArcHeartbeat.linesFor(exit.timestampMs, exit.pid).orEmpty()
         val own = when (exit.kind) {
             UnexpectedExitKind.Crash -> ArcCrashFile.linesFor(exit.timestampMs).orEmpty()
-            UnexpectedExitKind.NotResponding -> ArcMainWatchdog.linesFor(exit.timestampMs).orEmpty()
+            UnexpectedExitKind.NotResponding -> ArcMainWatchdog.linesFor(exit.timestampMs, exit.pid).orEmpty()
             else -> emptyList()
         }
         val android = if (exit.kind == UnexpectedExitKind.NotResponding || exit.kind == UnexpectedExitKind.NativeCrash) {
             androidTrace(exit).orEmpty()
         } else emptyList()
-        if (own.isEmpty() && heartbeat.isEmpty() && android.isEmpty()) return null
-        return ExitTrace.capped((own + facts + heartbeat + android).asSequence()).takeIf { it.isNotEmpty() }
+        return ExitRules.traceLines(own, facts, heartbeat, android).takeIf { it.isNotEmpty() }
     }
 
     private fun androidTrace(exit: UnexpectedExit): List<String>? {
@@ -469,10 +475,14 @@ internal object ExitFacts {
         commit: String,
         fingerprint: String?,
         securityPatch: String?,
-        recent: Map<UnexpectedExitKind, Int>
+        recent: Map<UnexpectedExitKind, Int>,
+        ended: ArcBuildLog.Entry? = null,
+        sender: String = ""
     ): List<String> = buildList {
         add("--- Arc facts ---")
-        add("Build commit: ${commit.ifBlank { "unknown" }}")
+        val other = ended?.takeIf { it.commit != commit || (sender.isNotEmpty() && it.label != sender) }
+        add("Build commit: ${(other?.commit ?: commit).ifBlank { "unknown" }}")
+        if (other != null) add("Ended on: ${other.label}, report sent from $sender")
         add("Android build: ${fingerprint ?: "unknown"}, security patch ${securityPatch ?: "unknown"}")
         if (exit.kind == UnexpectedExitKind.NativeCrash) {
             add("Signal: ${SIGNALS[exit.status] ?: "unknown"} (${exit.status})")

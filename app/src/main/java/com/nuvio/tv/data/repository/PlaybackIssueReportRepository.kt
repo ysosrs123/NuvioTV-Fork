@@ -10,6 +10,7 @@ import com.nuvio.tv.core.report.RecorderSnapshot
 import com.nuvio.tv.core.report.ReportFacts
 import com.nuvio.tv.data.remote.dto.PlaybackIssueAppDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueBoxDto
+import com.nuvio.tv.data.remote.dto.PlaybackIssueDisplayDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueContentDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDeviceDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDiagnosticsDto
@@ -39,7 +40,8 @@ data class PlaybackIssueViewerChoices(
     val problems: List<String> = emptyList(),
     val whenHappened: String? = null,
     val note: String? = null,
-    val includeLog: Boolean = true
+    val includeLog: Boolean = true,
+    val checkShown: String? = null
 )
 
 data class PlaybackIssueReceipt(val id: String, val followUrl: String?, val saved: Boolean = false)
@@ -72,13 +74,14 @@ internal fun PlaybackIssueReportRequestDto.applyViewerChoices(choices: PlaybackI
             deepExoEvents = emptyList(),
             exoEvents = emptyList()
         ),
-        recorder = named.recorder?.copy(eventLines = emptyList())
+        recorder = named.recorder?.copy(eventLines = emptyList(), logLines = emptyList())
     )
     return logged.copy(
         viewer = PlaybackIssueViewerDto(
             problems = choices.problems.take(12),
             whenHappened = choices.whenHappened,
-            note = ReportText.clean(choices.note, 1000)
+            note = ReportText.clean(choices.note, 1000),
+            checkShown = choices.checkShown?.take(40)
         )
     )
 }
@@ -141,6 +144,7 @@ data class PlaybackIssueReportInput(
     val recorder: RecorderSnapshot? = null,
     val network: PlaybackIssueNetworkDto? = null,
     val box: PlaybackIssueBoxDto? = null,
+    val display: PlaybackIssueDisplayDto? = null,
     val recorderSettings: Map<String, String>? = null,
     val recorderRoute: Map<String, String>? = null,
     val filename: String? = null,
@@ -288,9 +292,11 @@ class PlaybackIssueReportRepository @Inject constructor(
             error("Playback report endpoint is not configured")
         }
         val extra = reportFacts.collect()
+        val logLines = if (input.recorder != null && input.viewer.includeLog) withContext(Dispatchers.IO) { PlaybackReportLog.read() } else emptyList()
         val json = withContext(Dispatchers.Default) {
             val adapter = moshi.adapter(PlaybackIssueReportRequestDto::class.java)
-            val body = input.toDto(extra).applyViewerChoices(input.viewer)
+            val built = input.toDto(extra)
+            val body = built.copy(recorder = built.recorder?.copy(logLines = logLines)).applyViewerChoices(input.viewer)
             fitToRelay(body) { adapter.toJson(it).toByteArray(Charsets.UTF_8) }
         }
         outbox.deliver(ReportRoute.Playback, "playback", json)
@@ -358,6 +364,7 @@ class PlaybackIssueReportRepository @Inject constructor(
             recorder = recorder?.toDto(recorderSettings, recorderRoute),
             network = network,
             box = box,
+            display = display,
             extra = extra
         )
     }

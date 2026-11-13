@@ -4,16 +4,21 @@ import android.app.ActivityManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.hardware.display.DisplayManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.StatFs
 import android.os.SystemClock
+import android.provider.Settings
+import android.view.Display
+import kotlin.math.roundToInt
 import com.nuvio.tv.core.report.FRAME_BUCKET_COUNT
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.core.report.FRAME_BUCKET_EDGES_MS
 import com.nuvio.tv.core.report.RECORDER_UNKNOWN
 import com.nuvio.tv.core.report.RecorderSnapshot
 import com.nuvio.tv.data.remote.dto.PlaybackIssueBoxDto
+import com.nuvio.tv.data.remote.dto.PlaybackIssueDisplayDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueMarkDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueNetworkDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueRecordingDto
@@ -63,6 +68,18 @@ internal fun RecorderSnapshot.toDto(
                 speedPercent = it.speedPercent.known(),
                 connections = it.connections.known(),
                 watchedMs = it.watchedMs.known(),
+                swapFreeKb = it.swapFreeKb.known(),
+                gcCount = it.gcCount.known(),
+                gcMs = it.gcMs.known(),
+                gcBlockingMs = it.gcBlockingMs.known(),
+                audioQueueMs = it.audioQueueMs.known(),
+                busyFlags = it.busyFlags.known(),
+                audioHeadMs = it.audioHeadMs.known(),
+                audioLatencyMs = it.audioLatencyMs.known(),
+                audioClockSource = it.audioClockSource.known(),
+                audioWriteStalls = it.audioWriteStalls.known(),
+                subtitleCues = it.subtitleCues.known(),
+                subtitlePictureCues = it.subtitlePictureCues.known(),
                 frameBuckets = it.frameBuckets?.let { flat ->
                     List(it.count) { row -> List(FRAME_BUCKET_COUNT) { flat[row * FRAME_BUCKET_COUNT + it] } }
                 }.orEmpty()
@@ -144,7 +161,12 @@ internal fun PlaybackIssueRecorderSamplesDto.dropOldest(count: Int): PlaybackIss
         skippedFrames = skippedFrames.rest(), frameLeadUs = frameLeadUs.rest(),
         audioJitterAvgMs = audioJitterAvgMs.rest(), audioJitterMaxMs = audioJitterMaxMs.rest(),
         fillerCount = fillerCount.rest(), audioPositionMs = audioPositionMs.rest(), speedPercent = speedPercent.rest(),
-        connections = connections.rest(), watchedMs = watchedMs.rest(), frameBuckets = frameBuckets.rest()
+        connections = connections.rest(), watchedMs = watchedMs.rest(),
+        swapFreeKb = swapFreeKb.rest(), gcCount = gcCount.rest(), gcMs = gcMs.rest(), gcBlockingMs = gcBlockingMs.rest(), audioQueueMs = audioQueueMs.rest(), busyFlags = busyFlags.rest(),
+        subtitleCues = subtitleCues.rest(), subtitlePictureCues = subtitlePictureCues.rest(),
+        audioHeadMs = audioHeadMs.rest(), audioLatencyMs = audioLatencyMs.rest(),
+        audioClockSource = audioClockSource.rest(), audioWriteStalls = audioWriteStalls.rest(),
+        frameBuckets = frameBuckets.rest()
     )
 }
 
@@ -214,6 +236,64 @@ internal fun connectionKind(vpn: Boolean, wifi: Boolean, ethernet: Boolean): Str
     else -> "other"
 }
 
+internal fun swapTotalMb(meminfo: String?): Long? =
+    meminfo?.lineSequence()?.firstOrNull { it.startsWith("SwapTotal:") }
+        ?.substringAfter(':')?.trim()?.substringBefore(' ')?.toLongOrNull()?.div(1024L)
+
+/** Arc's own log lines worth sending: slow memory clean-ups and its own sound output. Nothing with a title or a link. */
+internal object PlaybackReportLog {
+    private const val READ_LINES = 4_000
+    private const val KEEP_LINES = 200
+    private const val WAIT_MS = 1_500L
+    private val MARKERS = listOf(" GC freed ", "WaitForGcToComplete", "IecPassthrough", "IecAudioTrack")
+
+    fun keep(lines: List<String>): List<String> =
+        lines.filter { line -> MARKERS.any { it in line } }
+            .mapNotNull { ReportText.eventLine(it, RECORDER_LINE_MAX_CHARS) }
+            .takeLast(KEEP_LINES)
+
+    fun read(): List<String> = runCatching { keep(ArcLogTail.read(READ_LINES, WAIT_MS)) }.getOrDefault(emptyList())
+}
+
+private fun rateLabel(value: Float): String =
+    String.format(java.util.Locale.US, "%.3f", value).trimEnd('0').trimEnd('.')
+
+/**
+ * How the film's frames land on the screen's ticks: "matched", an even multiple, a near match that slips one frame
+ * every so many seconds, 3:2 pulldown, or uneven. "unknown" when either rate is missing.
+ */
+internal fun cadenceLabel(filmFps: Float?, screenHz: Float?): String {
+    if (filmFps == null || screenHz == null || filmFps < 5f || screenHz < 5f) return "unknown"
+    val rates = "${rateLabel(filmFps)}p on ${rateLabel(screenHz)} Hz"
+    val ratio = screenHz / filmFps
+    val whole = Math.round(ratio)
+    if (whole >= 1 && kotlin.math.abs(ratio - whole) / whole <= 0.0004f) {
+        return if (whole == 1) "matched" else "even multiple x$whole ($rates)"
+    }
+    if (whole >= 1 && kotlin.math.abs(ratio - whole) / whole <= 0.01f) {
+        val slipSeconds = 1f / kotlin.math.abs(screenHz / whole - filmFps)
+        return "near match, one frame repeated or dropped every ${Math.round(slipSeconds)} s ($rates)"
+    }
+    if (kotlin.math.abs(ratio - 2.5f) / 2.5f <= 0.01f) return "3:2 pulldown ($rates)"
+    return "uneven ($rates)"
+}
+
+/** Android's own "match content frame rate" choice: the DisplayManager value on 12+, the setting before that. */
+internal fun systemMatchLabel(value: Int?): String = when (value) {
+    0 -> "never"
+    1 -> "seamless only"
+    2 -> "always"
+    else -> "unknown"
+}
+
+internal fun hdrTypeName(type: Int): String = when (type) {
+    1 -> "DolbyVision"
+    2 -> "HDR10"
+    3 -> "HLG"
+    4 -> "HDR10+"
+    else -> "type$type"
+}
+
 internal fun parseEthernetSpeedMbps(text: String?): Int? =
     text?.trim()?.toIntOrNull()?.takeIf { it in 1..400_000 }
 
@@ -227,6 +307,7 @@ internal fun networkKindForRecorder(capabilities: NetworkCapabilities): String =
 internal object PlaybackReportFacts {
     private const val ETHERNET_SPEED_FILE = "/sys/class/net/eth0/speed"
     private const val MB = 1024L * 1024L
+    private const val MEMINFO_FILE = "/proc/meminfo"
 
     fun network(context: Context): PlaybackIssueNetworkDto? = runCatching {
         val connectivity = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
@@ -260,7 +341,42 @@ internal object PlaybackReportFacts {
             totalMemoryMb = memory.totalMem.takeIf { it > 0L }?.div(MB),
             lowRamDevice = activity?.isLowRamDevice,
             freeStorageMb = runCatching { StatFs(context.filesDir.path).availableBytes / MB }.getOrNull(),
-            uptimeSeconds = SystemClock.elapsedRealtime() / 1000L
+            uptimeSeconds = SystemClock.elapsedRealtime() / 1000L,
+            swapTotalMb = swapTotalMb(runCatching { File(MEMINFO_FILE).readText() }.getOrNull())
+        )
+    }.getOrNull()
+
+    /** The screen mode as Android has it now. [measuredHz] is the tick count after the last switch, when it can be trusted. */
+    @Suppress("DEPRECATION")
+    fun display(context: Context, filmFps: Float?, arcMatching: String?, measuredHz: Float?): PlaybackIssueDisplayDto? = runCatching {
+        val manager = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
+        val display = manager?.getDisplay(Display.DEFAULT_DISPLAY)
+        val mode = display?.mode
+        val rates = mode?.let { current ->
+            display?.supportedModes.orEmpty()
+                .filter { it.physicalWidth == current.physicalWidth && it.physicalHeight == current.physicalHeight }
+                .map { (it.refreshRate * 1000f).roundToInt() / 1000f }
+                .distinct()
+                .sorted()
+        }.orEmpty()
+        val systemMatch = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            manager?.matchContentFrameRateUserPreference
+        } else {
+            runCatching { Settings.Secure.getInt(context.contentResolver, "match_content_frame_rate") }.getOrNull()
+        }
+        val fps = filmFps?.takeIf { it > 0f }
+        val screenHz = measuredHz ?: mode?.refreshRate
+        PlaybackIssueDisplayDto(
+            refreshHz = mode?.refreshRate,
+            width = mode?.physicalWidth,
+            height = mode?.physicalHeight,
+            refreshRatesAtThisSize = rates,
+            hdrTypes = display?.hdrCapabilities?.supportedHdrTypes?.map(::hdrTypeName).orEmpty(),
+            systemMatchFrameRate = systemMatchLabel(systemMatch),
+            arcFrameRateMatching = arcMatching,
+            filmFps = fps,
+            measuredHz = measuredHz,
+            cadence = cadenceLabel(fps, screenHz)
         )
     }.getOrNull()
 

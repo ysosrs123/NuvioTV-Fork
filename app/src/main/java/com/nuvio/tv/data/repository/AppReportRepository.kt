@@ -29,6 +29,44 @@ data class AppReportChoices(
 )
 
 internal const val APP_REPORT_NOTE_MAX = 1000
+internal const val APP_REPORT_LOG_LINES = 400
+internal const val APP_REPORT_LOG_MAX_CHARS = 60_000
+private const val APP_REPORT_LOG_WAIT_MS = 1_500L
+internal const val APP_REPORT_RECENT_HEADER = "--- Recent screens and playback ---"
+internal const val APP_REPORT_SLOW_HEADER = "--- Slow frames by minute and screen ---"
+private const val APP_REPORT_LOG_READ_LINES = 2000
+
+/** Lines the system writes under Arc's process that say nothing about Arc and crowd out what does. */
+internal fun withoutLogNoise(lines: List<String>): List<String> =
+    lines.filterNot { "AmazonKeyEventLogging" in it || "Accessing hidden " in it }
+
+/** Player events first, then the last screens and Arc's own log lines, which is all a report from Settings has when nothing was played. */
+internal fun appReportLogLines(
+    events: List<RecorderEventLine>,
+    recent: List<String>,
+    log: List<String>,
+    slowFrames: List<String> = emptyList()
+): List<String> = buildList {
+    addAll(newestWithinBudget(events.mapNotNull { ReportText.eventLine(it.text, RECORDER_LINE_MAX_CHARS) }))
+    val screens = recent.mapNotNull { ReportText.eventLine(it, RECORDER_LINE_MAX_CHARS) }
+    if (screens.isNotEmpty()) {
+        add(APP_REPORT_RECENT_HEADER)
+        addAll(screens)
+    }
+    val slow = slowFrames.mapNotNull { ReportText.eventLine(it, RECORDER_LINE_MAX_CHARS) }
+    if (slow.isNotEmpty()) {
+        add(APP_REPORT_SLOW_HEADER)
+        addAll(slow)
+    }
+    val own = newestWithinBudget(
+        withoutLogNoise(log).takeLast(APP_REPORT_LOG_LINES).mapNotNull { ReportText.eventLine(it, RECORDER_LINE_MAX_CHARS) },
+        APP_REPORT_LOG_MAX_CHARS
+    )
+    if (own.isNotEmpty()) {
+        add(ArcCrashFile.LOG_HEADER)
+        addAll(own)
+    }
+}
 
 internal fun buildAppReport(
     choices: AppReportChoices,
@@ -38,7 +76,10 @@ internal fun buildAppReport(
     network: PlaybackIssueNetworkDto?,
     box: PlaybackIssueBoxDto?,
     events: List<RecorderEventLine>,
-    extra: Map<String, String>? = null
+    extra: Map<String, String>? = null,
+    recent: List<String> = emptyList(),
+    log: List<String> = emptyList(),
+    slowFrames: List<String> = emptyList()
 ): AppReportRequestDto = AppReportRequestDto(
     schemaVersion = 1,
     createdAtMs = createdAtMs,
@@ -50,7 +91,7 @@ internal fun buildAppReport(
     where = choices.where.takeIf { choices.kind == AppReportKind.Bug },
     note = ReportText.clean(choices.note, APP_REPORT_NOTE_MAX),
     logLines = if (choices.includeLog && choices.kind != AppReportKind.Crash) {
-        newestWithinBudget(events.mapNotNull { ReportText.eventLine(it.text, RECORDER_LINE_MAX_CHARS) })
+        appReportLogLines(events, recent, log, slowFrames)
     } else {
         null
     },
@@ -68,6 +109,7 @@ class AppReportRepository @Inject constructor(
     suspend fun submit(choices: AppReportChoices): Result<PlaybackIssueReceipt> = runCatching {
         if (!IssueReports.available) error("App report endpoint is not configured")
         val json = withContext(Dispatchers.IO) {
+            val withLog = choices.includeLog && choices.kind == AppReportKind.Bug
             val body = buildAppReport(
                 choices = choices,
                 createdAtMs = System.currentTimeMillis(),
@@ -76,7 +118,10 @@ class AppReportRepository @Inject constructor(
                 network = PlaybackReportFacts.network(context),
                 box = PlaybackReportFacts.box(context),
                 events = if (choices.includeLog && choices.kind != AppReportKind.Crash) PlaybackRecorder.snapshot().events else emptyList(),
-                extra = reportFacts.collect()
+                extra = reportFacts.collect(),
+                recent = if (withLog) ArcBreadcrumbs.recent() else emptyList(),
+                log = if (withLog) runCatching { ArcLogTail.read(APP_REPORT_LOG_READ_LINES, APP_REPORT_LOG_WAIT_MS) }.getOrDefault(emptyList()) else emptyList(),
+                slowFrames = if (withLog) ArcSlowFrames.lines() else emptyList()
             )
             moshi.adapter(AppReportRequestDto::class.java).toJson(body).toByteArray(Charsets.UTF_8)
         }
