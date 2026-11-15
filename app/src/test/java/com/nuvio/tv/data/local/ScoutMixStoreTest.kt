@@ -75,4 +75,16 @@ class ScoutMixStoreTest {
         assertEquals("ready_world_us", decodeScoutMix(encodeScoutMix(mix))!!.savedFrom)
         assertNull(decodeScoutMix("""{"id":"a","name":"x","shows":[]}""")!!.savedFrom)
     }
+
+    @Test
+    fun `hidden seasons are remembered once each and only the latest are kept`() {
+        var raw: String? = null
+        raw = scoutHideSeason(raw, "thanksgiving:2026")
+        raw = scoutHideSeason(raw, "thanksgiving:2026")
+        raw = scoutHideSeason(raw, "christmas:2026")
+        assertEquals(setOf("thanksgiving:2026", "christmas:2026"), scoutHiddenSeasons(raw))
+        repeat(30) { raw = scoutHideSeason(raw, "halloween:${2000 + it}") }
+        assertEquals(20, scoutHiddenSeasons(raw).size)
+        assertEquals(emptySet<String>(), scoutHiddenSeasons(null))
+    }
 }

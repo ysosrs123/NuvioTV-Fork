@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,8 +69,10 @@ import javax.inject.Inject
 
 private const val NAMES_SHOWN = 4
 private const val TILE_NAMES = 2
+private const val READY_PREFIX = "ready_"
 private const val READY_TILE_PREFIX = "ready_tile_"
 private const val READY_TAB_PREFIX = "ready_tab_"
+private const val READY_FOCUS_TRIES = 8
 internal const val READY_FOCUS_PLAY = "ready_play"
 private const val READY_FOCUS_SAVE = "ready_save"
 private const val READY_FOCUS_ADJUST = "ready_adjust"
@@ -176,7 +179,7 @@ class ScoutReadyMixesViewModel @Inject constructor(
     private suspend fun tileFor(mix: ScoutReadyMix): ScoutReadyTileState {
         val occasion = mix.occasion
         if (occasion != null) {
-            val episodes = builder.occasionEpisodes(occasion).filter { !family || it.suitsFamily() }
+            val episodes = builder.fittingLimit(builder.occasionEpisodes(occasion).filter { !family || it.suitsFamily() })
             if (episodes.size < com.nuvio.tv.core.scout.SCOUT_OCCASION_FEWEST) return ScoutReadyTileState(mix, loaded = true, hidden = true)
             val chosen = com.nuvio.tv.core.scout.scoutOccasionChoice(episodes, family, com.nuvio.tv.core.scout.scoutReadyWeekSeed())
             val first = chosen.values.map { it.first() }
@@ -346,7 +349,8 @@ internal fun ColumnScope.ScoutReadyRows(
         val list = key(state.tab) { rememberLazyListState() }
         LazyRow(
             state = list,
-            modifier = Modifier.fillMaxWidth().height(tileHeight + NuvioTheme.spacing.md).scoutRowBounds(),
+            modifier = Modifier.fillMaxWidth().height(tileHeight + NuvioTheme.spacing.md).scoutRowBounds()
+                .then(state.tiles.firstOrNull()?.let { Modifier.focusRestorer(entry(READY_TILE_PREFIX + it.mix.id)) } ?: Modifier),
             contentPadding = PaddingValues(horizontal = ScoutFocusRoom, vertical = NuvioTheme.spacing.xs),
             horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl)
         ) {
@@ -365,10 +369,21 @@ internal fun ColumnScope.ScoutReadyRows(
     }
 }
 
-/** Focus lands on the first tile when the page opens, as it does on the picks. */
+/**
+ * Focus lands on the first tile when the page opens, as it does on the picks. Coming back from a mix or Mix your own it
+ * returns to what was pressed. Tries for a while, as the page may still be sliding in.
+ */
 @Composable
-internal fun ScoutReadyFirstFocus(state: ScoutReadyState, entry: (String) -> androidx.compose.ui.focus.FocusRequester) {
+internal fun ScoutReadyFirstFocus(state: ScoutReadyState, last: String?, entry: (String) -> androidx.compose.ui.focus.FocusRequester) {
     val first = state.tiles.firstOrNull()?.mix?.id ?: return
-    LaunchedEffect(Unit) { entry(READY_TILE_PREFIX + first).requestFocusAfterFrames() }
+    LaunchedEffect(Unit) {
+        val back = last?.takeIf { it.startsWith(READY_PREFIX) }
+        if (back != null) repeat(READY_FOCUS_TRIES) {
+            if (entry(back).requestFocusAfterFrames()) return@LaunchedEffect
+        }
+        repeat(READY_FOCUS_TRIES) {
+            if (entry(READY_TILE_PREFIX + first).requestFocusAfterFrames()) return@LaunchedEffect
+        }
+    }
 }
 

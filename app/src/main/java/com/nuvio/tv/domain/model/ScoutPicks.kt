@@ -125,15 +125,18 @@ fun scoutNormalizedName(name: String): String =
         .replace(SCOUT_NOT_LETTER_OR_DIGIT, " ")
         .trim()
 
-/** What must never be offered: anything watched, started or rated, and any left-out genre or language. */
+/** What must never be offered: anything watched, started or rated, any left-out genre or language, and anime recap films. */
 data class ScoutExclusions(
     val names: Set<String> = emptySet(),
     val tmdbKeys: Set<String> = emptySet(),
     val genres: Set<Int> = emptySet(),
-    val languages: Set<String> = emptySet()
+    val languages: Set<String> = emptySet(),
+    /** Anime films TMDB marks as re-cuts of a TV season. */
+    val recaps: Set<String> = emptySet()
 ) {
     fun blocks(pick: ScoutPick): Boolean {
         if (pick.key in tmdbKeys || pick.genres.any { it in genres }) return true
+        if (com.nuvio.tv.core.scout.scoutIsAnimeRecap(pick, recaps)) return true
         if (pick.language != null && pick.language in languages) return true
         val name = scoutNormalizedName(pick.name)
         if (name in names) return true

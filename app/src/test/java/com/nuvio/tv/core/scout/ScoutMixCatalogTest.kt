@@ -45,6 +45,16 @@ class ScoutMixCatalogTest {
     }
 
     @Test
+    fun `more mixes deals from every mix and leaves out each mix's own lead picture`() {
+        fun show(id: String) = ScoutMixShow(id, id.uppercase(), poster = "p$id", backdrop = "b$id")
+        val first = ScoutMix("m1", "Sitcoms", listOf(show("a"), show("b"), show("c")))
+        val second = ScoutMix("m2", "Cop shows", listOf(show("d"), show("e")))
+        assertEquals(listOf("e", "b", "c"), scoutMoreMixesShows(listOf(first, second)).map { it.id })
+        val lone = ScoutMix("m", "One", listOf(show("a")))
+        assertEquals(listOf("a"), scoutMoreMixesShows(listOf(lone)).map { it.id })
+    }
+
+    @Test
     fun `the hero shows logos only when every show it names has one`() {
         val some = ScoutMix("m", "M", listOf(ScoutMixShow("a", "A", logo = "la"), ScoutMixShow("b", "B")))
         val all = some.copy(shows = some.shows.map { it.copy(logo = "l" + it.id) })

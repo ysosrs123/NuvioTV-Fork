@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -90,8 +91,17 @@ data class ScoutScreenState(
     val pinChecking: Boolean = false,
     val asking: Boolean = false,
     val askBusy: Boolean = false,
-    val askFailure: AskFailure? = null
+    val askFailure: AskFailure? = null,
+    /** The profile has a rating limit: family moods and mixes only, and moods with nothing that fits are left out. */
+    val kids: Boolean = false,
+    val emptyMoods: Set<String> = emptySet()
 ) {
+    fun allMoods(): List<ScoutMood> = ScoutMood.choicesFor(answers.watch, answers.family, kids)
+
+    fun moodKey(mood: ScoutMood): String = answers.copy(mood = mood, tunes = emptySet()).encode() + others.sorted()
+
+    fun moods(): List<ScoutMood> = allMoods().filter { moodKey(it) !in emptyMoods || (tab as? ScoutTab.Feeling)?.mood == it }
+
     /** Unset answers, a surprise or "more like" draw from elsewhere, which is not a query a row could repeat. */
     val canSave: Boolean get() = !surprise && moreLike == null && !asking && !answers.isUnset
 }
@@ -178,12 +188,26 @@ class ScoutViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val gate = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(context)
+            if (gate != null && withContext(Dispatchers.IO) { gate.activeLimit() } != null) _state.update { it.copy(kids = true) }
+            if (gate != null) launch { followLimit(gate) }
             val saved = finder.pool() != null
             if (!saved) finder.refreshPool()
             loadRow(0)
             if (saved) finder.refreshPool()
         }
         viewModelScope.launch { _state.update { it.copy(fromCountryOffered = finder.fromCountryOffered(country)) } }
+    }
+
+    /** A limit added or taken away while Scout is open changes its moods and picks at once. */
+    private suspend fun followLimit(gate: com.nuvio.tv.core.ratinglimit.RatingLimitGate) {
+        gate.limits.drop(1).collect {
+            val kids = withContext(Dispatchers.IO) { gate.activeLimit() } != null
+            if (kids == _state.value.kids) return@collect
+            _state.update { it.copy(kids = kids, emptyMoods = emptySet()) }
+            shown.clear()
+            loadRow(0)
+        }
     }
 
     /** Resting on a tab shows it, the way Seasons work on a title's page. */
@@ -201,7 +225,9 @@ class ScoutViewModel @Inject constructor(
 
     fun pressWatch(watch: ScoutWatch) = answer { it.pressWatch(watch) }
     fun pressTime(time: ScoutTime) = answer { it.pressTime(time) }
-    fun pressFamily() = answer { it.pressFamily(!it.family) }
+    fun pressFamily() {
+        if (!_state.value.kids) answer { it.pressFamily(!it.family) }
+    }
 
     private fun answer(change: (ScoutAnswers) -> ScoutAnswers) {
         _state.update { s ->
@@ -279,7 +305,7 @@ class ScoutViewModel @Inject constructor(
         val s = _state.value
         val quick = s.answers.time == ScoutTime.QUICK_EPISODES || s.answers.time == ScoutTime.SHORT
         if (s.surprise || s.moreLike != null || s.asking || quick) return
-        val moods = listOf<ScoutMood?>(null) + ScoutMood.choicesFor(s.answers.watch, s.answers.family)
+        val moods = listOf<ScoutMood?>(null) + s.moods()
         val at = moods.indexOf((s.tab as? ScoutTab.Feeling)?.mood).coerceAtLeast(0)
         nearJob?.cancel()
         nearJob = viewModelScope.launch {
@@ -301,7 +327,7 @@ class ScoutViewModel @Inject constructor(
         warmJob = viewModelScope.launch {
             delay(WARM_AFTER_MS)
             val gate = Semaphore(WARM_AT_ONCE)
-            val moods = listOf<ScoutMood?>(null) + ScoutMood.choicesFor(s.answers.watch, s.answers.family)
+            val moods = listOf<ScoutMood?>(null) + s.allMoods()
             val from = moods.indexOf((s.tab as? ScoutTab.Feeling)?.mood).coerceAtLeast(0)
             coroutineScope {
                 moods.indices.sortedBy { abs(it - from) }.forEach { index ->
@@ -316,6 +342,8 @@ class ScoutViewModel @Inject constructor(
 
     private suspend fun warm(s: ScoutScreenState) {
         val picks = rowFor(s)
+        val mood = s.answers.mood
+        if (s.kids && mood != null && picks.isEmpty()) _state.update { it.copy(emptyMoods = it.emptyMoods + s.moodKey(mood)) }
         val top = picks.firstOrNull() ?: return
         coroutineScope {
             launch { finder.detail(top, s.answers.family)?.let { details[top.key] = it } }
@@ -353,11 +381,12 @@ class ScoutViewModel @Inject constructor(
     }
 
     private suspend fun buildRow(s: ScoutScreenState): List<ScoutPick> {
-        val answers = s.answers
+        val unset = s.answers.isUnset
+        val answers = if (s.kids) s.answers.copy(family = true) else s.answers
         var fresh = order(
             when {
-                s.surprise && answers.isUnset -> finder.surprisePool()
-                answers.isUnset -> finder.pool()?.picked.orEmpty()
+                s.surprise && unset -> finder.surprisePool()
+                unset -> finder.pool()?.picked.orEmpty()
                 else -> emptyList()
             }
         )
@@ -466,7 +495,7 @@ class ScoutViewModel @Inject constructor(
             when (val outcome = asker.ask(question)) {
                 is AskOutcome.Answer -> {
                     _state.update { it.copy(askBusy = false) }
-                    showRow(outcome.items.ifEmpty { outcome.held }.mapNotNull(::askedPick))
+                    showRow(fitLimit(outcome.items.ifEmpty { outcome.held }.mapNotNull(::askedPick)))
                 }
                 is AskOutcome.Failed -> _state.update { it.copy(askBusy = false, askFailure = outcome.failure, rowLoading = false) }
             }
@@ -515,9 +544,12 @@ class ScoutViewModel @Inject constructor(
         val exclusions = finder.exclusions()
         val others = group()
         val ordered = withContext(Dispatchers.Default) { scoutOrderPicks(list, finder.pool(), exclusions, System.nanoTime(), others) }
-        val kept = ordered.filterNot { it.key in shown }
-        val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(context) ?: return kept
-        val limit = withContext(Dispatchers.IO) { ratingLimits.activeLimit() } ?: return kept
-        return ratingLimits.keepFitting(limit, kept) { "tmdb:${it.tmdbId}" to if (it.tv) "series" else "movie" }
+        return fitLimit(ordered.filterNot { it.key in shown })
+    }
+
+    private suspend fun fitLimit(list: List<ScoutPick>): List<ScoutPick> {
+        val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(context) ?: return list
+        val limit = withContext(Dispatchers.IO) { ratingLimits.activeLimit() } ?: return list
+        return ratingLimits.keepFitting(limit, list) { "tmdb:${it.tmdbId}" to if (it.tv) "series" else "movie" }
     }
 }

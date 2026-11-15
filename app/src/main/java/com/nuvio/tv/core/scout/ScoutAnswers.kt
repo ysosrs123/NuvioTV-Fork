@@ -66,11 +66,16 @@ enum class ScoutMood(
             FEEL_GOOD, LAUGH, SHOUNEN, ISEKAI, SLICE_OF_LIFE, MECHA, PSYCHOLOGICAL, ROMANTIC, MAGICAL_GIRL, SPORT_ANIME, DARK_FANTASY, SAMURAI
         )
         private val TOPICS = listOf(TRUE_CRIME, NATURE, HISTORY, SPACE, FOOD, MUSIC, SPORT, WAR, SCIENCE, TRAVEL, ART, POLITICS)
+        private val NOT_FOR_KIDS = setOf(EDGE, DARK, SCARY, ROMANTIC, SLOW, PSYCHOLOGICAL, DARK_FANTASY, SAMURAI, TRUE_CRIME, WAR, POLITICS)
 
-        fun choicesFor(watch: ScoutWatch, family: Boolean = false): List<ScoutMood> = when (watch) {
-            ScoutWatch.ANIME -> ANIME
-            ScoutWatch.DOCUMENTARY -> TOPICS
-            else -> if (family) FAMILY else GENERAL
+        /** A profile with a rating limit gets the family moods without the ones made for grown-ups. */
+        fun choicesFor(watch: ScoutWatch, family: Boolean = false, kids: Boolean = false): List<ScoutMood> {
+            val all = when (watch) {
+                ScoutWatch.ANIME -> ANIME
+                ScoutWatch.DOCUMENTARY -> TOPICS
+                else -> if (family || kids) FAMILY else GENERAL
+            }
+            return if (kids) all.filterNot { it in NOT_FOR_KIDS } else all
         }
     }
 }

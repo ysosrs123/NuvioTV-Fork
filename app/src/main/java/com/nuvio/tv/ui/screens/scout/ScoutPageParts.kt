@@ -4,7 +4,9 @@ package com.nuvio.tv.ui.screens.scout
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -19,7 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +33,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
@@ -71,6 +75,7 @@ import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.components.GlassRole
 import com.nuvio.tv.ui.v2.components.nuvioGlass
 import com.nuvio.tv.ui.v2.components.nuvioV2Focus
+import kotlinx.coroutines.launch
 
 internal const val SCOUT_BACKDROP_WIDTH = 1920
 internal const val SCOUT_TILE_IMAGE_WIDTH = 780
@@ -173,20 +178,48 @@ internal fun ScoutTabs(
     onFocused: (ScoutTabItem) -> Unit,
     onClick: (ScoutTabItem) -> Unit,
     selected: FocusRequester = FocusRequester.Default,
-    entry: (ScoutTabItem) -> FocusRequester? = { null }
+    entry: (ScoutTabItem) -> FocusRequester? = { null },
+    whole: Boolean = false
 ) {
     val list = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     val landing = if (selected === FocusRequester.Default) items.getOrNull(list.firstVisibleItemIndex)?.let(entry) ?: selected else selected
-    CompositionLocalProvider(LocalBringIntoViewSpec provides NuvioScrollDefaults.smoothScrollSpec) {
+    CompositionLocalProvider(LocalBringIntoViewSpec provides if (whole) ScoutNoBringIntoView else NuvioScrollDefaults.smoothScrollSpec) {
         LazyRow(
             state = list,
             modifier = Modifier.fillMaxWidth().scoutRowBounds().focusRestorer(landing),
             contentPadding = PaddingValues(horizontal = ScoutFocusRoom, vertical = NuvioTheme.spacing.sm),
             horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
         ) {
-            items(items, key = { it.key }) { item ->
-                ScoutTab(item, focus(item.key), { onFocused(item) }, { onClick(item) })
+            itemsIndexed(items, key = { _, item -> item.key }) { index, item ->
+                ScoutTab(item, focus(item.key), {
+                    onFocused(item)
+                    if (whole) scope.launch { list.showWhole(index) }
+                }, { onClick(item) })
             }
+        }
+    }
+}
+
+private object ScoutNoBringIntoView : BringIntoViewSpec {
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float = 0f
+}
+
+/**
+ * Scrolls a row that starts part way across the screen so the focused chip and every chip before it on screen are
+ * whole: the row always rests with a chip at its start edge, never one cut in half.
+ */
+internal suspend fun LazyListState.showWhole(index: Int) {
+    repeat(2) {
+        val info = layoutInfo
+        val end = info.viewportEndOffset - info.afterContentPadding
+        val visible = info.visibleItemsInfo
+        val item = visible.firstOrNull { it.index == index }
+        when {
+            item == null && visible.isNotEmpty() && index > visible.last().index -> animateScrollBy(end / 2f)
+            item == null || item.offset < 0 -> return animateScrollToItem(index)
+            item.offset + item.size <= end -> return
+            else -> return animateScrollToItem(visible.first { item.offset + item.size - it.offset <= end || it.index == index }.index)
         }
     }
 }

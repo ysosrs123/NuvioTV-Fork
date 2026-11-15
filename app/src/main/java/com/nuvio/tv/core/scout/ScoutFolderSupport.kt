@@ -130,11 +130,12 @@ class ScoutFolderSupport @Inject constructor(
         val profile = store.current()
         val listed = listed()
         val names = namesToHide(profile, listed)
+        val leaveOut = ScoutLeaveOut.of(profile.settings)
         val named = System.currentTimeMillis()
         items.filterNot { item ->
             val name = scoutNormalizedName(item.name)
             val year = item.releaseInfo?.take(4)?.toIntOrNull()
-            item.id in listed.ids || name in names ||
+            !leaveOut.keeps(item) || item.id in listed.ids || name in names ||
                 (year != null && (year - 1..year + 1).any { "$name|$it" in names })
         }.also {
             Log.i("ScoutSpeed", "seen names=${named - started} filter=${System.currentTimeMillis() - named} items=${items.size}")

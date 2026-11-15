@@ -63,6 +63,17 @@ class ScoutFolderSupportTest {
         runBlocking { s.withoutSeen(items.toList()) }.map { it.id }
 
     @Test
+    fun `left out languages and genres leave tile pages and saved rows`() {
+        val profile = ScoutProfile(settings = com.nuvio.tv.domain.model.ScoutSettings(leaveOutGenres = setOf(16), leaveOutLanguages = setOf("ja")))
+        val s = support(profile = profile)
+        val anime = item("tmdb:1", "Anime").copy(originalLanguage = "ja", tmdbGenreIds = listOf(16))
+        val cartoon = item("tmdb:2", "Cartoon").copy(originalLanguage = "en", tmdbGenreIds = listOf(16))
+        val drama = item("tmdb:3", "Drama").copy(originalLanguage = "ja", tmdbGenreIds = listOf(18))
+        val comedy = item("tmdb:4", "Comedy").copy(originalLanguage = "en", tmdbGenreIds = listOf(35))
+        assertEquals(listOf("tmdb:4", "tmdb:5"), visible(s, anime, cartoon, drama, comedy, item("tmdb:5", "Unknown")))
+    }
+
+    @Test
     fun `watched title leaves but a remake of the name stays`() {
         val s = support(watched = listOf(WatchedItem("tt1", "movie", "Dune", watchedAt = 1, releaseInfo = "1984")))
         assertEquals(listOf("tmdb:2"), visible(s, item("tmdb:1", "Dune", "1984"), item("tmdb:2", "Dune", "2021")))

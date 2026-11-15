@@ -76,9 +76,14 @@ class ScoutMixViewModelTest {
     )
     private val allWatched = (1..6).map { 1 to it }.toSet()
 
-    private fun viewModel(keepPlaying: Boolean = true, seenEverything: Boolean = false): ScoutMixViewModel {
+    private fun viewModel(
+        keepPlaying: Boolean = true,
+        seenEverything: Boolean = false,
+        shows: List<ScoutMixShow> = listOf(show),
+        fits: (String) -> Boolean = { true }
+    ): ScoutMixViewModel {
         val store = mockk<ScoutMixStore>(relaxed = true)
-        val mixes = listOf(ScoutMix("m", "Mix", listOf(show), keepPlaying = keepPlaying))
+        val mixes = listOf(ScoutMix("m", "Mix", shows, keepPlaying = keepPlaying))
         every { store.observe(profile) } returns flowOf(mixes)
         every { store.observeAny(profile) } returns flowOf(mixes)
         every { store.observeNoSources(profile) } returns flowOf(emptySet())
@@ -99,6 +104,10 @@ class ScoutMixViewModelTest {
         every { layout.posterCardWidthDp } returns flowOf(126)
         every { layout.posterCardCornerRadiusDp } returns flowOf(12)
         val ready = mockk<ScoutReadyMixBuilder>(relaxed = true)
+        coEvery { ready.fittingLimit(any<ScoutMix>()) } answers {
+            val mix = firstArg<ScoutMix>()
+            mix.copy(shows = mix.shows.filter { fits(it.id) })
+        }
         return ScoutMixViewModel(SavedStateHandle(mapOf("mixId" to "m")), store, library, suggestions, session, profiles, settings, ready, layout)
     }
 
@@ -115,6 +124,23 @@ class ScoutMixViewModelTest {
         runCurrent()
         assertTrue(going.state.value.pick is ScoutMixPick.Episode)
         assertTrue(going.state.value.offers.isEmpty())
+    }
+
+    @Test
+    fun `a saved mix shows and plays only what fits the rating limit`() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel(shows = listOf(show, added), fits = { it == "tt1" })
+        runCurrent()
+        assertEquals(listOf("tt1"), vm.mix.value?.shows?.map { it.id })
+        val pick = vm.state.value.pick as ScoutMixPick.Episode
+        assertEquals("tt1", pick.show.id)
+    }
+
+    @Test
+    fun `a saved mix with nothing that fits offers no episode`() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel(fits = { false })
+        runCurrent()
+        assertTrue(vm.mix.value?.shows.orEmpty().isEmpty())
+        assertFalse(vm.state.value.pick is ScoutMixPick.Episode)
     }
 
     @Test

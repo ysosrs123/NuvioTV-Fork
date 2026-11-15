@@ -6,6 +6,8 @@ object ScoutFeature {
     val available: Boolean get() = BuildConfig.SCOUT_ENABLED
 }
 
+fun scoutMenuShown(available: Boolean, settings: ScoutSettings?): Boolean = available && settings?.menuVisible != false
+
 enum class ScoutRating { NOT_FOR_ME, LIKE, LOVE }
 
 data class ScoutTitle(
@@ -43,12 +45,14 @@ data class ScoutSettings(
     val becauseRow: Boolean = true,
     val gemsRow: Boolean = true,
     val tilesRow: Boolean = false,
+    val mixesRow: Boolean = true,
     val leaveOutGenres: Set<Int> = emptySet(),
     val leaveOutLanguages: Set<String> = emptySet(),
     val savedSlices: List<String> = emptyList(),
     val tasteRow: String = "titles",
     val sendToTrackers: Boolean = false,
-    val useTrackerRatings: Boolean = true
+    val useTrackerRatings: Boolean = true,
+    val menuVisible: Boolean = true
 )
 
 data class ScoutProfile(

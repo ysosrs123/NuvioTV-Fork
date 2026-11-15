@@ -98,6 +98,32 @@ class ScoutCatalogProviderTest {
     }
 
     @Test
+    fun `a saved row whose whole subject is left out does not show`() {
+        val settings = ScoutSettings(
+            pickedRow = false, becauseRow = false, gemsRow = false,
+            savedSlices = listOf("language_ja", "genre_16", "mood_laugh"),
+            leaveOutGenres = setOf(16), leaveOutLanguages = setOf("ja")
+        )
+        assertEquals(listOf(ScoutCatalogProvider.CATALOG_SAVED + "mood_laugh"), provider().catalogIds(ScoutProfile(settings = settings)))
+    }
+
+    @Test
+    fun `a saved row left out after saving loads empty`() {
+        val profile = ScoutProfile(settings = ScoutSettings(savedSlices = listOf("language_ja"), leaveOutLanguages = setOf("ja")))
+        assertTrue(provider(profile = profile).row(ScoutCatalogProvider.CATALOG_SAVED + "language_ja").items.isEmpty())
+    }
+
+    @Test
+    fun `tile pages ask without the left out genres`() {
+        val provider = provider()
+        provider.addonsFor(fullPool, ScoutProfile(settings = ScoutSettings(leaveOutGenres = setOf(16))))
+        val sources = provider.allSlicesCollection().folders.single { it.id == "mood_laugh" }.sources
+            .filterIsInstance<com.nuvio.tv.domain.model.TmdbCollectionSource>()
+        assertTrue(sources.isNotEmpty())
+        assertTrue(sources.all { "16" in it.filters.withoutGenres.orEmpty().split(',') })
+    }
+
+    @Test
     fun `row titles never get a type added`() {
         assertFalse(provider().showsTypeSuffix(ScoutCatalogProvider.ADDON_ID))
     }

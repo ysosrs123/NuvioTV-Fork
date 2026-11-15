@@ -24,6 +24,8 @@ private const val SITCOM_WORDS = "193171|381587|210605"
 private const val POLICE_WORDS = "268067|15167"
 private const val POLICE_WORDS_WIDE = "268067|15167|6149|703"
 private const val SPACE_WORDS = "281358|9882|3801"
+private const val SPACE_ONLY_WORDS = "9882|3801"
+private const val END_OF_WORLD_WORDS = "4565|4458"
 private const val ADULT_CARTOON_WORDS = "161919|315444"
 private const val RECIPE_PREFIX = "r"
 private const val ANY = "x"
@@ -52,7 +54,9 @@ enum class ScoutMixKind(
     val keywords: String? = null,
     val looseKeywords: String? = null,
     val looseLeaveOut: String? = null,
-    val leaveOutWords: String? = null
+    val leaveOutWords: String? = null,
+    val classicKeywords: String? = null,
+    val classicLeaveOutWords: String? = null
 ) {
     ANY("x", R.string.scout_premix_any, null),
     SITCOMS(
@@ -64,19 +68,30 @@ enum class ScoutMixKind(
         "k", R.string.scout_premix_crime, CRIME_GENRE, "$ANIMATION_GENRE,$SCI_FI_GENRE", keywords = POLICE_WORDS,
         looseKeywords = POLICE_WORDS_WIDE
     ),
-    SCI_FI("f", R.string.scout_premix_scifi, SCI_FI_GENRE, ANIMATION_GENRE, keywords = SPACE_WORDS),
+    SCI_FI(
+        "f", R.string.scout_premix_scifi, SCI_FI_GENRE, ANIMATION_GENRE, keywords = SPACE_WORDS,
+        classicKeywords = SPACE_ONLY_WORDS, classicLeaveOutWords = END_OF_WORLD_WORDS
+    ),
     ANIME("a", R.string.scout_premix_anime, ANIMATION_GENRE, countries = "JP"),
     DOCS("d", R.string.scout_premix_docs, DOCUMENTARY_GENRE)
 }
 
-/** The moods a mix can take, each the same as the mood tab of the same name. */
-enum class ScoutMixFeel(val code: String, val mood: ScoutMood?) {
+/** Moods a mix for the whole family does not offer, the same ones the Moods tab leaves out on Family night. */
+internal val SCOUT_NOT_FAMILY_FEELS = setOf(ScoutMixFeel.EDGE, ScoutMixFeel.WEIRD, ScoutMixFeel.DARK)
+
+/**
+ * The moods a mix can take, each the same as the mood tab of the same name. The last two fill the Moods tab on Family
+ * night only and are not offered in Mix your own.
+ */
+enum class ScoutMixFeel(val code: String, val mood: ScoutMood?, val own: Boolean = true) {
     ANY("x", null),
     FEEL_GOOD("g", ScoutMood.FEEL_GOOD),
     LAUGH("l", ScoutMood.LAUGH),
     EDGE("e", ScoutMood.EDGE),
     WEIRD("w", ScoutMood.WEIRD),
-    DARK("d", ScoutMood.DARK);
+    DARK("d", ScoutMood.DARK),
+    MAGICAL("m", ScoutMood.MAGICAL, own = false),
+    ACTION("a", ScoutMood.ACTION, own = false);
 
     @get:StringRes
     val labelRes: Int get() = mood?.labelRes ?: R.string.scout_premix_any
@@ -147,7 +162,8 @@ internal fun ScoutMixRecipe.filters(
     today: LocalDate = LocalDate.now(),
     years: Int = 0,
     votes: Int = 50,
-    strict: Boolean = true
+    strict: Boolean = true,
+    classic: Boolean = false
 ): TmdbCollectionFilters {
     val mood = feel.mood
     var f = if (mood != null) {
@@ -162,13 +178,18 @@ internal fun ScoutMixRecipe.filters(
         f.withGenres == null -> f.copy(withGenres = genres)
         else -> f.copy(withGenres = scoutAllGenres(genres.substringBefore('|'), f.withGenres))
     }
-    val words = if (strict) kind.keywords else kind.looseKeywords
+    val words = when {
+        classic && kind.classicKeywords != null -> kind.classicKeywords
+        strict -> kind.keywords
+        else -> kind.looseKeywords
+    }
     if (words != null && f.withKeywords == null) f = f.copy(withKeywords = words)
     val kindLeaveOut = if (strict) kind.leaveOut else kind.looseLeaveOut ?: kind.leaveOut
     val leaveOut = listOfNotNull(f.withoutGenres, kindLeaveOut, PEOPLE).flatMap { it.split(',') }
         .filter { it.isNotBlank() && it !in f.withGenres.orEmpty().split(',', '|') }.distinct()
     f = f.copy(withoutGenres = leaveOut.joinToString(",").ifBlank { null })
-    kind.leaveOutWords?.let { words -> f = f.copy(withoutKeywords = listOfNotNull(f.withoutKeywords, words).joinToString("|")) }
+    val leaveOutWords = listOfNotNull(kind.leaveOutWords, kind.classicLeaveOutWords?.takeIf { classic })
+    if (leaveOutWords.isNotEmpty()) f = f.copy(withoutKeywords = (listOfNotNull(f.withoutKeywords) + leaveOutWords).joinToString("|"))
     decade.from?.let { f = f.copy(releaseDateGte = "${it - years}-01-01") }
     if (decade.from != null) {
         f = f.copy(releaseDateLte = "${minOf((decade.to ?: today.year) + years, today.year)}-12-31")
@@ -181,7 +202,10 @@ internal fun ScoutMixRecipe.filters(
 
 private const val SMALL_FLOOR = 20
 
-/** The kinds where any episode works on its own: a decade or a country with no kind chosen is built from these. */
+/**
+ * The kinds where any episode works on its own: a decade or a country with no kind chosen is built from these. Their
+ * sci-fi part is space adventures only, as broad "science fiction" and end-of-the-world stories run season-long.
+ */
 internal val SCOUT_CLASSIC_KINDS = listOf(ScoutMixKind.SITCOMS, ScoutMixKind.CRIME, ScoutMixKind.CARTOONS, ScoutMixKind.SCI_FI)
 
 /** Fewer than this from those kinds (Korea, Latin America) and the mix keeps the broad search for that place. */

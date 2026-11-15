@@ -103,7 +103,8 @@ class ScoutMixViewModel @Inject constructor(
 
     private val allMixes = store.observe(profileId).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val pickSources = store.observePickSources(profileId).stateIn(viewModelScope, SharingStarted.Eagerly, true)
-    val mix: StateFlow<ScoutMix?> = store.observeAny(profileId).map { mixes -> mixes.firstOrNull { it.id == mixId } }
+    /** The mix as this profile may see it: shows above its rating limit are left out, also from mixes saved before. */
+    val mix: StateFlow<ScoutMix?> = store.observeAny(profileId).map { mixes -> mixes.firstOrNull { it.id == mixId }?.let { ready.fittingLimit(it) } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val posterWidthDp = layoutPreferences.posterCardWidthDp.stateIn(viewModelScope, SharingStarted.Eagerly, 126)
     val posterCornerDp = layoutPreferences.posterCardCornerRadiusDp.stateIn(viewModelScope, SharingStarted.Eagerly, 12)
@@ -315,7 +316,7 @@ class ScoutMixViewModel @Inject constructor(
         aheadJob?.cancel()
         ahead = null
         aheadJob = viewModelScope.launch {
-            val saved = store.observeAny(profileId).first().firstOrNull { it.id == mixId } ?: return@launch
+            val saved = stored() ?: return@launch
             val next = _state.value.coming.firstOrNull { it.key != current.key && it.key !in played } ?: pickScoutMixEpisode(
                 shows = saved.shows,
                 unwatchedOnly = saved.unwatchedOnly,
@@ -400,12 +401,15 @@ class ScoutMixViewModel @Inject constructor(
         }
     }
 
+    private suspend fun stored(): ScoutMix? =
+        store.observeAny(profileId).first().firstOrNull { it.id == mixId }?.let { ready.fittingLimit(it) }
+
     private fun pickNext(andCountDown: Boolean = false, with: ScoutMix? = null) {
         pickJob?.cancel()
         val current = (_state.value.pick as? ScoutMixPick.Episode)?.key
         _state.update { it.copy(loading = true, countdown = null) }
         pickJob = viewModelScope.launch {
-            val saved = with ?: store.observeAny(profileId).first().firstOrNull { it.id == mixId }
+            val saved = with ?: stored()
             if (saved == null) {
                 _gone.value = true
                 return@launch

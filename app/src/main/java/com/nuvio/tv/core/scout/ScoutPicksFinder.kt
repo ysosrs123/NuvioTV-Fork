@@ -234,7 +234,8 @@ class ScoutPicksFinder @Inject constructor(
         val rated = store.current().ratings.values.sumOf { it.ratedAt }
         val profile = engine.activeProfile()
         val moodsChecked = withContext(Dispatchers.IO) { moodAi.read(profile).moods.values.sumOf { it.checkedAt } }
-        return "$key|${tmdbSettings.settings.first().language}|${pool()?.builtAt}|$rated|$profile|$moodsChecked"
+        val limit = scoutLimit(context)?.code.orEmpty()
+        return "$key|${tmdbSettings.settings.first().language}|${pool()?.builtAt}|$rated|$profile|$moodsChecked|$limit"
     }
 
     /** A row built in the last day, without anything the profile has since seen or rated. */

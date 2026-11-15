@@ -350,4 +350,15 @@ class ScoutAnswersTest {
         assertEquals(18, scoutCanonicalGenre(18))
         assertEquals(setOf(878, 10765), scoutGenreLeaveOutIds(878))
     }
+
+    @Test
+    fun `a profile with a rating limit gets no moods made for grown-ups`() {
+        val grownUp = setOf(ScoutMood.EDGE, ScoutMood.DARK, ScoutMood.SCARY, ScoutMood.ROMANTIC, ScoutMood.SLOW)
+        val kids = ScoutMood.choicesFor(ScoutWatch.ANYTHING, kids = true)
+        assertTrue(kids.none { it in grownUp })
+        assertTrue(ScoutMood.MAGICAL in kids && ScoutMood.LAUGH in kids && ScoutMood.FEEL_GOOD in kids)
+        assertFalse(ScoutMood.DARK_FANTASY in ScoutMood.choicesFor(ScoutWatch.ANIME, kids = true))
+        assertFalse(ScoutMood.TRUE_CRIME in ScoutMood.choicesFor(ScoutWatch.DOCUMENTARY, kids = true))
+        assertEquals(12, ScoutMood.choicesFor(ScoutWatch.ANYTHING).size)
+    }
 }

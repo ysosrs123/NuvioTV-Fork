@@ -82,6 +82,30 @@ class ScoutReadyMixesTest {
     }
 
     @Test
+    fun `a decade's sci-fi is space adventures without end-of-the-world stories`() {
+        val f = ScoutMixRecipe(kind = ScoutMixKind.SCI_FI).filters("AU", today, classic = true)
+        assertEquals("9882|3801", f.withKeywords)
+        assertEquals("4565|4458", f.withoutKeywords)
+        assertNull(ScoutMixRecipe(kind = ScoutMixKind.SCI_FI).filters("AU", today).withoutKeywords)
+    }
+
+    @Test
+    fun `family night fills the moods row with magical and action-packed`() {
+        val family = ScoutReadyMixes.tab(ScoutReadyTab.MOODS, true, today, "AU").map { it.key }
+        assertEquals(listOf("feel_good", "laugh", "magical", "action"), family)
+        val everyone = ScoutReadyMixes.tab(ScoutReadyTab.MOODS, false, today, "AU").map { it.key }
+        assertEquals(listOf("feel_good", "laugh", "edge", "weird"), everyone)
+    }
+
+    @Test
+    fun `the family moods survive a saved recipe but stay out of mix your own`() {
+        val recipe = ScoutMixRecipe(feel = ScoutMixFeel.MAGICAL, family = true)
+        assertEquals(recipe, ScoutMixRecipe.decode(recipe.encode()))
+        assertFalse(ScoutMixFeel.MAGICAL.own)
+        assertFalse(ScoutMixFeel.ACTION.own)
+    }
+
+    @Test
     fun `cartoons leave out cartoons made for adults`() {
         val f = ScoutMixRecipe(kind = ScoutMixKind.CARTOONS).filters("AU", today)
         assertEquals("161919|315444", f.withoutKeywords)
@@ -237,5 +261,14 @@ class ScoutReadyMixesTest {
         val surprise = scoutBlendOrder(byVotes, byTaste, ScoutMixBlend.SURPRISE, 1L)
         assertEquals((11..14).toSet(), surprise.take(4).map { it.tmdbId }.toSet())
         assertEquals(14, surprise.size)
+    }
+
+    @Test
+    fun `Thanksgiving leads in November only in the United States`() {
+        val november = LocalDate.of(2026, 11, 14)
+        assertEquals(ScoutOccasion.THANKSGIVING, ScoutReadyMixes.inSeason(november, "US")?.occasion)
+        assertNull(ScoutReadyMixes.inSeason(november, "AU"))
+        assertNull(ScoutReadyMixes.inSeason(november, ""))
+        assertEquals(ScoutOccasion.CHRISTMAS, ScoutReadyMixes.inSeason(LocalDate.of(2026, 12, 2), "AU")?.occasion)
     }
 }

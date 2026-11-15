@@ -219,7 +219,7 @@ fun ScoutScreen(
     if (mixesOpen) mixesOpened = true
     val readyModel = if (mixesOpened) hiltViewModel<ScoutReadyMixesViewModel>() else null
     val readyState = readyModel?.state?.collectAsStateWithLifecycle()?.value
-    LaunchedEffect(readyModel, state.answers.family) { readyModel?.setFamily(state.answers.family) }
+    LaunchedEffect(readyModel, state.answers.family, state.kids) { readyModel?.setFamily(state.answers.family || state.kids) }
     BackHandler(enabled = mixesOpen && !startOnMixes) { mixesOpen = false }
     fun focus(key: String): Modifier = Modifier
         .focusRequester(requesters.getOrPut(key) { FocusRequester() })
@@ -325,7 +325,7 @@ fun ScoutScreen(
                     modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = FOCUS_ROOM),
                     contentAlignment = BiasAlignment(-1f, HERO_BLOCK_BIAS)
                 ) {
-                    ScoutReadyHero(readyState, ::focus, onPlay = play, onSave = readyModel::save, onAdjust = { onMixOwn(it) })
+                    ScoutReadyHero(readyState, ::focus, onPlay = play, onSave = readyModel::save, onAdjust = { onMixOwn(if (state.kids) com.nuvio.tv.core.scout.ScoutMixRecipe.decode(it)?.copy(family = true)?.encode() ?: it else it) })
                 }
                 ScoutReadyRows(
                     state = readyState,
@@ -335,9 +335,9 @@ fun ScoutScreen(
                     onTab = readyModel::focusTab,
                     onFocusMix = readyModel::focusMix,
                     onOpen = open,
-                    onOwn = { onMixOwn(null) }
+                    onOwn = { onMixOwn(if (state.kids) com.nuvio.tv.core.scout.ScoutMixRecipe(family = true).encode() else null) }
                 )
-                ScoutReadyFirstFocus(readyState, entry)
+                ScoutReadyFirstFocus(readyState, viewModel.focusKey, entry)
             } else {
             Box(
                 modifier = Modifier
@@ -522,7 +522,7 @@ private fun scoutTabItems(state: ScoutScreenState): List<ScoutTabItem> {
     val tab = state.tab
     return buildList {
         add(ScoutTabItem(SCOUT_FOCUS_FOR_YOU, stringResource(R.string.scout_for_you), tab == ScoutTab.ForYou))
-        ScoutMood.choicesFor(answers.watch, answers.family).forEach { mood ->
+        state.moods().forEach { mood ->
             add(ScoutTabItem(TAB_MOOD + mood.code, stringResource(mood.labelRes), tab == ScoutTab.Feeling(mood)))
         }
         add(ScoutTabItem(TAB_SURPRISE, stringResource(R.string.scout_tile_surprise), false))
@@ -624,7 +624,7 @@ private fun ScoutWhoDialog(
             }
             ScoutOptionRow(
                 label = stringResource(R.string.scout_family_night),
-                on = state.answers.family,
+                on = state.answers.family || state.kids,
                 onClick = viewModel::pressFamily,
                 note = stringResource(R.string.scout_family_suitable),
                 leading = { Icon(Icons.Default.Groups, null, Modifier.size(NuvioTheme.spacing.xxl)) }

@@ -75,6 +75,7 @@ class ScoutCatalogProvider @Inject constructor(
     private val started = java.util.concurrent.atomic.AtomicBoolean(false)
     internal val tileHeroes = MutableStateFlow<Map<String, String>>(emptyMap())
     @Volatile private var savedAnswers: List<String> = emptyList()
+    @Volatile private var leaveOut = ScoutLeaveOut()
     @Volatile private var localized: Pair<String, Context>? = null
 
     private val context: Context
@@ -179,6 +180,7 @@ class ScoutCatalogProvider @Inject constructor(
     internal fun addonsFor(pool: ScoutPool?, profile: ScoutProfile): List<Addon> {
         val settings = profile.settings
         savedAnswers = settings.savedSlices.filter { ScoutAnswers.decode(it) != null }
+        val leftOut = ScoutLeaveOut.of(settings).also { leaveOut = it }
         val catalogs = buildList {
             if (settings.pickedRow && !pool?.picked.isNullOrEmpty()) add(descriptor(CATALOG_PICKED, context.getString(R.string.scout_row_picked)))
             if (settings.pickedRow && !pool?.newForYou.isNullOrEmpty()) add(descriptor(CATALOG_NEW, context.getString(R.string.scout_picks_row_new)))
@@ -191,7 +193,7 @@ class ScoutCatalogProvider @Inject constructor(
             }
             if (settings.gemsRow && !pool?.gems.isNullOrEmpty()) add(descriptor(CATALOG_GEMS, context.getString(R.string.scout_row_gems)))
             settings.savedSlices.forEach { id ->
-                ScoutSlices.byId(id)?.let { add(descriptor(CATALOG_SAVED + id, sliceTitle(it))) }
+                ScoutSlices.byId(id)?.takeUnless(leftOut::covers)?.let { add(descriptor(CATALOG_SAVED + id, sliceTitle(it))) }
             }
         }
         if (catalogs.isEmpty()) return emptyList()
@@ -228,11 +230,12 @@ class ScoutCatalogProvider @Inject constructor(
     private fun sliceTitle(slice: ScoutSlice) = slice.title { res, args -> context.getString(res, *args) }
 
     internal fun tilesFor(pool: ScoutPool?, profile: ScoutProfile): List<Collection> {
+        val leftOut = ScoutLeaveOut.of(profile.settings).also { leaveOut = it }
         val folders = buildList {
             if (profile.settings.tilesRow) {
                 add(actionFolder(FOLDER_SURPRISE, R.string.scout_tile_surprise, actionCover("surprise_me", "acclaim_crowd")))
                 val art = (pool?.picked.orEmpty() + pool?.gems.orEmpty()).distinctBy { it.key }.drop(1)
-                ScoutSlices.homeTiles.mapNotNull(ScoutSlices::byId).forEachIndexed { index, slice ->
+                ScoutSlices.homeTiles.mapNotNull(ScoutSlices::byId).filterNot(leftOut::covers).forEachIndexed { index, slice ->
                     add(folderFor(slice, tileCover(slice) ?: art.getOrNull(index)?.backdrop).copy(heroBackdropUrl = tileHeroes.value[slice.id]))
                 }
                 add(actionFolder(FOLDER_MORE, R.string.scout_tile_more, actionCover("more_filters", "acclaim_gems")))
@@ -304,7 +307,7 @@ class ScoutCatalogProvider @Inject constructor(
         )
     }
 
-    private fun sourcesFor(slice: ScoutSlice) = slice.award?.takeIf { it.tabs.isNotEmpty() }?.let { choice ->
+    private fun sourcesFor(slice: ScoutSlice, leftOut: ScoutLeaveOut = leaveOut) = slice.award?.takeIf { it.tabs.isNotEmpty() }?.let { choice ->
         scoutAwardTabs(choice, awardLists).mapNotNull { tab ->
             awardSource(tab.titleRes, if (tab.series) TmdbCollectionMediaType.TV else TmdbCollectionMediaType.MOVIE, tab.ids)
         }
@@ -320,7 +323,7 @@ class ScoutCatalogProvider @Inject constructor(
                 title = context.getString(R.string.type_movie),
                 mediaType = TmdbCollectionMediaType.MOVIE,
                 sortBy = slice.sortBy,
-                filters = it
+                filters = leftOut.applyTo(it)
             )
         },
         slice.tv?.let {
@@ -329,7 +332,7 @@ class ScoutCatalogProvider @Inject constructor(
                 title = context.getString(R.string.type_series),
                 mediaType = TmdbCollectionMediaType.TV,
                 sortBy = slice.sortBy,
-                filters = it
+                filters = leftOut.applyTo(it)
             )
         }
     )
@@ -388,8 +391,9 @@ class ScoutCatalogProvider @Inject constructor(
         addonBaseUrl: String, addonId: String, addonName: String, catalogId: String, catalogName: String, skip: Int,
         posterPattern: String
     ): CatalogRow {
-        val slice = ScoutSlices.byId(catalogId.removePrefix(CATALOG_SAVED))
-        val lists = if (skip > 0 || slice == null) emptyList() else sourcesFor(slice).map { source ->
+        val leftOut = ScoutLeaveOut.of(store.profile.first().settings)
+        val slice = ScoutSlices.byId(catalogId.removePrefix(CATALOG_SAVED))?.takeUnless(leftOut::covers)
+        val lists = if (skip > 0 || slice == null) emptyList() else sourcesFor(slice, leftOut).map { source ->
             val result = resolver.resolve(source).first { it !is com.nuvio.tv.core.network.NetworkResult.Loading }
             (result as? com.nuvio.tv.core.network.NetworkResult.Success)?.data?.items.orEmpty()
         }

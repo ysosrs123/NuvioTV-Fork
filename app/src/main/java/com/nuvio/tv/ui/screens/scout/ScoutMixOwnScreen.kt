@@ -48,6 +48,7 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import com.nuvio.tv.R
 import com.nuvio.tv.core.scout.SCOUT_READY_SHOWS
+import com.nuvio.tv.core.scout.SCOUT_NOT_FAMILY_FEELS
 import com.nuvio.tv.core.scout.ScoutMixBlend
 import com.nuvio.tv.core.scout.ScoutMixDecade
 import com.nuvio.tv.core.scout.ScoutMixFeel
@@ -97,6 +98,7 @@ class ScoutMixOwnViewModel @Inject constructor(
 
     init {
         findShows(settle = false)
+        viewModelScope.launch { if (builder.limited()) choose(_state.value.recipe.copy(family = true)) }
     }
 
     fun choose(recipe: ScoutMixRecipe) {
@@ -140,7 +142,7 @@ private fun ownLines(recipe: ScoutMixRecipe): List<OwnLine> = listOf(
     OwnLine("kind", R.string.scout_premix_own_kind, ScoutMixKind.entries.map { it.code to it.labelRes }, recipe.kind.code) { r, c ->
         r.copy(kind = ScoutMixKind.entries.first { it.code == c })
     },
-    OwnLine("mood", R.string.scout_premix_own_mood, ScoutMixFeel.entries.filter { !(recipe.family && it == ScoutMixFeel.DARK) }.map { it.code to it.labelRes }, recipe.feel.code) { r, c ->
+    OwnLine("mood", R.string.scout_premix_own_mood, ScoutMixFeel.entries.filter { it.own && !(recipe.family && it in SCOUT_NOT_FAMILY_FEELS) }.map { it.code to it.labelRes }, recipe.feel.code) { r, c ->
         r.copy(feel = ScoutMixFeel.entries.first { it.code == c })
     },
     OwnLine("from", R.string.scout_premix_own_from, ScoutMixFrom.entries.map { it.code to it.labelRes }, recipe.from.code) { r, c ->
@@ -231,7 +233,8 @@ fun ScoutMixOwnScreen(
                         entry = { requester(it.key) },
                         focus = { Modifier.focusRequester(requester(it)) },
                         onFocused = { item -> viewModel.change { line.apply(it, item.key.removePrefix(LINE_PREFIX + line.key + "_")) } },
-                        onClick = { }
+                        onClick = { },
+                        whole = true
                     )
                 }
             }

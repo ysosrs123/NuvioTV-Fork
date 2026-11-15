@@ -7,6 +7,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
+import java.util.Locale
 
 enum class ScoutReadyTab(@StringRes val labelRes: Int) {
     DECADES(R.string.scout_premix_tab_decades),
@@ -17,11 +18,17 @@ enum class ScoutReadyTab(@StringRes val labelRes: Int) {
 }
 
 /** Occasions with enough themed episodes to fill a mix; each can be played all year and leads in its own season. */
-enum class ScoutOccasion(val code: String, @StringRes val nameRes: Int, @StringRes val whyRes: Int) {
+enum class ScoutOccasion(
+    val code: String,
+    @StringRes val nameRes: Int,
+    @StringRes val whyRes: Int,
+    /** Countries where it leads in season; null for everywhere. */
+    private val countries: Set<String>? = null
+) {
     CHRISTMAS("christmas", R.string.scout_premix_christmas, R.string.scout_premix_why_christmas),
     HALLOWEEN("halloween", R.string.scout_premix_halloween, R.string.scout_premix_why_halloween),
     VALENTINES("valentines", R.string.scout_premix_valentines, R.string.scout_premix_why_valentines),
-    THANKSGIVING("thanksgiving", R.string.scout_premix_thanksgiving, R.string.scout_premix_why_thanksgiving),
+    THANKSGIVING("thanksgiving", R.string.scout_premix_thanksgiving, R.string.scout_premix_why_thanksgiving, setOf("US")),
     EASTER("easter", R.string.scout_premix_easter, R.string.scout_premix_why_easter);
 
     /** The days it leads, around [today]'s year. Christmas runs on to New Year's Day. */
@@ -33,8 +40,12 @@ enum class ScoutOccasion(val code: String, @StringRes val nameRes: Int, @StringR
         EASTER -> scoutEaster(year).let { it.minusDays(21)..it.plusDays(1) }
     }
 
-    fun inSeason(today: LocalDate): Boolean =
-        today in season(today.year) || (this == CHRISTMAS && today in season(today.year - 1))
+    fun inSeason(today: LocalDate, country: String = Locale.getDefault().country): Boolean =
+        (countries == null || country.uppercase() in countries) &&
+            (today in season(today.year) || (this == CHRISTMAS && today in season(today.year - 1)))
+
+    /** Names this year's season, so a tile hidden for it comes back the next time round. */
+    fun seasonKey(today: LocalDate): String = "$code:" + (if (today in season(today.year)) today.year else today.year - 1)
 
     /** When its season next starts, for "Best in October". */
     fun nextStart(today: LocalDate): LocalDate {
@@ -85,8 +96,8 @@ object ScoutReadyMixes {
     private fun world(from: ScoutMixFrom) =
         ScoutReadyMix("world_${from.code}", ScoutReadyTab.WORLD, from.labelRes, R.string.scout_premix_why_world, ScoutMixRecipe(from = from))
 
-    private fun mood(key: String, feel: ScoutMixFeel, why: Int, notForFamily: Boolean = false) =
-        ScoutReadyMix(key, ScoutReadyTab.MOODS, feel.labelRes, why, ScoutMixRecipe(feel = feel), notForFamily = notForFamily)
+    private fun mood(key: String, feel: ScoutMixFeel, why: Int, notForFamily: Boolean = false, familyOnly: Boolean = false) =
+        ScoutReadyMix(key, ScoutReadyTab.MOODS, feel.labelRes, why, ScoutMixRecipe(feel = feel), notForFamily = notForFamily, familyOnly = familyOnly)
 
     val all: List<ScoutReadyMix> = buildList {
         add(decade("d70", ScoutMixDecade.SEVENTIES, R.string.scout_premix_70s, R.string.scout_premix_why_decade))
@@ -109,6 +120,8 @@ object ScoutReadyMixes {
         add(mood("laugh", ScoutMixFeel.LAUGH, R.string.scout_premix_why_laugh))
         add(mood("edge", ScoutMixFeel.EDGE, R.string.scout_premix_why_edge, notForFamily = true))
         add(mood("weird", ScoutMixFeel.WEIRD, R.string.scout_premix_why_weird, notForFamily = true))
+        add(mood("magical", ScoutMixFeel.MAGICAL, R.string.scout_premix_why_magical, familyOnly = true))
+        add(mood("action", ScoutMixFeel.ACTION, R.string.scout_premix_why_action, familyOnly = true))
         ScoutMixFrom.entries.filter { it != ScoutMixFrom.ANYWHERE }.forEach { add(world(it)) }
         ScoutOccasion.entries.forEach { occasion ->
             add(ScoutReadyMix("year_${occasion.code}", ScoutReadyTab.YEAR, occasion.nameRes, occasion.whyRes, occasion = occasion))
@@ -131,7 +144,7 @@ object ScoutReadyMixes {
         val shown = all.filter { it.tab == tab && !(family && it.notForFamily) && !(it.familyOnly && !family) }
         return when (tab) {
             ScoutReadyTab.YEAR -> shown.sortedWith(
-                compareByDescending<ScoutReadyMix> { it.occasion?.inSeason(today) == true }
+                compareByDescending<ScoutReadyMix> { it.occasion?.inSeason(today, country) == true }
                     .thenBy { it.occasion?.nextStart(today) }
             )
             ScoutReadyTab.WORLD -> {
@@ -147,8 +160,8 @@ object ScoutReadyMixes {
     }
 
     /** The occasion that leads today, if any: the one Home shows. */
-    fun inSeason(today: LocalDate): ScoutReadyMix? =
-        all.firstOrNull { it.occasion?.inSeason(today) == true }
+    fun inSeason(today: LocalDate, country: String = Locale.getDefault().country): ScoutReadyMix? =
+        all.firstOrNull { it.occasion?.inSeason(today, country) == true }
 }
 
 /** A ready-made mix is rebuilt once a week, from Monday. */

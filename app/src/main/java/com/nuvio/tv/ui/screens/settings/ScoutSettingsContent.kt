@@ -14,12 +14,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.QuestionAnswer
@@ -141,6 +143,13 @@ internal fun ScoutSettingsContent(
                     onClick = { onOpenRoute(com.nuvio.tv.ui.navigation.Screen.ScoutWords.route) }
                 )
             }
+            SettingsToggleRow(
+                title = stringResource(R.string.scout_menu_visible),
+                leadingIcon = Icons.Default.Menu,
+                subtitle = stringResource(R.string.scout_menu_visible_sub),
+                checked = settings.menuVisible,
+                onToggle = { viewModel.updateSettings { it.copy(menuVisible = !it.menuVisible) } }
+            )
         }
         SettingsGroupCard(title = stringResource(R.string.scout_settings_on_home)) {
             SettingsToggleRow(
@@ -177,6 +186,13 @@ internal fun ScoutSettingsContent(
                 subtitle = stringResource(R.string.scout_row_tiles_sub),
                 checked = settings.tilesRow,
                 onToggle = { viewModel.updateSettings { it.copy(tilesRow = !it.tilesRow) } }
+            )
+            SettingsToggleRow(
+                title = stringResource(R.string.scout_row_mixes),
+                leadingIcon = Icons.Default.Shuffle,
+                subtitle = stringResource(R.string.scout_row_mixes_sub),
+                checked = settings.mixesRow,
+                onToggle = { viewModel.updateSettings { it.copy(mixesRow = !it.mixesRow) } }
             )
         }
         SettingsGroupCard(title = stringResource(R.string.scout_settings_tune)) {

@@ -21,6 +21,8 @@
     <string name="scout_row_gems_sub">Well rated titles few people have seen</string>
     <string name="scout_row_tiles">Scout tiles</string>
     <string name="scout_row_tiles_sub">Surprise me, moods, decades</string>
+    <string name="scout_row_mixes">Mixes</string>
+    <string name="scout_row_mixes_sub">Your saved mixes and the holiday mix in season</string>
     <string name="scout_ratings_enabled">Rate titles</string>
     <string name="scout_ratings_enabled_sub">Shows the Rate button, the thumbs in the long-press menu and the question after a film</string>
     <string name="scout_ratings_off_note">Hides the Rate button, the thumbs in the menu and the question after a film. Your ratings still count.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">Leave out</string>
     <string name="scout_leave_out_sub">Genres you never want to see</string>
     <string name="scout_leave_out_none">None</string>
+    <string name="scout_menu_visible">Show Scout in the menu</string>
+    <string name="scout_menu_visible_sub">Scout\'s Home rows keep their own switches</string>
 </resources>

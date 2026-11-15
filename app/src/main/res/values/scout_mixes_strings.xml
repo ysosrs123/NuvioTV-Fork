@@ -56,4 +56,8 @@
     <string name="scout_mixes_delete_title">Delete %1$s?</string>
     <string name="scout_mixes_delete_detail">Your shows and watch history stay as they are</string>
     <string name="scout_mixes_delete_confirm">Delete</string>
+    <string name="scout_mixes_menu_subtitle">Mix actions</string>
+    <string name="scout_mixes_menu_open">Open mix</string>
+    <string name="scout_mixes_menu_remove">Remove from my mixes</string>
+    <string name="scout_mixes_menu_hide">Hide until next year</string>
 </resources>

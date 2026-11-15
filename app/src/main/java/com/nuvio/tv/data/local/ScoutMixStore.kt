@@ -25,6 +25,8 @@ private const val PREFIX = "mix:"
 private const val READY = "ready:"
 private val PICK_SOURCES = booleanPreferencesKey("pick_sources")
 private val NO_SOURCES = stringPreferencesKey("no_sources")
+private val HIDDEN_SEASONS = stringPreferencesKey("hidden_seasons")
+private const val HIDDEN_KEEP = 20
 private const val NO_SOURCES_DAYS = 7L
 
 /** Each profile's mixes, on this device only. */
@@ -64,6 +66,16 @@ class ScoutMixStore @Inject constructor(
         factory.get(profileManager.activeProfileId.value, FEATURE).edit {
             it[NO_SOURCES] = scoutNoSourcesAdd(it[NO_SOURCES], contentId to videoId, java.time.LocalDate.now().toEpochDay())
         }
+    }
+
+    /** Holiday seasons this profile hid from Home, as occasion code and year. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val hiddenSeasons: Flow<Set<String>> = profileManager.activeProfileId.flatMapLatest { id ->
+        factory.get(id, FEATURE).data.map { scoutHiddenSeasons(it[HIDDEN_SEASONS]) }
+    }
+
+    suspend fun hideSeason(key: String) {
+        factory.get(profileManager.activeProfileId.value, FEATURE).edit { it[HIDDEN_SEASONS] = scoutHideSeason(it[HIDDEN_SEASONS], key) }
     }
 
     fun profileId(): Int = profileManager.activeProfileId.value
@@ -212,5 +224,10 @@ internal fun scoutNoSourcesAdd(raw: String?, episode: Pair<String, String>, toda
     kept.put(episode.first + NO_SOURCES_JOIN + episode.second, today)
     return kept.toString()
 }
+
+internal fun scoutHiddenSeasons(raw: String?): Set<String> = raw.orEmpty().split('|').filter { it.isNotBlank() }.toSet()
+
+internal fun scoutHideSeason(raw: String?, key: String): String =
+    (raw.orEmpty().split('|').filter { it.isNotBlank() && it != key } + key).takeLast(HIDDEN_KEEP).joinToString("|")
 
 private fun JSONObject.textOrNull(key: String): String? = optString(key).takeIf { has(key) && it.isNotBlank() }

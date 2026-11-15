@@ -100,6 +100,7 @@ class ScoutEngine @Inject constructor(
     private val ratingLimits: dagger.Lazy<com.nuvio.tv.core.ratinglimit.RatingLimitGate>
 ) {
     private val adapter = Moshi.Builder().build().adapter(ScoutPool::class.java)
+    private val recapList = ScoutAnimeRecapList(context, tmdbApi)
     private val refreshLock = Mutex()
     private val _pool = MutableStateFlow<ScoutPool?>(null)
     val pool: StateFlow<ScoutPool?> = _pool.asStateFlow()
@@ -355,7 +356,7 @@ class ScoutEngine @Inject constructor(
                 val tv = type.trim().lowercase() != "movie"
                 (if (tv) "tv:" else "movie:") + tmdb
             }
-        return ScoutExclusions(names = names.toSet(), tmdbKeys = ids.toSet() + listedKeys, genres = profile.settings.leaveOutGenres, languages = scoutLeaveOutLanguageCodes(profile.settings.leaveOutLanguages))
+        return ScoutExclusions(names = names.toSet(), tmdbKeys = ids.toSet() + listedKeys, genres = profile.settings.leaveOutGenres, languages = scoutLeaveOutLanguageCodes(profile.settings.leaveOutLanguages), recaps = recapList.keys())
     }
 
     private suspend fun recommendations(seed: ScoutSeed, language: String): Pair<Int, List<ScoutPick>>? {

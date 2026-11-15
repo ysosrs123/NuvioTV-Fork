@@ -269,7 +269,7 @@ private fun language(code: String) = ScoutSlice(
     id = "language_$code",
     group = ScoutSliceGroup.LANGUAGE,
     titleArg = code,
-    movie = quality(language = code, votes = 150),
+    movie = quality(language = code, votes = 150, withoutKeywords = if (code == "ja") SCOUT_RECAP_KEYWORDS else null),
     tv = quality(language = code, votes = 50)
 )
 

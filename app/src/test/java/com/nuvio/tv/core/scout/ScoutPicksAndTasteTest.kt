@@ -7,6 +7,7 @@ import com.nuvio.tv.domain.model.ScoutPool
 import com.nuvio.tv.domain.model.ScoutProfile
 import com.nuvio.tv.domain.model.ScoutRating
 import com.nuvio.tv.domain.model.ScoutRatingEntry
+import com.nuvio.tv.domain.model.ScoutSettings
 import com.nuvio.tv.domain.model.ScoutTitle
 import com.nuvio.tv.domain.model.WatchedItem
 import com.nuvio.tv.ui.screens.scout.scoutEpisodeFits
@@ -257,10 +258,24 @@ class ScoutPicksAndTasteTest {
 
     @Test
     fun `the menu entry follows the switch`() {
+        val shown = com.nuvio.tv.domain.model.scoutMenuShown(ScoutFeature.available, ScoutSettings())
+        assertEquals(ScoutFeature.available, shown)
         assertEquals(
-            ScoutFeature.available,
-            com.nuvio.tv.appRootRoutes(discoverInSidebar = false, calendarInMenu = false)
+            shown,
+            com.nuvio.tv.appRootRoutes(discoverInSidebar = false, calendarInMenu = false, scoutInMenu = shown)
                 .contains(com.nuvio.tv.ui.navigation.Screen.Scout.route)
+        )
+    }
+
+    @Test
+    fun `Scout can be taken out of the menu`() {
+        assertTrue(com.nuvio.tv.domain.model.scoutMenuShown(true, null))
+        assertTrue(com.nuvio.tv.domain.model.scoutMenuShown(true, ScoutSettings()))
+        assertFalse(com.nuvio.tv.domain.model.scoutMenuShown(true, ScoutSettings(menuVisible = false)))
+        assertFalse(com.nuvio.tv.domain.model.scoutMenuShown(false, ScoutSettings()))
+        assertFalse(
+            com.nuvio.tv.ui.navigation.Screen.Scout.route in
+                com.nuvio.tv.appRootRoutes(discoverInSidebar = false, calendarInMenu = true, scoutInMenu = false)
         )
     }
 }

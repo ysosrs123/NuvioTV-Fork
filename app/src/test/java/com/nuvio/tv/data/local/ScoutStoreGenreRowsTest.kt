@@ -19,6 +19,12 @@ class ScoutStoreGenreRowsTest {
     }
 
     @Test
+    fun `Scout stays in the menu until the switch is turned off`() {
+        assertTrue(store.readSettings(mutablePreferencesOf()).menuVisible)
+        assertFalse(store.readSettings(mutablePreferencesOf(booleanPreferencesKey("menu_visible") to false)).menuVisible)
+    }
+
+    @Test
     fun `picked for you switched off earlier keeps the genre rows off`() {
         assertFalse(store.readSettings(mutablePreferencesOf(picked to false)).genreRows)
     }

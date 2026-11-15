@@ -49,6 +49,7 @@ class ScoutStore @Inject constructor(
     private val becauseRow = booleanPreferencesKey("because_row")
     private val gemsRow = booleanPreferencesKey("gems_row")
     private val tilesRow = booleanPreferencesKey("tiles_row_chosen")
+    private val mixesRow = booleanPreferencesKey("mixes_row")
     private val leaveOutGenres = stringSetPreferencesKey("leave_out_genres")
     private val leaveOutLanguages = stringSetPreferencesKey("leave_out_languages")
     private val asked = stringSetPreferencesKey("asked")
@@ -56,6 +57,7 @@ class ScoutStore @Inject constructor(
     private val tasteRow = stringPreferencesKey("taste_row")
     private val sendToTrackers = booleanPreferencesKey("send_to_trackers")
     private val useTrackerRatings = booleanPreferencesKey("use_tracker_ratings")
+    private val menuVisible = booleanPreferencesKey("menu_visible")
     private val dismissed = stringSetPreferencesKey("import_dismissed")
 
     private val _pendingAsk = MutableStateFlow<ScoutAskTarget?>(null)
@@ -205,12 +207,14 @@ class ScoutStore @Inject constructor(
             it[becauseRow] = next.becauseRow
             it[gemsRow] = next.gemsRow
             it[tilesRow] = next.tilesRow
+            it[mixesRow] = next.mixesRow
             it[leaveOutGenres] = next.leaveOutGenres.map(Int::toString).toSet()
             it[leaveOutLanguages] = next.leaveOutLanguages
             it[savedSlices] = next.savedSlices.joinToString(",")
             it[tasteRow] = next.tasteRow
             it[sendToTrackers] = next.sendToTrackers
             it[useTrackerRatings] = next.useTrackerRatings
+            it[menuVisible] = next.menuVisible
         }
     }
 
@@ -226,12 +230,14 @@ class ScoutStore @Inject constructor(
         becauseRow = p[becauseRow] ?: true,
         gemsRow = p[gemsRow] ?: true,
         tilesRow = p[tilesRow] ?: false,
+        mixesRow = p[mixesRow] ?: true,
         leaveOutGenres = p[leaveOutGenres].orEmpty().mapNotNull(String::toIntOrNull).toSet(),
         leaveOutLanguages = p[leaveOutLanguages].orEmpty(),
         savedSlices = p[savedSlices].orEmpty().split(",").filter(String::isNotBlank),
         tasteRow = p[tasteRow] ?: "titles",
         sendToTrackers = p[sendToTrackers] ?: false,
-        useTrackerRatings = p[useTrackerRatings] ?: true
+        useTrackerRatings = p[useTrackerRatings] ?: true,
+        menuVisible = p[menuVisible] ?: true
     )
 
     private fun readProfile(profileId: Int, p: Preferences): ScoutProfile {

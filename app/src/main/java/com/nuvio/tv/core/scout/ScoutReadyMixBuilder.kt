@@ -29,7 +29,7 @@ internal const val SCOUT_READY_SHOWS = 15
 internal const val SCOUT_READY_FEWEST = 8
 internal const val SCOUT_READY_TOO_FEW = 4
 /** Raise when the way mixes are filled changes, so kept mixes are filled again at once rather than on Monday. */
-internal const val SCOUT_READY_RULES = 2
+internal const val SCOUT_READY_RULES = 3
 /** An occasion needs this many good episodes before its tile shows. */
 internal const val SCOUT_OCCASION_FEWEST = 15
 private const val PAGES = 3
@@ -102,6 +102,8 @@ internal fun scoutBlendOrder(byVotes: List<ScoutPick>, byTaste: List<ScoutPick>,
     }
 }
 
+private const val LIMIT_SPARE = 5
+
 @Singleton
 class ScoutReadyMixBuilder @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -120,7 +122,7 @@ class ScoutReadyMixBuilder @Inject constructor(
     /** The shows a recipe finds, in the order the blend asks for, loosened step by step when too few are left. */
     suspend fun preview(recipe: ScoutMixRecipe, years: IntRange? = null, pages: Int = PREVIEW_PAGES): ScoutMixPreview {
         val today = LocalDate.now()
-        val cacheKey = recipe.encode() + years + pages
+        val cacheKey = recipe.encode() + years + pages + (scoutLimit(context)?.code ?: "")
         previewLock.withLock { previews[cacheKey]?.takeIf { it.first == today }?.let { return it.second } }
         val steps = listOf(
             ScoutWidened.NONE to recipe,
@@ -156,18 +158,21 @@ class ScoutReadyMixBuilder @Inject constructor(
             if (strict.size >= SCOUT_READY_FEWEST || (kind.looseKeywords == null && kind.keywords == null)) strict
             else (strict + search(recipe, years, widen, votes, pages, today, strict = false)).distinctBy { it.key }
         }
-        val exclusions = runCatching { finder.exclusions() }.getOrNull() ?: return found
+        val limit = scoutLimit(context)
+        val exclusions = runCatching { finder.exclusions() }.getOrNull()
+            ?: return scoutKeepFitting(limit, found, SCOUT_READY_SHOWS + LIMIT_SPARE) { "tmdb:${it.tmdbId}" to "series" }
         val seed = scoutReadyWeekSeed(today)
-        return withContext(Dispatchers.Default) {
+        val ordered = withContext(Dispatchers.Default) {
             val byTaste = scoutOrderPicks(found, finder.pool(), exclusions, seed)
             scoutBlendOrder(found, byTaste, recipe.blend, seed)
         }
+        return scoutKeepFitting(limit, ordered, SCOUT_READY_SHOWS + LIMIT_SPARE) { "tmdb:${it.tmdbId}" to "series" }
     }
 
     /** The best known of each kind where any episode works on its own, most votes first. */
     private suspend fun classic(recipe: ScoutMixRecipe, years: IntRange?, widen: Int, votes: Int, today: LocalDate): List<ScoutPick> =
         coroutineScope {
-            SCOUT_CLASSIC_KINDS.map { kind -> async { search(recipe.copy(kind = kind), years, widen, votes, 1, today, strict = true) } }
+            SCOUT_CLASSIC_KINDS.map { kind -> async { search(recipe.copy(kind = kind), years, widen, votes, 1, today, strict = true, classic = true) } }
                 .awaitAll()
         }.flatten().distinctBy { it.key }.sortedByDescending { it.votes ?: 0 }
 
@@ -178,9 +183,10 @@ class ScoutReadyMixBuilder @Inject constructor(
         votes: Int,
         pages: Int,
         today: LocalDate,
-        strict: Boolean
+        strict: Boolean,
+        classic: Boolean = false
     ): List<ScoutPick> {
-        var filters = recipe.filters(country(), today, widen, votes, strict)
+        var filters = recipe.filters(country(), today, widen, votes, strict, classic)
         if (years != null) {
             filters = filters.copy(
                 releaseDateGte = "${years.first - widen}-01-01",
@@ -197,7 +203,9 @@ class ScoutReadyMixBuilder @Inject constructor(
     /** A ready-made mix as it should be this week: the kept one if it is still fresh, otherwise built again and kept. */
     suspend fun ensure(id: String, family: Boolean? = null, name: String? = null): ScoutMix? = building.withLock {
         val profileId = store.profileId()
-        val kept = store.readyMix(profileId, id)
+        val limit = scoutLimit(context)
+        val stored = store.readyMix(profileId, id)
+        val kept = stored?.fittingLimit(limit)
         val wantFamily = family ?: kept?.let { readyFamily(it) } ?: false
         if (kept != null && scoutReadyFresh(kept.builtAt) && kept.rules >= SCOUT_READY_RULES && readyFamily(kept) == wantFamily && kept.shows.isNotEmpty()) return@withLock kept
         val ready = ScoutReadyMixes.byId(id)
@@ -210,7 +218,7 @@ class ScoutReadyMixBuilder @Inject constructor(
         } ?: return@withLock kept
         val mix = kept?.let { built.copy(unwatchedOnly = it.unwatchedOnly, keepPlaying = it.keepPlaying) } ?: built
         store.putReady(mix)
-        mix
+        mix.fittingLimit(limit)
     }
 
     /** A mix the viewer made from their own choices, kept in one slot that each new one replaces. */
@@ -257,7 +265,7 @@ class ScoutReadyMixBuilder @Inject constructor(
     private suspend fun occasionMix(id: String, occasion: ScoutOccasion, family: Boolean): ScoutMix? = withContext(Dispatchers.Default) { occasionMixNow(id, occasion, family) }
 
     private suspend fun occasionMixNow(id: String, occasion: ScoutOccasion, family: Boolean): ScoutMix? {
-        val all = occasionEpisodes(occasion).filter { !family || it.suitsFamily() }
+        val all = fittingLimit(occasionEpisodes(occasion).filter { !family || it.suitsFamily() })
         if (all.size < SCOUT_OCCASION_FEWEST) return null
         val chosen = scoutOccasionChoice(all, family, scoutReadyWeekSeed())
         val shows = chosen.values.map { list ->
@@ -276,6 +284,16 @@ class ScoutReadyMixBuilder @Inject constructor(
             only = chosen.mapValues { (_, list) -> list.map { it.season to it.episode }.toSet() }
         )
     }
+
+    /** The episodes whose show fits the rating limit of the profile in use. */
+    suspend fun fittingLimit(episodes: List<ScoutOccasionEpisode>): List<ScoutOccasionEpisode> =
+        scoutKeepFitting(scoutLimit(context), episodes) { it.imdb to "series" }
+
+    /** Whether the profile in use has a rating limit. */
+    suspend fun limited(): Boolean = scoutLimit(context) != null
+
+    /** The mix with only the shows that fit the rating limit of the profile in use. */
+    suspend fun fittingLimit(mix: ScoutMix): ScoutMix = mix.fittingLimit(scoutLimit(context))
 
     /** The bundled lists, read once. */
     suspend fun occasionEpisodes(occasion: ScoutOccasion): List<ScoutOccasionEpisode> {
