@@ -234,7 +234,9 @@ class ServerPlayback internal constructor(
         if (!current.provider.supports(ServerCapability.USER_STATE_READ)) return null
         val details = try {
             withTimeoutOrNull(RESUME_TIMEOUT_MS) {
-                current.provider.details(current.liveSession(), current.playback.target.item.itemId)
+                repository.callForPlayback(current.session) { provider, session ->
+                    provider.details(session, current.playback.target.item.itemId)
+                }
             }
         } catch (error: CancellationException) {
             throw error
@@ -323,7 +325,9 @@ class ServerPlayback internal constructor(
         private val reporter = scope.launch {
             for (event in events) {
                 try {
-                    withTimeoutOrNull(REPORT_TIMEOUT_MS) { provider.report(liveSession(), playback, event) }
+                    withTimeoutOrNull(REPORT_TIMEOUT_MS) {
+                        repository.callForPlayback(session) { server, current -> server.report(current, playback, event) }
+                    }
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Exception) {

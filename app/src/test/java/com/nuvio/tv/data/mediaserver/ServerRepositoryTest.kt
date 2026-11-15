@@ -125,6 +125,23 @@ class ServerRepositoryTest {
     }
 
     @Test
+    fun aServerLeftOutOfTheOfferedListIsNotDeletedByThePull() {
+        repository.store(connection("c1", "k1"), "token-one")
+        repository.store(connection("c2", "k2").copy(remoteServerId = "s2"), "token-two")
+        repository.setSyncEnabled(true)
+        val stored = persistence.values.getValue(1)
+        persistence.values[1] = stored.replace(""""k2":"token-two"""", "").replace(",}", "}").replace("{,", "{")
+        assertTrue(persistence.values.getValue(1) != stored)
+        val reloaded = ServerRepository(persistence, emptyList(), CoroutineScope(Dispatchers.Unconfined))
+
+        val snapshot = reloaded.syncSnapshot(1)!!
+        assertEquals(listOf("c1"), snapshot.servers.map { it.id })
+        assertTrue(reloaded.applySync(snapshot, emptyList(), emptySet()))
+
+        assertEquals(listOf("c2"), reloaded.uiState.value.connections.map { it.id })
+    }
+
+    @Test
     fun keepsConnectionsAndTokensPerProfile() {
         repository.store(connection("c1", "k1"), "token-one")
         assertEquals("token-one", repository.session("c1")?.token)

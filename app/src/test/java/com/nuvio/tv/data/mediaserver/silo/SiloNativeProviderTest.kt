@@ -406,6 +406,42 @@ class SiloNativeProviderTest {
     }
 
     @Test
+    fun anyAuthAnswerIsWorthOneRenewalExceptAProfileCheck() = runTest {
+        val (provider, http) = silo { request ->
+            if (request.url.encodedPath == "/api/v2/auth/refresh") {
+                Reply(200, """{"access_token":"acc2","refresh_token":"ref2","expires_in":3600}""")
+            } else {
+                null
+            }
+        }
+        val old = session(credential())
+
+        val renewed = provider.renewCredential(old, ServerException(ServerFailure.AUTH_REQUIRED, code = "authentication_required"))
+        val profileCheck = provider.renewCredential(
+            old,
+            ServerException(ServerFailure.AUTH_REQUIRED, code = SiloNativeProvider.PROFILE_VERIFICATION)
+        )
+
+        assertEquals("acc2", provider.credentialOrNull(renewed!!)!!.access)
+        assertNull(profileCheck)
+        assertEquals(1, http.requests.count { it.url.encodedPath == "/api/v2/auth/refresh" })
+    }
+
+    @Test
+    fun aRenewalSiloRejectsAsInvalidKeepsTheSignIn() = runTest {
+        val (provider, _) = silo { request ->
+            if (request.url.encodedPath == "/api/v2/auth/refresh") Reply(422, problem("validation_failed", 422)) else null
+        }
+
+        try {
+            provider.renewCredential(session(credential()), null)
+            fail("expected the renewal to fail")
+        } catch (error: ServerException) {
+            assertTrue(error.failure != ServerFailure.AUTH_REQUIRED)
+        }
+    }
+
+    @Test
     fun aTokenIsRenewedAMinuteBeforeItRunsOut() {
         val (provider, _) = silo { null }
 

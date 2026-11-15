@@ -140,6 +140,8 @@ class SiloNativePlaybackTest {
             listOf("client_managed_dynamic_range_v1", "client_selected_audio_track_v1"),
             original["validated_claims"]!!.jsonArray.map { it.jsonPrimitive.content }
         )
+        assertEquals("false", original["auth_header_refresh"]!!.jsonPrimitive.content)
+        assertFalse(start.text.contains("header_authenticated_media_v1"))
         val hdr = body["client_capabilities"]!!.jsonObject["hdr_details"]!!.jsonObject
         assertEquals(listOf("4", "5", "7", "8"), hdr["dolby_vision_profiles"]!!.jsonArray.map { it.jsonPrimitive.content })
         assertFalse("null" in start.text)
@@ -465,6 +467,30 @@ class SiloNativePlaybackTest {
         assertEquals(listOf("22.0", "32.5", "33.0"), bodies.map { it["position"]!!.jsonPrimitive.content })
         assertEquals("true", bodies[1]["is_paused"]!!.jsonPrimitive.content)
         assertTrue(bodies.last().containsKey("stop_id"))
+    }
+
+    @Test
+    fun aStopThatMeetsAnExpiredTokenIsSentAgain() = runTest {
+        var stops = 0
+        val (provider, http) = silo { request ->
+            if (request.method == "DELETE" && stops++ == 0) {
+                Reply(401, """{"type":"https://siloserver.org/docs/api/v2/problems/authentication_required","title":"x","status":401,"detail":"","instance":"i"}""")
+            } else null
+        }
+        val playback = provider.preparePlayback(session(), request())
+        val stop = ServerPlaybackEvent(ServerPlaybackEventType.STOP, 20_000L, true)
+        provider.report(session(), playback, ServerPlaybackEvent(ServerPlaybackEventType.START, 0L, false))
+
+        try {
+            provider.report(session(), playback, stop)
+            fail("expected a sign-in answer")
+        } catch (error: ServerException) {
+            assertEquals(ServerFailure.AUTH_REQUIRED, error.failure)
+        }
+        provider.report(session(), playback, stop)
+        provider.report(session(), playback, stop)
+
+        assertEquals(2, http.requests.count { it.method == "DELETE" && it.url.encodedPath == "/api/v2/playback/s-1" })
     }
 
     @Test

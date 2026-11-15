@@ -819,12 +819,17 @@ class SiloNativeProvider internal constructor(
             when (event.type) {
                 ServerPlaybackEventType.START -> Unit
                 ServerPlaybackEventType.STOP -> {
-                    playStates.remove(sessionId)
                     if (state.durationSeconds > 0.0 && position >= state.durationSeconds * WatchProgress.COMPLETED_THRESHOLD) {
                         recentlyPlayed[state.itemId] = now()
                     }
                     val body = siloStopBody(state.installationId, java.util.UUID.randomUUID().toString(), state.nextSequence(), position)
-                    stopWithRetries(session, path, body.toString())
+                    try {
+                        stopWithRetries(session, path, body.toString())
+                    } catch (error: ServerException) {
+                        if (error.failure == ServerFailure.AUTH_REQUIRED) state.started = false else playStates.remove(sessionId)
+                        throw error
+                    }
+                    playStates.remove(sessionId)
                 }
                 else -> {
                     val body = siloProgressBody(state.installationId, state.nextSequence(), position, event.isPaused)
@@ -1063,8 +1068,7 @@ class SiloNativeProvider internal constructor(
     }
 
     override suspend fun renewCredential(session: ServerSession, failure: ServerException?): String? {
-        val renewable = failure == null ||
-            failure.failure == ServerFailure.AUTH_REQUIRED && failure.code != "authentication_required" && failure.code != PROFILE_VERIFICATION
+        val renewable = failure == null || failure.failure == ServerFailure.AUTH_REQUIRED && failure.code != PROFILE_VERIFICATION
         if (!renewable) return null
         val credential = credentialOrNull(session.token) ?: return null
         val startedAt = now()
@@ -1078,7 +1082,7 @@ class SiloNativeProvider internal constructor(
                 RefreshBody(credential.refresh)
             )
         } catch (error: ServerException) {
-            val signedOut = error.httpStatus == 400 || error.httpStatus == 401 || error.httpStatus == 403 || error.httpStatus == 422
+            val signedOut = error.httpStatus == 400 || error.httpStatus == 401 || error.httpStatus == 403
             if (signedOut) throw ServerException(ServerFailure.AUTH_REQUIRED, code = error.code, httpStatus = error.httpStatus)
             throw error
         }

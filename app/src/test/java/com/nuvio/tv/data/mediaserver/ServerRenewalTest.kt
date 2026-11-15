@@ -144,6 +144,39 @@ class ServerRenewalTest {
     }
 
     @Test
+    fun aPlayingReportRenewsOnceAfterAnExpiredToken() = runTest {
+        repository.store(connection, "t1")
+        provider.current = "t2"
+        val started = repository.session(connection.id)!!
+
+        assertEquals(1, repository.callForPlayback(started) { p, s -> p.libraries(s) }.size)
+
+        assertEquals(listOf("t1", "t2"), provider.seenTokens)
+        assertEquals("t2", repository.session(connection.id)?.token)
+    }
+
+    @Test
+    fun aPlayingReportOutlastsAServerListChangeAndLeavesTheFailureStateAlone() = runTest {
+        repository.store(connection, "t1")
+        val started = repository.session(connection.id)!!
+        val other = connection.copy(id = "c2", remoteServerId = "srv2", credentialRef = "k2")
+
+        val during = repository.callForPlayback(started) { p, s ->
+            repository.store(other, "t1")
+            p.libraries(s).size
+        }
+        repository.remove(connection.id)
+        val afterRemoval = repository.callForPlayback(started) { _, s -> s.token }
+        provider.current = "t2"
+        val refused = runCatching { repository.callForPlayback(started) { p, s -> p.libraries(s) } }.exceptionOrNull()
+
+        assertEquals(1, during)
+        assertEquals("t1", afterRemoval)
+        assertEquals(ServerFailure.AUTH_REQUIRED, (refused as ServerException).failure)
+        assertNull(repository.uiState.value.failures[connection.id])
+    }
+
+    @Test
     fun serversThatCannotRenewFailAsBefore() = runTest {
         val plain = FakeServerProvider()
         val (fake, saved) = fakeServerRepository(plain)
