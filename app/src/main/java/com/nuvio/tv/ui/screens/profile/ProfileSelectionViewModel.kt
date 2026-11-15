@@ -55,8 +55,15 @@ class ProfileSelectionViewModel @Inject constructor(
     memberAccessRepository: MemberAccessRepository,
     private val profileLockStateDataStore: ProfileLockStateDataStore,
     private val localAvatars: LocalProfileAvatars,
-    private val ratingLimits: com.nuvio.tv.core.ratinglimit.RatingLimitGate
+    private val ratingLimits: com.nuvio.tv.core.ratinglimit.RatingLimitGate,
+    private val pinAskStore: com.nuvio.tv.core.profile.PinAskStore
 ) : ViewModel() {
+    val pinAsks: StateFlow<Map<Int, com.nuvio.tv.core.profile.PinAsk>> get() = pinAskStore.asks
+
+    fun setPinAsk(profileId: Int, ask: com.nuvio.tv.core.profile.PinAsk) = pinAskStore.set(profileId, ask)
+
+    fun forgetPinAsk(profileId: Int) = pinAskStore.forgetProfile(profileId)
+
     val activeProfileId: StateFlow<Int> = profileManager.activeProfileId
 
     val profileRatingLimits: StateFlow<Map<Int, com.nuvio.tv.core.ratinglimit.RatingLimit>> = ratingLimits.limits

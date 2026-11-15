@@ -251,6 +251,9 @@ fun ProfileSelectionScreen(
     val ratingLimits by viewModel.profileRatingLimits.collectAsState()
     var pendingRatingLimit by remember { mutableStateOf<Triple<UserProfile, UserProfile, com.nuvio.tv.core.ratinglimit.RatingLimit?>?>(null) }
     var pendingAddProfile by remember { mutableStateOf(false) }
+    val pinAsks by viewModel.pinAsks.collectAsState()
+    var pendingPinAsk by remember { mutableStateOf(false) }
+    var pinAskFor by remember { mutableStateOf<UserProfile?>(null) }
     var settingsCopyTarget by remember { mutableStateOf<UserProfile?>(null) }
     var settingsCopyError by remember { mutableStateOf<String?>(null) }
     var pinOverlayState by remember { mutableStateOf<ProfilePinOverlayState?>(null) }
@@ -380,7 +383,7 @@ fun ProfileSelectionScreen(
                             suppressOptionsDialogFirstKeyUp = false
                             longPressedProfile = profile
                         } else {
-                            if (profilePinEnabled[profile.id] == true) {
+                            if ((pinAsks[profile.id] ?: com.nuvio.tv.core.profile.PinAsk.EVERY_TIME).toOpen(profilePinEnabled[profile.id] == true)) {
                                 pinOverlayError = null
                                 pinOverlayState = ProfilePinOverlayState.Unlock(profile)
                             } else {
@@ -425,6 +428,7 @@ fun ProfileSelectionScreen(
                         pendingRatingLimit?.let { profileToEdit = it.first }
                         pendingRatingLimit = null
                         pendingAddProfile = false
+                        pendingPinAsk = false
                     },
                     onSubmit = { pin ->
                         when (activePinOverlay) {
@@ -432,7 +436,12 @@ fun ProfileSelectionScreen(
                                 viewModel.verifyProfilePin(activePinOverlay.profile.id, pin) { result ->
                                     result.onSuccess { verify ->
                                         val pending = pendingRatingLimit
-                                        if (verify.unlocked && pendingAddProfile) {
+                                        if (verify.unlocked && pendingPinAsk) {
+                                            pinOverlayError = null
+                                            pinOverlayState = null
+                                            pendingPinAsk = false
+                                            pinAskFor = activePinOverlay.profile
+                                        } else if (verify.unlocked && pendingAddProfile) {
                                             pinOverlayError = null
                                             pinOverlayState = null
                                             pendingAddProfile = false
@@ -469,6 +478,7 @@ fun ProfileSelectionScreen(
                                 ) { result ->
                                     when (result) {
                                         is SetProfilePinResult.Success -> {
+                                            if (activePinOverlay.currentPin == null) viewModel.forgetPinAsk(activePinOverlay.profile.id)
                                             pinOverlayState = null
                                             pinOverlayError = null
                                             profileActionMessage = context.getString(R.string.profile_pin_saved_for_profile, activePinOverlay.profile.name)
@@ -540,6 +550,7 @@ fun ProfileSelectionScreen(
                                     if (success) {
                                         pinOverlayError = null
                                         pinOverlayState = null
+                                        viewModel.forgetPinAsk(activePinOverlay.profile.id)
                                         profileActionMessage = context.getString(R.string.profile_pin_lock_removed_for_profile, activePinOverlay.profile.name)
                                     } else {
                                         pinOverlayError = context.getString(R.string.profile_pin_incorrect)
@@ -778,6 +789,27 @@ fun ProfileSelectionScreen(
                             contentColor = NuvioTheme.colors.TextPrimary
                         )
                     )
+                    ProfileDialogButton(
+                        label = stringResource(
+                            R.string.profile_pin_ask_label,
+                            pinAskName(pinAsks[profile.id] ?: com.nuvio.tv.core.profile.PinAsk.EVERY_TIME)
+                        ),
+                        onClick = {
+                            longPressedProfile = null
+                            pinOverlayError = null
+                            pendingPinAsk = true
+                            pinOverlayState = ProfilePinOverlayState.Ask(
+                                profile = profile,
+                                heading = context.getString(R.string.profile_pin_ask_verify, profile.name),
+                                support = context.getString(R.string.profile_pin_overlay_unlock_support)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.colors(
+                            containerColor = NuvioTheme.colors.BackgroundCard,
+                            contentColor = NuvioTheme.colors.TextPrimary
+                        )
+                    )
                 }
 
                 if (!profile.isPrimary) {
@@ -800,6 +832,19 @@ fun ProfileSelectionScreen(
                     )
                 }
             }
+        }
+
+        pinAskFor?.let { profile ->
+            PinAskDialog(
+                profile = profile,
+                selected = pinAsks[profile.id] ?: com.nuvio.tv.core.profile.PinAsk.EVERY_TIME,
+                onDismiss = { pinAskFor = null },
+                onSelected = { ask ->
+                    pinAskFor = null
+                    viewModel.setPinAsk(profile.id, ask)
+                    profileActionMessage = context.getString(R.string.profile_pin_ask_saved, profile.name, context.getString(pinAskNameRes(ask)))
+                }
+            )
         }
 
         settingsCopyTarget?.let { targetProfile ->
@@ -865,6 +910,50 @@ fun ProfileSelectionScreen(
                     )
                 )
             }
+        }
+    }
+}
+
+private fun pinAskNameRes(ask: com.nuvio.tv.core.profile.PinAsk): Int = when (ask) {
+    com.nuvio.tv.core.profile.PinAsk.EVERY_TIME -> R.string.profile_pin_ask_every
+    com.nuvio.tv.core.profile.PinAsk.NOT_AT_START -> R.string.profile_pin_ask_not_start
+    com.nuvio.tv.core.profile.PinAsk.LIMITS_ONLY -> R.string.profile_pin_ask_limits
+}
+
+@Composable
+private fun pinAskName(ask: com.nuvio.tv.core.profile.PinAsk): String = stringResource(pinAskNameRes(ask))
+
+@Composable
+private fun PinAskDialog(
+    profile: UserProfile,
+    selected: com.nuvio.tv.core.profile.PinAsk,
+    onDismiss: () -> Unit,
+    onSelected: (com.nuvio.tv.core.profile.PinAsk) -> Unit
+) {
+    val firstFocus = remember(profile.id) { FocusRequester() }
+    LaunchedEffect(profile.id) {
+        repeat(2) { withFrameNanos { } }
+        runCatching { firstFocus.requestFocus() }
+    }
+    NuvioDialog(
+        onDismiss = onDismiss,
+        title = stringResource(R.string.profile_pin_ask_heading, profile.name),
+        width = 560.dp,
+        solidWithoutBlur = true
+    ) {
+        com.nuvio.tv.core.profile.PinAsk.choicesFor(profile.isPrimary).forEach { ask ->
+            com.nuvio.tv.ui.components.ChoiceOption(
+                title = pinAskName(ask),
+                subtitle = when (ask) {
+                    com.nuvio.tv.core.profile.PinAsk.EVERY_TIME -> stringResource(R.string.profile_pin_ask_every_sub)
+                    com.nuvio.tv.core.profile.PinAsk.NOT_AT_START -> stringResource(R.string.profile_pin_ask_not_start_sub, profile.name)
+                    com.nuvio.tv.core.profile.PinAsk.LIMITS_ONLY -> stringResource(R.string.profile_pin_ask_limits_sub, profile.name)
+                },
+                note = if (ask == com.nuvio.tv.core.profile.PinAsk.LIMITS_ONLY) stringResource(R.string.profile_pin_ask_limits_warn, profile.name) else null,
+                isSelected = ask == selected,
+                onClick = { onSelected(ask) },
+                modifier = if (ask == selected) Modifier.focusRequester(firstFocus) else Modifier
+            )
         }
     }
 }

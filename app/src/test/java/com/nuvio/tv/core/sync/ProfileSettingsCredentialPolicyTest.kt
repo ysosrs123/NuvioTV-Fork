@@ -98,4 +98,10 @@ class ProfileSettingsCredentialPolicyTest {
         assertTrue(shouldExcludePreferenceFromProfileSettingsSync("trailer_settings", "trailer_allow_4k"))
         assertFalse(shouldExcludePreferenceFromProfileSettingsSync("trailer_settings", "trailer_enabled"))
     }
+
+    @Test
+    fun `an imported subtitle font stays on the TV that has the file`() {
+        assertTrue(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "subtitle_font_id"))
+        assertFalse(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "subtitle_shadow_size"))
+    }
 }

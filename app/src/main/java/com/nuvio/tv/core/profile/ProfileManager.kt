@@ -169,6 +169,7 @@ class ProfileManager @Inject constructor(
         if (id == 1) return
         credentialStores.forEach { store -> store.removeProfile(id) }
         runCatching { com.nuvio.tv.core.ratinglimit.ratingLimitGate(context).forgetProfile(id) }
+        runCatching { pinAskStore(context).forgetProfile(id) }
         snapshotStorage.clearProfile(id, retire = true)
         deleteProfileDataAsync(id)
     }
