@@ -26,9 +26,10 @@ class ContinueWatchingRowKeysTest {
     }
 
     @Test
-    fun differentEpisodesOfOneShow_allStay() {
+    fun oneShowKeepsOneCardWhateverTheEpisode() {
         val items = listOf(episode(3), episode(4))
-        assertEquals(items, distinctContinueWatchingItems(items))
+        assertEquals(listOf(episode(3)), distinctContinueWatchingItems(items))
+        assertEquals(continueWatchingItemKey(episode(3)), continueWatchingItemKey(episode(4)))
     }
 
     private fun blank(name: String, season: Int? = null, episode: Int? = null) = ContinueWatchingItem.InProgress(

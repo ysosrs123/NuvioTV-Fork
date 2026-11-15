@@ -35,7 +35,7 @@ internal fun rememberPreparedHeroScene(
         HeroSceneTrace.event("requested", owner, "generation=${ticket.generation} size=${width}x$height")
         // Never leave an unrelated title visible indefinitely on failure or a slow provider.
         launch {
-            delay(900)
+            delay(HERO_TEXT_WAIT_MS)
             if (!presentation.committed) HeroSceneTrace.event("neutral-timeout", owner)
             presentation = presentation.timeout(ticket, latest.neutralHero())
         }
@@ -72,7 +72,8 @@ internal fun rememberPreparedHeroScene(
                     coroutineContext.ensureActive()
                     val prepared = target.copy(
                         artwork = heroArtworkSelection(owner, displayedUrl), heroBackdrop = displayedUrl,
-                        enrichmentActive = false, preparedImage = decoded, preparedLogo = logoImage
+                        enrichmentActive = false, preparedImage = decoded, preparedLogo = logoImage,
+                        logoPending = logoImage == null && !target.preview?.logo.isNullOrBlank()
                     )
                     if (decoded != null) {
                         presentation = presentation.ready(ticket, prepared)
@@ -107,13 +108,18 @@ internal fun rememberPreparedHeroScene(
     LaunchedEffect(identity, logoUrl, displayed?.preparedImage, displayed?.artwork?.ownerKey, displayed?.preparedLogo == null) {
         val ticket = presentation.ticket
         if (displayed == null || ticket.identity != identity || displayed.artwork.ownerKey != owner ||
-            displayed.preparedLogo != null || logoUrl.isNullOrBlank()) return@LaunchedEffect
-        val image = withTimeoutOrNull(1500) {
+            displayed.preparedLogo != null) return@LaunchedEffect
+        if (logoUrl.isNullOrBlank()) {
+            if (displayed.logoPending) presentation = presentation.revise(ticket) { it.copy(logoPending = false) }
+            return@LaunchedEffect
+        }
+        val image = withTimeoutOrNull(HERO_LATE_LOGO_WAIT_MS) {
             (context.imageLoader.execute(HeroImageRequests.logo(context, logoUrl).build()) as? SuccessResult)?.image
-        } ?: return@LaunchedEffect
-        HeroSceneTrace.event("late-logo-ready", owner)
+        }
+        if (image != null) HeroSceneTrace.event("late-logo-ready", owner)
         presentation = presentation.revise(ticket) { scene ->
-            scene.copy(preparedLogo = image, preview = scene.preview?.copy(logo = logoUrl))
+            if (image == null) scene.copy(logoPending = false)
+            else scene.copy(preparedLogo = image, logoPending = false, preview = scene.preview?.copy(logo = logoUrl))
         }
     }
     val latestRequested = rememberUpdatedState(requested)
@@ -159,6 +165,9 @@ internal fun presentedHeroScene(shown: ModernHeroSceneState, live: ModernHeroSce
         )
     }
 
+/** How long the new title's text waits for its picture before showing over a plain background. */
+internal const val HERO_TEXT_WAIT_MS = 450L
+internal const val HERO_LATE_LOGO_WAIT_MS = 1_500L
 internal const val HERO_BACKDROP_FIRST_TRY_MS = 2_000L
 internal const val HERO_BACKDROP_RETRY_TIMEOUT_MS = 8_000L
 internal val HERO_BACKDROP_RETRY_DELAYS_MS = listOf(1_000L, 3_000L, 8_000L)
@@ -192,8 +201,8 @@ private suspend fun decodeHeroBackdrop(
     return HeroBackdropDecode(null, null, retryable)
 }
 
-private fun ModernHeroSceneState.neutralHero() = copy(
+internal fun ModernHeroSceneState.neutralHero() = copy(
     artwork = heroArtworkSelection(artwork.ownerKey), heroBackdrop = null,
-    preparedImage = null, preparedLogo = null, enrichmentActive = false,
+    preparedImage = null, preparedLogo = null, logoPending = !preview?.logo.isNullOrBlank(), enrichmentActive = false,
     shouldPlayTrailer = false, trailerFirstFrameRendered = false
 )

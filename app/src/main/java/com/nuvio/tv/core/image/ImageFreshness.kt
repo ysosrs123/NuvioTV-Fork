@@ -5,25 +5,16 @@ import coil3.annotation.InternalCoilApi
 import coil3.disk.DiskCache
 import coil3.network.CacheNetworkResponse
 import coil3.network.CacheStrategy
-import coil3.network.NetworkHeaders
 import coil3.network.NetworkRequest
 import coil3.network.NetworkResponse
 import coil3.network.cachecontrol.CacheControlCacheStrategy
 import coil3.request.Options
 import okio.FileSystem
 
+/** Shortest time between online checks of a saved picture, whatever the server's own rule says. */
 const val IMAGE_FRESHNESS_FLOOR_MS = 7L * 24 * 60 * 60 * 1000
 
-/** How long a picture from a host that sends no caching rule goes before it is checked online again. */
-const val UNDATED_IMAGE_FRESHNESS_MS = 12L * 60 * 60 * 1000
-
-/** Shortest time between online checks of a saved picture, whatever the server's own rule says. */
-const val MIN_IMAGE_FRESHNESS_MS = 6L * 60 * 60 * 1000
-
-/**
- * Artwork hosts whose pictures never change, checked online at most once a week. Subdomains count too. Pictures from
- * every other host are shown from disk as well; only their online check comes sooner.
- */
+/** Artwork hosts that give a changed picture a new address. Subdomains count too. */
 internal val IMMUTABLE_ARTWORK_HOSTS = listOf(
     "image.tmdb.org",
     "metahub.space",
@@ -49,29 +40,6 @@ internal fun isImmutableArtworkUrl(url: String): Boolean {
     return IMMUTABLE_ARTWORK_HOSTS.any { host == it || host.endsWith(".$it") }
 }
 
-/** True when the saved response carries its own freshness rule (max-age, no-cache, no-store or Expires). */
-internal fun serverSetsFreshness(headers: NetworkHeaders): Boolean {
-    val cacheControl = headers.getAll("Cache-Control").joinToString(",").lowercase()
-    return "max-age" in cacheControl || "no-cache" in cacheControl || "no-store" in cacheControl ||
-        headers["Expires"] != null
-}
-
-/**
- * The guaranteed fresh time of a saved picture: a week for [IMMUTABLE_ARTWORK_HOSTS], [UNDATED_IMAGE_FRESHNESS_MS]
- * for other hosts that send no caching rule, and [MIN_IMAGE_FRESHNESS_MS] for hosts whose own rule decides after that.
- */
-internal fun freshnessFloorFor(
-    url: String,
-    saved: NetworkHeaders,
-    artworkFloorMs: Long,
-    undatedFloorMs: Long,
-    minimumFloorMs: Long,
-): Long = when {
-    isImmutableArtworkUrl(url) -> artworkFloorMs
-    !serverSetsFreshness(saved) -> undatedFloorMs
-    else -> minimumFloorMs
-}
-
 /** A saved copy younger than [floorMs] needs no online check; a server rule allowing longer still applies. */
 internal fun withinFreshnessFloor(responseMillis: Long, nowMillis: Long, floorMs: Long = IMAGE_FRESHNESS_FLOOR_MS): Boolean =
     responseMillis > 0 && nowMillis - responseMillis < floorMs
@@ -81,13 +49,11 @@ private fun revalidationRequested(cacheControl: String?): Boolean {
     return "no-cache" in value || "max-age=0" in value
 }
 
-/** Artwork hosts get a week without online checks; other hosts follow their own caching rules. */
+/** Every saved picture gets a week without online checks; a server rule allowing longer still applies after that. */
 @OptIn(ExperimentalCoilApi::class)
 class FreshnessFloorCacheStrategy(
     private val delegate: CacheStrategy = CacheControlCacheStrategy(),
     private val floorMs: Long = IMAGE_FRESHNESS_FLOOR_MS,
-    private val undatedFloorMs: Long = UNDATED_IMAGE_FRESHNESS_MS,
-    private val minimumFloorMs: Long = MIN_IMAGE_FRESHNESS_MS,
     private val now: () -> Long = System::currentTimeMillis,
 ) : CacheStrategy {
     override suspend fun read(
@@ -95,8 +61,7 @@ class FreshnessFloorCacheStrategy(
         networkRequest: NetworkRequest,
         options: Options,
     ): CacheStrategy.ReadResult {
-        val floor = freshnessFloorFor(networkRequest.url, cacheResponse.headers, floorMs, undatedFloorMs, minimumFloorMs)
-        if (withinFreshnessFloor(cacheResponse.responseMillis, now(), floor) &&
+        if (withinFreshnessFloor(cacheResponse.responseMillis, now(), floorMs) &&
             !revalidationRequested(networkRequest.headers["Cache-Control"])
         ) {
             return CacheStrategy.ReadResult(cacheResponse)

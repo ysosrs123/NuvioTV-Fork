@@ -15,9 +15,15 @@ class ImageDiskCacheSizeTest {
     }
 
     @Test
-    fun tenGigabytesOrLess_staysAsBefore() {
-        assertEquals(300 * mb, imageDiskCacheBytes(totalRamBytes = 4 * gb, freeStorageBytes = 10 * gb))
-        assertEquals(200 * mb, imageDiskCacheBytes(totalRamBytes = 2 * gb, freeStorageBytes = 5 * gb))
+    fun fourToTenGigabytesFree_getsFiveHundredMegabytes() {
+        assertEquals(500 * mb, imageDiskCacheBytes(totalRamBytes = 2 * gb, freeStorageBytes = 8_269L * mb))
+        assertEquals(500 * mb, imageDiskCacheBytes(totalRamBytes = 4 * gb, freeStorageBytes = 10 * gb))
+        assertEquals(500 * mb, imageDiskCacheBytes(totalRamBytes = 1 * gb, freeStorageBytes = 4 * gb))
+    }
+
+    @Test
+    fun underFourGigabytesFree_staysAsBefore() {
+        assertEquals(200 * mb, imageDiskCacheBytes(totalRamBytes = 2 * gb, freeStorageBytes = 4 * gb - 1))
         assertEquals(200 * mb, imageDiskCacheBytes(totalRamBytes = 3_299L * mb, freeStorageBytes = 0L))
         assertEquals(300 * mb, imageDiskCacheBytes(totalRamBytes = 3_300L * mb, freeStorageBytes = 0L))
     }

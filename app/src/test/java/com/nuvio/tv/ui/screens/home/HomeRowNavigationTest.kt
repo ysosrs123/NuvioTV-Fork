@@ -162,4 +162,40 @@ class HomeRowNavigationTest {
             assertFalse(shouldClaimFocus(isTarget = index == 3, cardFocused = false, rowHasFocus = rowHasFocus, isPendingTarget = pending == index))
         }
     }
+
+    /**
+     * Two rows after a fast burst: focus already moved to [start] while the active row is still [other], and the card
+     * in [start] has its focus report waiting for the next frame. Each frame the active row's remembered card claims
+     * focus if its row has none, then the reports from the frame before run. Returns how many claims happened.
+     */
+    private fun claimsAfterBurst(frames: Int, reportApplies: (Boolean) -> Boolean): Int {
+        val start = "picked"
+        val other = "continue_watching"
+        var focusedRow = start
+        var activeRow = other
+        var waitingReports = listOf(start)
+        var claims = 0
+        repeat(frames) {
+            val nextReports = mutableListOf<String>()
+            if (shouldClaimFocus(isTarget = true, cardFocused = false, rowHasFocus = focusedRow == activeRow, isPendingTarget = false)) {
+                focusedRow = activeRow
+                nextReports += activeRow
+                claims++
+            }
+            for (row in waitingReports) if (reportApplies(focusedRow == row)) activeRow = row
+            waitingReports = nextReports
+        }
+        return claims
+    }
+
+    @Test fun lateFocusReportFromACardThatLostFocusDoesNotMoveTheActiveRow() {
+        assertTrue(focusReportApplies(cardStillFocused = true))
+        assertFalse(focusReportApplies(cardStillFocused = false))
+    }
+
+    @Test fun twoRowsSettleAfterAFastBurstInsteadOfTradingFocusEveryFrame() {
+        assertEquals(1, claimsAfterBurst(frames = 200) { focusReportApplies(it) })
+        // Without the check every late report flips the active row back and the two rows claim focus every frame.
+        assertEquals(200, claimsAfterBurst(frames = 200) { true })
+    }
 }

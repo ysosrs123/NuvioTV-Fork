@@ -117,6 +117,7 @@ internal fun ModernHomeRowsList(
     onRowItemFocusedInternal: (String, Int, Boolean) -> Unit,
     onNavigateToDetail: (String, String, String) -> Unit,
     onNavigateToFolderDetail: (String, String) -> Unit,
+    onNavigateToCatalogSeeAll: (String, String, String) -> Unit = { _, _, _ -> },
     onLoadMoreCatalog: (String, String, String) -> Unit,
     onServerArtworkWindow: (List<Pair<String, List<MetaPreview>>>) -> Unit = {},
     onContinueWatchingClick: (ContinueWatchingItem) -> Unit,
@@ -126,6 +127,7 @@ internal fun ModernHomeRowsList(
     onExpandedCatalogFocusKeyChange: (String?) -> Unit,
     isCatalogItemWatched: (MetaPreview) -> Boolean,
     onCatalogItemLongPress: (MetaPreview, String) -> Unit,
+    onFolderLongPress: (collectionId: String, folderId: String) -> Unit = { _, _ -> },
     onItemFocus: (MetaPreview) -> Unit,
     onPreloadAdjacentItem: (MetaPreview) -> Unit,
     enrichedPreviews: State<StableMap<String, MetaPreview>>,
@@ -242,7 +244,10 @@ internal fun ModernHomeRowsList(
     val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
     val verticalPrefetchImageLoader = context.imageLoader
-    val imageViewport = remember { com.nuvio.tv.core.image.HomePosterViewport() }
+    val imageViewport = remember {
+        com.nuvio.tv.core.image.HomeStartCalm.begin()
+        com.nuvio.tv.core.image.HomePosterViewport()
+    }
     com.nuvio.tv.core.image.HomePosterVisit(imageViewport)
     // First and last visible row, -1 when nothing is laid out. The collectors below read it, so only one of them
     // runs on every scroll frame.
@@ -337,6 +342,7 @@ internal fun ModernHomeRowsList(
             .distinctUntilChanged()
             .debounce(120L) // VERTICAL_PREFETCH_DEBOUNCE_MS
             .collectLatest { (firstVisibleRowIndex, lastVisibleRowIndex, _) ->
+                com.nuvio.tv.core.image.HomeStartCalm.awaitEnd { imageViewport.visibleRequests.get() > 0 }
                 val warmRows = com.nuvio.tv.core.image.homePosterPrefetchRows(
                     firstVisibleRowIndex, lastVisibleRowIndex, previousFirstRow, VERTICAL_POSTER_PREFETCH_AHEAD_ROWS
                 )
@@ -733,12 +739,14 @@ internal fun ModernHomeRowsList(
                     onContinueWatchingOptions = stableOnContinueWatchingOptions,
                     isCatalogItemWatched = isCatalogItemWatched,
                     onCatalogItemLongPress = onCatalogItemLongPress,
+                    onFolderLongPress = onFolderLongPress,
                     onItemFocus = onItemFocus,
                     onPreloadAdjacentItem = onPreloadAdjacentItem,
                     enrichedPreviews = enrichedPreviews,
                     onCatalogSelectionFocused = stableOnCatalogSelectionFocused,
                     onNavigateToDetail = onNavigateToDetail,
                     onNavigateToFolderDetail = onNavigateToFolderDetail,
+                    onNavigateToCatalogSeeAll = onNavigateToCatalogSeeAll,
                     onLoadMoreCatalog = onLoadMoreCatalog,
                     onBackdropInteraction = onBackdropInteraction,
                     onExpandedCatalogFocusKeyChange = onExpandedCatalogFocusKeyChange,

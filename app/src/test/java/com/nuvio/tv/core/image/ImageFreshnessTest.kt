@@ -100,13 +100,13 @@ class ImageFreshnessTest {
             put(freshKey, saved("max-age=60", 3 * day))
             put(staleKey, saved("max-age=60", 10 * day))
             put(addonKey, saved("max-age=60", 2 * day))
-            put("https://top-today.example/poster/tt2.jpg", saved(null, 6 * 60 * 60 * 1000L))
-            put("https://top-today.example/poster/tt3.jpg", saved(null, 13 * 60 * 60 * 1000L))
+            put("https://top-today.example/poster/tt2.jpg", saved(null, 6 * day))
+            put("https://top-today.example/poster/tt3.jpg", saved(null, 8 * day))
             put("manual", null)
             suspend fun fresh(key: String) = cache.openSnapshot(key)!!.use { savedImageIsFresh(it, cache.fileSystem, key, options) }
             assertTrue(fresh(freshKey))
             assertFalse(fresh(staleKey))
-            assertFalse(fresh(addonKey))
+            assertTrue(fresh(addonKey))
             assertTrue(fresh("https://top-today.example/poster/tt2.jpg"))
             assertFalse(fresh("https://top-today.example/poster/tt3.jpg"))
             assertTrue(fresh("manual"))
@@ -115,7 +115,7 @@ class ImageFreshnessTest {
         }
     }
 
-    @Test fun onlyTheListedArtworkHostsGetTheWeek() {
+    @Test fun onlyTheListedArtworkHostsCountAsNeverChanging() {
         listOf(
             "https://image.tmdb.org/t/p/original/a.jpg",
             "https://images.metahub.space/poster/medium/tt1/img",
@@ -147,49 +147,25 @@ class ImageFreshnessTest {
         assertEquals("addon.example", imageHost("title-logo:http://addon.example/l.png"))
     }
 
-    @Test fun otherHostsFollowTheirOwnMaxAgeAfterSixHours() = runTest {
-        val hour = 60 * 60 * 1000L
-        val minute = 60 * 1000L
-        assertTrue(freshFromAddon(saved("max-age=300", 6 * hour - minute)))
-        assertFalse(freshFromAddon(saved("max-age=300", 6 * hour + minute)))
-        assertTrue(freshFromAddon(saved("max-age=3600", 2 * hour)))
-        assertTrue(freshFromAddon(saved("public, max-age=86400", 10 * hour)))
-        assertFalse(freshFromAddon(saved("public, max-age=86400", 25 * hour)))
+    @Test fun otherHostsAlsoGetAWeekWhateverTheirOwnRuleSays() = runTest {
+        assertTrue(freshFromAddon(saved("max-age=300", 6 * day)))
+        assertTrue(freshFromAddon(saved("no-cache", 6 * day)))
+        assertTrue(freshFromAddon(saved("max-age=0", 6 * day)))
+        assertTrue(freshFromAddon(saved("no-store", 6 * day)))
+        assertTrue(freshFromAddon(saved(null, 6 * day)))
+        assertFalse(freshFromAddon(saved("max-age=300", 8 * day)))
+        assertFalse(freshFromAddon(saved(null, 8 * day)))
     }
 
-    @Test fun noCacheAndMaxAgeZeroAlsoWaitSixHours() = runTest {
-        val hour = 60 * 60 * 1000L
-        assertTrue(freshFromAddon(saved("no-cache", 5 * hour)))
-        assertTrue(freshFromAddon(saved("max-age=0", 5 * hour)))
-        assertTrue(freshFromAddon(saved("no-store", 5 * hour)))
-        assertFalse(freshFromAddon(saved("no-cache", 7 * hour)))
-        assertFalse(freshFromAddon(saved("max-age=0", 7 * hour)))
+    @Test fun otherHostsWithALongerRuleKeepItAfterTheWeek() = runTest {
+        assertTrue(freshFromAddon(saved("public, max-age=2592000", 20 * day)))
     }
 
-    @Test fun otherHostsAskWithTheirETagOnceTheMaxAgeRunsOut() = runTest {
+    @Test fun otherHostsAskWithTheirETagOnceTheWeekRunsOut() = runTest {
         val result = FreshnessFloorCacheStrategy().read(
-            saved("max-age=3600", 2 * day, etag = "\"r4\""), NetworkRequest(addon), options,
+            saved("max-age=3600", 8 * day, etag = "\"r4\""), NetworkRequest(addon), options,
         )
         assertNull(result.response)
         assertEquals("\"r4\"", result.request?.headers?.get("If-None-Match"))
-    }
-
-    @Test fun otherHostsWithoutCachingRulesAreKeptForTwelveHours() = runTest {
-        val hour = 60 * 60 * 1000L
-        assertTrue(freshFromAddon(saved(null, 6 * hour)))
-        assertTrue(freshFromAddon(saved("public", 11 * hour)))
-        assertFalse(freshFromAddon(saved(null, 13 * hour)))
-        val result = FreshnessFloorCacheStrategy().read(saved(null, 13 * hour, etag = "\"r5\""), NetworkRequest(addon), options)
-        assertEquals("\"r5\"", result.request?.headers?.get("If-None-Match"))
-    }
-
-    @Test fun expiresHeaderCountsAsACachingRule() {
-        val expires = NetworkHeaders.Builder().set("Expires", "Sun, 18 Oct 2026 00:00:00 GMT").build()
-        val none = NetworkHeaders.Builder().build()
-        assertTrue(serverSetsFreshness(expires))
-        assertFalse(serverSetsFreshness(NetworkHeaders.Builder().set("Cache-Control", "public").build()))
-        assertEquals(day / 4, freshnessFloorFor(addon, expires, 7 * day, day / 2, day / 4))
-        assertEquals(day / 2, freshnessFloorFor(addon, none, 7 * day, day / 2, day / 4))
-        assertEquals(7 * day, freshnessFloorFor(tmdb, expires, 7 * day, day / 2, day / 4))
     }
 }

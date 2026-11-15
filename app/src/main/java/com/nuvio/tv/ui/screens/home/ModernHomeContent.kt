@@ -179,9 +179,12 @@ fun ModernHomeContent(
     onMarkContinueWatchingWatched: (ContinueWatchingItem) -> Unit = {},
     isCatalogItemWatched: (MetaPreview) -> Boolean = { false },
     onCatalogItemLongPress: (MetaPreview, String) -> Unit = { _, _ -> },
+    onFolderLongPress: (collectionId: String, folderId: String) -> Unit = { _, _ -> },
     onNavigateToFolderDetail: (String, String) -> Unit = { _, _ -> },
+    onNavigateToCatalogSeeAll: (String, String, String) -> Unit = { _, _, _ -> },
     onItemFocus: (MetaPreview) -> Unit = {},
     onPreloadAdjacentItem: (MetaPreview) -> Unit = {},
+    onPreloadAdjacentRowItem: (MetaPreview) -> Unit = {},
     onSaveFocusState: (Int, Int, String?, Map<String, String>, Map<String, Int>, Map<String, String>, Int, Int) -> Unit,
     onSaveRowScrollOffsets: (Map<String, Int>) -> Unit = {},
     onFocusedRowKeyChanged: (String?) -> Unit = {},
@@ -673,6 +676,15 @@ fun ModernHomeContent(
                 settledItem?.metaPreview?.let { latestOnHeroItemFocus(it) }
                 settledItem?.heroSeriesRef()?.let { latestOnSeriesHeroSettled(it) }
             }
+    }
+
+    val latestRowsForPreload by rememberUpdatedState(carouselRows.list)
+    val latestOnPreloadAdjacentRowItem by rememberUpdatedState(onPreloadAdjacentRowItem)
+    LaunchedEffect(Unit) {
+        snapshotFlow { settledHeroSelection.value?.rowKey }.distinctUntilChanged().collect { rowKey ->
+            if (rowKey == null) return@collect
+            adjacentRowPreviews(latestRowsForPreload, rowKey, focusedItemByRow).forEach(latestOnPreloadAdjacentRowItem)
+        }
     }
 
     val latestCarouselRows by rememberUpdatedState(carouselRows)
@@ -1217,6 +1229,7 @@ fun ModernHomeContent(
                 onRowItemFocusedInternal = onRowItemFocusedInternalLambda,
                 onNavigateToDetail = onNavigateToDetail,
                 onNavigateToFolderDetail = onNavigateToFolderDetail,
+                onNavigateToCatalogSeeAll = onNavigateToCatalogSeeAll,
                 onLoadMoreCatalog = onLoadMoreCatalog,
                 onServerArtworkWindow = onServerArtworkWindow,
                 onContinueWatchingClick = onContinueWatchingClick,
@@ -1228,6 +1241,7 @@ fun ModernHomeContent(
                 onExpandedCatalogFocusKeyChange = onExpandedCatalogFocusKeyChangeLambda,
                 isCatalogItemWatched = isCatalogItemWatched,
                 onCatalogItemLongPress = onCatalogItemLongPress,
+                onFolderLongPress = onFolderLongPress,
                 enrichedPreviews = stableEnrichedPreviews,
                 trailerPreviewUrls = stableTrailerPreviewUrls,
                 trailerPreviewAudioUrls = stableTrailerPreviewAudioUrls,
@@ -1400,6 +1414,7 @@ private fun ModernHomeHero(
         previewProvider = { heroSceneState().preview },
         enrichmentActive = { false },
         preparedLogo = heroSceneState().preparedLogo,
+        logoPending = heroSceneState().logoPending,
         portraitMode = portraitMode,
         showImdbRatings = showImdbRatings,
         mdbListShowOnHero = mdbListShowOnHero,

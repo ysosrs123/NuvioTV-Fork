@@ -875,17 +875,21 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
  * succeeded is skipped here even when external metadata is outstanding. Adjacent prefetch is
  * opportunistic and the focused path retries anyway, so aligning the two would only add requests.
  */
-internal fun HomeViewModel.preloadAdjacentItemPipeline(item: MetaPreview) {
+internal fun HomeViewModel.preloadAdjacentItemPipeline(
+    item: MetaPreview,
+    jobs: AdjacentPrefetchJobs = adjacentItemPrefetchJobs,
+    warmDecode: Boolean = true
+) {
     if (startupGracePeriodActive) return
     if (pendingTmdbEnrichItemId == item.id) return
     val launchedAtMs = android.os.SystemClock.elapsedRealtime()
-    adjacentItemPrefetchJobs.launch(viewModelScope, item.id, Dispatchers.IO) {
+    jobs.launch(viewModelScope, item.id, Dispatchers.IO) {
         val tmdbEnabledForCurrentLayout = currentTmdbSettings.enabled &&
             (_uiState.value.homeLayout != HomeLayout.MODERN || currentTmdbSettings.modernHomeEnabled)
         delay(HomeViewModel.EXTERNAL_META_PREFETCH_ADJACENT_DEBOUNCE_MS + focusStepPace.extraWaitNowMs)
 
         val initialPreview = _enrichedPreviews.value[item.id] ?: item
-        val artworkWarmup = async { prefetchHeroArtwork(initialPreview) }
+        val artworkWarmup = async { prefetchHeroArtwork(initialPreview, warmDecode) }
         if (item.id in prefetchedTmdbIds || item.id in prefetchedExternalMetaIds) {
             artworkWarmup.await()
             return@launch
@@ -941,7 +945,7 @@ internal fun HomeViewModel.preloadAdjacentItemPipeline(item: MetaPreview) {
 
         val preview = _enrichedPreviews.value[item.id] ?: findCatalogItemById(item.id) ?: item
         artworkWarmup.await()
-        if (preview.backdropUrl != initialPreview.backdropUrl || preview.logo != initialPreview.logo) prefetchHeroArtwork(preview)
+        if (preview.backdropUrl != initialPreview.backdropUrl || preview.logo != initialPreview.logo) prefetchHeroArtwork(preview, warmDecode)
 
         // Background prefetch for detail screen cache.
         delay(DetailsPrefetchRest.remainingMs(launchedAtMs, android.os.SystemClock.elapsedRealtime()))
@@ -994,7 +998,7 @@ private suspend fun HomeViewModel.fetchFocusedHeroMetadata(
     tmdbMetadataService.fetchHomeHero(tmdbId, contentType, language)
 } else tmdbMetadataService.fetchEnrichment(tmdbId, contentType, language)
 
-private suspend fun HomeViewModel.prefetchHeroArtwork(preview: MetaPreview) {
+private suspend fun HomeViewModel.prefetchHeroArtwork(preview: MetaPreview, warmDecode: Boolean = true) {
     val candidates = landscapeHeroArtwork(preview.id, preview.poster, preview.background, preview.landscapePoster,
         widePoster = preview.poster.takeIf { preview.posterShape == com.nuvio.tv.domain.model.PosterShape.LANDSCAPE })
     val url = candidates.urls.firstOrNull() ?: return
@@ -1004,7 +1008,7 @@ private suspend fun HomeViewModel.prefetchHeroArtwork(preview: MetaPreview) {
     val manager = appContext.getSystemService(android.content.Context.ACTIVITY_SERVICE) as android.app.ActivityManager
     val info = android.app.ActivityManager.MemoryInfo().also(manager::getMemoryInfo)
     val cache = appContext.imageLoader.memoryCache
-    val decode = !info.lowMemory && canWarmDecodedHero(manager.isLowRamDevice, info.totalMem, cache?.maxSize ?: 0, width, height)
+    val decode = warmDecode && !info.lowMemory && canWarmDecodedHero(manager.isLowRamDevice, info.totalMem, cache?.maxSize ?: 0, width, height)
     val request = HeroImageRequests.backdrop(appContext, url, width, height)
     if (!decode) request.memoryCachePolicy(coil3.request.CachePolicy.DISABLED)
         .decoderFactory(coil3.decode.BlackholeDecoder.Factory())

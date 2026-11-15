@@ -499,8 +499,7 @@ private fun ModernContinueWatchingRowItem(
     // Only the focused card runs this, so cards scrolled past start no job of their own.
     if (isCardFocused && focusEventId != 0) {
         LaunchedEffect(focusEventId) {
-            // Update global focus state immediately so "self-claiming" logic in other items
-            // knows this item is now the one in charge.
+            if (!focusReportApplies(cardStillFocused = isCardFocused)) return@LaunchedEffect
             latestOnFocused()
         }
     }
@@ -596,6 +595,7 @@ private fun ModernCatalogRowItem(
     val latestOnItemFocus by rememberUpdatedState(onItemFocus)
     val latestOnPreloadAdjacentItem by rememberUpdatedState(onPreloadAdjacentItem)
     val latestOnCatalogSelectionFocused by rememberUpdatedState(onCatalogSelectionFocused)
+    val verticalRowsScrolling = LocalVerticalRowsScrolling.current
 
     // Bump focusEventId to re-trigger selection reporting.
     //LaunchedEffect(focusKey, isTargetItem) {
@@ -606,11 +606,12 @@ private fun ModernCatalogRowItem(
 
     // Only the focused poster runs this, so posters scrolled past start no job of their own.
     if (isCardFocused && focusEventId != 0) LaunchedEffect(focusEventId, focusKey) {
-        // Update global focus state immediately so "self-claiming" logic in other items
-        // knows this item is now the one in charge.
+        if (!focusReportApplies(cardStillFocused = isCardFocused)) return@LaunchedEffect
         latestOnFocused()
 
         delay(MODERN_HORIZONTAL_FOCUS_DEBOUNCE_MS)
+        // Started mid-slide this work costs the rows a few frames; the top area waits for them to stop anyway.
+        awaitRowsStill(snapshotFlow { verticalRowsScrolling.value })
 
         // Heavy "settled" work (trailers, enrichment) remains debounced.
         item.metaPreview?.let { latestOnItemFocus(it) }
@@ -792,12 +793,14 @@ internal fun ModernRowSection(
     onContinueWatchingOptions: (ContinueWatchingItem) -> Unit,
     isCatalogItemWatched: (MetaPreview) -> Boolean,
     onCatalogItemLongPress: (MetaPreview, String) -> Unit,
+    onFolderLongPress: (collectionId: String, folderId: String) -> Unit = { _, _ -> },
     onItemFocus: (MetaPreview) -> Unit,
     onPreloadAdjacentItem: (MetaPreview) -> Unit,
     enrichedPreviews: State<StableMap<String, MetaPreview>> = androidx.compose.runtime.mutableStateOf(StableMap()),
     onCatalogSelectionFocused: (FocusedCatalogSelection) -> Unit,
     onNavigateToDetail: (String, String, String) -> Unit,
     onNavigateToFolderDetail: (String, String) -> Unit,
+    onNavigateToCatalogSeeAll: (String, String, String) -> Unit = { _, _, _ -> },
     onLoadMoreCatalog: (String, String, String) -> Unit,
     onBackdropInteraction: () -> Unit,
     onExpandedCatalogFocusKeyChange: (String?) -> Unit,
@@ -1033,6 +1036,9 @@ internal fun ModernRowSection(
                 .collectLatest { ready ->
                     if (!ready) return@collectLatest
                     delay(150) // Wait before spamming image requests to survive rapid vertical D-pad scrolls!
+                    homeImagePriority?.viewport?.let { viewport ->
+                        com.nuvio.tv.core.image.HomeStartCalm.awaitEnd { viewport.visibleRequests.get() > 0 }
+                    }
                     val cwWidthPx = with(density) {
                         continueWatchingArtworkWidth(
                             continueWatchingCardStyle, continueWatchingCardWidth, continueWatchingCardHeight
@@ -1121,7 +1127,8 @@ internal fun ModernRowSection(
                                 ((lastVisibleIndex + 1)..minOf(currentItems.lastIndex, lastVisibleIndex + POSTER_PREFETCH_DISTANCE)).toList() +
                                     (maxOf(0, firstVisibleIndex - POSTER_PREFETCH_DISTANCE) until firstVisibleIndex).toList()
                             } else com.nuvio.tv.core.image.homePosterWarmWindow(
-                                currentItems.size, firstVisibleIndex, lastVisibleIndex, previousFirst
+                                currentItems.size, firstVisibleIndex, lastVisibleIndex, previousFirst,
+                                com.nuvio.tv.core.image.HomeLoadLevel.current,
                             )
                             previousFirst = firstVisibleIndex
                             for (batch in indices.chunked(2)) {
@@ -1400,6 +1407,9 @@ internal fun ModernRowSection(
                                         Unit
                                     }
                                 }
+                                payload is ModernPayload.CollectionFolder -> remember(payload.collectionId, payload.folderId) {
+                                    { onFolderLongPress(payload.collectionId, payload.folderId) }
+                                }
                                 else -> remember(Unit) { {} }
                             }
                             val expandedFocusKey = when (payload) {
@@ -1468,6 +1478,36 @@ internal fun ModernRowSection(
                                 } else Modifier
                             )
                         }
+                    }
+                }
+                if (row.seeAll) {
+                    item(key = "${row.key}__see_all", contentType = "modern_see_all_card") {
+                        val index = row.items.list.size
+                        val metrics = remember(row.items.list.lastOrNull(), useLandscapePosters) {
+                            row.items.list.lastOrNull()?.catalogCardMetrics(
+                                useLandscapePosters = useLandscapePosters,
+                                portraitCardWidth = portraitCatalogCardWidth,
+                                portraitCardHeight = portraitCatalogCardHeight,
+                                landscapeCardWidth = landscapeCatalogCardWidth,
+                                landscapeCardHeight = landscapeCatalogCardHeight
+                            ) ?: ModernCatalogCardMetrics(portraitCatalogCardWidth, portraitCatalogCardHeight)
+                        }
+                        ModernSeeAllCard(
+                            width = metrics.width,
+                            height = metrics.height,
+                            cornerRadius = posterCardCornerRadius,
+                            focusRequester = itemFocusRequesters.getOrPut(index) { FocusRequester() },
+                            onFocusGained = { focusGlide.moveTo(index, rowListState, focusGlideScope) },
+                            onFocused = { onRowItemFocused(row.key, index, false) },
+                            onClick = {
+                                val catalogId = row.catalogId
+                                val addonId = row.addonId
+                                val apiType = row.apiType
+                                if (catalogId != null && addonId != null && apiType != null) {
+                                    onNavigateToCatalogSeeAll(catalogId, addonId, apiType)
+                                }
+                            }
+                        )
                     }
                 }
             }

@@ -1,15 +1,15 @@
 package com.nuvio.tv.ui.screens.home
 
 /** The longest a series confirmed to have no next episode is skipped before it is looked up again. */
-internal const val NO_NEXT_UP_RECHECK_MS = 24L * 60 * 60 * 1000
+internal const val NO_NEXT_UP_RECHECK_MS = 6L * 60 * 60 * 1000
 
 /**
  * When a series with no episode after the one last watched has to be looked up again: when its
- * next announced episode or season is released, and at the latest after a day, so an episode
- * added without a date still shows up.
+ * next announced episode or season is released, and at the latest after six hours (a week for a
+ * show that has ended), so an episode added without a date still shows up.
  */
-internal fun noNextUpRecheckAt(nextReleaseMs: Long?, nowMs: Long): Long {
-    val latest = nowMs + NO_NEXT_UP_RECHECK_MS
+internal fun noNextUpRecheckAt(nextReleaseMs: Long?, nowMs: Long, ended: Boolean = false): Long {
+    val latest = nowMs + if (ended) CW_ENDED_SERIES_RECHECK_MS else NO_NEXT_UP_RECHECK_MS
     return nextReleaseMs?.coerceIn(nowMs, latest) ?: latest
 }
 

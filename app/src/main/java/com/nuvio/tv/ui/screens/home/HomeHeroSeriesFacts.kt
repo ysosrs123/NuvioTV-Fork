@@ -8,10 +8,18 @@ import com.nuvio.tv.domain.model.Meta
 import com.nuvio.tv.ui.util.asStable
 import com.nuvio.tv.ui.util.formatHeroRuntime
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -136,6 +144,39 @@ private fun HomeViewModel.publishHeroSeriesFacts(ref: HeroSeriesRef, facts: Hero
 }
 
 /**
+ * The hero's look-ups, one per card. Moving to the next card leaves a running one alone, so a card visited again
+ * finds its details; past [max] running the oldest is stopped.
+ */
+internal class HeroSeriesFactsJobs(private val max: Int = HERO_SERIES_FACTS_RUNNING_MAX) {
+    private val jobs = LinkedHashMap<String, Job>()
+    val warmGate = Semaphore(1)
+
+    fun isRunning(key: String): Boolean = synchronized(this) { jobs[key]?.isActive == true }
+
+    fun add(key: String, job: Job) {
+        val stopped = synchronized(this) {
+            jobs.remove(key)?.let { if (it !== job) it.cancel() }
+            jobs[key] = job
+            buildList { while (jobs.size > max) add(jobs.remove(jobs.keys.first())!!) }
+        }
+        stopped.forEach { it.cancel() }
+    }
+
+    fun finished(key: String, job: Job) {
+        synchronized(this) { if (jobs[key] === job) jobs.remove(key) }
+    }
+
+    fun cancelAll() {
+        val all = synchronized(this) { jobs.values.toList().also { jobs.clear() } }
+        all.forEach { it.cancel() }
+    }
+}
+
+private const val HERO_SERIES_FACTS_RUNNING_MAX = 4
+private const val HERO_SERIES_FACTS_WARM_COUNT = 6
+private const val HERO_SERIES_FACTS_WARM_DELAY_MS = 1_500L
+
+/**
  * Called once the hero has settled on a Continue watching or Coming up card. Details already in memory are used
  * straight away; otherwise the show's details are asked for once, for this card only.
  */
@@ -145,33 +186,79 @@ internal fun HomeViewModel.onSeriesHeroSettledPipeline(ref: HeroSeriesRef) {
         publishHeroSeriesFacts(ref, it)
         return
     }
-    if (!heroSeriesFactsAttempted.add(ref.key)) return
-    heroSeriesFactsJob?.cancel()
-    heroSeriesFactsJob = viewModelScope.launch(Dispatchers.IO) {
-        val meta = try {
-            withContext(MetaCaller("home-hero")) {
-                withTimeoutOrNull(HERO_SERIES_FACTS_TIMEOUT_MS) {
-                    metaRepository.getMetaFromPrimaryAddon(ref.contentType, ref.contentId)
-                        .first { it !is NetworkResult.Loading }
-                        .takeIf { it is NetworkResult.Success }
-                        ?: metaRepository.getMetaFromAllAddons(ref.contentType, ref.contentId)
-                            .first { it !is NetworkResult.Loading }
-                }
+    requestHeroSeriesFacts(ref, gate = null)
+}
+
+/**
+ * Soon after start, fills the hero for the first Continue watching cards: saved details at once, the add-ons one
+ * card at a time, so the first moves along the row find the logo and text ready.
+ */
+internal fun HomeViewModel.startHeroSeriesFactsWarmup() {
+    viewModelScope.launch {
+        _uiState
+            .map { state ->
+                state.continueWatchingItems.asSequence()
+                    .take(HERO_SERIES_FACTS_WARM_COUNT)
+                    .mapNotNull { it.heroSeriesRef() }
+                    .toList()
             }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            null
-        }
-        if (meta is NetworkResult.Success) publishHeroSeriesFacts(ref, meta.data.toHeroSeriesFacts(ref.season, ref.episode))
-    }.also { job ->
-        // A fetch cut short by the next card may be asked for again when that card comes back.
-        job.invokeOnCompletion { cause -> if (cause is CancellationException) heroSeriesFactsAttempted.remove(ref.key) }
+            .distinctUntilChanged()
+            .collectLatest { refs ->
+                if (refs.isEmpty()) return@collectLatest
+                withContext(Dispatchers.IO) { ensureCwMetaStoreLoaded() }
+                val missing = refs.filter { ref ->
+                    if (ref.key in _heroSeriesFacts.value) return@filter false
+                    val cached = cachedHeroSeriesFacts(ref) ?: return@filter true
+                    publishHeroSeriesFacts(ref, cached)
+                    false
+                }
+                if (missing.isEmpty()) return@collectLatest
+                delay(HERO_SERIES_FACTS_WARM_DELAY_MS)
+                missing.forEach { requestHeroSeriesFacts(it, gate = heroSeriesFactsJobs.warmGate) }
+            }
     }
 }
 
+private fun HomeViewModel.requestHeroSeriesFacts(ref: HeroSeriesRef, gate: Semaphore?) {
+    if (ref.key in _heroSeriesFacts.value || heroSeriesFactsJobs.isRunning(ref.key)) return
+    if (!heroSeriesFactsAttempted.add(ref.key)) return
+    val job = viewModelScope.launch(Dispatchers.IO, start = CoroutineStart.LAZY) {
+        // Right after start the saved Continue watching details may not be read in yet.
+        ensureCwMetaStoreLoaded()
+        cachedHeroSeriesFacts(ref)?.let {
+            publishHeroSeriesFacts(ref, it)
+            return@launch
+        }
+        val meta = if (gate != null) gate.withPermit { fetchHeroSeriesMeta(ref) } else fetchHeroSeriesMeta(ref)
+        if (meta is NetworkResult.Success) publishHeroSeriesFacts(ref, meta.data.toHeroSeriesFacts(ref.season, ref.episode))
+    }
+    job.invokeOnCompletion { cause ->
+        heroSeriesFactsJobs.finished(ref.key, job)
+        // A look-up stopped early may be asked for again when that card comes back.
+        if (cause is CancellationException) heroSeriesFactsAttempted.remove(ref.key)
+    }
+    heroSeriesFactsJobs.add(ref.key, job)
+    job.start()
+}
+
+private suspend fun HomeViewModel.fetchHeroSeriesMeta(ref: HeroSeriesRef): NetworkResult<Meta>? = try {
+    withContext(MetaCaller("home-hero")) {
+        withTimeoutOrNull(HERO_SERIES_FACTS_TIMEOUT_MS) {
+            metaRepository.getMetaFromPrimaryAddon(ref.contentType, ref.contentId)
+                .first { it !is NetworkResult.Loading }
+                .takeIf { it is NetworkResult.Success }
+                ?: metaRepository.getMetaFromAllAddons(ref.contentType, ref.contentId)
+                    .first { it !is NetworkResult.Loading }
+        }
+    }
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Exception) {
+    null
+}
+
 internal fun HomeViewModel.clearHeroSeriesFacts() {
-    heroSeriesFactsJob?.cancel()
+    heroSeriesFactsJobs.cancelAll()
     heroSeriesFactsAttempted.clear()
     _heroSeriesFacts.value = emptyMap()
 }

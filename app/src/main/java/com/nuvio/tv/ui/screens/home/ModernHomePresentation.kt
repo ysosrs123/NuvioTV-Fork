@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import com.nuvio.tv.LocaleCache
 import com.nuvio.tv.R
+import com.nuvio.tv.core.image.HomeLoadLevel
+import com.nuvio.tv.core.image.homeRowEndsWithSeeAll
 import com.nuvio.tv.core.util.withAppLocale
 import com.nuvio.tv.domain.model.CatalogRow
 import com.nuvio.tv.domain.model.Collection
@@ -197,6 +199,8 @@ internal fun buildModernHomePresentation(
                     } else {
                         val rowItemOccurrenceCounts = mutableMapOf<String, Int>()
                         val rowItemCache = cache.catalogItemCache.getOrPut(rowKey) { mutableMapOf() }
+                        val titleLimit = HomeLoadLevel.current.rowTitleLimit
+                        val seeAll = homeRowEndsWithSeeAll(row.items.size, row.hasMore, titleLimit)
                         HeroCarouselRow(
                             key = rowKey,
                             title = catalogRowTitle(
@@ -210,9 +214,10 @@ internal fun buildModernHomePresentation(
                             addonId = row.addonId,
                             apiType = row.apiType,
                             supportsSkip = row.supportsSkip,
-                            hasMore = row.hasMore,
+                            hasMore = row.hasMore && !seeAll,
                             isLoading = row.isLoading,
-                            items = row.items.mapIndexed { itemIndex, item ->
+                            seeAll = seeAll,
+                            items = (if (seeAll) row.items.subList(0, titleLimit) else row.items).mapIndexed { itemIndex, item ->
                                 val occurrence = rowItemOccurrenceCounts.getOrDefault(item.id, 0)
                                 rowItemOccurrenceCounts[item.id] = occurrence + 1
                                 val cacheKey = "${item.id}_$occurrence"

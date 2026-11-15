@@ -1,6 +1,6 @@
 package com.nuvio.tv.ui.screens.home
 
-internal const val CW_META_MAX_AGE_MS = 24L * 60 * 60 * 1000
+internal const val CW_META_MAX_AGE_MS = 6L * 60 * 60 * 1000
 internal const val CW_FILM_META_MAX_AGE_MS = 30L * 24 * 60 * 60 * 1000
 internal const val CW_CAUGHT_UP_RECHECK_MS = 24L * 60 * 60 * 1000
 internal const val CW_ENDED_SERIES_RECHECK_MS = 7L * 24 * 60 * 60 * 1000
@@ -23,6 +23,25 @@ internal fun cwMetaKeepUntilMs(isFilm: Boolean, ended: Boolean, nextEpisodeAirMs
     isFilm -> nowMs + CW_FILM_META_MAX_AGE_MS
     ended -> nowMs + CW_ENDED_SERIES_RECHECK_MS
     else -> cwMetaRefreshDueAtMs(nextEpisodeAirMs, nowMs)
+}
+
+/**
+ * When details read back from storage are fetched again. Films and ended shows keep their time; a running show is
+ * shown from storage but fetched again at once, so an episode that aired while the app was closed is not missed.
+ */
+internal fun cwStoredMetaRefreshAtMs(key: String, meta: CwMetaSummary, keepUntilMs: Long, nowMs: Long): Long {
+    val film = key.substringBefore(':').equals("movie", ignoreCase = true)
+    return if (film || isEndedSeriesStatus(meta.status)) keepUntilMs else minOf(keepUntilMs, nowMs)
+}
+
+/** True when an add-on answered with details for another title: both ids are known, of a kind in common, and differ. */
+internal fun cwMetaIsOtherTitle(answeredId: String?, askedId: String): Boolean {
+    val answered = com.nuvio.tv.core.calendar.CalendarIds.fromContentId(answeredId)
+    val asked = com.nuvio.tv.core.calendar.CalendarIds.fromContentId(askedId)
+    if (answered.isEmpty || asked.isEmpty || answered.sharesIdWith(asked)) return false
+    return (answered.imdb != null && asked.imdb != null) || (answered.tmdb != null && asked.tmdb != null) ||
+        (answered.tvdb != null && asked.tvdb != null) || (answered.trakt != null && asked.trakt != null) ||
+        (answered.simkl != null && asked.simkl != null)
 }
 
 /** A stored episode list is fetched again once it is due, but never while the player is open. */

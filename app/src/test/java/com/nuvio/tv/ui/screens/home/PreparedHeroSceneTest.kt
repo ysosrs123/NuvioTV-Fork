@@ -95,4 +95,20 @@ class PreparedHeroSceneTest {
         assertNull(prepared.value.heroBackdrop)
         assertTrue(prepared.value.shouldPlayTrailer)
     }
+
+    private fun withLogo(logo: String?) = scene("spider").copy(
+        preview = HeroPreview("Spider", logo, null, null, yearText = null, imdbText = null,
+            genres = StableList(emptyList()), poster = null, backdrop = null, imageUrl = null)
+    )
+
+    @Test fun `a title shown before its logo keeps the slot for the logo instead of showing text first`() {
+        assertTrue(withLogo("https://img/logo.png").neutralHero().logoPending)
+        assertFalse(withLogo(null).neutralHero().logoPending)
+        assertFalse(withLogo(" ").neutralHero().logoPending)
+    }
+
+    @Test fun `a pending logo stays with the shown title when the request changes`() {
+        val shown = withLogo("https://img/logo.png").neutralHero()
+        assertTrue(presentedHeroScene(shown, withLogo("https://img/logo.png")).logoPending)
+    }
 }

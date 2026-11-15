@@ -107,6 +107,8 @@ class HomeViewModel @Inject constructor(
         internal const val STARTUP_GRACE_PERIOD_MS = 1_500L
         /** Off-screen rows from the background sweep reach the screen at most this often. */
         private const val CATALOG_SWEEP_UPDATE_BATCH_MS = 1_000L
+        /** Rows arriving in the first seconds of Home share one rebuild this far apart at most. */
+        internal const val HOME_START_UPDATE_BATCH_MS = 500L
         internal const val CONTINUE_WATCHING_ENRICHMENT_GRACE_PERIOD_MS = 1_000L
         private const val CONTINUE_WATCHING_WINDOW_MS = 30L * 24 * 60 * 60 * 1000
         private const val MAX_RECENT_PROGRESS_ITEMS = 300
@@ -450,12 +452,14 @@ class HomeViewModel @Inject constructor(
     internal val _heroSeriesFacts = MutableStateFlow<Map<String, HeroSeriesFacts>>(emptyMap())
     val heroSeriesFacts: StateFlow<Map<String, HeroSeriesFacts>> = _heroSeriesFacts.asStateFlow()
     internal val heroSeriesFactsAttempted: MutableSet<String> = Collections.newSetFromMap(createLruMap(MAX_CW_CACHE_SIZE))
-    internal var heroSeriesFactsJob: Job? = null
+    internal val heroSeriesFactsJobs = HeroSeriesFactsJobs()
     fun onSeriesHeroSettled(ref: HeroSeriesRef) = onSeriesHeroSettledPipeline(ref)
     internal val cwMetaCache: MutableMap<String, CwMetaSummary?> = createLruMap(MAX_CW_CACHE_SIZE)
     internal val cwMetaNegativeCacheTimestamps: MutableMap<String, Long> = createLruMap(MAX_CW_CACHE_SIZE)
     internal val cwMetaRefreshAtMs: MutableMap<String, Long> = createLruMap(MAX_CW_CACHE_SIZE)
     internal val cwMetaStaleKeys: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    internal val cwMetaKeepUntilMs: MutableMap<String, Long> = createLruMap(MAX_CW_CACHE_SIZE)
+    internal val cwMetaUnsavedKeys: MutableSet<String> = ConcurrentHashMap.newKeySet()
     internal val cwMetaStore: ContinueWatchingMetaStore? by lazy {
         runCatching { appContext.filesDir?.takeIf { it.isDirectory } }.getOrNull()
             ?.let { ContinueWatchingMetaStore(java.io.File(it, "cw_meta")) }
@@ -504,11 +508,13 @@ class HomeViewModel @Inject constructor(
     /** Latest trailer request made during the startup grace period, sent once grace ends. */
     internal var deferredTrailerPreviewRequest: (() -> Unit)? = null
     internal val adjacentItemPrefetchJobs = AdjacentPrefetchJobs()
+    internal val adjacentRowPrefetchJobs = AdjacentPrefetchJobs()
     internal val focusStepPace = FocusStepPace()
     internal val movieWatchedObserverJobs = mutableMapOf<String, Job>()
     internal var movieWatchedBatchJob: Job? = null
     internal var lastMovieWatchedItemKeys: Set<String> = emptySet()
     internal var seriesWatchedObserverJob: Job? = null
+    internal var lastSeriesWatchedItemKeys: Set<String> = emptySet()
     internal var libraryTabsObserverJob: Job? = null
     internal var activePosterListPickerInput: LibraryEntryInput? = null
     internal var pendingPosterListPickerChanges: ListMembershipChanges? = null
@@ -535,7 +541,7 @@ class HomeViewModel @Inject constructor(
     internal var startupAuthNoticeJob: Job? = null
 
     // Lazy catalog loading
-    internal val eagerCatalogLoadCount: Int = 8
+    internal val eagerCatalogLoadCount: Int = com.nuvio.tv.core.image.HomeLoadLevel.current.startRows
     internal val lazyLoadRequestedKeys: MutableSet<String> = ConcurrentHashMap.newKeySet()
     internal val pendingLazyCatalogs = linkedMapOf<String, Pair<Addon, CatalogDescriptor>>()
     /** Catalogs whose load failed with no row to show. A refresh asks for them again. */
@@ -569,6 +575,7 @@ class HomeViewModel @Inject constructor(
         shownUiState = createShuffleHomeState()
         observeCwPrefetch(shownUiState)
         observeServerArtwork()
+        startHeroSeriesFactsWarmup()
         android.util.Log.i("HOMEVM_LIFECYCLE", "INIT id=" + instanceId + " from " + homeViewModelCaller())
         // Accumulates individual watched status changes and flushes them as a single
         // update after 150ms of inactivity, preventing N separate recompositions.
@@ -643,6 +650,8 @@ class HomeViewModel @Inject constructor(
                     cwMetaNegativeCacheTimestamps.clear()
                     cwMetaRefreshAtMs.clear()
                     cwMetaStaleKeys.clear()
+                    cwMetaKeepUntilMs.clear()
+                    cwMetaUnsavedKeys.clear()
                     cwBadgeEpisodeCache.clear()
                     cwBadgeNextSeasonMs.clear()
                     cwTmdbIdCache.clear()
@@ -672,6 +681,7 @@ class HomeViewModel @Inject constructor(
                     _movieWatchedStatus.value = emptyMap()
                     _pendingWatchedBatch.value = emptyMap()
                     _uiState.update { it.copy(movieWatchedStatus = emptyMap()) }
+                    lastSeriesWatchedItemKeys = emptySet()
                 }
             }
         }
@@ -710,6 +720,8 @@ class HomeViewModel @Inject constructor(
         cwMetaNegativeCacheTimestamps.clear()
         cwMetaRefreshAtMs.clear()
         cwMetaStaleKeys.clear()
+        cwMetaKeepUntilMs.clear()
+        cwMetaUnsavedKeys.clear()
         cwBadgeEpisodeCache.clear()
         cwBadgeNextSeasonMs.clear()
         cwTmdbIdCache.clear()
@@ -875,6 +887,10 @@ class HomeViewModel @Inject constructor(
 
     fun preloadAdjacentItem(item: MetaPreview) = preloadAdjacentItemPipeline(item)
 
+    /** The card focus lands on in the row above or below: fetched to disk only, in its own two-job pool. */
+    fun preloadAdjacentRowItem(item: MetaPreview) =
+        preloadAdjacentItemPipeline(item, adjacentRowPrefetchJobs, warmDecode = false)
+
     private fun loadHomeCatalogOrderPreference() = loadHomeCatalogOrderPreferencePipeline()
 
     private fun loadFollowAddonsOrder() = loadFollowAddonsOrderPipeline()
@@ -919,6 +935,8 @@ class HomeViewModel @Inject constructor(
                         cwMetaCache.clear()
                         cwMetaRefreshAtMs.clear()
                         cwMetaStaleKeys.clear()
+                        cwMetaKeepUntilMs.clear()
+                        cwMetaUnsavedKeys.clear()
                         cwEnrichedNextUpOverlay.clear()
                         cwDiskSeededNextUpOverlayIds.clear()
                         cwEnrichedInProgressOverlay.clear()
@@ -1178,7 +1196,9 @@ class HomeViewModel @Inject constructor(
         // Only the background sweep is loading: its off-screen rows are batched into one pass rather than a
         // rebuild of the whole Home per row while the user scrolls. A pass still waiting takes this row too.
         val sweepOnly = pendingCatalogLoads > 0 && pendingCatalogLoads <= catalogSweepInFlight.get()
-        if (sweepOnly && catalogUpdateJob?.isActive == true &&
+        // In the first seconds after Arc opens, rows that land close together share one rebuild.
+        val startBatch = hasRenderedFirstCatalog && com.nuvio.tv.core.image.HomeStartCalm.active()
+        if ((sweepOnly || startBatch) && catalogUpdateJob?.isActive == true &&
             android.os.SystemClock.uptimeMillis() < catalogUpdateDueAtMs
         ) return
         catalogUpdateJob?.cancel()
@@ -1192,6 +1212,7 @@ class HomeViewModel @Inject constructor(
                     150L
                 }
                 sweepOnly -> CATALOG_SWEEP_UPDATE_BATCH_MS
+                startBatch -> HOME_START_UPDATE_BATCH_MS
                 // During bulk loading, batch aggressively — placeholders are
                 // already visible so the user won't notice the delay.
                 pendingCatalogLoads > 8 -> 300L

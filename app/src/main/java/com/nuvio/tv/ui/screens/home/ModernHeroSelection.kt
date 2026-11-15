@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.home
 
+import com.nuvio.tv.domain.model.MetaPreview
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -32,3 +33,18 @@ internal fun Flow<ModernHeroFocus>.settledModernHeroSelections(
     verticalScrolling.first { !it }
     emit(selection)
 }.buffer(0)
+
+/** The cards focus would land on one row up and one row down, so their art is on disk before the move. */
+internal fun adjacentRowPreviews(
+    rows: List<HeroCarouselRow>,
+    rowKey: String,
+    focusedIndexByRow: Map<String, Int>
+): List<MetaPreview> {
+    val index = rows.indexOfFirst { it.key == rowKey }
+    if (index < 0) return emptyList()
+    return listOfNotNull(rows.getOrNull(index - 1), rows.getOrNull(index + 1)).mapNotNull { row ->
+        val items = row.items.list
+        if (items.isEmpty()) null
+        else items[(focusedIndexByRow[row.key] ?: 0).coerceIn(0, items.lastIndex)].metaPreview
+    }
+}

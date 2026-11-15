@@ -77,7 +77,7 @@ fun RatingLimitPicker(
             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
         ) {
             (listOf<RatingLimit?>(null) + RatingLimit.entries).forEach { limit ->
-                RatingLimitOption(
+                ChoiceOption(
                     title = limit?.label ?: ratingLimitDescription(null),
                     subtitle = limit?.let { ratingLimitDescription(it) },
                     isSelected = selected == limit,
@@ -97,11 +97,13 @@ fun RatingLimitPicker(
 }
 
 @Composable
-private fun RatingLimitOption(
+fun ChoiceOption(
     title: String,
     subtitle: String?,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    note: String? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -112,7 +114,7 @@ private fun RatingLimitOption(
     )
     val shape = RoundedCornerShape(14.dp)
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(shape)
             .background(background)
@@ -139,6 +141,9 @@ private fun RatingLimitOption(
             )
             if (subtitle != null) {
                 Text(text = subtitle, color = NuvioTheme.colors.TextTertiary, fontSize = 12.sp)
+            }
+            if (note != null) {
+                Text(text = note, color = NuvioTheme.colors.Warning, fontSize = 12.sp)
             }
         }
         Box(

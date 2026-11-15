@@ -12,11 +12,11 @@ class ContinueWatchingRefreshPolicyTest {
     private val day = 24 * hour
 
     @Test
-    fun `stored episode list is fetched again after a day`() {
+    fun `stored episode list is fetched again after six hours`() {
         val refreshAt = cwMetaRefreshDueAtMs(nextEpisodeAirMs = null, nowMs = now)
 
-        assertFalse(shouldRefreshCwMeta(refreshAt, now + day - 1, playerOpen = false))
-        assertTrue(shouldRefreshCwMeta(refreshAt, now + day, playerOpen = false))
+        assertFalse(shouldRefreshCwMeta(refreshAt, now + 6 * hour - 1, playerOpen = false))
+        assertTrue(shouldRefreshCwMeta(refreshAt, now + 6 * hour, playerOpen = false))
     }
 
     @Test
@@ -30,17 +30,17 @@ class ContinueWatchingRefreshPolicyTest {
     }
 
     @Test
-    fun `an air date further out than a day does not delay the refresh`() {
+    fun `an air date further out than six hours does not delay the refresh`() {
         val refreshAt = cwMetaRefreshDueAtMs(nextEpisodeAirMs = now + 3 * day, nowMs = now)
 
-        assertEquals(now + day, refreshAt)
+        assertEquals(now + 6 * hour, refreshAt)
     }
 
     @Test
-    fun `an air date already passed falls back to a day`() {
+    fun `an air date already passed falls back to six hours`() {
         val refreshAt = cwMetaRefreshDueAtMs(nextEpisodeAirMs = now - hour, nowMs = now)
 
-        assertEquals(now + day, refreshAt)
+        assertEquals(now + 6 * hour, refreshAt)
     }
 
     @Test
@@ -48,7 +48,27 @@ class ContinueWatchingRefreshPolicyTest {
         assertEquals(now + 30 * day, cwMetaKeepUntilMs(isFilm = true, ended = false, nextEpisodeAirMs = now + hour, nowMs = now))
         assertEquals(now + 7 * day, cwMetaKeepUntilMs(isFilm = false, ended = true, nextEpisodeAirMs = null, nowMs = now))
         assertEquals(now + 2 * hour, cwMetaKeepUntilMs(isFilm = false, ended = false, nextEpisodeAirMs = now + 2 * hour, nowMs = now))
-        assertEquals(now + day, cwMetaKeepUntilMs(isFilm = false, ended = false, nextEpisodeAirMs = null, nowMs = now))
+        assertEquals(now + 6 * hour, cwMetaKeepUntilMs(isFilm = false, ended = false, nextEpisodeAirMs = null, nowMs = now))
+    }
+
+    @Test
+    fun `a running show read back from storage is fetched again at once, films and ended shows keep their time`() {
+        val running = summary(status = "Continuing", videos = listOf(episode(1, 1, "2026-10-01")))
+        val ended = summary(status = "Ended", videos = listOf(episode(1, 1, "2026-10-01")))
+
+        assertEquals(now, cwStoredMetaRefreshAtMs("series:tt1", running, now + 5 * hour, now))
+        assertEquals(now + 7 * day, cwStoredMetaRefreshAtMs("series:tt2", ended, now + 7 * day, now))
+        assertEquals(now + 30 * day, cwStoredMetaRefreshAtMs("movie:tt3", running, now + 30 * day, now))
+    }
+
+    @Test
+    fun `details for another title are recognised, other id kinds are not judged`() {
+        assertTrue(cwMetaIsOtherTitle("tt10370710", "tt6763664"))
+        assertTrue(cwMetaIsOtherTitle("tmdb:103516", "tmdb:72844"))
+        assertFalse(cwMetaIsOtherTitle("tt6763664", "tt6763664"))
+        assertFalse(cwMetaIsOtherTitle("tt6763664", "tmdb:72844"))
+        assertFalse(cwMetaIsOtherTitle("kitsu:1", "tt6763664"))
+        assertFalse(cwMetaIsOtherTitle(null, "tt6763664"))
     }
 
     @Test

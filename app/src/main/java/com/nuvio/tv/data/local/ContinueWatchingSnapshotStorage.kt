@@ -42,7 +42,7 @@ class ContinueWatchingSnapshotStorage @Inject constructor(
         mutex.withLock {
             if (retire) { retiredProfiles.add(profileId); profilesAfterReset?.remove(profileId) }
             try {
-                listOf("nextup", "inprogress").forEach { kind ->
+                listOf("nextup", "inprogress", "nonextup").forEach { kind ->
                     val file = snapshotFile(kind, profileId)
                     file.delete()
                     File(file.parentFile, "${file.name}.tmp").delete()

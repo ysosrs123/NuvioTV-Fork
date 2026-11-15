@@ -49,7 +49,7 @@ internal class ContinueWatchingMetaStore(private val dir: File) {
     private fun file(profileId: Int) = File(dir, "cw_meta_$profileId.json")
 
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
         const val TAG = "CwMetaStore"
     }
 }
@@ -77,7 +77,8 @@ internal suspend fun HomeViewModel.ensureCwMetaStoreLoaded() {
                 entries.forEach { entry ->
                     if (!cwMetaCache.containsKey(entry.key)) {
                         cwMetaCache[entry.key] = entry.meta
-                        cwMetaRefreshAtMs[entry.key] = entry.keepUntilMs
+                        cwMetaRefreshAtMs[entry.key] = cwStoredMetaRefreshAtMs(entry.key, entry.meta, entry.keepUntilMs, nowMs)
+                        cwMetaKeepUntilMs[entry.key] = entry.keepUntilMs
                         added++
                     }
                 }
@@ -105,7 +106,8 @@ internal fun HomeViewModel.scheduleCwMetaStoreSave() {
             if (cwMetaStoreLoadedFor != context) return@launch
             val entries = synchronized(cwMetaCache) {
                 cwMetaCache.mapNotNull { (key, meta) ->
-                    val keepUntil = cwMetaRefreshAtMs[key] ?: return@mapNotNull null
+                    if (key in cwMetaUnsavedKeys) return@mapNotNull null
+                    val keepUntil = cwMetaKeepUntilMs[key] ?: cwMetaRefreshAtMs[key] ?: return@mapNotNull null
                     meta?.let { CwMetaStoreEntry(key, keepUntil, it) }
                 }
             }

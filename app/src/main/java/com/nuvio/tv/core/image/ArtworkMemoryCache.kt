@@ -8,7 +8,7 @@ import com.nuvio.tv.data.repository.OpenFilesGuard
  */
 class ArtworkMemoryCache(
     bytes: Long,
-    private val undatedLimitMs: Long = MIN_IMAGE_FRESHNESS_MS,
+    private val undatedLimitMs: Long = IMAGE_FRESHNESS_FLOOR_MS,
     private val now: () -> Long = { android.os.SystemClock.elapsedRealtime() },
 ) : MemoryCache {
     private val lock = Any()

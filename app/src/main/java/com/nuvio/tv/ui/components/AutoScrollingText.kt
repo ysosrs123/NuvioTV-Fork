@@ -115,7 +115,7 @@ fun AutoScrollingText(
         val viewportPx = layout.getLineBottom(maxLines - 1).coerceAtMost(constraints.maxHeight.toFloat())
         val overflowPx = layout.size.height - viewportPx
         val viewportHeight = with(density) { viewportPx.toDp() }
-        val lineHeightPx = viewportPx / maxLines
+        val lineHeightPx = layout.getLineBottom(maxLines - 1) / maxLines
         val currentPaused by rememberUpdatedState(paused)
         // A fresh offset per text, so a new description never shows at the previous one's position.
         val offset = remember(text) { Animatable(0f) }

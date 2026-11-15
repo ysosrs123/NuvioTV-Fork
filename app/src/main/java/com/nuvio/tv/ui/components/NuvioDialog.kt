@@ -62,8 +62,8 @@ fun NuvioDialog(
     contentPadding: Dp = NuvioTheme.spacing.xl,
     contentSpacing: Dp = NuvioTheme.spacing.lg,
     backgroundContent: @Composable BoxScope.() -> Unit = {},
-    /** V2 only: a near solid surface when the box draws no blur, for dialogs that appear over busy pages. */
-    solidWithoutBlur: Boolean = false,
+    /** V2 only: a near solid surface when the box draws no blur, so the page behind never shows through the text. */
+    solidWithoutBlur: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     var isReady by remember { mutableStateOf(!suppressFirstKeyUp) }

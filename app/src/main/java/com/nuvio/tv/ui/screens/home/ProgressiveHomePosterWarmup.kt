@@ -24,7 +24,9 @@ import com.nuvio.tv.core.image.homePosterMemoryWarmBudget
 import com.nuvio.tv.core.image.homePosterMemoryWarmColumns
 import com.nuvio.tv.core.image.homePosterMemoryWarmRows
 import com.nuvio.tv.core.image.homePosterPriority
-import com.nuvio.tv.core.image.progressivePosterIndices
+import com.nuvio.tv.core.image.HomeLoadLevel
+import com.nuvio.tv.core.image.HomeStartCalm
+import com.nuvio.tv.core.image.homePosterDiskWarmIndices
 import com.nuvio.tv.core.image.progressivePosterRows
 import com.nuvio.tv.core.image.sizedHomeArtworkUrl
 import com.nuvio.tv.domain.model.isPlaceholder
@@ -69,9 +71,10 @@ internal fun ProgressiveHomePosterWarmup(
         // scroll; these are not opened, or waited for, a second time.
         val onDisk = HashSet<String>()
         // Rows whose posters were all on disk when a pass finished them, with the items that were checked.
-        val rowsOnDisk = HashMap<String, List<ModernCarouselItem>>()
+        val rowsOnDisk = HashMap<String, RowOnDisk>()
         var skipped = 0
         while (isActive) {
+            HomeStartCalm.awaitEnd { viewport.visibleRequests.get() > 0 }
             snapshotFlow { idle() }.first { it }
             delay(HOME_WARMUP_IDLE_MS)
             while (true) {
@@ -104,7 +107,8 @@ internal fun ProgressiveHomePosterWarmup(
                 changed.set(true)
             }
             fun current(): Boolean = !changed.get() && !viewport.scrolling && !verticalScrolling.value
-            val memoryRows = homePosterMemoryWarmRows(catalogue.size, firstRow, lastRow, previousFirstRow)
+            val level = HomeLoadLevel.current
+            val memoryRows = homePosterMemoryWarmRows(catalogue.size, firstRow, lastRow, previousFirstRow, level.memoryRowsAhead)
             previousFirstRow = firstRow
             val memoryCache = loader.memoryCache
             val complete = withContext(Dispatchers.Default) {
@@ -114,24 +118,29 @@ internal fun ProgressiveHomePosterWarmup(
                     val row = catalogue[index]
                     val items = row.items.list
                     if (items.isEmpty() || items.first().payload is ModernPayload.ContinueWatching) null
-                    else if (index !in memoryRows && rowsOnDisk[row.key] == items) {
+                    else if (!level.warmOtherRowsToDisk && index !in firstRow..lastRow && index !in memoryRows) null
+                    else if (index !in memoryRows &&
+                        rowsOnDisk[row.key] == RowOnDisk(items, firstColumns[row.key] ?: 0)
+                    ) {
                         rowsSkipped++
                         null
                     } else {
                         val (first, last) = bounds[row.key] ?: (0 to -1)
                         val onScreen = index in firstRow..lastRow && last >= first
-                        val indices = if (onScreen) progressivePosterIndices(row.items.size, first, last)
-                        else row.items.indices.asSequence()
-                        val columns = if (onScreen) homePosterMemoryWarmColumns(first, last - first + 1)
-                        else homePosterMemoryWarmColumns(firstColumns[row.key] ?: 0, screenColumns)
-                        WarmupScan(index, indices.iterator(), columns, wholeRow = !onScreen)
+                        val firstColumn = firstColumns[row.key] ?: 0
+                        val indices = homePosterDiskWarmIndices(
+                            row.items.size, onScreen, first, last, firstColumn, screenColumns, level.diskWarmScreens
+                        )
+                        val columns = if (onScreen) homePosterMemoryWarmColumns(first, last - first + 1, level.memoryScreensFromPosition)
+                        else homePosterMemoryWarmColumns(firstColumn, screenColumns, level.memoryScreensFromPosition)
+                        WarmupScan(index, indices.iterator(), columns, offScreen = !onScreen, firstColumn = firstColumn)
                     }
                 }.toList()
                 val visibleRows = firstRow..lastRow
                 var memoryBudget = homePosterMemoryWarmBudget(
                     (memoryCache as? ArtworkMemoryCache)?.posterMaxSize ?: ((memoryCache?.maxSize ?: 0L) * 3 / 4)
                 )
-                log("progressive_home_start loadedRows=${scans.size} rowsDone=$rowsSkipped visible=$firstRow..$lastRow memoryRows=$memoryRows")
+                log("progressive_home_start level=$level loadedRows=${scans.size} rowsDone=$rowsSkipped visible=$firstRow..$lastRow memoryRows=$memoryRows")
                 // Finish the visible rows' offscreen posters first, then decode the rows ahead into
                 // memory. Remaining loaded rows only reach the disk; no new catalogue pages or metadata.
                 val phases = listOf(
@@ -214,9 +223,9 @@ internal fun ProgressiveHomePosterWarmup(
                     log("progressive_scan row=${scan.row} checked=${scan.checked} diskHits=${scan.hits} requests=${scan.requests} furthest=${scan.furthest} complete=${!scan.iterator.hasNext()}")
                 }
                 scans.forEach { scan ->
-                    if (scan.wholeRow && scan.allOnDisk && scan.row !in memoryRows && !scan.iterator.hasNext()) {
+                    if (scan.offScreen && scan.allOnDisk && scan.row !in memoryRows && !scan.iterator.hasNext()) {
                         val row = catalogue[scan.row]
-                        rowsOnDisk[row.key] = row.items.list
+                        rowsOnDisk[row.key] = RowOnDisk(row.items.list, scan.firstColumn)
                     }
                 }
                 scans.none { it.iterator.hasNext() }
@@ -227,8 +236,17 @@ internal fun ProgressiveHomePosterWarmup(
     }
 }
 
-/** One row of a warm-up pass. [wholeRow] is false for a row on screen, whose visible cards load themselves. */
-private class WarmupScan(val row: Int, val iterator: Iterator<Int>, val memoryColumns: IntRange, val wholeRow: Boolean) {
+/** A row whose warm-up window was all on disk, with the items and the position it was checked at. */
+private data class RowOnDisk(val items: List<ModernCarouselItem>, val firstColumn: Int)
+
+/** One row of a warm-up pass. [offScreen] is false for a row on screen, whose visible cards load themselves. */
+private class WarmupScan(
+    val row: Int,
+    val iterator: Iterator<Int>,
+    val memoryColumns: IntRange,
+    val offScreen: Boolean,
+    val firstColumn: Int,
+) {
     var checked = 0
     var hits = 0
     var requests = 0

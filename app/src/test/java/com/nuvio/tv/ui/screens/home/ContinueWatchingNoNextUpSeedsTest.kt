@@ -10,8 +10,13 @@ class ContinueWatchingNoNextUpSeedsTest {
     private val hour = 60L * 60 * 1000
 
     @Test
-    fun `a series with nothing announced is looked up again after a day`() {
-        assertEquals(now + NO_NEXT_UP_RECHECK_MS, noNextUpRecheckAt(nextReleaseMs = null, nowMs = now))
+    fun `a series with nothing announced is looked up again after six hours`() {
+        assertEquals(now + 6 * hour, noNextUpRecheckAt(nextReleaseMs = null, nowMs = now))
+    }
+
+    @Test
+    fun `an ended series is looked up again after a week`() {
+        assertEquals(now + 7 * 24 * hour, noNextUpRecheckAt(nextReleaseMs = null, nowMs = now, ended = true))
     }
 
     @Test
@@ -20,7 +25,7 @@ class ContinueWatchingNoNextUpSeedsTest {
     }
 
     @Test
-    fun `a release far ahead still gets looked up after a day`() {
+    fun `a release far ahead is still looked up within six hours`() {
         assertEquals(now + NO_NEXT_UP_RECHECK_MS, noNextUpRecheckAt(nextReleaseMs = now + 90 * 24 * hour, nowMs = now))
     }
 

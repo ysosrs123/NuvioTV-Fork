@@ -155,7 +155,8 @@ data class HeroCarouselRow(
     val apiType: String? = null,
     val supportsSkip: Boolean = false,
     val hasMore: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val seeAll: Boolean = false
 )
 
 @Immutable
@@ -202,7 +203,9 @@ internal data class ModernHeroSceneState(
     val fullScreenBackdrop: Boolean,
     val featheredTrailer: Boolean = false,
     val preparedImage: coil3.Image? = null,
-    val preparedLogo: coil3.Image? = null
+    val preparedLogo: coil3.Image? = null,
+    /** The title has a logo that is still loading: its slot stays empty instead of showing text first. */
+    val logoPending: Boolean = false
 )
 
 internal data class ModernCatalogRowBuildCacheEntry(
@@ -642,8 +645,16 @@ internal fun buildCollectionFolderItem(
 
 // One key per show, like the shuffle key: when its card moves to another episode it stays the
 // same row item, so focus stays on it instead of passing to the next card.
+/** One key per show, so a card that moves on to the next episode keeps its place and focus. */
 internal fun continueWatchingItemKey(item: ContinueWatchingItem): String {
-    return item.shuffleFocusKey ?: "cw_${item.contentId()}"
+    item.shuffleFocusKey?.let { return it }
+    val id = item.contentId().ifBlank { "untitled_${item.contentType()}_${item.title()}" }
+    return "cw_$id"
+}
+
+private fun ContinueWatchingItem.title(): String = when (this) {
+    is ContinueWatchingItem.InProgress -> progress.name
+    is ContinueWatchingItem.NextUp -> info.name
 }
 
 /** Two entries with one key would crash the row: every list the home rows get passes through here. */

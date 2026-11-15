@@ -62,10 +62,12 @@ class HomePosterWatchedTest {
 
         viewModel.reconcilePosterStatusObserversPipeline(listOf(youtubeRow()))
 
-        assertEquals(
-            true,
-            viewModel._uiState.value.movieWatchedStatus[homeItemStatusKey(VIDEO_ID, "youtube")]
-        )
+        val key = homeItemStatusKey(VIDEO_ID, "youtube")
+        val deadline = System.currentTimeMillis() + 2_000
+        while (viewModel._uiState.value.movieWatchedStatus[key] == null && System.currentTimeMillis() < deadline) {
+            Thread.sleep(10)
+        }
+        assertEquals(true, viewModel._uiState.value.movieWatchedStatus[key])
     }
 
     private fun watchProgressRepository(watchedIds: Set<String>) = mockk<WatchProgressRepository>(relaxed = true) {
@@ -134,7 +136,11 @@ class HomePosterWatchedTest {
             cwEnrichmentCache = cwEnrichmentCache,
             profileManager = profileManager,
             tvRecommendationManager = mockk(relaxed = true),
-            serverCatalog = mockk(relaxed = true)
+            homeRefreshSignal = mockk(relaxed = true),
+            prefetchSelectionSupplier = mockk(relaxed = true),
+            streamRepository = mockk(relaxed = true),
+            trailerSettingsDataStore = mockk(relaxed = true),
+            serverCatalog = mockk { every { addons } returns flowOf(emptyList()); every { artworkUpdates } returns MutableStateFlow(0L) }
         )
         viewModel.startupGracePeriodActive = false
         viewModel.currentTmdbSettings = TmdbSettings(enabled = false)

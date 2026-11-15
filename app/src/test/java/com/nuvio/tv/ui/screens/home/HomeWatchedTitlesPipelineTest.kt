@@ -192,6 +192,25 @@ class HomeWatchedTitlesPipelineTest {
         assertNotNull(vm.seriesWatchedObserverJob)
     }
 
+    @Test
+    fun `the same shows in a new batch keep the running watched observer`() = runTest {
+        val vm = newViewModel()
+        val item = movie("kitsu:2").copy(type = ContentType.UNKNOWN, rawType = "anime")
+        val rows = listOf(row("anime", hasMore = false, items = listOf(item)))
+
+        vm.reconcilePosterStatusObserversPipeline(rows)
+        val first = vm.seriesWatchedObserverJob
+        vm.reconcilePosterStatusObserversPipeline(rows)
+
+        assertTrue(first === vm.seriesWatchedObserverJob)
+        assertTrue("anime|kitsu:2" in vm.lastSeriesWatchedItemKeys)
+
+        vm.reconcilePosterStatusObserversPipeline(
+            rows + row("more", hasMore = false, items = listOf(movie("kitsu:3").copy(type = ContentType.UNKNOWN, rawType = "anime")))
+        )
+        assertFalse(first === vm.seriesWatchedObserverJob)
+    }
+
     private fun refreshingViewModel(current: CatalogRow, refreshed: CatalogRow): HomeViewModel {
         val vm = spyk(newViewModel())
         every { vm.scheduleUpdateCatalogRows() } just Runs

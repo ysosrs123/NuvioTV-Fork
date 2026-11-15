@@ -1,6 +1,8 @@
 package com.nuvio.tv.ui.screens.home
 
 import kotlin.math.abs
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 /** Preserve row identity when a focused card has transformed visual bounds. */
 internal fun adjacentHomeRowIndex(current: Int, count: Int, down: Boolean): Int? {
@@ -83,6 +85,17 @@ internal fun removedCardFocusTarget(index: Int, rowSize: Int): Int? =
  */
 internal fun shouldClaimFocus(isTarget: Boolean, cardFocused: Boolean, rowHasFocus: Boolean, isPendingTarget: Boolean): Boolean =
     isTarget && !cardFocused && (isPendingTarget || !rowHasFocus)
+
+/**
+ * Whether a card's focus report still makes its row the active one. The report runs a frame after focus arrived; if a
+ * card in another row took focus meanwhile, making this row active again would let that row's card claim focus back.
+ */
+internal fun focusReportApplies(cardStillFocused: Boolean): Boolean = cardStillFocused
+
+/** Returns once the Home rows are not scrolling, at once when they already stand still. */
+internal suspend fun awaitRowsStill(scrolling: Flow<Boolean>) {
+    scrolling.first { !it }
+}
 
 /** The card focus was sent to in a row, once a card of [focusedRowKey] has taken focus: done with as soon as any card in its row has it. */
 internal fun pendingAfterFocus(pendingRowKey: String?, pendingIndex: Int?, focusedRowKey: String): Int? =

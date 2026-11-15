@@ -180,6 +180,7 @@ internal suspend fun HomeViewModel.loadAllCatalogsPipeline(
     activeCatalogLoadSignature = signature
     watchedTitles.refillPages.clear()
     StartupLatencyTrace.mark("catalogs_load_start")
+    com.nuvio.tv.core.image.HomeStartCalm.begin()
     catalogsLoadInProgress = true
     // A full load leaves every catalog fresh, so the next return to Home has nothing to do.
     lastHomeCatalogRefreshAtMs = android.os.SystemClock.elapsedRealtime()
@@ -1133,12 +1134,14 @@ internal fun HomeViewModel.reconcilePosterStatusObserversPipeline(rows: List<Cat
             movieWatchedBatchJob = viewModelScope.launch {
                 watchProgressRepository.observeWatchedMovieIds()
                     .collectLatest { watchedIds ->
-                        _uiState.update { state ->
-                            val movieStatus = buildMap {
+                        val movieStatus = withContext(Dispatchers.Default) {
+                            buildMap {
                                 allMovieItemsByKey.forEach { (statusKey, contentId) ->
                                     put(statusKey, contentId in watchedIds)
                                 }
                             }
+                        }
+                        _uiState.update { state ->
                             // Merge with existing status to preserve series entries.
                             val merged = state.movieWatchedStatus
                                 .filterKeys { it !in desiredMovieKeys } + movieStatus
@@ -1155,7 +1158,13 @@ internal fun HomeViewModel.reconcilePosterStatusObserversPipeline(rows: List<Cat
 
     // Update series watched status from CW pipeline's fully-watched resolution.
     // This piggybacks on the meta lookups CW already performs — no extra network calls.
-    if (allSeriesItemsByKey.isNotEmpty()) {
+    val desiredSeriesKeys = allSeriesItemsByKey.keys
+    if (desiredSeriesKeys.isEmpty()) {
+        lastSeriesWatchedItemKeys = emptySet()
+        seriesWatchedObserverJob?.cancel()
+        seriesWatchedObserverJob = null
+    } else if (desiredSeriesKeys != lastSeriesWatchedItemKeys || seriesWatchedObserverJob?.isActive != true) {
+        lastSeriesWatchedItemKeys = desiredSeriesKeys
         seriesWatchedObserverJob?.cancel()
         seriesWatchedObserverJob = viewModelScope.launch {
             combine(
@@ -1164,33 +1173,32 @@ internal fun HomeViewModel.reconcilePosterStatusObserversPipeline(rows: List<Cat
             ) { fullyWatched, watchedItems ->
                 fullyWatched to watchedItems
             }.collectLatest { (fullyWatched, watchedItems) ->
-                val effectiveFullyWatched = if (
-                    watchProgressRepository.activeProviderOwnsCompletedHistoryProjection()
-                ) {
-                    fullyWatched
-                } else {
-                    reconcileFullyWatchedFromLocalItems(
-                        fullyWatched = fullyWatched,
-                        watchedItems = watchedItems,
-                        seriesContentIds = allSeriesItemsByKey.values
-                    )
-                }
-                val seriesStatus = buildMap {
-                    allSeriesItemsByKey.forEach { (statusKey, contentId) ->
-                        put(statusKey, contentId in effectiveFullyWatched)
+                val seriesStatus = withContext(Dispatchers.Default) {
+                    val effectiveFullyWatched = if (
+                        watchProgressRepository.activeProviderOwnsCompletedHistoryProjection()
+                    ) {
+                        fullyWatched
+                    } else {
+                        reconcileFullyWatchedFromLocalItems(
+                            fullyWatched = fullyWatched,
+                            watchedItems = watchedItems,
+                            seriesContentIds = allSeriesItemsByKey.values
+                        )
+                    }
+                    buildMap {
+                        allSeriesItemsByKey.forEach { (statusKey, contentId) ->
+                            put(statusKey, contentId in effectiveFullyWatched)
+                        }
                     }
                 }
                 _uiState.update { state ->
                     val merged = state.movieWatchedStatus
-                        .filterKeys { it !in allSeriesItemsByKey.keys } + seriesStatus
+                        .filterKeys { it !in desiredSeriesKeys } + seriesStatus
                     if (state.movieWatchedStatus == merged) state
                     else state.copy(movieWatchedStatus = merged)
                 }
             }
         }
-    } else {
-        seriesWatchedObserverJob?.cancel()
-        seriesWatchedObserverJob = null
     }
 
     _uiState.update { state ->

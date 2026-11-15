@@ -388,6 +388,7 @@ internal fun HeroTitleBlock(
     previewProvider: () -> HeroPreview?,
     enrichmentActive: () -> Boolean = { false },
     preparedLogo: coil3.Image? = null,
+    logoPending: Boolean = false,
     portraitMode: Boolean,
     descriptionMaxLines: Int,
     showImdbRatings: Boolean,
@@ -430,6 +431,7 @@ internal fun HeroTitleBlock(
         HeroTitleContent(
             previewProvider = { displayPreview },
             preparedLogo = preparedLogo,
+            logoPending = logoPending,
             portraitMode = portraitMode,
             descriptionMaxLines = descriptionMaxLines,
             showImdbRatings = showImdbRatings,
@@ -445,6 +447,7 @@ internal fun HeroTitleBlock(
 private fun HeroTitleContent(
     previewProvider: () -> HeroPreview?,
     preparedLogo: coil3.Image?,
+    logoPending: Boolean,
     portraitMode: Boolean,
     descriptionMaxLines: Int,
     showImdbRatings: Boolean,
@@ -518,7 +521,7 @@ private fun HeroTitleContent(
                     modifier = Modifier.widthIn(max = 220.dp).fillMaxSize().graphicsLayer { alpha = metaAlpha },
                     contentScale = ContentScale.Fit, alignment = Alignment.CenterStart
                 )
-            } else {
+            } else if (!logoPending) {
                 Text(text = preview.title, style = scaledTitleStyle,
                     color = NuvioTheme.colors.TextPrimary, maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
