@@ -195,7 +195,7 @@ class ReportOutbox @Inject constructor(
         withContext(Dispatchers.IO) {
             when (val result = upload(route, json)) {
                 is ReportUpload.Accepted -> {
-                    runCatching { sentReports.add(result.id, kind) }
+                    runCatching { sentReports.add(result.id, kind, followToken(result.followUrl)) }
                     PlaybackIssueReceipt(result.id, result.followUrl)
                 }
                 is ReportUpload.Refused -> error("Report upload failed: HTTP ${result.code}")
@@ -239,7 +239,7 @@ class ReportOutbox @Inject constructor(
                 upload = { report, json -> upload(report.route, json) },
                 onAccepted = { report, accepted ->
                     schedule.succeeded()
-                    runCatching { sentReports.add(accepted.id, report.kind) }
+                    runCatching { sentReports.add(accepted.id, report.kind, followToken(accepted.followUrl)) }
                 }
             )
             if (unreachable) {

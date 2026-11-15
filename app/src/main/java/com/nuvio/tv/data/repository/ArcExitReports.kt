@@ -219,10 +219,12 @@ internal object ExitTrace {
 
     private val THREAD_HEADER = Regex("""^"[^"]*".* tid=\d+""")
     private val IDLE_STATE = Regex(""" tid=\d+ (Waiting|TimedWaiting|Sleeping|Native|WaitingInMainSignalCatcherLoop)(\s|$)""")
+    private val DRAWING_THREAD = Regex("""^"(RenderThread|hwuiTask\d*|GPU completion|ExoPlayer:FrameReleaseChoreographer)"""")
 
     /**
      * An ANR dump with the main thread first, then threads in Arc's own code, then other busy threads, and last only
-     * the header line of threads that were just waiting, so the size cap keeps what matters.
+     * the header line of threads that were just waiting, so the size cap keeps what matters. The threads that draw the
+     * screen keep their stack even while they wait in native code: a stuck frame is usually waiting on one of them.
      */
     fun ordered(lines: List<String>): List<String> {
         val firstThread = lines.indexOfFirst { THREAD_HEADER.containsMatchIn(it) }
@@ -239,7 +241,7 @@ internal object ExitTrace {
         val rest = blocks - main.toSet()
         val app = rest.filter { block -> block.any { "com.nuvio." in it } }
         val others = rest - app.toSet()
-        val idle = others.filter { IDLE_STATE.containsMatchIn(it.first()) }
+        val idle = others.filter { IDLE_STATE.containsMatchIn(it.first()) && !DRAWING_THREAD.containsMatchIn(it.first()) }
         val busy = others - idle.toSet()
         return lines.subList(0, firstThread) + (main + app + busy).flatten() + idle.map { it.first() }
     }

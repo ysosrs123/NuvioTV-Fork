@@ -20,15 +20,37 @@ object ArcCrashFile {
     internal const val LOG_HEADER = "--- Arc log, last lines ---"
 
     @Volatile private var file: File? = null
+    @Volatile private var playing: () -> Boolean = { false }
+    @Volatile private var ours: Thread.UncaughtExceptionHandler? = null
+    private val lastRecorded = java.util.concurrent.atomic.AtomicReference<Throwable?>(null)
 
-    fun install(context: Context, playing: () -> Boolean) {
-        val target = File(context.noBackupFilesDir, FILE_NAME)
+    fun install(context: Context, playing: () -> Boolean) = installAt(File(context.noBackupFilesDir, FILE_NAME), playing)
+
+    internal fun installAt(target: File, playing: () -> Boolean) {
         file = target
+        this.playing = playing
+        claim(target)
+    }
+
+    /**
+     * Puts Arc's handler back in front when other code, such as a downloaded plugin, set its own. That handler still
+     * runs, after Arc's.
+     */
+    fun reclaim() {
+        val target = file ?: return
+        if (Thread.getDefaultUncaughtExceptionHandler() !== ours) claim(target)
+    }
+
+    @Synchronized
+    private fun claim(target: File) {
         val previous = Thread.getDefaultUncaughtExceptionHandler()
-        Thread.setDefaultUncaughtExceptionHandler { thread, error ->
-            runCatching { write(target, thread, error, runCatching(playing).getOrDefault(false)) }
+        if (previous != null && previous === ours) return
+        val handler = Thread.UncaughtExceptionHandler { thread, error ->
+            runCatching { if (lastRecorded.getAndSet(error) !== error) record(target, thread.name, error, runCatching(playing).getOrDefault(false)) }
             previous?.uncaughtException(thread, error)
         }
+        ours = handler
+        Thread.setDefaultUncaughtExceptionHandler(handler)
     }
 
     /** The saved crash written shortly before an exit Android recorded at [exitMs], without its time line. */
@@ -84,14 +106,38 @@ object ArcCrashFile {
         ) + ArcSetupSize.lines()
     }
 
-    private fun write(target: File, thread: Thread, error: Throwable, playing: Boolean) {
-        val lines = lines(
-            System.currentTimeMillis(), thread.name, error, playing, processFacts(),
-            ArcBreadcrumbs.recent(), runCatching { ArcLogTail.read(LOG_LINES, LOG_WAIT_MS) }.getOrDefault(emptyList())
-        )
+    /** The stack is saved first on its own, so a failure or a kill while the rest is gathered still leaves it. */
+    internal fun record(
+        target: File,
+        thread: String,
+        error: Throwable,
+        playing: Boolean,
+        facts: () -> List<String> = ::processFacts,
+        recent: () -> List<String> = ArcBreadcrumbs::recent,
+        log: () -> List<String> = { ArcLogTail.read(LOG_LINES, LOG_WAIT_MS) }
+    ) {
+        val now = System.currentTimeMillis()
+        runCatching { save(target, lines(now, thread, error, playing, emptyList())) }
+        runCatching {
+            save(
+                target,
+                lines(
+                    now, thread, error, playing,
+                    runCatching(facts).getOrDefault(emptyList()),
+                    runCatching(recent).getOrDefault(emptyList()),
+                    runCatching(log).getOrDefault(emptyList())
+                )
+            )
+        }
+    }
+
+    private fun save(target: File, lines: List<String>) {
         val temp = File(target.parentFile, "$FILE_NAME.tmp")
         temp.writeText(lines.joinToString("\n"))
-        temp.renameTo(target)
+        if (!temp.renameTo(target)) {
+            target.delete()
+            temp.renameTo(target)
+        }
     }
 
     /** Every thread in the process, native ones included; names are cut to 15 characters by the kernel. */

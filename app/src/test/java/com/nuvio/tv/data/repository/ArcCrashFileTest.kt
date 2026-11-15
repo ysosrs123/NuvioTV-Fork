@@ -3,6 +3,7 @@ package com.nuvio.tv.data.repository
 import java.io.File
 import java.nio.file.Files
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -68,5 +69,55 @@ class ArcCrashFileTest {
         assertEquals("pool1-x 12", groups.first())
         assertEquals("unknown", ArcCrashFile.threadGroups(emptyList()))
         assertTrue(ArcCrashFile.allThreadNames(File("/no/such/dir")).isEmpty())
+    }
+
+    @Test fun theStackIsSavedEvenWhenGatheringTheRestFails() {
+        val file = File(Files.createTempDirectory("crash").toFile(), "arc-last-crash.txt")
+
+        ArcCrashFile.record(
+            file, "worker", IllegalStateException("boom"), playing = false,
+            facts = { error("no facts") }, recent = { throw OutOfMemoryError("no room") }, log = { error("no log") }
+        )
+
+        val lines = ArcCrashFile.linesFor(file, exitMs = System.currentTimeMillis())!!
+        assertEquals("Crash in thread: worker", lines[0])
+        assertTrue(lines.any { it.startsWith("java.lang.IllegalStateException: boom") })
+        assertFalse(lines.contains(ArcCrashFile.LOG_HEADER))
+    }
+
+    @Test fun factsScreensAndLogAreAddedAfterTheStack() {
+        val file = File(Files.createTempDirectory("crash").toFile(), "arc-last-crash.txt")
+
+        ArcCrashFile.record(
+            file, "main", IllegalStateException("boom"), playing = true,
+            facts = { listOf("Threads: 7") }, recent = { listOf("10:00:00 screen home") }, log = { listOf("last log line") }
+        )
+
+        val lines = ArcCrashFile.linesFor(file, exitMs = System.currentTimeMillis())!!
+        assertEquals("Threads: 7", lines[2])
+        assertTrue(lines.indexOf("10:00:00 screen home") > lines.indexOfFirst { it.startsWith("java.lang.IllegalStateException") })
+        assertEquals("last log line", lines.last())
+    }
+
+    @Test fun aHandlerSetLaterByAPluginIsPutBehindArcs() {
+        val original = Thread.getDefaultUncaughtExceptionHandler()
+        try {
+            Thread.setDefaultUncaughtExceptionHandler(null)
+            val file = File(Files.createTempDirectory("crash").toFile(), "arc-last-crash.txt")
+            ArcCrashFile.installAt(file) { false }
+            val arcFirst = Thread.getDefaultUncaughtExceptionHandler()
+            var pluginCalls = 0
+            Thread.setDefaultUncaughtExceptionHandler { thread, error -> pluginCalls++; arcFirst?.uncaughtException(thread, error) }
+
+            ArcCrashFile.reclaim()
+            val error = IllegalArgumentException("from a plugin thread")
+            Thread.getDefaultUncaughtExceptionHandler()!!.uncaughtException(Thread.currentThread(), error)
+
+            assertEquals(1, pluginCalls)
+            val lines = ArcCrashFile.linesFor(file, exitMs = System.currentTimeMillis())!!
+            assertEquals(1, lines.count { it.startsWith("java.lang.IllegalArgumentException: from a plugin thread") })
+        } finally {
+            Thread.setDefaultUncaughtExceptionHandler(original)
+        }
     }
 }

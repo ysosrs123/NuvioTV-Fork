@@ -98,6 +98,26 @@ class ArcExitReportsTest {
         assertTrue(lines.first().endsWith(" 0"))
     }
 
+    @Test fun `the threads that draw the screen keep their stack while waiting in native code`() {
+        val dump = listOf(
+            "----- pid 1 -----",
+            "\"main\" prio=5 tid=1 Native",
+            "  at android.graphics.HardwareRenderer.nSyncAndDrawFrame(Native Method)",
+            "\"RenderThread\" daemon prio=7 tid=79 Native",
+            "  native: #00 pc 0001 /vendor/lib64/libGLESv2_tegra.so (glFinish+12)",
+            "\"hwuiTask0\" daemon prio=6 tid=146 Native",
+            "  native: #00 pc 0002 /system/lib64/libhwui.so (wait+4)",
+            "\"Okio Watchdog\" daemon prio=5 tid=83 TimedWaiting",
+            "  at java.lang.Object.wait(Native Method)"
+        )
+        val out = ExitTrace.ordered(dump)
+        assertTrue(out.contains("  native: #00 pc 0001 /vendor/lib64/libGLESv2_tegra.so (glFinish+12)"))
+        assertTrue(out.contains("  native: #00 pc 0002 /system/lib64/libhwui.so (wait+4)"))
+        assertTrue(out.contains("\"Okio Watchdog\" daemon prio=5 tid=83 TimedWaiting"))
+        assertFalse(out.contains("  at java.lang.Object.wait(Native Method)"))
+        assertEquals("\"Okio Watchdog\" daemon prio=5 tid=83 TimedWaiting", out.last())
+    }
+
     private class Proto {
         val out = ByteArrayOutputStream()
         private fun raw(value: Long) {

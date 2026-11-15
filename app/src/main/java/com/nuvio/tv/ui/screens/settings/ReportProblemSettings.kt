@@ -2,7 +2,6 @@
 
 package com.nuvio.tv.ui.screens.settings
 
-import android.text.format.DateUtils
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
@@ -26,6 +25,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,7 +34,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.nuvio.tv.R
 import com.nuvio.tv.data.repository.AppReportChoices
 import com.nuvio.tv.data.repository.AppReportKind
-import com.nuvio.tv.data.repository.SentReport
+import com.nuvio.tv.data.repository.ReportStatus
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.components.NuvioScrollDefaults
 import com.nuvio.tv.ui.screens.player.PlaybackIssueReportStatus
@@ -61,9 +61,6 @@ private enum class ReportDialogKind { PlaybackHint, Bug, Idea, SentList }
 
 private enum class ReportFormStep { Where, Note, Ready }
 
-private fun reportAge(timeMs: Long): String =
-    DateUtils.getRelativeTimeSpanString(timeMs, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun ReportProblemSettingsContent(
@@ -73,6 +70,7 @@ internal fun ReportProblemSettingsContent(
 ) {
     val recorderEnabled by viewModel.recorderEnabled.collectAsStateWithLifecycle()
     val sentReports by viewModel.sentReports.collectAsStateWithLifecycle()
+    val checkEnabled by viewModel.checkEnabled.collectAsStateWithLifecycle()
     val send by viewModel.send.collectAsStateWithLifecycle()
     val askAfterExit by crashViewModel.promptEnabled.collectAsStateWithLifecycle()
     var dialog by remember { mutableStateOf<ReportDialogKind?>(null) }
@@ -138,13 +136,29 @@ internal fun ReportProblemSettingsContent(
                             checked = askAfterExit,
                             onToggle = { crashViewModel.setPromptEnabled(!askAfterExit) }
                         )
-                        val latest = sentReports.firstOrNull()
+                        SettingsToggleRow(
+                            title = stringResource(R.string.report_follow_title),
+                            subtitle = stringResource(R.string.report_follow_hint),
+                            checked = checkEnabled,
+                            onToggle = { viewModel.setCheckEnabled(!checkEnabled) }
+                        )
+                        val newCount = sentReports.count { it.isNew }
+                        val latest = sentReports.firstOrNull { it.isNew } ?: sentReports.firstOrNull()
                         SettingsActionRow(
                             title = stringResource(R.string.report_sent_list_title),
                             subtitle = latest?.let {
-                                stringResource(R.string.report_sent_list_latest, it.code, reportAge(it.timeMs))
+                                if (it.followed && it.status != ReportStatus.Sent) {
+                                    stringResource(R.string.report_my_reports_latest, it.code, reportStatusText(it.status, it.fixedIn))
+                                } else {
+                                    stringResource(R.string.report_sent_list_latest, it.code, reportAge(it.timeMs))
+                                }
                             } ?: stringResource(R.string.report_sent_list_empty),
-                            value = sentReports.size.takeIf { it > 0 }?.toString(),
+                            value = if (newCount > 0) {
+                                pluralStringResource(R.plurals.report_my_reports_new, newCount, newCount)
+                            } else {
+                                sentReports.size.takeIf { it > 0 }?.toString()
+                            },
+                            valueColor = if (newCount > 0) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary,
                             onClick = { open(ReportDialogKind.SentList) }
                         )
                     }
@@ -161,7 +175,7 @@ internal fun ReportProblemSettingsContent(
         )
         ReportDialogKind.Bug -> ReportFormDialog(AppReportKind.Bug, send, viewModel::send, close)
         ReportDialogKind.Idea -> ReportFormDialog(AppReportKind.Idea, send, viewModel::send, close)
-        ReportDialogKind.SentList -> SentReportsDialog(sentReports, close)
+        ReportDialogKind.SentList -> MyReportsDialog(sentReports, checkEnabled, onOpenReport = { viewModel.markViewed(it.code) }, onClose = close)
         null -> Unit
     }
 
@@ -312,63 +326,6 @@ private fun ColumnScope.ReportWhereStep(selected: ReportWhere?, onPick: (ReportW
                     modifier = if (place == focusPlace) Modifier.focusRequester(focusRow) else Modifier
                 )
             }
-        }
-    }
-}
-
-@StringRes
-private fun sentKindLabel(kind: String): Int? = when (kind) {
-    "playback" -> R.string.report_sent_kind_playback
-    AppReportKind.Bug.key -> R.string.report_sent_kind_bug
-    AppReportKind.Idea.key -> R.string.report_sent_kind_idea
-    AppReportKind.Crash.key -> R.string.report_row_crash
-    else -> null
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun SentReportsDialog(reports: List<SentReport>, onClose: () -> Unit) {
-    val firstFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        withFrameNanos { }
-        runCatching { firstFocus.requestFocus() }
-    }
-    NuvioDialog(
-        onDismiss = onClose,
-        title = stringResource(R.string.report_sent_list_title),
-        subtitle = stringResource(R.string.report_sent_list_empty).takeIf { reports.isEmpty() },
-        width = 560.dp,
-        usePlatformDefaultWidth = false,
-        solidWithoutBlur = true
-    ) {
-        if (reports.isNotEmpty()) {
-            CompositionLocalProvider(LocalBringIntoViewSpec provides NuvioScrollDefaults.smoothScrollSpec) {
-                LazyColumn(
-                    modifier = Modifier.weight(1f, fill = false),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
-                    contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm)
-                ) {
-                    items(reports, key = { it.code }) { report ->
-                        SettingsActionRow(
-                            title = report.code,
-                            subtitle = sentKindLabel(report.kind)?.let { stringResource(it) },
-                            value = reportAge(report.timeMs),
-                            trailingIcon = null,
-                            jumpAnchor = false,
-                            onClick = {},
-                            modifier = if (report == reports.first()) Modifier.focusRequester(firstFocus) else Modifier
-                        )
-                    }
-                }
-            }
-        }
-        SettingsDialogActionRow {
-            SettingsDialogActionButton(
-                text = stringResource(R.string.action_close),
-                onClick = onClose,
-                primary = true,
-                modifier = if (reports.isEmpty()) Modifier.focusRequester(firstFocus) else Modifier
-            )
         }
     }
 }

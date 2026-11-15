@@ -142,19 +142,43 @@ internal fun exitReasonText(kind: UnexpectedExitKind): Int = when (kind) {
 internal fun CrashPromptHost(
     canShow: Boolean,
     lastInteractionAt: StateFlow<Long>,
-    viewModel: CrashReportViewModel = hiltViewModel()
+    viewModel: CrashReportViewModel = hiltViewModel(),
+    statusViewModel: ReportStatusNoticeViewModel = hiltViewModel()
 ) {
     val view = LocalView.current
-    LaunchedEffect(canShow) {
-        if (!canShow) return@LaunchedEffect
-        val exit = viewModel.prepareOffer() ?: return@LaunchedEffect
+    val exitShowing by viewModel.exit.collectAsStateWithLifecycle()
+    val changed by statusViewModel.changed.collectAsStateWithLifecycle()
+    val notice by statusViewModel.notice.collectAsStateWithLifecycle()
+    val listOpen by statusViewModel.listOpen.collectAsStateWithLifecycle()
+    var crashChecked by remember { mutableStateOf(false) }
+    val waitForQuietHome: suspend () -> Unit = {
         delay(HOME_SETTLE_MS)
         while (!view.hasWindowFocus() || SystemClock.elapsedRealtime() - lastInteractionAt.value < HOME_IDLE_MS) {
             delay(HOME_IDLE_POLL_MS)
         }
-        viewModel.show(exit)
+    }
+    LaunchedEffect(canShow) {
+        if (!canShow) return@LaunchedEffect
+        val exit = viewModel.prepareOffer()
+        if (exit != null) {
+            waitForQuietHome()
+            viewModel.show(exit)
+        }
+        crashChecked = true
+    }
+    val noticeDue = canShow && crashChecked && exitShowing == null && notice == null && !listOpen && changed.isNotEmpty()
+    LaunchedEffect(noticeDue) {
+        if (!noticeDue) return@LaunchedEffect
+        waitForQuietHome()
+        statusViewModel.show()
     }
     CrashReportDialogs(viewModel)
+    notice?.let { ReportStatusNotice(it, onOpen = statusViewModel::openList, onLater = statusViewModel::later) }
+    if (listOpen) {
+        val reports by statusViewModel.reports.collectAsStateWithLifecycle()
+        val checkEnabled by statusViewModel.checkEnabled.collectAsStateWithLifecycle()
+        MyReportsDialog(reports, checkEnabled, onOpenReport = { statusViewModel.markViewed(it.code) }, onClose = statusViewModel::closeList)
+    }
 }
 
 @Composable

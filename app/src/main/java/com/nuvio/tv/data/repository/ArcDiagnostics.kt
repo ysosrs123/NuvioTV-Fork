@@ -8,7 +8,7 @@ import java.util.Locale
 
 /** The last few screens and playback changes, kept in memory for a crash or stall report. */
 object ArcBreadcrumbs {
-    private const val CAPACITY = 12
+    private const val CAPACITY = 20
     private val entries = ArrayDeque<String>(CAPACITY)
 
     fun note(text: String) {

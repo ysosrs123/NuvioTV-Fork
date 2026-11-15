@@ -30,6 +30,7 @@ object ArcHeartbeat {
     private const val FIRST_AFTER_S = 15L
     private const val SAME_RUN_MAX_MS = 12L * 60 * 60 * 1000
     private const val TRIMS_KEPT = 10
+    private const val SLOW_FRAME_MINUTES = 5
     private const val POOLS_SHOWN = 10
     private const val MATCH_BEFORE_MS = 150_000L
     private const val MATCH_AFTER_MS = 10_000L
@@ -54,7 +55,7 @@ object ArcHeartbeat {
         MemoryPressure.register(app)
         MemoryPressure.addListener(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE) { level -> noteTrim(level) }
         Executors.newSingleThreadScheduledExecutor { r -> Thread(r, "arc-heartbeat").apply { isDaemon = true } }
-            .scheduleWithFixedDelay({ runCatching { write(app, target) } }, FIRST_AFTER_S, EVERY_S, TimeUnit.SECONDS)
+            .scheduleWithFixedDelay({ runCatching { write(app, target) }; ArcCrashFile.reclaim() }, FIRST_AFTER_S, EVERY_S, TimeUnit.SECONDS)
     }
 
     /**
@@ -138,6 +139,8 @@ object ArcHeartbeat {
             addAll(ArcSetupSize.lines())
             synchronized(trims) { if (trims.isNotEmpty()) add("Memory warnings: ${trims.joinToString("; ")}") }
             add("Recent: ${ArcBreadcrumbs.recent().joinToString("; ")}")
+            ArcSlowFrames.lines().takeLast(SLOW_FRAME_MINUTES).takeIf { it.isNotEmpty() }
+                ?.let { add("Slow frames: ${it.joinToString("; ")}") }
         }
         val temp = File(target.parentFile, "$FILE_NAME.tmp")
         temp.writeText(lines.joinToString("\n"))

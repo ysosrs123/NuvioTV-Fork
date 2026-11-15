@@ -34,7 +34,7 @@ internal fun PlaybackIssueReceipt.toSendState(): ReportSendState =
 class ReportProblemSettingsViewModel @Inject constructor(
     private val playerSettingsDataStore: PlayerSettingsDataStore,
     private val appReportRepository: AppReportRepository,
-    sentReportsStore: SentReportsStore
+    private val sentReportsStore: SentReportsStore
 ) : ViewModel() {
     val recorderEnabled: StateFlow<Boolean> = playerSettingsDataStore.playerSettings
         .map { it.reportRecorderEnabled }
@@ -42,6 +42,7 @@ class ReportProblemSettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), true)
 
     val sentReports: StateFlow<List<SentReport>> = sentReportsStore.reports
+    val checkEnabled: StateFlow<Boolean> = sentReportsStore.checkEnabled
 
     private val _send = MutableStateFlow(ReportSendState())
     val send: StateFlow<ReportSendState> = _send.asStateFlow()
@@ -53,6 +54,14 @@ class ReportProblemSettingsViewModel @Inject constructor(
 
     fun setRecorderEnabled(enabled: Boolean) {
         viewModelScope.launch { playerSettingsDataStore.setReportRecorderEnabled(enabled) }
+    }
+
+    fun setCheckEnabled(enabled: Boolean) {
+        viewModelScope.launch { sentReportsStore.setCheckEnabled(enabled) }
+    }
+
+    fun markViewed(code: String) {
+        viewModelScope.launch { sentReportsStore.markViewed(code) }
     }
 
     fun resetSend() {
