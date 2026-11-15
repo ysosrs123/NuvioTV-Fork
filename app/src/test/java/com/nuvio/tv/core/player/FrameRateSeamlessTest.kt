@@ -54,7 +54,7 @@ class FrameRateSeamlessTest {
 
     @Test
     fun `resolution matching to another size is unchanged`() {
-        val modeId = FrameRateUtils.selectDisplayMode(modes, qms4k60, 24f, 1920, 1080, true)?.modeId
+        val modeId = FrameRateUtils.selectDisplayMode(modes, qms4k60, 24f, 1920, 1080, true, allowSeamlessSwitch = true)?.modeId
         assertEquals(13, modeId)
     }
 
@@ -64,16 +64,32 @@ class FrameRateSeamlessTest {
         assertEquals(24f, pick(active, 24f), 0.01f)
     }
 
+    @Test
+    fun `qms display makes a real mode change unless the seamless switch is allowed`() {
+        assertEquals(24f, pick(qms4k60, 24f, allowSeamless = false), 0.01f)
+        assertEquals(23.976f, pick(qms4k60, film, allowSeamless = false), 0.01f)
+        assertEquals(23.976f, pick(qms4k60, film, 3840, 2160, resolutionMatching = true, allowSeamless = false), 0.01f)
+        val table = modes.map { if (it.modeId == qms4k60.modeId) qms4k60 else it }
+        assertEquals(9, FrameRateUtils.selectDisplayMode(table, qms4k60, film, null, null, false)?.modeId)
+    }
+
+    @Test
+    fun `25 fps still takes 50 Hz with a real mode change`() {
+        assertEquals(50f, pick(qms4k60, 25f, allowSeamless = false), 0.01f)
+    }
+
     private fun pick(
         active: DisplayModeSpec,
         frameRate: Float,
         videoWidth: Int? = null,
         videoHeight: Int? = null,
-        resolutionMatching: Boolean = false
+        resolutionMatching: Boolean = false,
+        allowSeamless: Boolean = true
     ): Float {
         val table = modes.map { if (it.modeId == active.modeId) active else it }
-        return FrameRateUtils.selectDisplayMode(table, active, frameRate, videoWidth, videoHeight, resolutionMatching)!!
-            .refreshRate
+        return FrameRateUtils.selectDisplayMode(
+            table, active, frameRate, videoWidth, videoHeight, resolutionMatching, allowSeamless
+        )!!.refreshRate
     }
 
     private fun mode(id: Int, width: Int, height: Int, refreshRate: Float) =

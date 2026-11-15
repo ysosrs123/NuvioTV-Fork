@@ -10,6 +10,16 @@ internal object PlayerStallWatchdogPolicy {
 
     const val SKIP_PAST_BUFFERED_MS = 250L
 
+    /**
+     * With at least this much media buffered ahead the stall is slow delivery, not a stuck
+     * request: the data source restarts late pieces itself, and seeking past the buffered
+     * edge would throw away film the viewer has not seen.
+     */
+    const val MIN_DATA_AHEAD_TO_WAIT_MS = 1_500L
+
+    /** Upper bound on that wait before the old skip runs anyway. */
+    const val DATA_AHEAD_MAX_WAIT_MS = 60_000L
+
     data class Input(
         val bufferedPositionMs: Long,
         val playheadMs: Long,
@@ -17,6 +27,8 @@ internal object PlayerStallWatchdogPolicy {
         val stalledForMs: Long,
         val thresholdMs: Long = PlayerRuntimeController.STALL_WATCHDOG_THRESHOLD_MS,
         val skipPastBufferedMs: Long = SKIP_PAST_BUFFERED_MS,
+        val minDataAheadToWaitMs: Long = MIN_DATA_AHEAD_TO_WAIT_MS,
+        val dataAheadMaxWaitMs: Long = DATA_AHEAD_MAX_WAIT_MS,
     )
 
     sealed class Decision {
@@ -39,6 +51,11 @@ internal object PlayerStallWatchdogPolicy {
         val bufferedNow = input.bufferedPositionMs
         if (bufferedNow <= playheadMs) {
             return Decision.SkipBufferedNotAhead
+        }
+        if (bufferedNow - playheadMs >= input.minDataAheadToWaitMs &&
+            input.stalledForMs < input.dataAheadMaxWaitMs
+        ) {
+            return Decision.KeepWaiting
         }
         val targetPastBufferedMs = if (bufferedNow > Long.MAX_VALUE - input.skipPastBufferedMs) {
             Long.MAX_VALUE

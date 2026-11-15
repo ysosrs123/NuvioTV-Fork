@@ -79,8 +79,6 @@ internal object CopyChoice {
     )
     private const val SERVICES = "rd|tb|ad|pm|dl|ed|oc|pkp"
     private val DEBRID_TAG = Regex("""\[($SERVICES)(?![a-z])|(?<![a-z])($SERVICES)\+""")
-    private val CACHED_MARK = Regex("""⚡|(?<![a-z])($SERVICES)\+|(?<![a-z])(cached|instant)(?![a-z])""")
-    private val UNCACHED_MARK = Regex("""⏳|⬇|(?<![a-z])uncached(?![a-z])|\[($SERVICES)(?![a-z])[^\]]*download""")
     private val HASH = Regex("[0-9a-f]{40}")
 
     private fun pathOf(url: String): String =
@@ -92,15 +90,12 @@ internal object CopyChoice {
 
     /**
      * Why a ready link may not be read for a copy, null when it may: a plain file link (HTTP providers too, whatever
-     * their names say about downloads), a Usenet link streamed by a local AIOStreams, or a debrid resolve link marked
-     * as cached ([cached]: the add-on's or the app's cache answer).
+     * their names say about downloads) or a Usenet link streamed by a local AIOStreams. An add-on's debrid link never
+     * is, cached or not: opening it can put the title in the viewer's debrid account, which only playing it may do.
      */
-    fun linkRejection(url: String, text: String, cached: Boolean? = null): String? {
+    fun linkRejection(url: String, text: String): String? {
         if (isUsenet(url)) return null
-        val t = text.lowercase()
-        if (!debridLink(url, t)) return null
-        if (cached == false || UNCACHED_MARK.containsMatchIn(t)) return "a debrid link that is not cached"
-        if (cached != true && !CACHED_MARK.containsMatchIn(t)) return "a debrid link with no cached mark"
+        if (debridLink(url, text.lowercase())) return "an add-on's debrid link"
         return null
     }
 

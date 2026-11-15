@@ -18,4 +18,14 @@ class PlaybackUrlCredentialsTest {
         assertFalse("https://example.com/video.mp4?quality=1080p&format=mp4".hasLikelyExpiringPlaybackCredentials())
         assertFalse("https://example.com/video.mkv?api_key=static".hasLikelyExpiringPlaybackCredentials())
     }
+
+    @Test
+    fun onlyLinkErrorsRefreshAnExpiringLink() {
+        val url = "https://example.com/video.mkv?token=abc&expires=1234"
+        assertTrue(expiredLinkRefreshApplies(url, null, null, linkError = true))
+        assertFalse(expiredLinkRefreshApplies(url, null, null, linkError = false))
+        assertFalse(expiredLinkRefreshApplies(url, null, url, linkError = true))
+        assertTrue(expiredLinkRefreshApplies("https://example.com/video.mkv", "https://example.com/video.mkv", null, linkError = true))
+        assertFalse(expiredLinkRefreshApplies("https://example.com/video.mkv", null, null, linkError = true))
+    }
 }

@@ -39,6 +39,19 @@ class SubtitlePresentationTest {
         assertSame(text, presentation.apply(text, style, false, false))
     }
 
+    @Test fun `restyling finds the original cue after other cues came and went`() {
+        val bitmap = mockk<Bitmap>(relaxed = true)
+        val original = Cue.Builder().setBitmap(bitmap).setSize(.6f).setBitmapHeight(.1f).build()
+        val presentation = SubtitlePresentation()
+        val style = SubtitleStyleSettings(bitmapSize = 60)
+        val shown = presentation.apply(original, style, false, false)
+        repeat(8) { i ->
+            presentation.apply(Cue.Builder().setBitmap(bitmap).setSize(.5f + i / 100f).setBitmapHeight(.1f).build(), style, false, false)
+        }
+        val restyled = presentation.apply(shown, style.copy(bitmapSize = 100), false, false)
+        assertEquals(.6f, restyled.size, .00001f)
+    }
+
     @Test fun `text cues keep italic bold and underline but not authored fonts or sizes`() {
         for (span in listOf(StyleSpan(Typeface.ITALIC), StyleSpan(Typeface.BOLD), StyleSpan(Typeface.BOLD_ITALIC),
             UnderlineSpan(), StrikethroughSpan(), ForegroundColorSpan(0))) {

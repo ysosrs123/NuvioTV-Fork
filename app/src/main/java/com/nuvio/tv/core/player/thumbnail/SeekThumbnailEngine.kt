@@ -907,7 +907,6 @@ object SeekThumbnails {
         private var latticeStrides = PrepareGrid.LATTICE_1080P
         /** The before-play grid in slots: what the generating screen and the paused progress hint count. */
         private var screenStride = 3
-        private var beforePlay = ThumbsBeforePlay.FASTER
         private var fallbackSlots = MIN_FALLBACK_SLOTS
         /** UI thread: the strip's stride in slots and when it was last worked out. */
         private var stripStride = 0
@@ -1218,7 +1217,6 @@ object SeekThumbnails {
             ConnectionLedger.app.notePlayingUrl(source.url)
             val first = sample() ?: awaitPlayerBack() ?: return
             lastDurationMs = first.durationMs
-            beforePlay = runCatching { SeekThumbnailPreferences.beforePlay(context) }.getOrDefault(ThumbsBeforePlay.FASTER)
             // A saved store shows its thumbnails before any network access; its size is checked against the server's below.
             var known = openKnownStore()
             known?.let {
@@ -1266,10 +1264,10 @@ object SeekThumbnails {
                     Log.i(TAG, "prepare: start now pressed while the player opened the stream - not holding")
                 } else if (mode != ThumbPrepareMode.OFF) {
                     if (beginPrepareOnMain()) {
-                        giveUp.beforePlay = if (preparePausedPlayer) "shown (${beforePlayName()})"
-                            else "shown, playback already paused (${beforePlayName()})"
+                        giveUp.beforePlay = if (preparePausedPlayer) "shown"
+                            else "shown, playback already paused"
                         showPrepare(PrepareUi.Checking)
-                        Log.i(TAG, "prepare: generating screen up ($mode, $beforePlay)")
+                        Log.i(TAG, "prepare: generating screen up ($mode)")
                         letGoEarlyForHardware()
                     }
                 }
@@ -1439,7 +1437,7 @@ object SeekThumbnails {
             val bps = if (durationMs > 0) fileLength * 8_000L / durationMs else 0L
             if (fourK) remux = bps >= REMUX_MIN_BITS_PER_SECOND
             val base = PrepareGrid.base(fourK, remux, MemoryGovernor.isStrongBox, bps >= HEAVY_1080P_MIN_BITS_PER_SECOND)
-            screenStride = PrepareGrid.screenStride(beforePlay, fourK, remux, base.last())
+            screenStride = PrepareGrid.screenStride(fourK, remux, base.last())
             latticeStrides = PrepareGrid.strides(base, screenStride)
             fallbackSlots = maxOf(MIN_FALLBACK_SLOTS, latticeStrides.last() / 2)
             st.noteDuration(durationMs)
@@ -1791,9 +1789,8 @@ object SeekThumbnails {
             val anchorMs = sample()?.positionMs?.takeIf { it > 0 } ?: lastPositionMs
             var anchorSlot = slotOf(anchorMs)
             prepareAnchorMs = anchorSlot * SPACING_MS
-            // Full makes the fine detail around the start first; the quicker choices make the screen's grid first
-            // while the screen is up, and go back to the detail around the playhead once it is gone.
-            fun gridFirst() = if (beforePlay != ThumbsBeforePlay.FULL && prepareStage in 1..4) prepareStride() else 0
+            // The screen's grid comes first while the screen is up, then the detail around the playhead once it is gone.
+            fun gridFirst() = if (prepareStage in 1..4) prepareStride() else 0
             var orderedGridFirst = gridFirst()
             fun order(anchor: Int) = SeekGrid.latticeOrder(slotKeyframe.size, latticeStrides, anchor,
                 beforeSlots = (LOCAL_BEFORE_MS / SPACING_MS).toInt(), afterSlots = (LOCAL_AFTER_MS / SPACING_MS).toInt(),
@@ -4426,7 +4423,7 @@ object SeekThumbnails {
                             watchPrepareScreen()
                             startYield()
                             sampledPlaying = false
-                            giveUp.beforePlay = "shown after the first frame (${beforePlayName()})"
+                            giveUp.beforePlay = "shown after the first frame"
                             postPrepareUi(this@Session, PrepareUi.Checking)
                             Log.i(TAG, "prepare: playback held after the first frame (${waited} ms after the first ask)")
                             return@launch
@@ -4740,8 +4737,6 @@ object SeekThumbnails {
                 settings = runCatching { source.settingsNote() }.getOrDefault(""),
             ))
         }
-
-        private fun beforePlayName() = beforePlay.name.lowercase().replaceFirstChar { it.uppercase() }
 
         private fun finish() {
             if (afterPlayback) ConnectionLedger.app.setUnhurried(false)

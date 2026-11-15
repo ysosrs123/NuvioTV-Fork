@@ -594,6 +594,16 @@ class FrameRateUtilsAfrTest {
         assertNotEquals(keyA, keyB)
     }
 
+    @Test
+    fun `a fresh Plex play session id does not change the cache key`() {
+        val url = "http://192.168.1.5:32400/library/parts/123/1690000/file.mkv"
+        val base = mapOf("X-Plex-Token" to "tok", "X-Plex-Client-Identifier" to "dev")
+        val first = FrameRateUtils.buildCacheKey(url, base + ("X-Plex-Session-Identifier" to "a1"), null)
+        val second = FrameRateUtils.buildCacheKey(url, base + ("X-Plex-Session-Identifier" to "b2"), null)
+        assertEquals(first, second)
+        assertNotEquals(first, FrameRateUtils.buildCacheKey(url, base + ("X-Plex-Token" to "other"), null))
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // originalModeId lifecycle (process-level singleton)
     // ─────────────────────────────────────────────────────────────────────────

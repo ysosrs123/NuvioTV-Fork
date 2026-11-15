@@ -11,7 +11,7 @@ internal fun PlayerRuntimeController.errorCardFor(error: PlaybackException): Pla
         error.errorCard(
             context = context,
             source = reportSourceLine(),
-            lastLoadErrorClass = playbackAnalyticsDiagnostics.lastLoadErrorClass,
+            lastLoadErrorClasses = playbackAnalyticsDiagnostics.lastLoadErrorClasses,
             lastLoadErrorMs = playbackAnalyticsDiagnostics.lastLoadErrorDurationMs,
             bytesLoaded = playbackAnalyticsDiagnostics.bytesLoadedSoFar,
         )
@@ -32,14 +32,30 @@ internal fun PlayerRuntimeController.watchdogErrorCard(reason: String, elapsedMs
             val status = playbackAnalyticsDiagnostics.lastLoadErrorHttpStatus
             if (status != null) return httpErrorCard(context, status, source, fromWatchdog = true)
             if (reason == "no_video_track") return null
-            val classes = listOfNotNull(playbackAnalyticsDiagnostics.lastLoadErrorClass)
+            val classes = playbackAnalyticsDiagnostics.lastLoadErrorClasses
             val seconds = (elapsedMs / 1_000L).toInt()
-            when (PlayerErrorCauses.forLoadFailure(classes, playbackAnalyticsDiagnostics.bytesLoadedSoFar)) {
+            val bytes = playbackAnalyticsDiagnostics.bytesLoadedSoFar
+            val filmRate = PlayerErrorCauses.filmBitsPerSecond(
+                PlaybackByteCounter.contentLengthFor(currentStreamUrl),
+                expectedRuntimeMinutes
+            )
+            when (PlayerErrorCauses.forLoadFailure(classes, bytes)) {
                 PlayerErrorCause.ServerUnreachable -> unreachableServerCard(context, source, fromWatchdog = true)
-                PlayerErrorCause.ServerSilent -> silentServerCard(context, seconds, source, fromWatchdog = true)
-                else -> null
+                PlayerErrorCause.ServerSilent -> silentServerCard(context, seconds, source, fromWatchdog = true, bytesLoaded = bytes)
+                else -> filmRate?.takeIf { PlayerErrorCauses.isSlowSource(bytes, elapsedMs, it) }
+                    ?.let { slowSourceCard(context, bytes, elapsedMs, it, source) }
             }
         }
+        else -> null
+    }
+}
+
+/** The card for an MPV start that failed, from MPV's own answer: an HTTP status or a refused connection in its log. */
+internal fun PlayerRuntimeController.mpvStartErrorCard(httpCode: Int?, logLine: String?): PlayerErrorCard? {
+    val source = reportSourceLine()
+    if (httpCode != null) return withSendRule(httpErrorCard(context, httpCode, source))
+    return when (PlayerErrorCauses.forMpvLoadFailure(logLine)) {
+        PlayerErrorCause.ServerUnreachable -> withSendRule(unreachableServerCard(context, source, fromWatchdog = false))
         else -> null
     }
 }

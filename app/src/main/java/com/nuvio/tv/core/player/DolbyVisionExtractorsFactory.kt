@@ -288,6 +288,8 @@ internal data class DolbyVisionConversionConfig(
     val nativeProfile7: Boolean = false,
     /** AUTO converting profile 7 the way manual Convert to DV8.1 does (mode 2, fallback to 1). */
     val autoMode2: Boolean = false,
+    /** The box has a Profile 5 Dolby Vision decoder: MKV HEVC tracks whose first RPU says Profile 5 are relabelled. */
+    val relabelUnlabelledP5: Boolean = false,
     val stats: DolbyVisionStatsSession = DolbyVisionConversionStats.session
 ) {
     /** Mode-2 default with per-RPU fallback to mode 1 (not for a forced mode). */

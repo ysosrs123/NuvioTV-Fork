@@ -168,6 +168,8 @@ class AfrPreflightPolicyTest {
     fun `only an MKV or WebM with no rate needs the probe`() {
         assertTrue(needsProbeForUndeclaredRate(-1f, "video/x-matroska"))
         assertTrue(needsProbeForUndeclaredRate(-1f, "video/webm"))
+        assertTrue(needsProbeForUndeclaredRate(-1f, "video/mp2t"))
+        assertFalse(needsProbeForUndeclaredRate(25f, "video/mp2t"))
         assertFalse(needsProbeForUndeclaredRate(23.976f, "video/x-matroska"))
         assertFalse(needsProbeForUndeclaredRate(-1f, "video/mp4"))
         assertFalse(needsProbeForUndeclaredRate(-1f, null))

@@ -7,7 +7,8 @@ package com.nuvio.tv.core.player
  *
  * An absolute size floor is used rather than a ratio against the advertised
  * size, because a season pack that serves one episode is a legitimate small
- * ratio, and some sources declare no size at all.
+ * ratio, and some sources declare no size at all. The advertised size is used
+ * only before the running time is known, and only together with the floor.
  *
  * The floor only applies when the title's metadata says it should be long, so
  * clips and extras are never judged. With no runtime known, only a file whose
@@ -19,11 +20,17 @@ object PlaceholderStreamPolicy {
 
     /**
      * Files at or below this are not video anyone asked for. The largest placeholder
-     * observed is 406 KB; the smallest plausible real episode at watchable quality is
-     * tens of MB. 8 MB sits in the empty space between, ~20x above the observed
-     * placeholder and well under any real content.
+     * observed is a 7.7 MB debrid "not ready" clip served for a 3 GB episode; 16 MB leaves
+     * twice that as headroom. Only judged for titles of 20 minutes or more (or, with no running
+     * time, against the size the add-on listed), where 16 MB would be about 100 kbit/s.
      */
-    const val MIN_PLAUSIBLE_BYTES = 8L * 1024L * 1024L
+    const val MIN_PLAUSIBLE_BYTES = 16L * 1024L * 1024L
+
+    /**
+     * With no running time, a film or episode is judged only when the add-on listed its size and
+     * the server sent less than this share of it: a short real file listed at its own size plays.
+     */
+    const val MAX_SHARE_OF_LISTED_PERCENT = 1L
 
     /**
      * The runtime guard. Only titles the metadata says run longer than this are
@@ -87,13 +94,26 @@ object PlaceholderStreamPolicy {
     /**
      * The size rule alone, for the moment the first response gives the real total length, so a notice
      * clip is caught before the start times out. Null when it does not apply or was already decided.
+     * Before the running time is known, a film or numbered episode is judged against the size its
+     * add-on listed instead (see [MAX_SHARE_OF_LISTED_PERCENT]).
      */
     fun rejectOnFirstLength(
         contentLengthBytes: Long?,
         expectedRuntimeMs: Long?,
-        alreadyDecided: Boolean
+        alreadyDecided: Boolean,
+        filmOrEpisode: Boolean = false,
+        listedBytes: Long? = null
     ): Verdict.Reject? {
         if (alreadyDecided) return null
+        if (expectedRuntimeMs == null) {
+            if (!filmOrEpisode || listedBytes == null || contentLengthBytes == null) return null
+            if (contentLengthBytes !in 1L..MIN_PLAUSIBLE_BYTES) return null
+            if (contentLengthBytes * 100L >= listedBytes * MAX_SHARE_OF_LISTED_PERCENT) return null
+            return Verdict.Reject(
+                Reason.ImplausibleSize,
+                "${contentLengthBytes / 1024L} KB served, ${listedBytes / (1024L * 1024L)} MB listed"
+            )
+        }
         val verdict = evaluate(contentLengthBytes, durationMs = null, expectedRuntimeMs = expectedRuntimeMs)
         return (verdict as? Verdict.Reject)?.takeIf { it.reason == Reason.ImplausibleSize }
     }

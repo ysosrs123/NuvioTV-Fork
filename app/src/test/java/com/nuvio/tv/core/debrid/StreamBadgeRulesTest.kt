@@ -95,6 +95,26 @@ class StreamBadgeRulesTest {
     }
 
     @Test
+    fun `cached compile reuses filters for equal rules and rebuilds for changed ones`() {
+        fun rules(pattern: String) = StreamBadgeRules(
+            imports = listOf(
+                StreamBadgeImport(
+                    sourceUrl = "active",
+                    isActive = true,
+                    filters = listOf(StreamBadgeFilter(name = "Dolby Vision", pattern = pattern))
+                )
+            )
+        )
+
+        val first = StreamBadgeMatcher.compileCached(rules("DV"))
+        val again = StreamBadgeMatcher.compileCached(rules("DV"))
+        val changed = StreamBadgeMatcher.compileCached(rules("DoVi"))
+
+        assertTrue(first === again)
+        assertEquals("DoVi", changed.single().pattern.pattern())
+    }
+
+    @Test
     fun `matches active badge filters against stream metadata`() {
         val stream = directDebridStream()
         val rules = StreamBadgeRules(

@@ -318,4 +318,30 @@ class PlaceholderStreamPolicyTest {
         assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(4_718_592L, 120 * minute, alreadyDecided = true))
         assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(PlaceholderStreamPolicy.MIN_PLAUSIBLE_BYTES + 1, 120 * minute, false))
     }
+
+    @Test
+    fun `first response length rejects a notice clip for an episode whose running time is not known yet`() {
+        val verdict = PlaceholderStreamPolicy.rejectOnFirstLength(
+            8_053_823L, null, false, filmOrEpisode = true, listedBytes = 3_249_552_117L
+        )
+        assertEquals(PlaceholderStreamPolicy.Reason.ImplausibleSize, verdict?.reason)
+    }
+
+    @Test
+    fun `with no running time a small real file plays`() {
+        // A short film or cartoon listed at its own size, or with no size listed.
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(6_000_000L, null, false, filmOrEpisode = true, listedBytes = 6_000_000L))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(6_000_000L, null, false, filmOrEpisode = true, listedBytes = null))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(6_000_000L, null, false, filmOrEpisode = true, listedBytes = 400_000_000L))
+    }
+
+    @Test
+    fun `without a running time only films and episodes are judged, and only below the floor`() {
+        val listed = 3_249_552_117L
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(8_053_823L, null, false, filmOrEpisode = false, listedBytes = listed))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(PlaceholderStreamPolicy.MIN_PLAUSIBLE_BYTES + 1, null, false, filmOrEpisode = true, listedBytes = 400_000_000_000L))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(null, null, false, filmOrEpisode = true, listedBytes = listed))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(8_053_823L, null, alreadyDecided = true, filmOrEpisode = true, listedBytes = listed))
+        assertNull(PlaceholderStreamPolicy.rejectOnFirstLength(4_718_592L, 12 * minute, false, filmOrEpisode = true, listedBytes = listed))
+    }
 }

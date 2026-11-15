@@ -27,6 +27,8 @@ import java.util.Locale
  * Switches the display refresh rate to match the video frame rate for judder-free playback.
  */
 object FrameRateUtils {
+    /** Follows the "Allow 25 and 30 Hz" setting: 25 and 30 fps keep their own rate instead of 50 and 60 Hz. */
+    @Volatile var allowLowRates: Boolean = false
 
     private const val TAG = "FrameRateUtils"
     private const val SWITCH_TIMEOUT_MS = 4000L
@@ -231,7 +233,9 @@ object FrameRateUtils {
     }
 
     internal fun buildCacheKey(url: String, headers: Map<String, String>, filename: String?): String {
-        val sanitized = sanitizeHeaders(headers)
+        // A per-play session id (Plex sends a fresh X-Plex-Session-Identifier on every start) names the
+        // playback, not the file, so it must not split one title into a new entry each time.
+        val sanitized = sanitizeHeaders(headers).filterKeys { !isPlaySessionHeader(it) }
         // The resolved CDN host rotates per debrid resolve (one title can land on
         // several edges), so a key with the host would miss whenever a fresh
         // resolve landed on a different edge.
@@ -257,6 +261,9 @@ object FrameRateUtils {
                 }
         }
     }
+
+    private fun isPlaySessionHeader(name: String): Boolean =
+        name.contains("session", ignoreCase = true)
 
     fun getCachedFrameRate(url: String, headers: Map<String, String>, filename: String? = null): FrameRateDetection? {
         val key = buildCacheKey(url, headers, filename)
@@ -437,10 +444,13 @@ object FrameRateUtils {
     private fun chooseBestModeForFrameRate(
         activeMode: DisplayModeSpec,
         modes: List<DisplayModeSpec>,
-        frameRate: Float
+        frameRate: Float,
+        allowSeamlessSwitch: Boolean
     ): ModeChoice {
         val choice = chooseBestCadence(activeMode, modes, frameRate)
-        if (activeMode.alternativeRefreshRates.isEmpty()) return choice
+        // A switch without a mode change (QMS) avoids the blank screen, but some boxes then show frames
+        // unevenly, so a real mode change is the default and the seamless pick is opt-in.
+        if (!allowSeamlessSwitch || activeMode.alternativeRefreshRates.isEmpty()) return choice
         if (!choice.quality.isExactOrDouble() || isSeamlessFrom(activeMode, choice.mode)) return choice
         val seamlessModes = modes.filter { isSeamlessFrom(activeMode, it) }
         if (seamlessModes.isEmpty()) return choice
@@ -456,7 +466,7 @@ object FrameRateUtils {
         // 25 and 29.97/30 fps play at 50 and 59.94/60 Hz when the display has them: the same clean cadence,
         // with menus, subtitles and the TV's motion handling at their usual rate. Interlaced sources show up
         // here as 25/29.97 and need the field rate anyway.
-        if (prefersDoubleRate(frameRate)) {
+        if (!allowLowRates && prefersDoubleRate(frameRate)) {
             pickBestForTarget(modes, frameRate * 2f)?.let {
                 return ModeChoice(it, ModeMatchQuality.DOUBLE)
             }
@@ -551,14 +561,16 @@ object FrameRateUtils {
         frameRate: Float,
         videoWidth: Int?,
         videoHeight: Int?,
-        resolutionMatchingEnabled: Boolean
+        resolutionMatchingEnabled: Boolean,
+        allowSeamlessSwitch: Boolean = false
     ): DisplayModeSpec? = planDisplayMode(
         modes = modes,
         activeMode = activeMode,
         frameRate = frameRate,
         videoWidth = videoWidth,
         videoHeight = videoHeight,
-        resolutionMatchingEnabled = resolutionMatchingEnabled
+        resolutionMatchingEnabled = resolutionMatchingEnabled,
+        allowSeamlessSwitch = allowSeamlessSwitch
     ).choice?.mode
 
     private class DisplayModePlan(val choice: ModeChoice?, val candidateCount: Int)
@@ -569,7 +581,8 @@ object FrameRateUtils {
         frameRate: Float,
         videoWidth: Int?,
         videoHeight: Int?,
-        resolutionMatchingEnabled: Boolean
+        resolutionMatchingEnabled: Boolean,
+        allowSeamlessSwitch: Boolean
     ): DisplayModePlan {
         if (resolutionMatchingEnabled && hasValidVideoSize(videoWidth, videoHeight)) {
             val sizeGroups = resolutionCandidateGroups(
@@ -587,7 +600,7 @@ object FrameRateUtils {
             }
             // Frame rate first: the smallest size that shows the rate exactly or doubled.
             val groupChoices = sizeGroups.map { group ->
-                chooseBestModeForFrameRate(activeMode, group, frameRate) to group.size
+                chooseBestModeForFrameRate(activeMode, group, frameRate, allowSeamlessSwitch) to group.size
             }
             groupChoices.firstOrNull { (choice, _) -> choice.quality.isExactOrDouble() }
                 ?.let { (choice, count) -> return DisplayModePlan(choice, count) }
@@ -596,7 +609,7 @@ object FrameRateUtils {
             // serve the cadence that way, look at every size above the floor before settling.
             val nearest = groupChoices.first().first
             val eligible = floorEligibleModes(modes)
-            val wider = chooseBestModeForFrameRate(activeMode, eligible, frameRate)
+            val wider = chooseBestModeForFrameRate(activeMode, eligible, frameRate, allowSeamlessSwitch)
             if (wider.quality.isExactOrDouble()) {
                 Log.d(
                     TAG,
@@ -642,7 +655,7 @@ object FrameRateUtils {
             return DisplayModePlan(null, sameSizeModes.size)
         }
         return DisplayModePlan(
-            chooseBestModeForFrameRate(activeMode, sameSizeModes, frameRate),
+            chooseBestModeForFrameRate(activeMode, sameSizeModes, frameRate, allowSeamlessSwitch),
             sameSizeModes.size
         )
     }
@@ -656,7 +669,8 @@ object FrameRateUtils {
         frameRate: Float,
         videoWidth: Int?,
         videoHeight: Int?,
-        resolutionMatchingEnabled: Boolean
+        resolutionMatchingEnabled: Boolean,
+        allowSeamlessSwitch: Boolean = false
     ): Boolean? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
         if (frameRate < MIN_AFR_SWITCH_FPS) return false
@@ -669,7 +683,8 @@ object FrameRateUtils {
                 frameRate = frameRate,
                 videoWidth = videoWidth,
                 videoHeight = videoHeight,
-                resolutionMatchingEnabled = resolutionMatchingEnabled
+                resolutionMatchingEnabled = resolutionMatchingEnabled,
+                allowSeamlessSwitch = allowSeamlessSwitch
             ).choice
             choice != null && choice.mode.modeId != activeSpec.modeId
         }.getOrNull()
@@ -683,7 +698,8 @@ object FrameRateUtils {
         frameRate: Float,
         videoWidth: Int? = null,
         videoHeight: Int? = null,
-        resolutionMatchingEnabled: Boolean = false
+        resolutionMatchingEnabled: Boolean = false,
+        allowSeamlessSwitch: Boolean = false
     ): DisplayModeSwitchResult? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return null
         if (frameRate <= 0f) return null
@@ -715,7 +731,8 @@ object FrameRateUtils {
                 frameRate = frameRate,
                 videoWidth = videoWidth,
                 videoHeight = videoHeight,
-                resolutionMatchingEnabled = resolutionMatchingEnabled
+                resolutionMatchingEnabled = resolutionMatchingEnabled,
+                allowSeamlessSwitch = allowSeamlessSwitch
             )
             val candidateCount = plan.candidateCount
             plan.choice?.let { choice ->
@@ -772,6 +789,10 @@ object FrameRateUtils {
                     "${modeBest.physicalWidth}x${modeBest.physicalHeight} videoFps=$frameRate seamless=$seamless"
             )
 
+            com.nuvio.tv.data.repository.ArcBreadcrumbs.note(
+                "display ${activeMode.refreshRate.roundForNote()} to ${modeBest.refreshRate.roundForNote()} Hz" +
+                    if (seamless == true) " without a mode change" else ""
+            )
             val layoutParams = window.attributes
             layoutParams.preferredDisplayModeId = modeBest.modeId
             window.attributes = layoutParams
@@ -2116,3 +2137,5 @@ object FrameRateUtils {
         return null
     }
 }
+
+private fun Float.roundForNote(): String = String.format(java.util.Locale.US, "%.3f", this)

@@ -24,11 +24,15 @@ class BufferMemoryKeeper(
     /** The box's own size for this budget; 0 or no more than the built budget means no growth. */
     ceilingBytes: Long = 0L,
     private val swapFreeMb: () -> Long = { -1L },
+    /** MB of address space the process uses on a 32-bit box ([BufferSizing.addressSpaceUsedMbOn32Bit]); null on 64-bit. */
+    private val addressSpaceUsedMb: () -> Long? = { null },
     /** The least a pressure cut or the lending leaves; [BufferSizing.sizedFloorMb]. */
     floorBytes: Long = BufferSizing.MIN_SIZED_BUFFER_MB * MB,
     /** A 1 GB box ([BufferSizing.isOneGbBox]): Android's last warning always counts. */
     private val oneGbBox: Boolean = false,
     private val onLastWarning: () -> Unit = {},
+    /** True when the level reaches critical, false when it leaves it or the keeper is detached. Runs on the worker. */
+    private val onCritical: (Boolean) -> Unit = {},
 ) {
     interface Worker {
         fun run(task: () -> Unit)
@@ -45,6 +49,7 @@ class BufferMemoryKeeper(
     @Volatile private var lastSeekAtMs = 0L
     @Volatile private var seekTrimQueued = false
     @Volatile private var detached = false
+    private var criticalTold = false
     @Volatile var lentBytes: Long = 0L
         private set
     /** What the lending may never take the buffer below (seconds of film), on top of the sized floor. */
@@ -66,16 +71,28 @@ class BufferMemoryKeeper(
         private set
     @Volatile var floorBytes: Long = floorBytes.coerceAtLeast(0L)
         private set
+    /** 32-bit only: what is held plus the address space left under the ceiling; -1 while there is room for the budget. */
+    @Volatile var roomCapBytes: Long = -1L
+        private set
 
     private val trimListener: (Int) -> Unit = ::onTrimMemory
 
     fun attach() {
         MemoryPressure.addListener(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW, trimListener)
+        worker.run { tendAddressSpace() }
     }
 
     fun detach() {
         detached = true
         MemoryPressure.removeListener(trimListener)
+        worker.run { tellCritical() }
+    }
+
+    private fun tellCritical() {
+        val critical = !detached && pressureLevel == LEVEL_CRITICAL
+        if (critical == criticalTold) return
+        criticalTold = critical
+        runCatching { onCritical(critical) }
     }
 
     fun onTrimMemory(level: Int) {
@@ -216,6 +233,7 @@ class BufferMemoryKeeper(
                 "level=$pressureLevel playing=$playing")
         }
         tendPausedCap(playing, free)
+        tendAddressSpace()
         if (free != null && free.lowMemory) {
             val level = if (pressureLevel == LEVEL_LOW && now - levelSetAtMs >= ESCALATE_AFTER_MS) LEVEL_CRITICAL
                 else maxOf(pressureLevel, LEVEL_LOW)
@@ -252,6 +270,7 @@ class BufferMemoryKeeper(
         lastPressureAtMs = now
         levelSetAtMs = now
         applyTarget()
+        tellCritical()
         Log.i(TAG, "BUFFER_MEMORY: pressure eased level=$next capMb=${capOrBudgetMb()} availMb=${free.availMb}")
     }
 
@@ -283,6 +302,27 @@ class BufferMemoryKeeper(
         applyTarget()
         Log.i(TAG, "BUFFER_MEMORY: budget grew to ${control.uncappedBudgetBytes / MB} MB (built ${base / MB}, box ${ceilingBytes / MB}) " +
             "availMb=${free.availMb} thresholdMb=${free.thresholdMb} swapFreeMb=$swap")
+    }
+
+    /**
+     * A 32-bit process has 4 GB of address space for everything; the buffer may only take what is left under
+     * [BufferSizing.ADDRESS_SPACE_CEILING_32BIT_MB], whatever the box's RAM.
+     */
+    internal fun tendAddressSpace() {
+        if (detached) return
+        val usedMb = addressSpaceUsedMb() ?: return
+        val budget = control.uncappedBudgetBytes.coerceAtLeast(0L)
+        val held = control.bufferAllocator.totalBytesAllocated.toLong()
+        val roomMb = BufferSizing.ADDRESS_SPACE_CEILING_32BIT_MB - usedMb
+        val cap = (held + roomMb * MB).coerceIn(minOf(budget, floorBytes), budget)
+        val next = if (cap >= budget) -1L else cap
+        if (next == roomCapBytes) return
+        if (next >= 0L && roomCapBytes >= 0L && kotlin.math.abs(next - roomCapBytes) < ROOM_STEP_BYTES) return
+        roomCapBytes = next
+        applyTarget()
+        val freed = if (next >= 0L && held > next) trimIdle(null) else 0L
+        Log.i(TAG, "BUFFER_MEMORY: address space usedMb=$usedMb ceilingMb=${BufferSizing.ADDRESS_SPACE_CEILING_32BIT_MB} " +
+            "roomCapMb=${if (next < 0L) "none" else (next / MB).toString()} budgetMb=${budget / MB} freedMb=${freed / MB}")
     }
 
     /**
@@ -324,6 +364,7 @@ class BufferMemoryKeeper(
             pressureLevel = level
             levelSetAtMs = lastPressureAtMs
             applyTarget()
+            tellCritical()
         }
         val freed = trimIdle(null)
         if (changed || freed > 0) {
@@ -350,10 +391,15 @@ class BufferMemoryKeeper(
     /** The pressure cap, lowered further by the paused cap and what the extra downloads hold; -1 when none applies. */
     internal fun effectiveCapBytes(): Long {
         val level = if (pressureLevel == LEVEL_NONE) -1L else capBytes(pressureLevel)
-        val pressure = when {
+        val paused = when {
             pausedCapBytes < 0L -> level
             level < 0L -> pausedCapBytes
             else -> minOf(level, pausedCapBytes)
+        }
+        val pressure = when {
+            roomCapBytes < 0L -> paused
+            paused < 0L -> roomCapBytes
+            else -> minOf(paused, roomCapBytes)
         }
         val budget = control.uncappedBudgetBytes
         if (lentBytes <= 0L || lendingHeld || budget <= 0L) return pressure
@@ -467,6 +513,8 @@ class BufferMemoryKeeper(
         const val GROW_ROOM_BESIDE_SWAP_MB = 300L
         /** Spare room a paused film leaves for the next app in front; a launcher with artwork takes about this much. */
         const val PAUSED_ROOM_MB = 300L
+        /** Smaller changes of the address-space cap are left alone. */
+        const val ROOM_STEP_BYTES = 16L * 1024 * 1024
         const val KEEP_IDLE_BYTES = 2 * 1024 * 1024
         /** 256 allocations of 64 KB per step. */
         const val TRIM_STEP_BYTES = 16 * 1024 * 1024

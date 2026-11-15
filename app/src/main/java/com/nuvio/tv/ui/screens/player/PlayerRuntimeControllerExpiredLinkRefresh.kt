@@ -29,12 +29,10 @@ internal data class CachedSourceIdentity(
  *
  * Returns `true` when a refresh was started and the error must not be shown yet.
  */
-internal fun PlayerRuntimeController.tryRefreshExpiredLinkAfterError(errorMessage: String): Boolean {
+internal fun PlayerRuntimeController.tryRefreshExpiredLinkAfterError(errorMessage: String, linkError: Boolean): Boolean {
     val failedUrl = currentStreamUrl
-    if (failedUrl.isBlank() || failedUrl.startsWith("torrent://")) return false
-    val fromLinkCache = failedUrl == linkCacheSourceUrl
-    if (!fromLinkCache && !failedUrl.hasLikelyExpiringPlaybackCredentials()) return false
-    if (failedUrl == linkRefreshAttemptedUrl) return false
+    if (!expiredLinkRefreshApplies(failedUrl, linkCacheSourceUrl, linkRefreshAttemptedUrl, linkError)) return false
+    if (!hasRenderedFirstFrame && freshLinkForReusedLinkTried) return false
     linkRefreshAttemptedUrl = failedUrl
     linkCacheSourceUrl = null
 
@@ -48,6 +46,7 @@ internal fun PlayerRuntimeController.tryRefreshExpiredLinkAfterError(errorMessag
     )
     val season = currentSeason
     val episode = currentEpisode
+    val savedPosition = currentPlaybackPositionMs()?.takeIf { it > 0L } ?: 0L
     Log.i(PlayerRuntimeController.TAG, "Link likely expired, fetching the source again from ${expected.addonName}")
 
     errorRetryJob?.cancel()
@@ -87,15 +86,32 @@ internal fun PlayerRuntimeController.tryRefreshExpiredLinkAfterError(errorMessag
 
         if (refreshed == null) {
             Log.w(PlayerRuntimeController.TAG, "No fresh link was found for the failed source")
-            showErrorUnlessSourceFallback(errorMessage)
+            if (!advanceToNextLiveSource(errorMessage)) surfaceSourceFailoverError(errorMessage)
             return@launch
         }
         val wasAutoSelected = failedUrl == autoSelectedSourceUrl
+        if (savedPosition > 0L) _uiState.update { it.copy(pendingSeekPosition = savedPosition) }
         // Saves the fresh link for reuse and resumes from the saved position.
-        switchToSourceStream(refreshed)
+        switchToSourceStream(refreshed, automatic = true)
         if (wasAutoSelected) autoSelectedSourceUrl = currentStreamUrl
     }
     return true
+}
+
+/**
+ * Only a refused or dead link is fetched again; a decoder or renderer failure keeps the usual recovery order.
+ * [linkError] comes from [ReusedLinkRefresh.isLinkError].
+ */
+internal fun expiredLinkRefreshApplies(
+    failedUrl: String,
+    linkCacheSourceUrl: String?,
+    attemptedUrl: String?,
+    linkError: Boolean
+): Boolean {
+    if (!linkError) return false
+    if (failedUrl.isBlank() || failedUrl.startsWith("torrent://")) return false
+    if (failedUrl == attemptedUrl) return false
+    return failedUrl == linkCacheSourceUrl || failedUrl.hasLikelyExpiringPlaybackCredentials()
 }
 
 internal fun findCachedSourceRefreshCandidate(

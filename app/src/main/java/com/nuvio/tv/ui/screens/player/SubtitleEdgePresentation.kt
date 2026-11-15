@@ -8,6 +8,7 @@ import androidx.media3.ui.CaptionStyleCompat
 import com.nuvio.tv.data.local.SubtitleOutlineSize
 import com.nuvio.tv.data.local.SubtitleStyleSettings
 import com.nuvio.tv.data.local.normalizeSubtitleShadowOpacity
+import com.nuvio.tv.data.local.subtitleShadowScale
 
 /** Outline stroke width as a share of the text size; Normal is Media3's 2 dp at the 24 sp base size. */
 internal fun subtitleOutlineStrokeRatio(size: SubtitleOutlineSize): Float = when (size) {
@@ -47,7 +48,7 @@ internal fun exoSubtitleEdges(style: SubtitleStyleSettings): ExoSubtitleEdges = 
 internal fun subtitleEdgeSpan(style: SubtitleStyleSettings): SubtitleEdgeSpan? {
     val stroke = subtitleOutlineStrokeRatio(style.effectiveOutlineSize)
     val shadow = if (drawsSubtitleShadow(style)) subtitleShadowColor(style.shadowOpacity) else 0
-    return if (stroke == 0f && shadow == 0) null else SubtitleEdgeSpan(stroke, shadow)
+    return if (stroke == 0f && shadow == 0) null else SubtitleEdgeSpan(stroke, shadow, subtitleShadowScale(style.shadowSize))
 }
 
 /**
@@ -55,23 +56,32 @@ internal fun subtitleEdgeSpan(style: SubtitleStyleSettings): SubtitleEdgeSpan? {
  * text colour. This span sets the stroke width of the first pass from the text size and adds the shadow to it,
  * so the shadow sits behind the outline. Without an outline it sizes Media3's drop shadow on the fill pass.
  */
-internal class SubtitleEdgeSpan(val strokeRatio: Float, val shadowColor: Int) : CharacterStyle(), UpdateAppearance {
+internal class SubtitleEdgeSpan(
+    val strokeRatio: Float,
+    val shadowColor: Int,
+    val shadowScale: Float = 1f
+) : CharacterStyle(), UpdateAppearance {
     override fun updateDrawState(tp: TextPaint) {
         val outlinePass = tp.style == Paint.Style.FILL_AND_STROKE
         if (outlinePass != (strokeRatio > 0f)) return
         val textSize = tp.textSize
         if (outlinePass) tp.strokeWidth = textSize * strokeRatio
         if (shadowColor != 0) {
-            val offset = textSize * if (outlinePass) SUBTITLE_SHADOW_OFFSET_OUTLINED_RATIO else SUBTITLE_SHADOW_OFFSET_RATIO
-            tp.setShadowLayer(textSize * SUBTITLE_SHADOW_RADIUS_RATIO, offset, offset, shadowColor)
+            val offset = textSize * shadowScale *
+                if (outlinePass) SUBTITLE_SHADOW_OFFSET_OUTLINED_RATIO else SUBTITLE_SHADOW_OFFSET_RATIO
+            tp.setShadowLayer(textSize * SUBTITLE_SHADOW_RADIUS_RATIO * shadowScale, offset, offset, shadowColor)
         }
     }
 
     override fun equals(other: Any?): Boolean =
-        other is SubtitleEdgeSpan && other.strokeRatio == strokeRatio && other.shadowColor == shadowColor
+        other is SubtitleEdgeSpan && other.strokeRatio == strokeRatio && other.shadowColor == shadowColor &&
+            other.shadowScale == shadowScale
 
-    override fun hashCode(): Int = 31 * strokeRatio.hashCode() + shadowColor
+    override fun hashCode(): Int = (31 * strokeRatio.hashCode() + shadowColor) * 31 + shadowScale.hashCode()
 }
+
+/** libass shadow offset of the size-2 shadow, matched to ExoPlayer's. */
+internal const val MPV_SUBTITLE_SHADOW_OFFSET = 1.5
 
 internal data class MpvSubtitleEdges(
     val outlineSize: Double, val shadowOffset: Double,
@@ -97,7 +107,10 @@ internal fun mpvSubtitleEdges(style: SubtitleStyleSettings, ass: Boolean): MpvSu
     // libass has no text shadow inside a background box, so the box wins when one is set.
     if (hasSubtitleBackground(style)) return MpvSubtitleEdges(outline, 5.0, "background-box", style.backgroundColor)
     if (style.effectiveShadowEnabled) {
-        return MpvSubtitleEdges(outline, 1.5, "outline-and-shadow", subtitleShadowColor(style.shadowOpacity))
+        return MpvSubtitleEdges(
+            outline, MPV_SUBTITLE_SHADOW_OFFSET * subtitleShadowScale(style.shadowSize),
+            "outline-and-shadow", subtitleShadowColor(style.shadowOpacity)
+        )
     }
     return MpvSubtitleEdges(outline, 0.0, "outline-and-shadow", style.backgroundColor)
 }

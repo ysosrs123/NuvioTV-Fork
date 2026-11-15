@@ -28,8 +28,11 @@ internal object PrepareGrid {
     /** Full: every 30 s, a 4K remux every 60 s, never finer than the pass itself goes on this box. */
     fun fullStride(fourK: Boolean, remux: Boolean, finest: Int): Int = maxOf(finest, if (fourK && remux) 6 else 3)
 
-    fun screenStride(choice: ThumbsBeforePlay, fourK: Boolean, remux: Boolean, finest: Int): Int =
-        fullStride(fourK, remux, finest) * choice.gridTimes
+    /** Before play the screen covers every other slot of the full grid; the rest follow while the title plays. */
+    fun screenStride(fourK: Boolean, remux: Boolean, finest: Int): Int =
+        fullStride(fourK, remux, finest) * BEFORE_PLAY_GRID_TIMES
+
+    const val BEFORE_PLAY_GRID_TIMES = 2
 
     /**
      * The pass's strides with the screen's grid among them. The first sweep stays a multiple of the grid, 5 min where

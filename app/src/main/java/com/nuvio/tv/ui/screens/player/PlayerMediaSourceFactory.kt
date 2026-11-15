@@ -271,7 +271,7 @@ internal class PlayerMediaSourceFactory(
         if (!shape.useChunkSessionSource || shape.mp4SessionMode) return
         val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return
         val sanitizedHeaders = sanitizeHeaders(headers)
-        val okHttpFactory = OkHttpDataSource.Factory(chunkSessionClient(url)).apply {
+        val okHttpFactory = OkHttpDataSource.Factory(PieceCallFactory(chunkSessionClient(url))).apply {
             setDefaultRequestProperties(sanitizedHeaders)
             if (sanitizedHeaders.none { it.key.equals("User-Agent", ignoreCase = true) }) {
                 setUserAgent(DEFAULT_USER_AGENT)
@@ -383,7 +383,7 @@ internal class PlayerMediaSourceFactory(
                         "for progressive MP4 with parallel connections off"
                 )
             }
-            val okHttpFactory = OkHttpDataSource.Factory(chunkSessionClient(url)).apply {
+            val okHttpFactory = OkHttpDataSource.Factory(PieceCallFactory(chunkSessionClient(url))).apply {
                 setDefaultRequestProperties(sanitizedHeaders)
                 if (sanitizedHeaders.none { it.key.equals("User-Agent", ignoreCase = true) }) {
                     setUserAgent(DEFAULT_USER_AGENT)
@@ -553,7 +553,7 @@ internal class PlayerMediaSourceFactory(
             .cookieJar(NuvioApplication.extensionCookieJar)
             .let(::withChunkSessionTimeouts)
             .build()
-        val okHttpFactory = OkHttpDataSource.Factory(client).apply {
+        val okHttpFactory = OkHttpDataSource.Factory(PieceCallFactory(client)).apply {
             setDefaultRequestProperties(headers)
             if (headers.none { it.key.equals("User-Agent", ignoreCase = true) }) setUserAgent(DEFAULT_USER_AGENT)
         }

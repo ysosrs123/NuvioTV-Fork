@@ -349,14 +349,9 @@ class CopyChoiceTest {
     }
 
     @Test
-    fun plainLinksUsenetAndCachedDebridLinksAreRead() {
+    fun plainLinksAndUsenetAreRead() {
         assertNull(CopyChoice.linkRejection("https://cdn.example.org/files/Film.2019.1080p.WEB.mkv", "Film 1080p"))
         assertNull(CopyChoice.linkRejection("http://192.168.1.10:3000/api/v1/usenet/stream/abc/Film.mkv", "[TB+] Film"))
-        assertNull(CopyChoice.linkRejection("https://addon.example.com/resolve/realdebrid/key/hash/1/Film.mkv", "[RD+] Film"))
-        assertNull(CopyChoice.linkRejection("https://aio.example.org/api/v1/playback/abc", "[TB\u26a1] Film 1080p"))
-        assertNull(CopyChoice.linkRejection("https://comet.example.org/cfg/playback/abc/0/Film.mkv", "[AD\u26a1] Comet"))
-        assertNull(CopyChoice.linkRejection("https://x.example.org/Film.mkv", "TB+ cached"))
-        assertNull(CopyChoice.linkRejection("https://x.example.org/torbox/abc/Film.mkv", "Film", cached = true))
         assertEquals(CopyKind.RESOLVE, CopyChoice.linkKind("https://aio.example.org/api/v1/playback/abc", "[TB\u26a1] Film"))
         assertEquals(CopyKind.RESOLVE, CopyChoice.linkKind("https://x.example.org/Film.mkv", "[RD+] Film"))
         assertEquals(CopyKind.LINK, CopyChoice.linkKind("https://cdn.example.org/Film.mkv", "Film 1080p"))
@@ -364,7 +359,11 @@ class CopyChoiceTest {
     }
 
     @Test
-    fun debridLinksNotCachedOrWithoutACachedMarkAreLeftOut() {
+    fun addonDebridLinksAreNeverReadCachedOrNot() {
+        assertNotNull(CopyChoice.linkRejection("https://addon.example.com/resolve/realdebrid/key/hash/1/Film.mkv", "[RD+] Film"))
+        assertNotNull(CopyChoice.linkRejection("https://aio.example.org/api/v1/playback/abc", "[TB\u26a1] Film 1080p"))
+        assertNotNull(CopyChoice.linkRejection("https://comet.example.org/cfg/playback/abc/0/Film.mkv", "[AD\u26a1] Comet"))
+        assertNotNull(CopyChoice.linkRejection("https://x.example.org/Film.mkv", "TB+ cached"))
         assertNotNull(CopyChoice.linkRejection("https://addon.example.com/resolve/realdebrid/key/hash/1/Film.mkv", "[RD download] Film"))
         assertNotNull(CopyChoice.linkRejection("https://aio.example.org/api/v1/playback/abc", "[TB\u23f3] Film"))
         assertNotNull(CopyChoice.linkRejection("https://comet.example.org/cfg/playback/abc", "[TB\u2b07\ufe0f] Film"))
@@ -372,7 +371,6 @@ class CopyChoiceTest {
         assertNotNull(CopyChoice.linkRejection("https://aio.example.org/api/v1/debrid/playback/abc", "Film"))
         assertNotNull(CopyChoice.linkRejection("https://x.example.org/torbox/abc/Film.mkv", "Film"))
         assertNotNull(CopyChoice.linkRejection("https://x.example.org/Film.mkv", "[PM] Film"))
-        assertNotNull(CopyChoice.linkRejection("https://x.example.org/Film.mkv", "[RD+] Film", cached = false))
     }
 
     @Test

@@ -55,7 +55,7 @@ class SpeedTestDownloadsMatchPlaybackTest {
 
     // The reader schedules depth chunks from the one it holds, so depth - 1 downloads at once.
     private data class Case(val connections: Int, val window: MemoryBudget.DownloadWindow, val depth: Int) {
-        val expected get() = depth - 1
+        val expected get() = minOf(depth - 1, ParallelRangeDataSource.playbackWorkerCount(android.os.Process.is64Bit()))
     }
 
     private val chunkMb = 8

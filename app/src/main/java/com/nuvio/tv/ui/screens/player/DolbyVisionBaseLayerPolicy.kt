@@ -238,6 +238,11 @@ object DolbyVisionBaseLayerPolicy {
         }.getOrDefault(DvDecoderProfileSupport(false, false, false))
     }
 
+    private val profile5Decoder: Boolean by lazy { queryDvDecoderProfileSupport().dvheStn }
+
+    /** True when the box has a decoder for Dolby Vision Profile 5. Looked up once. */
+    fun decodesProfile5(): Boolean = profile5Decoder
+
     private const val DOLBY_VISION_MIME = "video/dolby-vision"
 
     /** Android constant for DV Profile 7 (dual-layer FEL/MEL). Added in API 24. */

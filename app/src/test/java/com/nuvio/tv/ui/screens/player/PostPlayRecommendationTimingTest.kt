@@ -39,12 +39,10 @@ class PostPlayRecommendationTimingTest {
 
     @Test
     fun `End Credits chapter at the end of a movie triggers at the credits start`() {
-        val chapters = PlayerChapters.normalize(
-            listOf(
-                PlayerChapter(0L, "Chapter 1"),
-                PlayerChapter(3_600_000L, "Chapter 2"),
-                PlayerChapter(6_990_000L, "End Credits")
-            )
+        val chapters = listOf(
+            PlayerChapter(1, 0L, "Chapter 1"),
+            PlayerChapter(2, 3_600_000L, "Chapter 2"),
+            PlayerChapter(3, 6_990_000L, "End Credits")
         )
         val intervals = ChapterSkipIntervals.fromChapters(chapters, durationMs)
 

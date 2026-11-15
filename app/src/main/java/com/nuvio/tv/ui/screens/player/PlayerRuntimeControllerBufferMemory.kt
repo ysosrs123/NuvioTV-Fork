@@ -41,6 +41,7 @@ internal fun PlayerRuntimeController.attachBufferMemoryKeeper(
                 com.nuvio.tv.core.player.thumbnail.MemoryGovernor.readMeminfo()
                     ?.takeIf { it.swapTotalMb > 0L }?.swapFreeMb ?: -1L
             },
+            addressSpaceUsedMb = BufferSizing::addressSpaceUsedMbOn32Bit,
             floorBytes = floorMb.toLong() * 1024L * 1024L,
             oneGbBox = oneGbBox,
             onLastWarning = {
@@ -49,6 +50,7 @@ internal fun PlayerRuntimeController.attachBufferMemoryKeeper(
                     appContext, NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(appContext), "lowMemory"
                 )
             },
+            onCritical = { ParallelRangeDataSource.onMemoryCritical(it) },
         ).also { it.attach() }
     }
     PlaybackMemoryFacts.onKeeper(bufferMemoryKeeper)

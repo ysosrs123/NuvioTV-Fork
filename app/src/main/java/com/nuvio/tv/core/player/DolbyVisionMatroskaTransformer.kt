@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.player
 
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.util.ParsableByteArray
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.container.DolbyVisionConfig
@@ -194,6 +195,23 @@ internal class DolbyVisionMatroskaTransformer(
         if (stripRpuOnly) return isDv
         val profile = resolveProfile(codecs, dolbyVisionConfigBytes)
         return config.shouldConvert(profile)
+    }
+
+    override fun probesFirstSample(codecs: String?, dolbyVisionConfigBytes: ByteArray?): Boolean =
+        config.relabelUnlabelledP5 && UnlabelledDolbyVision.isCandidate(null, codecs, dolbyVisionConfigBytes)
+
+    override fun relabelFromFirstSample(
+        format: Format,
+        sampleLengthDelimitedData: ByteArray,
+        sampleLength: Int,
+        nalUnitLengthFieldLength: Int
+    ): Format? {
+        val relabelled = UnlabelledDolbyVision.relabel(
+            format, sampleLengthDelimitedData, sampleLength, nalUnitLengthFieldLength
+        ) ?: return null
+        config.stats.recordSourceProfile(5)
+        android.util.Log.i(TAG, "Unlabelled Dolby Vision Profile 5 track, playing as ${relabelled.codecs}")
+        return relabelled
     }
 
     override fun onHevcSample(

@@ -13,6 +13,17 @@ internal const val DEFAULT_SUBTITLE_SHADOW_OPACITY = 70
 internal const val MIN_SUBTITLE_SHADOW_OPACITY = 10
 internal const val MAX_SUBTITLE_SHADOW_OPACITY = 100
 
+/** 2 is the shadow every earlier build drew; the other sizes scale its offset and softness. */
+internal const val DEFAULT_SUBTITLE_SHADOW_SIZE = 2
+internal const val MIN_SUBTITLE_SHADOW_SIZE = 1
+internal const val MAX_SUBTITLE_SHADOW_SIZE = 8
+
+internal fun normalizeSubtitleShadowSize(value: Int): Int =
+    value.coerceIn(MIN_SUBTITLE_SHADOW_SIZE, MAX_SUBTITLE_SHADOW_SIZE)
+
+internal fun subtitleShadowScale(size: Int): Float =
+    normalizeSubtitleShadowSize(size) / DEFAULT_SUBTITLE_SHADOW_SIZE.toFloat()
+
 /** Unknown new values retain the legacy fallback without rewriting saved preferences. */
 internal fun parseSubtitleEdgeStyle(value: String?): SubtitleEdgeStyle? =
     SubtitleEdgeStyle.entries.firstOrNull { it.name == value }

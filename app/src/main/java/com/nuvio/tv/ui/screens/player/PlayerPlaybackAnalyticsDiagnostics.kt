@@ -98,6 +98,9 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
     private var lastLoadError: PlaybackIssuePlaybackLoadErrorInput? = null
     val lastLoadErrorHttpStatus: Int? get() = lastLoadError?.httpStatus
     val lastLoadErrorClass: String? get() = lastLoadError?.exceptionClass
+    /** The last load error and the errors inside it, outermost first: a failed name lookup arrives wrapped. */
+    var lastLoadErrorClasses: List<String> = emptyList()
+        private set
     val lastLoadErrorDurationMs: Long? get() = lastLoadError?.durationMs
     val bytesLoadedSoFar: Long get() = totalBytesLoaded
     private var lastLoadStartedAtElapsedMs: Long? = null
@@ -255,6 +258,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         totalBytesLoaded = 0L
         lastLoad = null
         lastLoadError = null
+        lastLoadErrorClasses = emptyList()
         lastCompletedMediaLoad = null
         rawEventLines.clear()
         launchStartedAtElapsedMs = null
@@ -716,6 +720,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         wasCanceled: Boolean
     ) {
         loadErrorCount += 1
+        lastLoadErrorClasses = PlayerErrorCauses.causeClasses(error)
         val load = loadEventInfo.toPlaybackLoad(mediaLoadData)
         lastLoad = load
         lastLoadError = PlaybackIssuePlaybackLoadErrorInput(

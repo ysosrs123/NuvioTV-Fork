@@ -350,6 +350,7 @@ internal fun PlayerRuntimeController.applyBluetoothAudioRouteInPlace(isBluetooth
 internal fun PlayerRuntimeController.applyMpvBluetoothAudioRouteInPlace(isBluetooth: Boolean) {
     val view = mpvView ?: return
     val wasPlaying = hasActivePlayIntent() && !userPausedManually
+    applyMpvPassthroughCodecs(view)
     view.applyBluetoothAudioRoute(isBluetooth, reloadOutput = true)
     // ao-reload can drop live properties; re-pin the current per-route delay.
     view.setAudioDelayMs(_uiState.value.audioDelayMs)

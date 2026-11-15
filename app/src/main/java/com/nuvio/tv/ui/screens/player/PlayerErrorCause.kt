@@ -22,6 +22,7 @@ enum class PlayerErrorCause(val key: String) {
     NotVideo("not_video"),
     BoxCannotDecode("box_cannot_decode"),
     PictureUnreadable("picture_unreadable"),
+    SourceSlow("source_slow"),
 }
 
 /**
@@ -86,15 +87,62 @@ internal object PlayerErrorCauses {
         else -> null
     }
 
-    /** Only when not a single byte came from the source, so the server cannot have been half working. */
+    /**
+     * Unreachable only when not a single byte came from the source, so the server cannot have been half working.
+     * Silent also after a little: a server that sends the start of an answer and then stops still sent no video.
+     */
     fun forLoadFailure(exceptionClasses: List<String>, bytesLoaded: Long): PlayerErrorCause? {
-        if (bytesLoaded > 0L) return null
+        val timedOut = exceptionClasses.any { it == "java.net.SocketTimeoutException" }
+        if (bytesLoaded > 0L) return PlayerErrorCause.ServerSilent.takeIf { timedOut && bytesLoaded <= SILENT_MAX_BYTES }
         return when {
             exceptionClasses.any { it in UNREACHABLE } -> PlayerErrorCause.ServerUnreachable
-            exceptionClasses.any { it == "java.net.SocketTimeoutException" } -> PlayerErrorCause.ServerSilent
+            timedOut -> PlayerErrorCause.ServerSilent
             else -> null
         }
     }
+
+    /** More than a stalled start, but over the whole start-up wait less than the film itself needs to keep playing. */
+    fun isSlowSource(bytesLoaded: Long, elapsedMs: Long, filmBitsPerSecond: Long?): Boolean {
+        if (filmBitsPerSecond == null || filmBitsPerSecond <= 0L) return false
+        if (elapsedMs < SLOW_MIN_ELAPSED_MS || bytesLoaded <= SILENT_MAX_BYTES) return false
+        return bitsPerSecond(bytesLoaded, elapsedMs) < filmBitsPerSecond
+    }
+
+    fun bitsPerSecond(bytes: Long, elapsedMs: Long): Long = if (elapsedMs <= 0L) 0L else bytes * 8L * 1_000L / elapsedMs
+
+    /** A file's average rate from its size and the title's running time; null when either is missing or too short. */
+    fun filmBitsPerSecond(sizeBytes: Long?, runtimeMinutes: Int?): Long? {
+        if (sizeBytes == null || sizeBytes <= 0L || runtimeMinutes == null || runtimeMinutes < MIN_RUNTIME_MINUTES) return null
+        return sizeBytes * 8L / (runtimeMinutes * 60L)
+    }
+
+    /** An MPV start that failed on the connection itself, read from its log: the server refused, closed or can't be found. */
+    fun forMpvLoadFailure(logLine: String?): PlayerErrorCause? {
+        val log = logLine?.lowercase() ?: return null
+        return PlayerErrorCause.ServerUnreachable.takeIf { MPV_CONNECTION_FAILURE.containsMatchIn(log) }
+    }
+
+    /** "25 KB", "8 MB", "1.2 GB": numbers and units only, so it needs no translation. */
+    fun sizeText(bytes: Long): String = when {
+        bytes >= 1_000_000_000L -> String.format(Locale.ROOT, "%.1f GB", bytes / 1_000_000_000.0)
+        bytes >= 1_000_000L -> "${(bytes + 500_000L) / 1_000_000L} MB"
+        else -> "${((bytes + 999L) / 1_000L).coerceAtLeast(1L)} KB"
+    }
+
+    /** "6 Mbit/s", "0.8 Mbit/s". */
+    fun rateText(bitsPerSecond: Long): String {
+        val mbit = bitsPerSecond / 1_000_000.0
+        return if (mbit >= 10.0) "${Math.round(mbit)} Mbit/s" else String.format(Locale.ROOT, "%.1f Mbit/s", mbit)
+    }
+
+    const val SILENT_MAX_BYTES = 256L * 1024L
+    private const val SLOW_MIN_ELAPSED_MS = 5_000L
+    private const val MIN_RUNTIME_MINUTES = 20
+
+    private val MPV_CONNECTION_FAILURE = Regex(
+        "connection refused|connection reset|connection closed|broken pipe|failed to resolve|name or service not known|" +
+            "no address associated|network is unreachable|tls: |ssl: |handshake"
+    )
 
     /** "3840 × 2160 · HEVC · 59.94 fps": only numbers and codec names, so it needs no translation. */
     fun formatSummary(width: Int, height: Int, sampleMimeType: String?, frameRate: Float): String? {
@@ -128,6 +176,9 @@ internal object PlayerErrorCauses {
     fun factsLine(vararg parts: String?): String? =
         parts.mapNotNull { it?.trim()?.takeIf(String::isNotEmpty) }.takeIf { it.isNotEmpty() }?.joinToString(" · ")
 
+    fun causeClasses(error: Throwable): List<String> =
+        generateSequence(error) { it.cause.takeIf { cause -> cause !== it } }.take(8).map { it.javaClass.name }.toList()
+
     private val UNREACHABLE = setOf(
         "java.net.ConnectException",
         "java.net.UnknownHostException",
@@ -147,18 +198,44 @@ internal fun httpErrorCard(context: Context, code: Int, source: String?, fromWat
     return PlayerErrorCard(cause, context.getString(title), message, PlayerErrorCauses.factsLine(source, "HTTP $code"), fromWatchdog)
 }
 
-internal fun silentServerCard(context: Context, seconds: Int, source: String?, fromWatchdog: Boolean): PlayerErrorCard =
+internal fun silentServerCard(
+    context: Context,
+    seconds: Int,
+    source: String?,
+    fromWatchdog: Boolean,
+    bytesLoaded: Long = 0L,
+): PlayerErrorCard =
     PlayerErrorCard(
         PlayerErrorCause.ServerSilent,
         context.getString(R.string.player_error_card_silent_title),
         context.getString(R.string.player_error_card_silent, seconds),
         PlayerErrorCauses.factsLine(
             source,
+            bytesLoaded.takeIf { it > 0L }?.let(PlayerErrorCauses::sizeText),
             context.getString(R.string.player_error_facts_no_answer),
             context.getString(R.string.player_error_facts_seconds, seconds)
         ),
         fromWatchdog
     )
+
+internal fun slowSourceCard(
+    context: Context,
+    bytesLoaded: Long,
+    elapsedMs: Long,
+    filmBitsPerSecond: Long,
+    source: String?,
+): PlayerErrorCard {
+    val seconds = (elapsedMs / 1_000L).toInt()
+    val got = PlayerErrorCauses.rateText(PlayerErrorCauses.bitsPerSecond(bytesLoaded, elapsedMs))
+    val needs = PlayerErrorCauses.rateText(filmBitsPerSecond)
+    return PlayerErrorCard(
+        PlayerErrorCause.SourceSlow,
+        context.getString(R.string.player_error_card_slow_title),
+        context.getString(R.string.player_error_card_slow, PlayerErrorCauses.sizeText(bytesLoaded), seconds, got, needs),
+        PlayerErrorCauses.factsLine(source, got, context.getString(R.string.player_error_facts_seconds, seconds)),
+        fromWatchdog = true
+    )
+}
 
 internal fun unreachableServerCard(context: Context, source: String?, fromWatchdog: Boolean): PlayerErrorCard =
     PlayerErrorCard(
@@ -203,7 +280,7 @@ internal fun providerNoticeCard(context: Context, source: String?): PlayerErrorC
 internal fun PlaybackException.errorCard(
     context: Context,
     source: String?,
-    lastLoadErrorClass: String?,
+    lastLoadErrorClasses: List<String>,
     lastLoadErrorMs: Long?,
     bytesLoaded: Long,
 ): PlayerErrorCard? {
@@ -225,12 +302,11 @@ internal fun PlaybackException.errorCard(
     if (boxSaidNo && (videoRenderer || renderer?.rendererFormat == null)) {
         return boxCannotDecodeCard(context, renderer?.rendererFormat?.takeIf { videoRenderer }, source, fromWatchdog = false)
     }
-    val classes = generateSequence<Throwable>(this) { it.cause }.take(8).map { it.javaClass.name }.toList() +
-        listOfNotNull(lastLoadErrorClass)
+    val classes = PlayerErrorCauses.causeClasses(this) + lastLoadErrorClasses
     return when (PlayerErrorCauses.forLoadFailure(classes, bytesLoaded)) {
         PlayerErrorCause.ServerUnreachable -> unreachableServerCard(context, source, fromWatchdog = false)
         PlayerErrorCause.ServerSilent -> lastLoadErrorMs?.takeIf { it >= 1_000L }
-            ?.let { silentServerCard(context, (it / 1_000L).toInt(), source, fromWatchdog = false) }
+            ?.let { silentServerCard(context, (it / 1_000L).toInt(), source, fromWatchdog = false, bytesLoaded = bytesLoaded) }
         else -> null
     }
 }

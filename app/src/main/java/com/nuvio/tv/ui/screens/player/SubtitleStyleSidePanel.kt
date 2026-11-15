@@ -5,7 +5,7 @@ package com.nuvio.tv.ui.screens.player
 import com.nuvio.tv.data.local.SubtitleOutlineSize
 import com.nuvio.tv.data.local.next
 import com.nuvio.tv.ui.screens.settings.SubtitleFontDialog
-import com.nuvio.tv.ui.screens.settings.subtitleFontName
+import com.nuvio.tv.ui.screens.settings.subtitleFontLabel
 import com.nuvio.tv.ui.screens.settings.subtitleOutlineSizeName
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.util.keepLtr
@@ -191,7 +191,7 @@ internal fun SubtitleStyleSidePanel(
                             .width(StyleCardWidth)
                             .height(StyleCardHeight + 32.dp)
                     ) {
-                        SubtitleAppearanceButton(subtitleFontName(subtitleStyle.font), { showFontPicker = true })
+                        SubtitleAppearanceButton(subtitleFontLabel(subtitleStyle), { showFontPicker = true })
                         SubtitleStyleSettingRow(label = stringResource(R.string.subtitle_style_weight)) {
                             SubtitleStyleToggleButton(
                                 isEnabled = subtitleStyle.bold,
@@ -295,7 +295,7 @@ internal fun SubtitleStyleSidePanel(
                         centerContent = false,
                         modifier = Modifier
                             .width(StyleCardWidth)
-                            .height(140.dp)
+                            .height(196.dp)
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
                             SubtitleStyleToggleButton(
@@ -317,6 +317,23 @@ internal fun SubtitleStyleSidePanel(
                                     icon = Icons.Default.Add,
                                     contentDescription = stringResource(R.string.cd_increase),
                                     onClick = { onEvent(PlayerEvent.OnSetSubtitleShadowOpacity(subtitleStyle.shadowOpacity + 10)) }
+                                )
+                            }
+                            Row(
+                                modifier = if (shadow) Modifier else Modifier.alpha(0.35f),
+                                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                SubtitleStyleStepperButton(
+                                    icon = Icons.Default.Remove,
+                                    contentDescription = stringResource(R.string.cd_decrease),
+                                    onClick = { onEvent(PlayerEvent.OnSetSubtitleShadowSize(subtitleStyle.shadowSize - 1)) }
+                                )
+                                SubtitleStyleValueDisplay(text = subtitleStyle.shadowSize.toString())
+                                SubtitleStyleStepperButton(
+                                    icon = Icons.Default.Add,
+                                    contentDescription = stringResource(R.string.cd_increase),
+                                    onClick = { onEvent(PlayerEvent.OnSetSubtitleShadowSize(subtitleStyle.shadowSize + 1)) }
                                 )
                             }
                         }
@@ -371,8 +388,13 @@ internal fun SubtitleStyleSidePanel(
             }
         }
     }
-    if (showFontPicker && !bitmapTrack && !isStyleDisabledByLibass) SubtitleFontDialog(subtitleStyle.font,
-        { dispatchStyleEvent(PlayerEvent.OnSetSubtitleFont(it)) }) { showFontPicker = false }
+    if (showFontPicker && !bitmapTrack && !isStyleDisabledByLibass) SubtitleFontDialog(
+        selected = subtitleStyle.font,
+        selectedImportedId = subtitleStyle.importedFontId,
+        onSelected = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleFont(it)) },
+        onSelectedImported = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleImportedFont(it)) },
+        onDismiss = { showFontPicker = false }
+    )
 }
 
 @Composable

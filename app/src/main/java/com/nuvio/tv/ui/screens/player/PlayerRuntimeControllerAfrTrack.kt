@@ -13,9 +13,11 @@ import com.nuvio.tv.data.local.InternalPlayerEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -27,23 +29,32 @@ private const val TRACK_AFR_MARGIN_MS = 1_000L
 internal fun trackAfrDeadlineMs(userDelayMs: Long): Long =
     TRACK_AFR_SWITCH_WAIT_MS + com.nuvio.tv.core.player.AfrSettle.capMs(userDelayMs) + TRACK_AFR_MARGIN_MS
 
-// How long playback waits to learn the rate of an MKV that declares none.
+// How long playback waits to learn the rate of an MKV or TS that declares none.
 private const val UNDECLARED_RATE_PROBE_TIMEOUT_MS = 6_000L
-
-/** MKV stores the rate only as an optional DefaultDuration, and the H.264 header can't stand in for it. */
-internal fun needsProbeForUndeclaredRate(frameRate: Float, containerMimeType: String?): Boolean =
-    frameRate <= 0f &&
-        (containerMimeType == MimeTypes.VIDEO_MATROSKA || containerMimeType == MimeTypes.VIDEO_WEBM)
+// The playback stream's own sample times usually arrive first; the separate probe opens a second connection.
+private const val UNDECLARED_RATE_TIMING_HEAD_START_MS = 2_500L
 
 /**
- * The file declares no frame rate, so the track format alone can't drive the switch. Runs the same probe as the MPV
- * path with playback held, then hands the result to [maybeRunTrackFormatAfr], which also saves it for the next play.
- * Without a result in time, playback just starts.
+ * MKV stores the rate only as an optional DefaultDuration, and the H.264 header can't stand in for it. Media3's TS
+ * reader never fills in a rate, so broadcast recordings always arrive without one.
+ */
+internal fun needsProbeForUndeclaredRate(frameRate: Float, containerMimeType: String?): Boolean =
+    frameRate <= 0f &&
+        (containerMimeType == MimeTypes.VIDEO_MATROSKA || containerMimeType == MimeTypes.VIDEO_WEBM ||
+            containerMimeType == MimeTypes.VIDEO_MP2T)
+
+/**
+ * The file declares no frame rate, so the track format alone can't drive the switch. With playback held it takes the
+ * rate from the playback stream's own sample times, and only if those are slow also runs the same probe as the MPV
+ * path; the first answer goes to [maybeRunTrackFormatAfr], which also saves it for the next play. Without a result in
+ * time, playback just starts.
  */
 internal fun PlayerRuntimeController.maybeRunTrackAfrForUndeclaredRate(format: Format) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
     if (currentInternalPlayerEngine != InternalPlayerEngine.EXOPLAYER) return
     if (!needsProbeForUndeclaredRate(format.frameRate, format.containerMimeType)) return
+    // A live TS gives its sample times in real time, so the wait would hold every channel start back.
+    if (format.containerMimeType == MimeTypes.VIDEO_MP2T && (_exoPlayer?.duration ?: C.TIME_UNSET) == C.TIME_UNSET) return
     if (trackAfrAttemptedForCurrentStream || afrModeAppliedPreStart) return
     if (_uiState.value.frameRateMatchingMode == FrameRateMatchingMode.OFF || com.nuvio.tv.core.formatcheck.FormatCheckSession.active) return
     if (_uiState.value.afrProbeRunning) return
@@ -65,22 +76,38 @@ internal fun PlayerRuntimeController.maybeRunTrackAfrForUndeclaredRate(format: F
     scope.launch {
         var switchStarted = false
         try {
-            val probe = scope.async(Dispatchers.IO) {
-                runCatching {
-                    FrameRateUtils.detectFrameRateWithOkHttpProbe(
-                        context = context,
-                        sourceUrl = url,
-                        headers = headers,
-                        mimeType = mimeType,
-                        filename = filename,
-                        isCancelled = { afrTrackGeneration != startGeneration }
-                    )
-                }.getOrNull()
+            val timed = withTimeoutOrNull(UNDECLARED_RATE_TIMING_HEAD_START_MS) {
+                mkvTimedFrameRate.filterNotNull().first()
             }
-            // Awaited rather than run inside the timeout: a blocked native read would hold the timeout up too.
-            val detection = withTimeoutOrNull(UNDECLARED_RATE_PROBE_TIMEOUT_MS) { probe.await() }
-            probe.cancel()
-            Log.i(PlayerRuntimeController.TAG, "AFR undeclared rate: probe fps=${detection?.raw}")
+            val detection = if (timed != null) {
+                Log.i(PlayerRuntimeController.TAG, "AFR undeclared rate: sample times fps=$timed")
+                timedFrameRateDetection(timed, format)
+            } else {
+                val probe = scope.async(Dispatchers.IO) {
+                    runCatching {
+                        FrameRateUtils.detectFrameRateWithOkHttpProbe(
+                            context = context,
+                            sourceUrl = url,
+                            headers = headers,
+                            mimeType = mimeType,
+                            filename = filename,
+                            isCancelled = { afrTrackGeneration != startGeneration }
+                        )
+                    }.getOrNull()
+                }
+                val timing = scope.async { mkvTimedFrameRate.filterNotNull().first() }
+                // Awaited rather than run inside the timeout: a blocked native read would hold the timeout up too.
+                val first = withTimeoutOrNull(UNDECLARED_RATE_PROBE_TIMEOUT_MS - UNDECLARED_RATE_TIMING_HEAD_START_MS) {
+                    select<FrameRateUtils.FrameRateDetection?> {
+                        probe.onAwait { it ?: timedFrameRateDetection(timing.await(), format) }
+                        timing.onAwait { timedFrameRateDetection(it, format) }
+                    }
+                }
+                probe.cancel()
+                timing.cancel()
+                Log.i(PlayerRuntimeController.TAG, "AFR undeclared rate: probe or sample times fps=${first?.raw}")
+                first
+            }
             if (detection != null && afrTrackGeneration == startGeneration) {
                 withContext(Dispatchers.Main) {
                     trackAfrAttemptedForCurrentStream = false
@@ -199,7 +226,8 @@ internal fun PlayerRuntimeController.maybeRunTrackFormatAfr(rawFps: Float, forma
             ),
             videoWidth = format.width.takeIf { w -> w > 0 },
             videoHeight = format.height.takeIf { h -> h > 0 },
-            resolutionMatchingEnabled = it.resolutionMatchingEnabled
+            resolutionMatchingEnabled = it.resolutionMatchingEnabled,
+            allowSeamlessSwitch = it.afrAllowSeamlessSwitch
         )
     } ?: true
     val userDelayMs = (settingsNow?.afrSettleDelaySeconds ?: 0) * 1000L
@@ -293,7 +321,8 @@ internal fun PlayerRuntimeController.maybeRunTrackFormatAfr(rawFps: Float, forma
                     frameRate = targetFrameRate,
                     videoWidth = format.width.takeIf { it > 0 },
                     videoHeight = format.height.takeIf { it > 0 },
-                    resolutionMatchingEnabled = playerSettings.resolutionMatchingEnabled
+                    resolutionMatchingEnabled = playerSettings.resolutionMatchingEnabled,
+                    allowSeamlessSwitch = playerSettings.afrAllowSeamlessSwitch
                 )
 
                 if (result != null) {

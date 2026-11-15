@@ -15,6 +15,7 @@ class MpvStartupRescuePolicyTest {
         hasStream: Boolean = true,
         inBackground: Boolean = false,
         playerPaused: Boolean = false,
+        mpvLoaded: Boolean = true,
     ) = MpvStartupWatchdogPolicy.watchdogEnabled(
         hasError = hasError,
         releasing = releasing,
@@ -22,7 +23,8 @@ class MpvStartupRescuePolicyTest {
         recoveryArmed = recoveryArmed,
         hasStream = hasStream,
         inBackground = inBackground,
-        playerPaused = playerPaused
+        playerPaused = playerPaused,
+        mpvLoaded = mpvLoaded
     )
 
     @Test
@@ -45,10 +47,14 @@ class MpvStartupRescuePolicyTest {
 
     @Test
     fun `resume restarts the tick only for a start that showed no frame`() {
-        assertTrue(MpvStartupWatchdogPolicy.restartTickOnResume(false, hasStream = true, hasView = true))
-        assertFalse(MpvStartupWatchdogPolicy.restartTickOnResume(true, hasStream = true, hasView = true))
-        assertFalse(MpvStartupWatchdogPolicy.restartTickOnResume(false, hasStream = false, hasView = true))
-        assertFalse(MpvStartupWatchdogPolicy.restartTickOnResume(false, hasStream = true, hasView = false))
+        assertTrue(MpvStartupWatchdogPolicy.restartTickOnResume(false, hasStream = true, mpvLoaded = true))
+        assertFalse(MpvStartupWatchdogPolicy.restartTickOnResume(true, hasStream = true, mpvLoaded = true))
+        assertFalse(MpvStartupWatchdogPolicy.restartTickOnResume(false, hasStream = false, mpvLoaded = true))
+    }
+
+    @Test
+    fun `resume before the media load leaves the tick to the load`() {
+        assertFalse(MpvStartupWatchdogPolicy.restartTickOnResume(false, hasStream = true, mpvLoaded = false))
     }
 
     @Test
@@ -76,6 +82,22 @@ class MpvStartupRescuePolicyTest {
         assertFalse(enabled(failoverTriggered = true))
         assertFalse(enabled(recoveryArmed = true))
         assertFalse(enabled(hasStream = false))
+    }
+
+    @Test
+    fun `watchdog waits for the view to load its media before asking mpv anything`() {
+        assertFalse(enabled(mpvLoaded = false))
+        val step = MpvStartupWatchdogPolicy.step(
+            MpvStartupWatchdogPolicy.Input(
+                enabled = enabled(mpvLoaded = false),
+                waitingForSurface = false,
+                idleActive = false,
+                cacheProgressing = false,
+                counters = MpvStartupWatchdogPolicy.Counters(stallTicks = 30, absoluteTicks = 50)
+            )
+        )
+        assertEquals(MpvStartupWatchdogPolicy.Action.Continue, step.action)
+        assertEquals(MpvStartupWatchdogPolicy.Counters(), step.counters)
     }
 
     @Test

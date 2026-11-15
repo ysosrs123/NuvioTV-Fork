@@ -27,6 +27,11 @@ object DisplayCapabilities {
         val currentModeId: Int,
         val apiSupported: Boolean,
     ) {
+        /** The TV lists rates it reaches without a mode change (QMS / VRR). */
+        val offersSeamlessRates: Boolean
+            get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                supportedModes.any { it.alternativeRefreshRates.isNotEmpty() }
+
         companion object {
             val Unknown = Snapshot(
                 supportsFrameRateSwitching = false,

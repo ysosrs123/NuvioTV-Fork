@@ -43,6 +43,21 @@ class FrameRateKodiRulesTest {
     }
 
     @Test
+    fun `with 25 and 30 Hz allowed those rates play at their own rate, and 50 or 60 Hz where they are missing`() {
+        FrameRateUtils.allowLowRates = true
+        try {
+            assertEquals(25f, pickRate(uhd, 25f), 0.01f)
+            assertEquals(29.97f, pickRate(uhd, ntsc30), 0.01f)
+            assertEquals(30f, pickRate(uhd, 30f), 0.01f)
+            assertEquals(23.976f, pickRate(uhd, film), 0.01f)
+            val noLowRates = listOf(mode(1, 3840, 2160, 60f), mode(2, 3840, 2160, 50f))
+            assertEquals(50f, pickRate(noLowRates, 25f), 0.01f)
+        } finally {
+            FrameRateUtils.allowLowRates = false
+        }
+    }
+
+    @Test
     fun `25 fps keeps 25 Hz when the display has no 50 Hz`() {
         val modes = listOf(mode(1, 3840, 2160, 60f), mode(2, 3840, 2160, 25f))
         assertEquals(25f, pickRate(modes, 25f), 0.01f)

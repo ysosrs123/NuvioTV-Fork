@@ -67,6 +67,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.nuvio.tv.core.util.withAppLocale
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
@@ -434,6 +435,7 @@ class PlayerRuntimeController(
 
     init {
         observeDisplayRefresh()
+        notePlayerPanels()
         scope.launch {
             _uiState
                 .map { it.isPlaying }
@@ -557,6 +559,8 @@ class PlayerRuntimeController(
     internal var seekProgressSyncJob: Job? = null
     internal var frameRateProbeJob: Job? = null
     internal var frameRateProbeToken: Long = 0L
+    internal val mkvTimedFrameRate = kotlinx.coroutines.flow.MutableStateFlow<Float?>(null)
+    @Volatile internal var mkvFrameTimingToken: Long = 0L
     internal var hideAspectRatioIndicatorJob: Job? = null
     internal var hideStreamSourceIndicatorJob: Job? = null
     internal var hidePlayerEngineSwitchInfoJob: Job? = null
@@ -643,6 +647,8 @@ class PlayerRuntimeController(
     internal var mpvEofSeenClear = false
     // Set once the Exo progress loop forced a natural end for a position past duration.
     internal var exoEndOverrunHandled = false
+    // Set when a load error right at the end of the file was taken as the natural end.
+    internal var exoSourceEndReached = false
     internal var shouldEnforceAutoplayOnFirstReady = true
 
     internal var rebufferCount: Int = 0
@@ -848,7 +854,6 @@ class PlayerRuntimeController(
     internal var ffmpegAudioRenderer: FfmpegAudioRenderer? = null
     internal var mpvView: NuvioMpvSurfaceView? = null
     internal val subtitleCueTracker = SubtitleCueTracker()
-    internal val styledSubtitles = StyledSubtitlePresenter()
     internal var mpvInitializationInProgress: Boolean = false
     internal var mpvMediaLoadPrepared: Boolean = false
     internal var lastMpvOutputChannels: Int = -1
@@ -1149,17 +1154,20 @@ class PlayerRuntimeController(
     private fun observeStreamBadgeSettings() {
         scope.launch {
             streamBadgeSettingsDataStore.settings.collect { settings ->
+                val filters = if (settings.showInPlayer) {
+                    withContext(Dispatchers.Default) {
+                        StreamBadgeMatcher.compileCached(settings.rules.forPlayer(settings.playerBadgeSource))
+                    }
+                } else {
+                    emptyList()
+                }
                 _uiState.update {
                     it.copy(
                         showFileSizeBadges = settings.showFileSizeBadges,
                         showAddonLogo = settings.showAddonLogo,
                         streamBadgePlacement = settings.badgePlacement,
                         showPlayerBadges = settings.showInPlayer,
-                        playerBadgeFilters = if (settings.showInPlayer) {
-                            StreamBadgeMatcher.compile(settings.rules.forPlayer(settings.playerBadgeSource))
-                        } else {
-                            emptyList()
-                        }
+                        playerBadgeFilters = filters
                     )
                 }
             }

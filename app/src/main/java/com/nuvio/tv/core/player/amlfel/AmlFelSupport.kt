@@ -41,6 +41,13 @@ internal object AmlFelSupport {
     /** The native FEL path can run: dual-layer port + Dolby Vision driver + FEL-capable kernel. */
     fun isNativeFelUsable(bits: Int = deviceBits()): Boolean = isDeviceUsable(bits) && isFelKernel() && com.nuvio.tv.core.player.DoviBridge.isAvailable()
 
+    @Volatile private var nativeFelUsableCache: Boolean? = null
+
+    /** The kernel can't change while the app runs, so Settings asks once. Null until [nativeFelUsableOnce] ran. */
+    fun nativeFelUsableCached(): Boolean? = nativeFelUsableCache
+
+    fun nativeFelUsableOnce(): Boolean = nativeFelUsableCache ?: isNativeFelUsable().also { nativeFelUsableCache = it }
+
     /** Dolby Vision profile from the codec string (dvhe/dvh1/dvav/dva1.NN.xx), or null. */
     fun dvProfile(format: Format): Int? {
         val codecs = format.codecs?.trim()?.lowercase() ?: return null

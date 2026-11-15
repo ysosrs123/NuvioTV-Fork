@@ -214,6 +214,14 @@ class ExternalExtensionLoader @Inject constructor(
     private val codeCacheDir: File
         get() = File(context.codeCacheDir, "cs_dex_cache").also { it.mkdirs() }
 
+    private fun loadPlugin(plugin: Plugin, target: Context) {
+        try {
+            plugin.load(target)
+        } finally {
+            com.nuvio.tv.data.repository.ArcCrashFile.reclaim()
+        }
+    }
+
     /** Sanitize scraper ID for use as a filename (colons are not safe on all filesystems). */
     private fun safeFileName(scraperId: String): String =
         scraperId.replace(':', '_').replace('/', '_')
@@ -328,7 +336,7 @@ class ExternalExtensionLoader @Inject constructor(
             // the arg to Activity? and chains through.
             val activity = AcraApplication.getActivity()
             try {
-                plugin.load((activity as Context?) ?: context)
+                loadPlugin(plugin, (activity as Context?) ?: context)
             } catch (e: Exception) {
                 Log.w(TAG, "plugin.load() threw (partial load, ${plugin.registeredMainAPIs.size} APIs so far): ${e.message}", e)
             } catch (e: Error) {
@@ -480,7 +488,7 @@ class ExternalExtensionLoader @Inject constructor(
 
             val activity = AcraApplication.getActivity()
             try {
-                plugin.load((activity as Context?) ?: context)
+                loadPlugin(plugin, (activity as Context?) ?: context)
                 diagnostics.addStep("load(Context): OK, ${plugin.registeredMainAPIs.size} APIs")
             } catch (e: Exception) {
                 diagnostics.addStep("load() FAILED: ${e.javaClass.simpleName}: ${e.message?.take(120)}")
@@ -600,7 +608,7 @@ class ExternalExtensionLoader @Inject constructor(
                 if (plugin != null) {
                     val activity = AcraApplication.getActivity()
                     try {
-                        plugin.load((activity as Context?) ?: context)
+                        loadPlugin(plugin, (activity as Context?) ?: context)
                     } catch (_: Exception) {
                     } catch (_: Error) {
                     }

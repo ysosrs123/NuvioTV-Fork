@@ -28,7 +28,6 @@ import com.nuvio.tv.domain.model.DebridStreamQuality
 import com.nuvio.tv.domain.model.DebridSettings
 import com.nuvio.tv.domain.model.DebridStreamVisualTag
 import com.nuvio.tv.domain.model.Stream
-import com.nuvio.tv.domain.model.StreamDebridCacheState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -152,8 +151,8 @@ internal class PlayerCopyList(private val controller: PlayerRuntimeController) :
  * server stream is direct play; one request at a time from a server away from the home network), Usenet links streamed by a local
  * AIOStreams, plain file links, app debrid entries or add-on sources naming their torrent, through the app's own
  * keys: TorBox (from the user's list, or a cached copy added and removed again) and Premiumize (direct download),
- * and otherwise cached debrid copies through their resolve links or the app's resolver, which may leave the title in
- * that debrid account ([CopyChoice.linkRejection]).
+ * and other app debrid entries through the app's resolver (Real-Debrid and AllDebrid only with titles already in the
+ * account). An add-on's own debrid link is never opened for a copy ([CopyChoice.linkRejection]).
  */
 internal class ThumbnailCopySources(
     private val host: CopyListHost,
@@ -238,7 +237,7 @@ internal class ThumbnailCopySources(
                 else -> {
                     val url = stream.getStreamUrl() ?: return@mapIndexedNotNull null
                     val text = streamText(stream)
-                    CopyChoice.linkRejection(url, text, cachedOf(stream))?.let {
+                    CopyChoice.linkRejection(url, text)?.let {
                         leaveOut(it)
                         return@mapIndexedNotNull null
                     }
@@ -434,10 +433,6 @@ internal class ThumbnailCopySources(
         }
     }
 
-    private fun cachedOf(stream: Stream): Boolean? = when {
-        stream.debridCacheStatus?.state == StreamDebridCacheState.CACHED -> true
-        else -> stream.clientResolve?.isCached
-    }
 }
 
 /**

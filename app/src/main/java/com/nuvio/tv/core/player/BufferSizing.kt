@@ -40,6 +40,8 @@ object BufferSizing {
     const val FOUR_K_BITRATE_BPS = 50_000_000L
     /** About 5 s of a 4K remux at 80 Mbit/s. */
     const val MIN_SIZED_BUFFER_MB = 50
+    /** 32-bit process: the buffer stops growing once the process uses this much of its 4 GB address space. */
+    const val ADDRESS_SPACE_CEILING_32BIT_MB = 3_300L
 
     /**
      * 1 GB boxes: under the same 1.15 GB edge as [BUFFER_1GB_BOX_MB]. Only these get [oneGbFloorMb]; every bigger box
@@ -67,6 +69,13 @@ object BufferSizing {
         totalMem < 4.8 * GB -> BUFFER_4GB_BOX_MB
         totalMem < 6.8 * GB -> BUFFER_6GB_BOX_MB
         else -> BUFFER_8GB_BOX_MB
+    }
+
+    fun addressSpaceUsedMbOn32Bit(): Long? {
+        if (android.os.Process.is64Bit()) return null
+        return runCatching {
+            com.nuvio.tv.core.player.thumbnail.MemoryGovernor.parseVmSizeMb(java.io.File("/proc/self/status").readText())
+        }.getOrNull()
     }
 
     fun isSmallBox(totalMem: Long): Boolean = totalMem <= 0L || totalMem < SMALL_BOX_RAM_BYTES

@@ -26,17 +26,6 @@ internal fun subtitleOutlineSizeName(size: SubtitleOutlineSize): String = string
 })
 
 @Composable
-internal fun SubtitleFontDialog(selected: SubtitleFont?, onSelected: (SubtitleFont?) -> Unit, onDismiss: () -> Unit) {
-    SettingsSingleChoiceDialog<SubtitleFont?>(
-        title = stringResource(R.string.subtitle_font_family),
-        options = listOf(SettingsPickerOption<SubtitleFont?>(null, subtitleFontName(null))) +
-            SubtitleFont.entries.map { SettingsPickerOption<SubtitleFont?>(it, it.displayName, titleFontFamily = subtitleFontFamily(it)) },
-        selectedValue = selected,
-        onOptionSelected = { onSelected(it); onDismiss() }, onDismiss = onDismiss
-    )
-}
-
-@Composable
 internal fun SubtitleOutlineSizeDialog(selected: SubtitleOutlineSize, onSelected: (SubtitleOutlineSize) -> Unit, onDismiss: () -> Unit) {
     SettingsSingleChoiceDialog(
         title = stringResource(R.string.subtitle_style_outline),
@@ -46,7 +35,7 @@ internal fun SubtitleOutlineSizeDialog(selected: SubtitleOutlineSize, onSelected
     )
 }
 
-private fun subtitleFontFamily(font: SubtitleFont): FontFamily {
+internal fun subtitleFontFamily(font: SubtitleFont): FontFamily {
     font.appFont?.let { return getFontFamily(it) }
     val regular = Font(font.fontResource(), if (font == SubtitleFont.NOTO_SANS_SEMIBOLD) FontWeight.SemiBold else FontWeight.Normal)
     return font.boldFontResource()?.let { FontFamily(regular, Font(it, FontWeight.Bold)) } ?: FontFamily(regular)

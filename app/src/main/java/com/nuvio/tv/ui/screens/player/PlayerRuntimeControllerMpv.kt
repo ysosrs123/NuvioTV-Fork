@@ -14,6 +14,9 @@ private const val MPV_RESUME_SEEK_TOLERANCE_MS = 1500L
 
 internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
     if (mpvView === view) return
+    // A view that leaves the screen is never shown again. Released here, or its libmpv instance with
+    // the demuxer cache, decoders and threads outlives the player when the screen goes first.
+    if (mpvView != null) releaseMpvPlayer()
     mpvView = view
 
     if (view == null) return
@@ -48,6 +51,7 @@ internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
         )
         view.applySubtitleStyle(_uiState.value.effectiveSubtitleStyle)
         view.setSubtitleDelayMs(mpvSubtitleDelayMs(_uiState.value.subtitleDelayMs))
+        applyMpvPassthroughCodecs(view)
         view.applyBluetoothAudioRoute(currentAudioOutputRoute?.isBluetooth == true)
         view.setAudioDelayMs(_uiState.value.audioDelayMs)
         view.applyAspectMode(_uiState.value.aspectMode)
@@ -58,6 +62,7 @@ internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
         endDetectionArmed = false
         mpvEofSeenClear = false
         exoEndOverrunHandled = false
+        exoSourceEndReached = false
         _uiState.update {
             it.copy(
                 isBuffering = true,
@@ -174,6 +179,7 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
         )
         view.applySubtitleStyle(_uiState.value.effectiveSubtitleStyle)
         view.setSubtitleDelayMs(mpvSubtitleDelayMs(_uiState.value.subtitleDelayMs))
+        applyMpvPassthroughCodecs(view)
         view.applyBluetoothAudioRoute(currentAudioOutputRoute?.isBluetooth == true)
         view.setAudioDelayMs(_uiState.value.audioDelayMs)
         view.applyAspectMode(_uiState.value.aspectMode)
@@ -185,6 +191,7 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
         endDetectionArmed = false
         mpvEofSeenClear = false
         exoEndOverrunHandled = false
+        exoSourceEndReached = false
         _uiState.update {
             it.copy(
                 isBuffering = true,
@@ -357,7 +364,7 @@ internal fun PlayerRuntimeController.resumeForLifecycle() {
         if (MpvStartupWatchdogPolicy.restartTickOnResume(
                 hasRenderedFirstFrame = hasRenderedFirstFrame,
                 hasStream = currentStreamUrl.isNotBlank(),
-                hasView = mpvView != null
+                mpvLoaded = mpvView?.isMpvLoaded == true
             )
         ) {
             if (MpvStartupWatchdogPolicy.unpauseOnResume(hasRenderedFirstFrame, partyBridge?.inParty == true)) {

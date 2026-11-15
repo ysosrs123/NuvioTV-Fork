@@ -38,6 +38,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.R
+import com.nuvio.tv.data.repository.SentReportsStore
 import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.core.report.recordingClock
 import com.nuvio.tv.data.repository.PlaybackIssueViewerChoices
@@ -414,6 +416,13 @@ internal fun ColumnScope.ReadyToSendStep(
     }
     Text(
         text = stringResource(R.string.report_never_sent),
+        style = MaterialTheme.typography.bodySmall,
+        color = NuvioTheme.extendedColors.textSecondary
+    )
+    val context = LocalContext.current
+    val following = remember { SentReportsStore.checkEnabledNow(context) }
+    Text(
+        text = stringResource(if (following) R.string.report_ready_follow else R.string.report_ready_follow_off),
         style = MaterialTheme.typography.bodySmall,
         color = NuvioTheme.extendedColors.textSecondary
     )

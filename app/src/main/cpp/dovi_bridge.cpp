@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "dovi_rpu_guard.h"
+
 #define LOG_TAG "DoviBridgeNative"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
@@ -40,6 +42,27 @@ static inline bool dovi_has_error(const DoviRpuOpaque* rpu, std::string* out_err
     return true;
 }
 
+// RPUs the guard refuses never reach libdovi (see dovi_rpu_guard.h). Throttled log: first and every 100th.
+static std::atomic<uint64_t> g_rpuGuardRefusals{0};
+static inline bool rpu_passes_guard(const uint8_t* data, size_t len, bool escaped) {
+    const int verdict = dovi_guard::check(data, len, escaped, nullptr);
+    if (verdict == dovi_guard::kOk) return true;
+    const uint64_t n = g_rpuGuardRefusals.fetch_add(1, std::memory_order_relaxed) + 1;
+    if (n == 1 || n % 100 == 0) {
+        LOGW("DV7_NATIVE: RPU refused before libdovi (reason=%d, refused=%llu)",
+             verdict, static_cast<unsigned long long>(n));
+    }
+    return false;
+}
+
+static inline DoviRpuOpaque* guarded_parse_unspec62_nalu(const uint8_t* data, size_t len) {
+    return rpu_passes_guard(data, len, true) ? dovi_parse_unspec62_nalu(data, len) : nullptr;
+}
+
+static inline DoviRpuOpaque* guarded_parse_rpu(const uint8_t* data, size_t len) {
+    return rpu_passes_guard(data, len, false) ? dovi_parse_rpu(data, len) : nullptr;
+}
+
 static inline DoviRpuOpaque* dovi_parse_any_rpu(const std::vector<uint8_t>& payload, std::string* out_error) {
     if (payload.empty()) {
         if (out_error != nullptr) {
@@ -49,7 +72,7 @@ static inline DoviRpuOpaque* dovi_parse_any_rpu(const std::vector<uint8_t>& payl
     }
 
     std::string parse_error;
-    DoviRpuOpaque* parsed = dovi_parse_unspec62_nalu(payload.data(), payload.size());
+    DoviRpuOpaque* parsed = guarded_parse_unspec62_nalu(payload.data(), payload.size());
     if (parsed != nullptr && !dovi_has_error(parsed, &parse_error)) {
         return parsed;
     }
@@ -57,7 +80,7 @@ static inline DoviRpuOpaque* dovi_parse_any_rpu(const std::vector<uint8_t>& payl
         dovi_rpu_free(parsed);
     }
 
-    parsed = dovi_parse_rpu(payload.data(), payload.size());
+    parsed = guarded_parse_rpu(payload.data(), payload.size());
     if (parsed != nullptr && !dovi_has_error(parsed, &parse_error)) {
         return parsed;
     }
@@ -254,7 +277,7 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeConvertDv7RpuToDv81NonAllocating(
     static int preferredParser = 0; // 0 unknown, 1 unspec62, 2 raw rpu
     DoviRpuOpaque* rpu = nullptr;
     if (preferredParser != 2) {
-        rpu = dovi_parse_unspec62_nalu(input.data(), input.size());
+        rpu = guarded_parse_unspec62_nalu(input.data(), input.size());
         if (rpu != nullptr && !dovi_has_error(rpu, nullptr)) {
             preferredParser = 1;
         } else if (rpu != nullptr) {
@@ -263,7 +286,7 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeConvertDv7RpuToDv81NonAllocating(
         }
     }
     if (rpu == nullptr) {
-        rpu = dovi_parse_rpu(input.data(), input.size());
+        rpu = guarded_parse_rpu(input.data(), input.size());
         if (rpu != nullptr && !dovi_has_error(rpu, nullptr)) {
             preferredParser = 2;
         } else if (rpu != nullptr) {
@@ -743,10 +766,10 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
                         shouldDrop = true;
                     } else if (convertDovi) {
 #if DOVI_REAL_LINKED
-                        DoviRpuOpaque* rpu = dovi_parse_unspec62_nalu(sampleBuffer.data() + nalStart, nalSize);
+                        DoviRpuOpaque* rpu = guarded_parse_unspec62_nalu(sampleBuffer.data() + nalStart, nalSize);
                         if (rpu == nullptr || dovi_has_error(rpu, nullptr)) {
                             if (rpu != nullptr) dovi_rpu_free(rpu);
-                            rpu = dovi_parse_rpu(sampleBuffer.data() + nalStart, nalSize);
+                            rpu = guarded_parse_rpu(sampleBuffer.data() + nalStart, nalSize);
                             if (rpu != nullptr && dovi_has_error(rpu, nullptr)) {
                                 dovi_rpu_free(rpu);
                                 rpu = nullptr;
@@ -864,10 +887,10 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
                             shouldDrop = true;
                         } else if (convertDovi) {
 #if DOVI_REAL_LINKED
-                            DoviRpuOpaque* rpu = dovi_parse_unspec62_nalu(sampleBuffer.data() + nalBegin, nalSize);
+                            DoviRpuOpaque* rpu = guarded_parse_unspec62_nalu(sampleBuffer.data() + nalBegin, nalSize);
                             if (rpu == nullptr || dovi_has_error(rpu, nullptr)) {
                                 if (rpu != nullptr) dovi_rpu_free(rpu);
-                                rpu = dovi_parse_rpu(sampleBuffer.data() + nalBegin, nalSize);
+                                rpu = guarded_parse_rpu(sampleBuffer.data() + nalBegin, nalSize);
                                 if (rpu != nullptr && dovi_has_error(rpu, nullptr)) {
                                     dovi_rpu_free(rpu);
                                     rpu = nullptr;

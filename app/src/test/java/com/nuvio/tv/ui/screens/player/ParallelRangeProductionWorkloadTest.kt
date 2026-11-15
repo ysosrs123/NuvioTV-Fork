@@ -162,20 +162,21 @@ class ParallelRangeProductionWorkloadTest {
         while(!fact() && System.nanoTime()<end) Thread.sleep(2)
         assertTrue(message,fact())
     }
-    @Test fun `three connection playback repeated seeks actually creates thirty two shared workers`() {
+    @Test fun `three connection playback repeated seeks stays within the playback worker count`() {
         Fixture().use { f ->
             val ds=f.source();f.bootstrap(ds)
+            val workers=ParallelRangeDataSource.playbackWorkerCount(false)
             for(chunk in 1L..36L) {
                 assertEquals(f.total-chunk*CHUNK,ds.open(f.spec(chunk)))
                 assertEquals(((chunk*CHUNK)%127).toByte(),f.readAsync(ds).get(5,TimeUnit.SECONDS))
                 f.waitDone(ds,chunk);ds.close()
             }
             assertEquals(36,f.workerOpens.size)
-            assertEquals(32,f.pool.largestPoolSize)
-            assertEquals(32,f.pool.corePoolSize);assertEquals(64,f.pool.maximumPoolSize)
+            assertEquals(workers,f.pool.largestPoolSize)
+            assertEquals(workers,f.pool.corePoolSize);assertEquals(workers,f.pool.maximumPoolSize)
             assertTrue(f.pool.queue.isEmpty())
             val live=Thread.getAllStackTraces().keys.count { it.isAlive && it.name=="parallel-ds-worker" }
-            assertEquals(32,live)
+            assertEquals(workers,live)
             println("WORKLOAD worker-creation connections=3 seeks=36 actualTasks=36 peakWorkers=${f.pool.largestPoolSize} liveWorkers=$live")
         }
     }
@@ -248,27 +249,28 @@ class ParallelRangeProductionWorkloadTest {
     @Test fun `saturated actual chunk tasks queue reader and hedge until a worker retires`() {
         manualClock.set(1000)
         Fixture().use { f ->
-            val ds=f.source();f.bootstrap(ds);ds.open(f.spec(33))
+            val workers=ParallelRangeDataSource.playbackWorkerCount(false).toLong();val current=workers+1
+            val ds=f.source();f.bootstrap(ds);ds.open(f.spec(current))
             // The real session cap may cancel an older future before it starts.
             // Admit each controlled body before the next so cancelled/blocked
             // transports actually occupy the normal worker, not an imagined slot.
-            val holds=(1L..32L).map { chunk ->
+            val holds=(1L..workers).map { chunk ->
                 f.hold(chunk).also { hold ->
                     invoke(ds,"ensureChunkScheduled",chunk)
                     assertTrue("actual body $chunk entered",hold.entered.await(5,TimeUnit.SECONDS))
                 }
             }
             val read=f.readAsync(ds)
-            awaitCondition("real current chunk queued") { f.futures(f.session(ds)).containsKey(33) && f.pool.queue.size>=1 }
+            awaitCondition("real current chunk queued") { f.futures(f.session(ds)).containsKey(current) && f.pool.queue.size>=1 }
             awaitCondition("queued reader sampled absent watermark") { readerClockCalls.get()>=6 }
             manualClock.set(3500)
             awaitCondition("normal task plus reader escalation both queued") { f.pool.queue.size>=2 }
-            assertEquals(32,f.pool.largestPoolSize);assertFalse(read.isDone)
+            assertEquals(workers.toInt(),f.pool.largestPoolSize);assertFalse(read.isDone)
             holds.first().release.countDown()
-            assertEquals(((33*CHUNK)%127).toByte(),read.get(5,TimeUnit.SECONDS))
-            f.waitDone(ds,33);holds.forEach { it.release.countDown() }
+            assertEquals(((current*CHUNK)%127).toByte(),read.get(5,TimeUnit.SECONDS))
+            f.waitDone(ds,current);holds.forEach { it.release.countDown() }
             awaitCondition("all actual tasks and hedge settle") { f.pool.activeCount==0 && f.pool.queue.isEmpty() }
-            println("WORKLOAD saturation workers=${f.pool.largestPoolSize} connections=3 internalActualChunkAdmission=32 queuedReaderAndHedge=true")
+            println("WORKLOAD saturation workers=${f.pool.largestPoolSize} connections=3 internalActualChunkAdmission=$workers queuedReaderAndHedge=true")
         }
     }
     @Test fun `abandoned noncooperative real body cannot publish into a fresh session`() {
@@ -292,7 +294,7 @@ class ParallelRangeProductionWorkloadTest {
             assertEquals("late old bytes must not overwrite fresh retained bytes",((CHUNK+17)%127).toByte(),f.readAsync(fresh).get(5,TimeUnit.SECONDS))
         }
     }
-    @Test fun `handed off session is out of reach at once and a worker closes its download`() {
+    @Test fun `handed off session is out of reach at once and only its own worker closes the download`() {
         manualClock.set(1000)
         Fixture().use { f ->
             val old=f.source();f.bootstrap(old);val hold=f.hold(1)
@@ -302,9 +304,11 @@ class ParallelRangeProductionWorkloadTest {
             old.close();f.closers.clear()
             invoke(f.resources,"handOffRetainedSession")
             assertNull(field(f.resources,"currentChunkSession"))
-            assertTrue("the held download is closed",hold.release.await(5,TimeUnit.SECONDS))
+            assertFalse("no other thread closes a download still being read",hold.release.await(300,TimeUnit.MILLISECONDS))
+            assertTrue(f.closers.isEmpty())
+            hold.release.countDown()
             awaitCondition("old session drains") { oldFuture.isDone && f.pool.activeCount==0 }
-            assertTrue(f.closers.isNotEmpty());assertFalse(Thread.currentThread() in f.closers)
+            assertTrue(f.closers.isNotEmpty());assertTrue(f.closers.all { it.name=="parallel-ds-worker" })
             assertTrue(f.futures(oldSession).isEmpty())
         }
     }

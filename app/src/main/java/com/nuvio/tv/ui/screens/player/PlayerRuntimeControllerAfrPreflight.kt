@@ -67,6 +67,9 @@ private fun PlayerRuntimeController.seedFrameRateFromPrewarmedHead(url: String, 
     )
 }
 
+internal val PlayerRuntimeController.afrAllowSeamlessSwitch: Boolean
+    get() = lastAppliedPlayerSettings?.afrAllowSeamlessSwitch == true
+
 internal suspend fun PlayerRuntimeController.runAfrCachePreflightIfEnabled(
     url: String,
     headers: Map<String, String>,
@@ -138,7 +141,8 @@ internal suspend fun PlayerRuntimeController.runAfrCachePreflightIfEnabled(
         frameRate = targetFrameRate,
         videoWidth = cached.videoWidth,
         videoHeight = cached.videoHeight,
-        resolutionMatchingEnabled = resolutionMatchingEnabled
+        resolutionMatchingEnabled = resolutionMatchingEnabled,
+        allowSeamlessSwitch = afrAllowSeamlessSwitch
     )
     if (isStale()) return
 
@@ -248,7 +252,8 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
                 frameRate = targetFrameRate,
                 videoWidth = cached.videoWidth,
                 videoHeight = cached.videoHeight,
-                resolutionMatchingEnabled = resolutionMatchingEnabled
+                resolutionMatchingEnabled = resolutionMatchingEnabled,
+                allowSeamlessSwitch = afrAllowSeamlessSwitch
             )
             if (isStale()) return
 
@@ -383,7 +388,8 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
             frameRate = targetFrameRate,
             videoWidth = detection.videoWidth,
             videoHeight = detection.videoHeight,
-            resolutionMatchingEnabled = resolutionMatchingEnabled
+            resolutionMatchingEnabled = resolutionMatchingEnabled,
+            allowSeamlessSwitch = afrAllowSeamlessSwitch
         )
         if (isStale()) return
 

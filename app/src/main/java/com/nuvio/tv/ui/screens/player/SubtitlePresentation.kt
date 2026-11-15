@@ -84,13 +84,22 @@ internal class SubtitleBoldItalicSpan : MetricAffectingSpan() {
 
 internal class SubtitlePresentation {
     // Work happens at cue changes, never on a video frame. Bound retained bitmap memory.
-    private val originals = java.util.WeakHashMap<Cue, Cue>()
+    // Keyed by identity: hashing a cue walks its whole text and every span, which is slow for long cues.
+    private val originals = ArrayDeque<Pair<java.lang.ref.WeakReference<Cue>, Cue>>()
+
+    private fun originalOf(cue: Cue): Cue? = originals.firstOrNull { it.first.get() === cue }?.second
+
+    private fun remember(result: Cue, original: Cue) {
+        originals.removeAll { it.first.get().let { key -> key == null || key === result } }
+        originals.addFirst(java.lang.ref.WeakReference(result) to original)
+        while (originals.size > MAX_REMEMBERED) originals.removeLast()
+    }
     private var originalBitmap: Bitmap? = null
     private var dimmedBitmap: Bitmap? = null
 
     @Synchronized
     fun apply(input: Cue, style: SubtitleStyleSettings, dim: Boolean, preserveAss: Boolean, edgeSpan: SubtitleEdgeSpan? = null): Cue {
-        val cue = originals[input] ?: input
+        val cue = originalOf(input) ?: input
         var builder: Cue.Builder? = null
         val text = cue.text
         if (text != null && (text is Spanned || (edgeSpan != null && text.isNotEmpty()))) {
@@ -164,9 +173,13 @@ internal class SubtitlePresentation {
         }
         val result = builder?.build() ?: cue
         if (result !== cue) {
-            originals[result] = cue
+            remember(result, cue)
         }
         return result
+    }
+
+    private companion object {
+        const val MAX_REMEMBERED = 16
     }
 }
 
