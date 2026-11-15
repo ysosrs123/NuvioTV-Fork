@@ -10,6 +10,10 @@ import androidx.annotation.FontRes
 import androidx.annotation.RequiresApi
 import androidx.core.content.res.ResourcesCompat
 import com.nuvio.tv.R
+import com.nuvio.tv.core.player.ImportedSubtitleFont
+import com.nuvio.tv.core.player.ImportedSubtitleFontStore
+import com.nuvio.tv.core.player.ImportedSubtitleFonts
+import com.nuvio.tv.data.local.SubtitleStyleSettings
 import com.nuvio.tv.domain.model.AppFont
 import com.nuvio.tv.domain.model.SubtitleFont
 import java.io.File
@@ -82,9 +86,17 @@ internal fun mpvPlainSubtitleScale(
     exoTextSizePx: Double,
     screenHeightPx: Double,
     referenceHeight: Double
+): Double = mpvPlainSubtitleScale(font.mpvLineHeightEm(), fontSize, exoTextSizePx, screenHeightPx, referenceHeight)
+
+internal fun mpvPlainSubtitleScale(
+    lineHeightEm: Double,
+    fontSize: Double,
+    exoTextSizePx: Double,
+    screenHeightPx: Double,
+    referenceHeight: Double
 ): Double {
-    if (fontSize <= 0.0 || exoTextSizePx <= 0.0 || screenHeightPx <= 0.0) return 1.0
-    val mpvLettersPx = fontSize / font.mpvLineHeightEm() * screenHeightPx / referenceHeight
+    if (fontSize <= 0.0 || exoTextSizePx <= 0.0 || screenHeightPx <= 0.0 || lineHeightEm <= 0.0) return 1.0
+    val mpvLettersPx = fontSize / lineHeightEm * screenHeightPx / referenceHeight
     return exoTextSizePx / mpvLettersPx
 }
 
@@ -122,6 +134,42 @@ internal fun mpvSubtitleFontResources(): List<Int> =
         listOf(R.font.atkinson_hyperlegible_next_italic, R.font.source_sans3_italic)
 
 private val notoTypefaces = ConcurrentHashMap<Boolean, Typeface>()
+
+/** The imported font when one is chosen and its file is here, else the bundled choice. */
+internal fun resolvedSubtitleTypeface(context: Context, style: SubtitleStyleSettings): Typeface =
+    importedSubtitleTypeface(context, style.importedFontId, style.bold)
+        ?: subtitleTypeface(context, style.font, style.bold)
+
+internal fun importedSubtitleTypeface(context: Context, id: String?, bold: Boolean): Typeface? {
+    if (id == null || !ImportedSubtitleFonts.isImportedId(id)) return null
+    val base = ImportedSubtitleFontStore.get(context).typeface(id) ?: return null
+    return if (bold) Typeface.create(base, Typeface.BOLD) else base
+}
+
+/** The imported font libass should draw, or null to use the bundled choice. */
+internal fun importedMpvSubtitleFont(context: Context, style: SubtitleStyleSettings): ImportedSubtitleFont? {
+    val store = ImportedSubtitleFontStore.get(context)
+    return store.font(style.importedFontId)?.takeIf { store.fontFile(it.id) != null }
+}
+
+internal data class MpvSubFontPick(val font: String, val bold: Boolean)
+
+/**
+ * libass reads the fonts folder once, when mpv starts. A font imported during playback is not there yet, so the
+ * font in use stays until the next start instead of falling back to libass's default.
+ */
+internal fun mpvSubtitleFontPick(
+    importedId: String?,
+    importedFamily: String?,
+    loadedImportedIds: Set<String>,
+    bundled: MpvSubFontPick,
+    importedBold: Boolean,
+    previous: MpvSubFontPick?
+): MpvSubFontPick = when {
+    importedId == null || importedFamily == null -> bundled
+    importedId in loadedImportedIds -> MpvSubFontPick(importedFamily, importedBold)
+    else -> previous ?: bundled
+}
 
 /** Cached Android resources; never resolved from the UI font or downloaded. */
 internal fun subtitleTypeface(context: Context?, font: SubtitleFont?, bold: Boolean): Typeface {
@@ -161,11 +209,12 @@ private fun notoSubtitleTypeface(context: Context, bold: Boolean): Typeface {
         .build()
 }
 
-/** libass/MPV must discover the actual bundled fonts, not just receive a name. */
+/** libass/MPV must discover the actual bundled and imported fonts, not just receive a name. */
 @Synchronized
 internal fun prepareMpvSubtitleFonts(context: Context): File {
     val directory = File(context.filesDir, "subtitle-fonts-v1")
     check(directory.isDirectory || directory.mkdirs())
+    syncImportedMpvSubtitleFonts(context, directory)
     for (resource in mpvSubtitleFontResources()) {
         val bytes = context.resources.openRawResource(resource).use { it.readBytes() }
         val target = File(directory, "${context.resources.getResourceEntryName(resource)}.ttf")
@@ -176,4 +225,23 @@ internal fun prepareMpvSubtitleFonts(context: Context): File {
         }
     }
     return directory
+}
+
+private const val IMPORTED_MPV_FONT_PREFIX = "imported-"
+
+/** Imported fonts sit beside the bundled ones; copies of removed fonts are deleted. */
+private fun syncImportedMpvSubtitleFonts(context: Context, directory: File) {
+    val store = ImportedSubtitleFontStore.get(context)
+    val wanted = store.fonts.value.mapNotNull { font ->
+        store.fontFile(font.id)?.let { "$IMPORTED_MPV_FONT_PREFIX${font.id}.${font.extension}" to it }
+    }.toMap()
+    directory.listFiles { file -> file.name.startsWith(IMPORTED_MPV_FONT_PREFIX) && file.name !in wanted }
+        ?.forEach { it.delete() }
+    for ((name, source) in wanted) {
+        val target = File(directory, name)
+        if (target.isFile && target.length() == source.length()) continue
+        val temporary = File(directory, "$name.tmp")
+        source.copyTo(temporary, overwrite = true)
+        check(temporary.renameTo(target)) { "Could not install imported subtitle font" }
+    }
 }

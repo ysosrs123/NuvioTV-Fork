@@ -60,6 +60,7 @@ internal object SubtitleFontWebPage {
 </div>
 <script>
 const input=document.getElementById('font');
+const key=new URLSearchParams(location.search).get('k')||'';
 const statusBox=document.getElementById('status');
 function show(text,failed){statusBox.textContent=text;statusBox.className=failed?'status error':'status'}
 input.addEventListener('change',async()=>{
@@ -68,7 +69,7 @@ input.addEventListener('change',async()=>{
   show($uploading,false);
   try{
     const response=await fetch('/api/font',{method:'POST',
-      headers:{'Content-Type':'application/octet-stream','X-File-Name':encodeURIComponent(file.name)},body:file});
+      headers:{'Content-Type':'application/octet-stream','X-File-Name':encodeURIComponent(file.name),'X-Upload-Key':key},body:file});
     if(response.ok){show($added,false)}else{show($error,true)}
   }catch(e){show($connectionError,true)}
   input.value='';
