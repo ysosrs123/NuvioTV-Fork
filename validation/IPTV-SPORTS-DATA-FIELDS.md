@@ -2285,3 +2285,11 @@ Confirmed now: an NHL shootout in progress on the scoreboard.
 
 Still unconfirmed: the UFC finish method arriving later for a bout first posted without one;
 AFL/NRL live clock (off season); a golf playoff in progress.
+
+## Fifty-eighth pass (15 November 10:28 onwards)
+
+Scheduled captures on Sunday 15 November with a UFC poll through UFC 334. Golf third rounds in
+progress (PGA, LPGA), NHL and NBA as before. Every finished bout so far had its method in the
+first sample in which it was final.
+
+Still unconfirmed: as in the fifty-seventh pass.
