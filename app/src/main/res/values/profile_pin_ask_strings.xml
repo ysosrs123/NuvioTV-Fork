@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Ask for the PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Every time</string>
+    <string name="profile_pin_ask_every_sub">Opening this profile always asks for the PIN.</string>
+    <string name="profile_pin_ask_not_start">Not when Arc starts</string>
+    <string name="profile_pin_ask_not_start_sub">With Remember last profile on, Arc opens straight into %1$s. Choosing %1$s from the profile list still asks.</string>
+    <string name="profile_pin_ask_limits">Only for kids\' limits</string>
+    <string name="profile_pin_ask_limits_sub">%1$s opens without the PIN. It\'s still asked to play above a kids profile\'s limit and to change a limit.</string>
+    <string name="profile_pin_ask_limits_warn">Anyone on this box can open %1$s, kids included.</string>
+    <string name="profile_pin_ask_heading">When to ask for %1$s\'s PIN</string>
+    <string name="profile_pin_ask_verify">Enter %1$s\'s PIN to change when it\'s asked</string>
+    <string name="profile_pin_ask_saved">%1$s\'s PIN: %2$s</string>
+</resources>

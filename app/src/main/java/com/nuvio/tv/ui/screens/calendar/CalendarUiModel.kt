@@ -49,7 +49,8 @@ data class CalendarRow(
     val backdrop: String? = null,
     val logo: String? = null,
     val rating: Double? = null,
-    val genre: String? = null
+    val genre: String? = null,
+    val streaming: Boolean = false
 ) {
     val dimmed: Boolean get() = status == CalendarRowStatus.WATCHED
     val isFilm: Boolean get() = type == CalendarTitleType.MOVIE
@@ -156,7 +157,8 @@ fun calendarRow(
         backdrop = title.backdrop?.takeIf(String::isNotBlank),
         logo = title.logo?.takeIf(String::isNotBlank),
         rating = title.rating,
-        genre = title.genre
+        genre = title.genre,
+        streaming = title.tvmazeStreaming
     )
 }
 

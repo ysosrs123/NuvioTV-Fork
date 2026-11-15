@@ -47,6 +47,8 @@ class AccountLocalDataResetService @Inject constructor(
                 .onFailure { Log.w(ACCOUNT_RESET_TAG, "Failed to clear profile credentials", it) }
             runCatching { com.nuvio.tv.core.ratinglimit.ratingLimitGate(context).forgetAll() }
                 .onFailure { Log.w(ACCOUNT_RESET_TAG, "Failed to clear rating limits", it) }
+            runCatching { com.nuvio.tv.core.profile.pinAskStore(context).forgetAll() }
+                .onFailure { Log.w(ACCOUNT_RESET_TAG, "Failed to clear PIN choices", it) }
             runCatching { com.nuvio.tv.data.local.SupporterMarkerStore.clear(context) }
                 .onFailure { Log.w(ACCOUNT_RESET_TAG, "Failed to clear the supporter marker", it) }
             runCatching { clearAccountFiles() }

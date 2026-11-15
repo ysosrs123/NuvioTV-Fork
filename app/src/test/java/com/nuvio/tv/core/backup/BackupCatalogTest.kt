@@ -25,6 +25,7 @@ class BackupCatalogTest {
         assertEquals(BackupPart.DEVICE, BackupCatalog.partFor(player, "allow_truehd_passthrough"))
         assertEquals(BackupPart.DEVICE, BackupCatalog.partFor(player, "dv7_handling_mode"))
         assertEquals(BackupPart.DEVICE, BackupCatalog.partFor(player, "night_mode"))
+        assertEquals(BackupPart.DEVICE, BackupCatalog.partFor(player, "subtitle_font_id"))
         assertEquals(BackupPart.SETTINGS, BackupCatalog.partFor(player, "subtitle_font"))
         assertEquals(BackupPart.SETTINGS, BackupCatalog.partFor(player, "player_chapters_enabled"))
         assertEquals(BackupPart.DEVICE, BackupCatalog.partFor(spec(BackupStoreKind.PROFILE_STORE, "trailer_settings"), "trailer_allow_4k"))

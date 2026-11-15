@@ -249,4 +249,21 @@ class FormatCheckLogicTest {
         assertEquals(listOf(FormatSettingNote.DV_MODE), FormatCheckSettingNotes.forClip(FormatCheckCatalog.byId("fc02")!!, FormatCheckSettings(dolbyVisionNotAuto = true)))
         assertTrue(FormatCheckSettingNotes.forClip(FormatCheckCatalog.byId("fc03")!!, FormatCheckSettings(dolbyVisionNotAuto = true)).isEmpty())
     }
+
+    @Test
+    fun `stopping the clip server closes connections still open`() {
+        val folder = java.nio.file.Files.createTempDirectory("clips").toFile()
+        val server = LocalClipServer(folder)
+        server.start()
+        val port = java.net.URI(server.url("x.mkv")).port
+        val idle = java.net.Socket("127.0.0.1", port)
+        val deadline = System.currentTimeMillis() + 2_000
+        while (server.openConnections() == 0 && System.currentTimeMillis() < deadline) Thread.sleep(10)
+        assertEquals(1, server.openConnections())
+        server.stop()
+        idle.soTimeout = 2_000
+        assertEquals(-1, idle.getInputStream().read())
+        idle.close()
+        folder.deleteRecursively()
+    }
 }

@@ -4,6 +4,7 @@ import com.nuvio.tv.domain.model.Stream
 import com.nuvio.tv.domain.model.StreamBadge
 import java.util.regex.Pattern
 import java.util.regex.Matcher
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
@@ -199,6 +200,16 @@ internal object StreamBadgeRulesParser {
 
 internal object StreamBadgeMatcher {
     private val WHITESPACE_PATTERN = Regex("\\s+")
+    private val lastCompiled = AtomicReference<Pair<StreamBadgeRules, List<CompiledStreamBadgeFilter>>?>(null)
+
+    fun compileCached(rules: StreamBadgeRules): List<CompiledStreamBadgeFilter> {
+        lastCompiled.get()?.let { (source, compiled) ->
+            if (source == rules) return compiled
+        }
+        val compiled = compile(rules)
+        lastCompiled.set(rules to compiled)
+        return compiled
+    }
 
     fun compile(rules: StreamBadgeRules): List<CompiledStreamBadgeFilter> {
         if (!rules.hasImport) return emptyList()

@@ -16,17 +16,19 @@ object ArtCompileStatus {
     /** Blocking file reads: call off the main thread. */
     fun logOnce(context: Context, tag: String) {
         if (!logged.compareAndSet(false, true)) return
-        val line = runCatching {
-            val status = ProfileVerifier.writeProfileVerification(context.applicationContext)
-            describe(
-                status.profileInstallResultCode,
-                status.isCompiledWithProfile,
-                status.hasProfileEnqueuedForCompilation(),
-                status.appApkHasEmbeddedProfile()
-            )
-        }.getOrElse { "ART_COMPILE: unknown (${it.javaClass.simpleName})" }
-        Log.i(tag, line)
+        Log.i(tag, read(context))
     }
+
+    /** The same line as the log, for reports. Blocking file reads: call off the main thread. */
+    fun read(context: Context): String = runCatching {
+        val status = ProfileVerifier.writeProfileVerification(context.applicationContext)
+        describe(
+            status.profileInstallResultCode,
+            status.isCompiledWithProfile,
+            status.hasProfileEnqueuedForCompilation(),
+            status.appApkHasEmbeddedProfile()
+        )
+    }.getOrElse { "ART_COMPILE: unknown (${it.javaClass.simpleName})" }
 
     internal fun describe(resultCode: Int, compiledWithProfile: Boolean, enqueued: Boolean, embedded: Boolean): String {
         val state = when (resultCode) {

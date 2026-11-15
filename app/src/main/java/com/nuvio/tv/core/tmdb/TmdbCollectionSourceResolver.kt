@@ -379,7 +379,9 @@ class TmdbCollectionSourceResolver @Inject constructor(
             released = date,
             imdbRating = voteAverage?.toFloat(),
             voteCount = null,
-            genres = emptyList()
+            genres = emptyList(),
+            originalLanguage = originalLanguage,
+            tmdbGenreIds = genres?.map { it.id }
         )
     }
 
@@ -478,7 +480,9 @@ class TmdbCollectionSourceResolver @Inject constructor(
             },
             imdbRating = voteAverage?.toFloat(),
             voteCount = voteCount,
-            genres = emptyList()
+            genres = emptyList(),
+            originalLanguage = originalLanguage,
+            tmdbGenreIds = genreIds
         )
     }
 

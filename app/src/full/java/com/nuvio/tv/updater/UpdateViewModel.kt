@@ -41,6 +41,9 @@ data class UpdateUiState(
     val autoInstallEnabled: Boolean = false,
     val autoInstallSupported: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
     val autoInstallNoticeEnabled: Boolean = true,
+    /** Updates the user installs carry dex metadata; off sends them through the system installer screen. */
+    val optimizeDuringInstall: Boolean = true,
+    val optimizeDuringInstallSupported: Boolean = ApkInstaller.supportsDexMetadata,
     /** Release installed automatically since the last launch, shown in the banner until dismissed. */
     val installedUpdate: AppUpdate? = null
 )
@@ -63,11 +66,13 @@ class UpdateViewModel @Inject constructor(
             try { updatePreferences.initializeForkStream() } catch (_: java.io.IOException) { /* Retry next launch. */ }
             val autoInstallEnabled = updatePreferences.autoInstallEnabled.first()
             val autoInstallNoticeEnabled = updatePreferences.autoInstallNoticeEnabled.first()
+            val optimizeDuringInstall = updatePreferences.optimizeDuringInstall.first()
             _uiState.update {
                 it.copy(
                     updateBannerEnabled = enabled,
                     autoInstallEnabled = autoInstallEnabled,
-                    autoInstallNoticeEnabled = autoInstallNoticeEnabled
+                    autoInstallNoticeEnabled = autoInstallNoticeEnabled,
+                    optimizeDuringInstall = optimizeDuringInstall
                 )
             }
             downloadStore.clearIfInstalled()
@@ -309,12 +314,19 @@ class UpdateViewModel @Inject constructor(
                 return@launch
             }
             _uiState.update { it.copy(showUnknownSourcesDialog = false) }
+            // Without dex metadata a session install gains nothing over the system installer, whose screen stays up
+            // while the app is closed for the install and offers to open it again.
+            val useSystemInstaller = !ApkInstaller.supportsDexMetadata || !_uiState.value.optimizeDuringInstall
             withContext(Dispatchers.IO) {
-                runCatching { ApkInstaller.install(context, apkFile, background = false) }
-                    .recoverCatching {
-                        Log.w(TAG, "Session install failed, falling back to the system installer", it)
-                        ApkInstaller.launchSystemInstaller(context, apkFile)
-                    }
+                if (useSystemInstaller) {
+                    runCatching { ApkInstaller.launchSystemInstaller(context, apkFile) }
+                } else {
+                    runCatching { ApkInstaller.install(context, apkFile, background = false) }
+                        .recoverCatching {
+                            Log.w(TAG, "Session install failed, falling back to the system installer", it)
+                            ApkInstaller.launchSystemInstaller(context, apkFile)
+                        }
+                }
             }.onFailure { error ->
                 _uiState.update { it.copy(errorMessage = error.message, showBanner = true) }
             }
@@ -346,6 +358,11 @@ class UpdateViewModel @Inject constructor(
     fun setAutoInstallNoticeEnabled(enabled: Boolean) {
         _uiState.update { it.copy(autoInstallNoticeEnabled = enabled) }
         viewModelScope.launch { updatePreferences.setAutoInstallNoticeEnabled(enabled) }
+    }
+
+    fun setOptimizeDuringInstall(enabled: Boolean) {
+        _uiState.update { it.copy(optimizeDuringInstall = enabled) }
+        viewModelScope.launch { updatePreferences.setOptimizeDuringInstall(enabled) }
     }
 
     fun setAutoInstallEnabled(enabled: Boolean) {

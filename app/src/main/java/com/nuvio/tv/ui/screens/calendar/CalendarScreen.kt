@@ -626,7 +626,7 @@ internal fun CalendarRowItem(
     var bellFocused by remember { mutableStateOf(false) }
     val press = remember { CalendarPress() }
     val contentAlpha = if (row.dimmed) 0.6f else 1f
-    val notAnnounced = stringResource(R.string.calendar_time_not_announced)
+    val notAnnounced = stringResource(calendarNoTimeLabel(row))
     val (timePrimary, timeSecondary) = calendarTimeTexts(row, formats, showDate = !compact)
 
     Row(
@@ -732,11 +732,15 @@ internal fun CalendarRowItem(
     }
 }
 
+/** What a row shows in place of a time: a show that streams first is out that day, its hour is just not given. */
+internal fun calendarNoTimeLabel(row: CalendarRow): Int =
+    if (row.streaming) R.string.calendar_streaming else R.string.calendar_time_not_announced
+
 /** The time and, where it helps, the date for the right of a row; nothing for shows without a date. */
 @Composable
 internal fun calendarTimeTexts(row: CalendarRow, formats: CalendarFormats, showDate: Boolean): Pair<String?, String?> {
     val timeText = row.time?.let(formats::time)
-    val notAnnounced = stringResource(R.string.calendar_time_not_announced)
+    val notAnnounced = stringResource(calendarNoTimeLabel(row))
     return when {
         row.kind == CalendarRowKind.SHOW -> null to null
         row.section == CalendarSectionKind.LATER -> row.date?.let(formats::yearDate) to (timeText ?: notAnnounced.takeUnless { row.isFilm })

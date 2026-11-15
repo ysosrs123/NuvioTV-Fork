@@ -9,6 +9,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.player.PlayerSessionTracker
 import com.nuvio.tv.core.util.hasPendingJob
 import com.nuvio.tv.core.util.scheduleSafely
 import dagger.hilt.EntryPoint
@@ -28,11 +29,15 @@ private const val JOB_ID_CHECK = 10_020
 private const val JOB_ID_INSTALL = 10_021
 private const val JOB_ID_CHECK_NOW = 10_022
 private const val CHECK_INTERVAL_MS = 12 * 60 * 60_000L
+private const val CHECK_NOW_DELAY_MS = 3 * 60_000L
+private const val RETRY_BACKOFF_MS = 10 * 60_000L
 
 /**
  * Background update work. The periodic job checks for a new release and downloads it, so the banner can offer an
  * install without waiting for the download. On Android 12+, with automatic installs enabled, a second job installs the
  * downloaded update while the device is idle, without a confirmation screen.
+ *
+ * The download is large, so it never runs while the player is open: it waits, or stops and tries again later.
  *
  * Dependencies are obtained via Hilt EntryPoint since JobService is not a supported Hilt injection target.
  */
@@ -64,6 +69,9 @@ class UpdateJobService : JobService() {
                 throw e
             } catch (e: NoEligibleUpdateException) {
                 Log.d(TAG, e.message.orEmpty())
+            } catch (e: PlayerOpenException) {
+                Log.d(TAG, "Update download waits for the player to close")
+                retry = true
             } catch (e: Exception) {
                 Log.w(TAG, "Update job ${params.jobId} failed", e)
                 retry = true
@@ -94,7 +102,10 @@ class UpdateJobService : JobService() {
         ) return
         if (update.dismissalKey == preferences.ignoredTag.first()) return
 
-        val file = downloadStore.download(update).getOrThrow()
+        if (PlayerSessionTracker.isOpenNow) throw PlayerOpenException()
+        val file = downloadStore.download(update) { _, _ ->
+            if (PlayerSessionTracker.isOpenNow) throw PlayerOpenException()
+        }.getOrThrow()
         try {
             ApkInstaller.validateUpdate(applicationContext, file, update.versionCode, update.assetSizeBytes)
         } catch (e: Exception) {
@@ -133,17 +144,25 @@ class UpdateJobService : JobService() {
             val job = JobInfo.Builder(JOB_ID_CHECK, ComponentName(context, UpdateJobService::class.java))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setPeriodic(CHECK_INTERVAL_MS)
+                .setBackoffCriteria(RETRY_BACKOFF_MS, JobInfo.BACKOFF_POLICY_LINEAR)
                 .setPersisted(true)
                 .build()
             scheduler.scheduleSafely(job)
         }
 
-        /** Downloads a newer release found by the in-app check without waiting for the next periodic run. */
+        /**
+         * Downloads a newer release found by the in-app check without waiting for the next periodic run. It starts a
+         * few minutes later, so it does not compete with Home loading or a film starting right after launch.
+         */
         fun scheduleCheckNow(context: Context) {
+            val scheduler = context.jobScheduler()
+            if (scheduler.hasPendingJob(JOB_ID_CHECK_NOW)) return
             val job = JobInfo.Builder(JOB_ID_CHECK_NOW, ComponentName(context, UpdateJobService::class.java))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setMinimumLatency(CHECK_NOW_DELAY_MS)
+                .setBackoffCriteria(RETRY_BACKOFF_MS, JobInfo.BACKOFF_POLICY_LINEAR)
                 .build()
-            context.jobScheduler().scheduleSafely(job)
+            scheduler.scheduleSafely(job)
         }
 
         fun cancelPeriodicCheck(context: Context) {
@@ -167,3 +186,5 @@ class UpdateJobService : JobService() {
             getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
     }
 }
+
+private class PlayerOpenException : Exception("The player is open")

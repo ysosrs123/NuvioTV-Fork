@@ -4,6 +4,7 @@ import com.nuvio.tv.core.util.parseEpisodeReleaseInstant
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
@@ -23,7 +24,7 @@ internal val CALENDAR_KEEP_AHEAD: Duration = Duration.ofDays(366)
  */
 internal fun calendarEntriesToMerge(record: CalendarTitleRecord): List<CalendarEntry> {
     val tvMaze = record.sources[CalendarSource.TVMAZE].orEmpty()
-    if (record.tvmazeAnime && tvMaze.any { it.kind == CalendarEntryKind.EPISODE }) return tvMaze
+    if (record.tvmazeAnime && tvMaze.any { it.kind == CalendarEntryKind.EPISODE }) return tvMaze + animeTimesFor(record, tvMaze)
     val all = record.sources.values.flatten()
     if (tvMaze.isEmpty()) return all
     val tvMazeDays = tvMaze.mapNotNull { entry -> entry.utcDay()?.let { entry.slot to it } }.toMap()
@@ -50,23 +51,42 @@ internal fun calendarEntriesToMerge(record: CalendarTitleRecord): List<CalendarE
     }
 }
 
+/** For anime TVmaze lists without a time, the time another source gives the same episode on the same day. */
+private fun animeTimesFor(record: CalendarTitleRecord, tvMaze: List<CalendarEntry>): List<CalendarEntry> {
+    val untimedDays = tvMaze.filter { !it.timeKnown }.mapNotNull { entry -> entry.utcDay()?.let { entry.slot to it } }.toMap()
+    if (untimedDays.isEmpty()) return emptyList()
+    return record.sources.filterKeys { it != CalendarSource.TVMAZE }.values.flatten().filter { other ->
+        other.timeKnown && untimedDays[other.slot]?.let { day ->
+            other.utcDay()?.let { abs(ChronoUnit.DAYS.between(day, it)) <= 1L }
+        } == true
+    }
+}
+
 private fun CalendarEntry.utcDay(): LocalDate? =
     (airInstantMs ?: placeAtMs)?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
         ?: airDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
 /**
  * A date the Calendar knows for an episode, when it is up to [EARLIER_RELEASE_MAX_DAYS] days before what the details
- * add-on says. Later dates are never returned: an episode the add-on says is out stays out.
+ * add-on says. Later dates are never returned: an episode the add-on says is out stays out. A plain date starts at
+ * midnight in [zone], the day the Calendar shows it on.
  */
-internal fun calendarEarlierRelease(addonReleased: String?, entry: CalendarEntry): String? {
+internal fun calendarEarlierRelease(
+    addonReleased: String?,
+    entry: CalendarEntry,
+    zone: ZoneId = ZoneId.systemDefault()
+): String? {
     val addon = parseEpisodeReleaseInstant(addonReleased, ZoneOffset.UTC) ?: return null
+    val addonDay = addon.atZone(ZoneOffset.UTC).toLocalDate()
     val calendar = entry.airInstantMs?.let(Instant::ofEpochMilli)
-        ?: entry.airDate?.let { runCatching { LocalDate.parse(it).atStartOfDay(ZoneOffset.UTC).toInstant() }.getOrNull() }
+    val calendarDay = calendar?.atZone(ZoneOffset.UTC)?.toLocalDate()
+        ?: entry.airDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
         ?: return null
-    if (!calendar.isBefore(addon)) return null
-    val days = ChronoUnit.DAYS.between(calendar.atZone(ZoneOffset.UTC).toLocalDate(), addon.atZone(ZoneOffset.UTC).toLocalDate())
-    if (days > EARLIER_RELEASE_MAX_DAYS) return null
-    return entry.airDate.takeIf { entry.airInstantMs == null } ?: calendar.toString()
+    if (calendar == null && !calendarDay.isBefore(addonDay)) return null
+    val start = calendar ?: calendarDay.atStartOfDay(zone).toInstant()
+    if (!start.isBefore(addon)) return null
+    if (ChronoUnit.DAYS.between(calendarDay, addonDay) > EARLIER_RELEASE_MAX_DAYS) return null
+    return start.toString()
 }
 
 private val STREAMING_FIRST_GAP_DAYS = 2L..3L

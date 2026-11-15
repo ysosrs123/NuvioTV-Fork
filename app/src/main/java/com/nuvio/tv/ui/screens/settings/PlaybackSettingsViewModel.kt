@@ -323,6 +323,14 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setAfrSettleDelaySeconds(seconds)
     }
 
+    suspend fun setAfrAllowSeamlessSwitch(enabled: Boolean) {
+        playerSettingsDataStore.setAfrAllowSeamlessSwitch(enabled)
+    }
+
+    suspend fun setAfrAllowLowRates(enabled: Boolean) {
+        playerSettingsDataStore.setAfrAllowLowRates(enabled)
+    }
+
     suspend fun disableAfrAndResolution() {
         playerSettingsDataStore.setFrameRateMatchingMode(FrameRateMatchingMode.OFF)
         playerSettingsDataStore.setResolutionMatchingEnabled(false)
@@ -361,10 +369,6 @@ class PlaybackSettingsViewModel @Inject constructor(
 
     suspend fun setInjectHdr10MetadataOnStrip(enabled: Boolean) {
         playerSettingsDataStore.setInjectHdr10MetadataOnStrip(enabled)
-    }
-
-    suspend fun setChapterTitleEnabled(enabled: Boolean) {
-        playerSettingsDataStore.setChapterTitleEnabled(enabled)
     }
 
     suspend fun setUseLibass(enabled: Boolean) {
@@ -441,6 +445,8 @@ class PlaybackSettingsViewModel @Inject constructor(
     suspend fun setSubtitleShadowEnabled(enabled: Boolean) { playerSettingsDataStore.setSubtitleShadowEnabled(enabled) }
 
     suspend fun setSubtitleShadowOpacity(opacity: Int) { playerSettingsDataStore.setSubtitleShadowOpacity(opacity) }
+    suspend fun setSubtitleShadowSize(size: Int) { playerSettingsDataStore.setSubtitleShadowSize(size) }
+    suspend fun setSubtitleImportedFont(id: String) { playerSettingsDataStore.setSubtitleImportedFont(id) }
 
     suspend fun setSubtitleOutlineColor(color: Int) {
         playerSettingsDataStore.setSubtitleOutlineColor(color)
@@ -448,30 +454,6 @@ class PlaybackSettingsViewModel @Inject constructor(
 
     suspend fun setSubtitleOutlineWidth(width: Int) {
         playerSettingsDataStore.setSubtitleOutlineWidth(width)
-    }
-
-    suspend fun setSubtitleFontId(fontId: String) {
-        playerSettingsDataStore.setSubtitleFontId(fontId)
-    }
-
-    suspend fun setSubtitleBackgroundRadius(radius: Int) {
-        playerSettingsDataStore.setSubtitleBackgroundRadius(radius)
-    }
-
-    suspend fun setSubtitleShadowEnabled(enabled: Boolean) {
-        playerSettingsDataStore.setSubtitleShadowEnabled(enabled)
-    }
-
-    suspend fun setSubtitleShadowOpacity(opacity: Int) {
-        playerSettingsDataStore.setSubtitleShadowOpacity(opacity)
-    }
-
-    suspend fun setSubtitleShadowSize(size: Int) {
-        playerSettingsDataStore.setSubtitleShadowSize(size)
-    }
-
-    suspend fun resetSubtitleAppearance() {
-        playerSettingsDataStore.resetSubtitleAppearance()
     }
 
     suspend fun setSubtitleHdrStyleEnabled(enabled: Boolean) {

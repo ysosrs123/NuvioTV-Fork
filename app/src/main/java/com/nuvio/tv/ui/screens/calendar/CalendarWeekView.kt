@@ -619,7 +619,7 @@ private fun CalendarShelfCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        val notAnnounced = stringResource(R.string.calendar_time_not_announced)
+        val notAnnounced = stringResource(calendarNoTimeLabel(row))
         listOfNotNull(notAnnounced.takeIf { row.time == null && !row.isFilm }, row.network)
             .joinToString(" · ").takeIf { it.isNotEmpty() }?.let {
             Spacer(Modifier.height(3.dp))

@@ -63,7 +63,6 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.core.build.AppFeaturePolicy
-import com.nuvio.tv.data.local.PlayerPreference
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.NextEpisodeThresholdMode
 import com.nuvio.tv.data.local.StreamAutoPlayMode
@@ -131,52 +130,6 @@ internal fun PlaybackStreamSelectionSection(
     }
 
     if (settings.streamAutoPlayMode != StreamAutoPlayMode.MANUAL) {
-        // Excludes the engine switch on error: both react to the same failure. Only the switch
-        // that is off is locked, so both stay reachable if both ended up on.
-        val blockedByEngineSwitch = settings.autoSwitchInternalPlayerOnError && !settings.streamAutoPlayFallbackOnFailure
-        SettingsToggleRow(
-            title = stringResource(R.string.autoplay_fallback_next_source),
-            subtitle = stringResource(
-                if (blockedByEngineSwitch) {
-                    R.string.autoplay_fallback_next_source_blocked_by_engine_switch
-                } else {
-                    R.string.autoplay_fallback_next_source_sub
-                }
-            ),
-            checked = settings.streamAutoPlayFallbackOnFailure,
-            onToggle = { onUpdate { setStreamAutoPlayFallbackOnFailure(!settings.streamAutoPlayFallbackOnFailure) } },
-            enabled = settings.playerPreference != PlayerPreference.EXTERNAL && !blockedByEngineSwitch
-        )
-
-        if (settings.streamAutoPlayFallbackOnFailure && !blockedByEngineSwitch) {
-            SliderSettingsItem(
-                title = stringResource(R.string.autoplay_fallback_max_sources),
-                subtitle = stringResource(R.string.autoplay_fallback_max_sources_sub),
-                value = settings.streamAutoPlayFallbackMaxSources,
-                valueText = "${settings.streamAutoPlayFallbackMaxSources}",
-                minValue = PlayerSettings.MIN_SOURCE_FALLBACK_MAX_SOURCES,
-                maxValue = PlayerSettings.MAX_SOURCE_FALLBACK_MAX_SOURCES,
-                step = 1,
-                enabled = settings.playerPreference != PlayerPreference.EXTERNAL,
-                onValueChange = { count -> onUpdate { setStreamAutoPlayFallbackMaxSources(count) } }
-            )
-
-            SliderSettingsItem(
-                title = stringResource(R.string.autoplay_fallback_startup_timeout),
-                subtitle = stringResource(R.string.autoplay_fallback_startup_timeout_sub),
-                value = settings.streamAutoPlayFallbackStartupTimeoutSeconds,
-                valueText = stringResource(
-                    R.string.autoplay_fallback_startup_timeout_value,
-                    settings.streamAutoPlayFallbackStartupTimeoutSeconds
-                ),
-                minValue = PlayerSettings.MIN_SOURCE_STARTUP_TIMEOUT_SECONDS,
-                maxValue = PlayerSettings.MAX_SOURCE_STARTUP_TIMEOUT_SECONDS,
-                step = PlayerSettings.SOURCE_STARTUP_TIMEOUT_SECONDS_STEP,
-                enabled = settings.playerPreference != PlayerPreference.EXTERNAL,
-                onValueChange = { seconds -> onUpdate { setStreamAutoPlayFallbackStartupTimeoutSeconds(seconds) } }
-            )
-        }
-
         SettingsActionRow(
             title = stringResource(R.string.autoplay_scope),
             subtitle = null,

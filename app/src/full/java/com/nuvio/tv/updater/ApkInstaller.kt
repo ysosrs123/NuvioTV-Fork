@@ -51,6 +51,10 @@ object ApkInstaller {
         require(trusted) { "Update signing certificate does not match this installation" }
     }
 
+    /** Install sessions accept dex metadata from Android 9. */
+    val supportsDexMetadata: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+
     fun canRequestPackageInstalls(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.packageManager.canRequestPackageInstalls()
@@ -97,11 +101,23 @@ object ApkInstaller {
         } else {
             null
         }
-        val sessionId = packageInstaller.createSession(params)
+        UpdateInstallLog.note(
+            context,
+            "session " + (if (dexMetadata != null) "with profile" else "without profile") +
+                (if (background) ", background" else "")
+        )
+        val sessionId = try {
+            packageInstaller.createSession(params)
+        } catch (e: Exception) {
+            UpdateInstallLog.note(context, "session not created: ${e.javaClass.simpleName} ${e.message.orEmpty().take(60)}")
+            dexMetadata?.delete()
+            throw e
+        }
         try {
             packageInstaller.openSession(sessionId).use { session ->
                 session.writeFile("base.apk", apkFile)
                 dexMetadata?.let { session.writeFile("base.dm", it) }
+                if (!background) UpdateRelaunchReceiver.requestReopen(context)
                 session.commit(
                     UpdateInstallResultReceiver.statusReceiver(
                         context = context,
@@ -113,6 +129,7 @@ object ApkInstaller {
                 )
             }
         } catch (e: Exception) {
+            UpdateInstallLog.note(context, "session failed: ${e.javaClass.simpleName} ${e.message.orEmpty().take(60)}")
             packageInstaller.abandonSession(sessionId)
             throw e
         } finally {
@@ -120,8 +137,13 @@ object ApkInstaller {
         }
     }
 
-    /** Hands the APK to the system installer screen, used when the session install cannot be completed. */
+    /**
+     * Hands the APK to the system installer screen, which stays up while the app is closed for the install and
+     * offers to open it again.
+     */
     fun launchSystemInstaller(context: Context, apkFile: File) {
+        UpdateRelaunchReceiver.cancelReopen(context)
+        UpdateInstallLog.note(context, "Android installer screen")
         val authority = "${BuildConfig.APPLICATION_ID}.fileprovider"
         val uri = FileProvider.getUriForFile(context, authority, apkFile)
 

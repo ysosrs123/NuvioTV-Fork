@@ -34,7 +34,8 @@ class DeviceAssessmentWordingTest {
             "assessment_value_connections_auto",
             "assessment_grounds_connections_auto",
             "assessment_grounds_connections_auto_one",
-            "assessment_grounds_connections_auto_untested"
+            "assessment_grounds_connections_auto_untested",
+            "assessment_grounds_strip_sdr"
         )
         val languages = res.listFiles().orEmpty().filter { it.name.startsWith("values-") }
         var checked = 0

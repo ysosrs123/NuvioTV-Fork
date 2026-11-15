@@ -6,11 +6,13 @@ import java.io.InputStreamReader
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.concurrent.thread
 
 /** Serves the unpacked clips to the player on this device only, the way a stream reaches it. */
 internal class LocalClipServer(private val folder: File) {
     private val socket = ServerSocket(0, 8, InetAddress.getByName("127.0.0.1"))
+    private val clients: MutableSet<Socket> = ConcurrentHashMap.newKeySet()
 
     fun url(file: String) = "http://127.0.0.1:${socket.localPort}/$file"
 
@@ -18,14 +20,28 @@ internal class LocalClipServer(private val folder: File) {
         thread(name = "format-check-clips", isDaemon = true) {
             while (!socket.isClosed) {
                 val client = runCatching { socket.accept() }.getOrNull() ?: break
-                thread(isDaemon = true) { client.use { runCatching { serve(it) } } }
+                // A connection that never sends its request, or a reader that went away without closing, would
+                // otherwise hold its thread for the rest of the app's life.
+                runCatching { client.soTimeout = CLIENT_READ_TIMEOUT_MS }
+                clients += client
+                thread(name = "format-check-clip", isDaemon = true) {
+                    try {
+                        client.use { runCatching { serve(it) } }
+                    } finally {
+                        clients -= client
+                    }
+                }
             }
         }
     }
 
     fun stop() {
         runCatching { socket.close() }
+        clients.toList().forEach { runCatching { it.close() } }
+        clients.clear()
     }
+
+    internal fun openConnections(): Int = clients.size
 
     private fun serve(client: Socket) {
         val reader = BufferedReader(InputStreamReader(client.getInputStream(), Charsets.ISO_8859_1))
@@ -72,6 +88,7 @@ internal class LocalClipServer(private val folder: File) {
     }
 
     internal companion object {
+        const val CLIENT_READ_TIMEOUT_MS = 15_000
         fun parseRange(header: String?, size: Long): LongRange? {
             val match = Regex("bytes=(\\d+)-(\\d*)").matchEntire(header?.trim().orEmpty()) ?: return null
             val start = match.groupValues[1].toLongOrNull() ?: return null

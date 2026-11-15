@@ -46,6 +46,7 @@ class UpdatePreferences @Inject constructor(
     private val autoInstalledTagKey = stringPreferencesKey("auto_installed_release_tag")
     private val autoInstalledCodeKey = longPreferencesKey("auto_installed_release_code")
     private val autoInstallNoticeEnabledKey = booleanPreferencesKey("auto_install_notice_enabled")
+    private val optimizeDuringInstallKey = booleanPreferencesKey("optimize_during_install")
 
     val ignoredTag: Flow<String?> = preferences.map { prefs ->
         prefs[ignoredTagKey]
@@ -88,6 +89,17 @@ class UpdatePreferences @Inject constructor(
 
     val autoInstallNoticeEnabled: Flow<Boolean> = preferences.map { prefs ->
         prefs[autoInstallNoticeEnabledKey] ?: true
+    }
+
+    /** Whether updates the user installs carry dex metadata, or go through the system installer screen instead. */
+    val optimizeDuringInstall: Flow<Boolean> = preferences.map { prefs ->
+        prefs[optimizeDuringInstallKey] ?: true
+    }
+
+    suspend fun setOptimizeDuringInstall(enabled: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[optimizeDuringInstallKey] = enabled
+        }
     }
 
     suspend fun initializeForkStream() {

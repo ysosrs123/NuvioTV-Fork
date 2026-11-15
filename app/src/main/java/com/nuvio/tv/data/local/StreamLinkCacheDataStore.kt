@@ -106,12 +106,6 @@ class StreamLinkCacheDataStore @Inject constructor(
         }
     }
 
-    suspend fun remove(contentKey: String) {
-        store().edit { prefs ->
-            prefs.remove(cachePrefKey(contentKey))
-        }
-    }
-
     suspend fun getValid(contentKey: String, maxAgeMs: Long): CachedStreamLink? {
         if (maxAgeMs <= 0L) return null
 

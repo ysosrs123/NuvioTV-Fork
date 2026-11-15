@@ -5,6 +5,7 @@ import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import com.nuvio.tv.ui.screens.player.ParallelRangeDataSource
 import com.nuvio.tv.ui.screens.player.ParallelDiagnosticCalls
+import com.nuvio.tv.ui.screens.player.PieceCallFactory
 import com.nuvio.tv.ui.screens.player.PlayerPlaybackNetworking
 
 @UnstableApi
@@ -69,7 +70,7 @@ object StreamSpeedTester {
             val calls = ParallelDiagnosticCalls(downloads, payload = budget)
             try {
                 val dataSource = ParallelRangeDataSource(
-                    upstreamFactory = OkHttpDataSource.Factory(calls).apply { setDefaultRequestProperties(headers) },
+                    upstreamFactory = OkHttpDataSource.Factory(PieceCallFactory(calls)).apply { setDefaultRequestProperties(headers) },
                     parallelConnections = parallelConnections,
                     chunkSize = chunkSizeBytes,
                     useNativeMemory = true,

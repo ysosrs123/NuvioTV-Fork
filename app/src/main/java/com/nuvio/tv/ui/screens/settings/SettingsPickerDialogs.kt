@@ -336,7 +336,7 @@ internal fun ColorSelectionDialog(
 }
 
 @Composable
-internal fun ColorOption(
+private fun ColorOption(
     color: Color,
     isSelected: Boolean,
     isTransparent: Boolean = false,

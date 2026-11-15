@@ -124,4 +124,11 @@ class CalendarWeekModelTest {
         val rows = listOf(episode("tt1", 1, 1, monday), episode("tt1", 1, 2, monday), episode("tt2", 1, 1, monday))
         assertEquals(CalendarMosaicLayout.SPLIT, calendarMosaic(rows).layout)
     }
+
+    @Test
+    fun `a show that streams first says Streaming where the time would be`() {
+        val dexter = episode("tt1", 1, 2, LocalDate.of(2026, 11, 13), time = null)
+        assertEquals(com.nuvio.tv.R.string.calendar_time_not_announced, calendarNoTimeLabel(dexter))
+        assertEquals(com.nuvio.tv.R.string.calendar_streaming, calendarNoTimeLabel(dexter.copy(streaming = true)))
+    }
 }

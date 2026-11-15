@@ -632,19 +632,27 @@ object DeviceAssessmentEngine {
             changeNeeded = settings.dv7HandlingMode != Dv7HandlingMode.AUTO && !(settings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL && facts.nativeFelUsable)
         )
 
-        val stripRecommendOn = policy.hdrCapsKnown && !policy.displayHdr10Plus
+        // An SDR display shows no HDR at all, so the setting changes nothing there.
+        val sdrDisplay = policy.hdrCapsKnown && !policy.displayDv && !policy.displayHdr10 &&
+            !policy.displayHdr10Plus && !policy.displayHlg
+        val stripRecommendOn = policy.hdrCapsKnown && !policy.displayHdr10Plus && !sdrDisplay
         items += AssessmentItem(
             key = "strip_hdr10plus",
             title = s(R.string.assessment_item_strip_hdr10plus),
             currentValue = if (settings.stripHdr10PlusSei) on else off,
-            recommendedValue = if (stripRecommendOn) on else off,
+            recommendedValue = when {
+                sdrDisplay -> s(R.string.assessment_value_leave_as_is)
+                stripRecommendOn -> on
+                else -> off
+            },
             grounds = when {
                 !policy.hdrCapsKnown -> s(R.string.assessment_grounds_dv7_unknown)
+                sdrDisplay -> s(R.string.assessment_grounds_strip_sdr)
                 stripRecommendOn -> s(R.string.assessment_grounds_strip_on)
                 else -> s(R.string.assessment_grounds_strip_off)
             },
             tier = AssessmentTier.VERIFY,
-            changeNeeded = settings.stripHdr10PlusSei != stripRecommendOn
+            changeNeeded = !sdrDisplay && settings.stripHdr10PlusSei != stripRecommendOn
         )
 
         // --- Tier 4: not queryable at all - verify yourself ---

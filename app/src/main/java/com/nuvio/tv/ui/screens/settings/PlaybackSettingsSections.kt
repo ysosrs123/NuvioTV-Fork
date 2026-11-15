@@ -31,7 +31,6 @@ import com.nuvio.tv.core.player.thumbnail.SeekThumbMode
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnailPreferences
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import com.nuvio.tv.core.player.thumbnail.ThumbPrepareMode
-import com.nuvio.tv.core.player.thumbnail.ThumbsBeforePlay
 import com.nuvio.tv.core.player.thumbnail.ThumbnailCache
 import com.nuvio.tv.data.local.PlayerPreference
 import com.nuvio.tv.data.local.PlayerSettings
@@ -194,8 +193,6 @@ private fun PlaybackThumbnailRows(
     val seekThumbPrepareRead by SeekThumbnailPreferences.prepareModeFlow(context)
         .collectAsState<ThumbPrepareMode, ThumbPrepareMode?>(initial = null)
     val seekThumbPrepare = seekThumbPrepareRead ?: ThumbPrepareMode.OFF
-    val seekThumbBeforePlay by SeekThumbnailPreferences.beforePlayFlow(context)
-        .collectAsState(initial = ThumbsBeforePlay.FASTER)
     val seekThumbHardware by SeekThumbnailPreferences.hardwareFlow(context).collectAsState(initial = true)
     var seekThumbStoredBytes by remember { mutableStateOf(-1L) }
     val seekThumbScope = rememberCoroutineScope()
@@ -222,13 +219,6 @@ private fun PlaybackThumbnailRows(
         value = stringResource(seekThumbPrepare.label),
         enabled = internalPlayer && seekThumbsOn,
         onClick = { onOpenDialog(PlaybackDialog.SEEK_THUMBNAIL_PREPARE) }
-    )
-    SettingsActionRow(
-        title = stringResource(R.string.seek_thumbnails_before_play_title),
-        subtitle = null,
-        value = stringResource(seekThumbBeforePlay.label),
-        enabled = internalPlayer && seekThumbsOn && seekThumbPrepareRead != ThumbPrepareMode.OFF,
-        onClick = { onOpenDialog(PlaybackDialog.SEEK_THUMBNAILS_BEFORE_PLAY) }
     )
     SettingsToggleRow(
         title = stringResource(R.string.seek_thumbnails_hardware_title),
@@ -335,7 +325,6 @@ internal fun PlaybackSettingsDialogs(
             onDismiss = onDismiss
         )
         PlaybackDialog.SEEK_THUMBNAIL_PREPARE -> SeekThumbnailPrepareDialog(onUpdate = onUpdate, onDismiss = onDismiss)
-        PlaybackDialog.SEEK_THUMBNAILS_BEFORE_PLAY -> SeekThumbnailBeforePlayDialog(onUpdate = onUpdate, onDismiss = onDismiss)
         PlaybackDialog.SEEKING -> SeekingDialog(settings.seekingMode, onUpdate = onUpdate, onDismiss = onDismiss)
         else -> {
             AutoPlaySettingsDialogs(dialog, settings, installedAddonNames, enabledPluginNames, onUpdate, onDismiss)
@@ -364,25 +353,6 @@ private fun SeekThumbnailPrepareDialog(onUpdate: PlaybackSettingsUpdate, onDismi
         selectedValue = prepare,
         onOptionSelected = { chosen ->
             onUpdate { SeekThumbnailPreferences.setPrepareMode(context, chosen) }
-            onDismiss()
-        },
-        onDismiss = onDismiss
-    )
-}
-
-@Composable
-private fun SeekThumbnailBeforePlayDialog(onUpdate: PlaybackSettingsUpdate, onDismiss: () -> Unit) {
-    val context = LocalContext.current.applicationContext
-    val choice by SeekThumbnailPreferences.beforePlayFlow(context).collectAsState(initial = ThumbsBeforePlay.FASTER)
-    SettingsSingleChoiceDialog(
-        title = stringResource(R.string.seek_thumbnails_before_play_title),
-        subtitle = stringResource(R.string.seek_thumbnails_before_play_subtitle),
-        options = ThumbsBeforePlay.entries.map {
-            SettingsPickerOption(it, stringResource(it.label), stringResource(it.description))
-        },
-        selectedValue = choice,
-        onOptionSelected = { chosen ->
-            onUpdate { SeekThumbnailPreferences.setBeforePlay(context, chosen) }
             onDismiss()
         },
         onDismiss = onDismiss
