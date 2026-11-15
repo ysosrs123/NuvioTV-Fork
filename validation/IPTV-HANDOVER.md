@@ -153,8 +153,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 101 (10 November 14:28, with a 90-minute NHL poll), open batch 7ae: San
     Jose–Islanders went to a shootout (`In SO`, period 5, clock `0:00`); the fifth line-score
     column read "2OT" until the final and now reads "SO" while the shootout runs.
-  - Captures 102 and 103 (15 November 10:28 and 12:28, with a UFC poll during UFC 334): nothing
-    new so far; every finished bout had its method with its result.
+  - Captures 102 to 104 (15 November 10:28 to 14:28, with a five-hour UFC poll through UFC 334):
+    nothing new; the fourth full card with every method posted with its result, and a majority
+    draw read as a draw (no winner, no method row).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

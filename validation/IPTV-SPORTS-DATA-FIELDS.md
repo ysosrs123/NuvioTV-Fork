@@ -2286,10 +2286,16 @@ Confirmed now: an NHL shootout in progress on the scoreboard.
 Still unconfirmed: the UFC finish method arriving later for a bout first posted without one;
 AFL/NRL live clock (off season); a golf playoff in progress.
 
-## Fifty-eighth pass (15 November 10:28 onwards)
+## Fifty-eighth pass (15 November 10:28 to 14:28)
 
-Scheduled captures on Sunday 15 November with a UFC poll through UFC 334. Golf third rounds in
-progress (PGA, LPGA), NHL and NBA as before. Every finished bout so far had its method in the
-first sample in which it was final.
+Three scheduled captures and a UFC poll through the whole of UFC 334 (430 samples, 00:28 to
+05:53Z). Golf third rounds in progress (PGA, LPGA), NHL and NBA as before. Every finished bout had
+its method in the first sample in which it was final (a fourth whole card). Holland–Medić was a
+majority draw: `STATUS_END_OF_FIGHT`, then `STATUS_FINAL` at `3`, `5:00` with neither fighter
+`winner` and no `Unofficial Winner` row, the judges' cards only in the competitors' `linescores`
+(28–28, 28–28, 27–29) and both records gaining a draw; the app reads it as a draw, as on 18
+October. The five-round main event ended `STATUS_FINAL` at `period` 5 with `displayClock` `-`
+(not `5:00`) and `Unofficial Winner Decision`. No parser change.
 
-Still unconfirmed: as in the fifty-seventh pass.
+Still unconfirmed: as in the fifty-seventh pass. One more UFC card falls before 30 November
+(Fight Night, 22 November from 04:00 Brisbane).
