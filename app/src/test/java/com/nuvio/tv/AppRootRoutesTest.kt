@@ -11,16 +11,16 @@ import org.junit.Test
 
 class AppRootRoutesTest {
     @Test fun `a hidden Calendar is not a menu page, so Back from it goes Home`() {
-        assertTrue(Screen.Calendar.route in appRootRoutes(discoverInSidebar = false, calendarInMenu = true))
-        assertFalse(Screen.Calendar.route in appRootRoutes(discoverInSidebar = false, calendarInMenu = false))
+        assertTrue(Screen.Calendar.route in appRootRoutes(discoverInSidebar = false, calendarInMenu = true, scoutInMenu = false))
+        assertFalse(Screen.Calendar.route in appRootRoutes(discoverInSidebar = false, calendarInMenu = false, scoutInMenu = false))
     }
 
     @Test fun `the other menu pages stay root pages`() {
         assertEquals(
             setOf(Screen.Home.route, Screen.Search.route, Screen.Library.route, Screen.Settings.route, Screen.Discover.route),
-            appRootRoutes(discoverInSidebar = true, calendarInMenu = false)
+            appRootRoutes(discoverInSidebar = true, calendarInMenu = false, scoutInMenu = false)
         )
-        assertFalse(Screen.Discover.route in appRootRoutes(discoverInSidebar = false, calendarInMenu = true))
+        assertFalse(Screen.Discover.route in appRootRoutes(discoverInSidebar = false, calendarInMenu = true, scoutInMenu = false))
     }
 
     @Test fun `the Search button opens search outside the player and before sign-in`() {
