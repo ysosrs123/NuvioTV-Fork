@@ -59,4 +59,8 @@
     <string name="scout_mixes_delete_title">Supprimer %1$s ?</string>
     <string name="scout_mixes_delete_detail">Vos séries et votre historique restent inchangés</string>
     <string name="scout_mixes_delete_confirm">Supprimer</string>
+    <string name="scout_mixes_menu_subtitle">Actions du mix</string>
+    <string name="scout_mixes_menu_open">Ouvrir le mix</string>
+    <string name="scout_mixes_menu_remove">Retirer de mes mix</string>
+    <string name="scout_mixes_menu_hide">Masquer jusqu\'à l\'an prochain</string>
 </resources>

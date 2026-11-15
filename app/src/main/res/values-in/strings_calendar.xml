@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">Dalam produksi</string>
     <string name="calendar_show_next_unknown">Episode berikutnya belum ada tanggal</string>
     <string name="calendar_time_not_announced">Waktu belum diumumkan</string>
+    <string name="calendar_streaming">Streaming</string>
     <string name="calendar_unknown_title">Tanpa judul</string>
     <string name="calendar_label_new_show">Serial baru</string>
     <string name="calendar_label_season_premiere">Premiere musim</string>

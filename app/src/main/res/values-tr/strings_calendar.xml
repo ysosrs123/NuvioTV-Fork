@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">Yapım aşamasında</string>
     <string name="calendar_show_next_unknown">Sonraki bölümün tarihi belli değil</string>
     <string name="calendar_time_not_announced">Saat açıklanmadı</string>
+    <string name="calendar_streaming">Dijital yayın</string>
     <string name="calendar_unknown_title">İsimsiz</string>
     <string name="calendar_label_new_show">Yeni dizi</string>
     <string name="calendar_label_season_premiere">Sezon prömiyeri</string>

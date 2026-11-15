@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">בקשת קוד PIN: %1$s</string>
+    <string name="profile_pin_ask_every">בכל פעם</string>
+    <string name="profile_pin_ask_every_sub">פתיחת הפרופיל הזה תמיד מבקשת את קוד ה-PIN.</string>
+    <string name="profile_pin_ask_not_start">לא כש-Arc מופעל</string>
+    <string name="profile_pin_ask_not_start_sub">כשזכירת הפרופיל האחרון פעילה, Arc נפתח ישר בפרופיל %1$s. בחירת %1$s מרשימת הפרופילים עדיין מבקשת אותו.</string>
+    <string name="profile_pin_ask_limits">רק להגבלות של ילדים</string>
+    <string name="profile_pin_ask_limits_sub">%1$s נפתח בלי קוד PIN. הקוד עדיין נדרש כדי לנגן מעל ההגבלה של פרופיל ילד וכדי לשנות הגבלה.</string>
+    <string name="profile_pin_ask_limits_warn">כל אחד במכשיר הזה יכול לפתוח את %1$s, כולל ילדים.</string>
+    <string name="profile_pin_ask_heading">מתי לבקש את קוד ה-PIN של %1$s</string>
+    <string name="profile_pin_ask_verify">הזינו את קוד ה-PIN של %1$s כדי לשנות מתי הוא נדרש</string>
+    <string name="profile_pin_ask_saved">קוד ה-PIN של %1$s: %2$s</string>
+</resources>

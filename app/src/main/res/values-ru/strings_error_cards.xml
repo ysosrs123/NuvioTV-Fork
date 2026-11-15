@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc прочитал этот файл, но не нашёл в нём изображения, которое может воспроизвести. Так бывает с файлами для видеомонтажа, например Apple ProRes. Выберите другую версию.</string>
     <string name="player_error_card_silent_title">Источник не ответил</string>
     <string name="player_error_card_silent">Сервер этого источника не присылал видео в течение %1$d с. Причина на стороне источника, а не Arc. Попробуйте другой источник или повторите попытку позже.</string>
+    <string name="player_error_card_slow_title">Этот источник очень медленный</string>
+    <string name="player_error_card_slow">Arc получил %1$s за %2$d с, примерно %3$s. Этому фильму нужно примерно %4$s, чтобы идти без остановок. Причина на стороне источника, а не Arc. Попробуйте другой источник.</string>
     <string name="player_error_card_fault_title">Сбой на сервере источника</string>
     <string name="player_error_card_fault">Сервер этого источника ответил ошибкой (%1$d). Причина на стороне источника, а не Arc. Попробуйте другой источник или повторите попытку позже.</string>
     <string name="player_error_card_blocked_title">Источник заблокировал ссылку</string>

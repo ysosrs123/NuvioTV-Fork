@@ -56,4 +56,8 @@
     <string name="scout_mixes_delete_title">Radera %1$s?</string>
     <string name="scout_mixes_delete_detail">Dina serier och din historik förblir som de är</string>
     <string name="scout_mixes_delete_confirm">Radera</string>
+    <string name="scout_mixes_menu_subtitle">Mixåtgärder</string>
+    <string name="scout_mixes_menu_open">Öppna mix</string>
+    <string name="scout_mixes_menu_remove">Ta bort från mina mixar</string>
+    <string name="scout_mixes_menu_hide">Dölj till nästa år</string>
 </resources>

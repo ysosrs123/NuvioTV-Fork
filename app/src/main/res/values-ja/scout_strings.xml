@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">高評価だがあまり知られていない作品</string>
     <string name="scout_row_tiles">Scoutタイル</string>
     <string name="scout_row_tiles_sub">おまかせ、気分、年代</string>
+    <string name="scout_row_mixes">ミックス</string>
+    <string name="scout_row_mixes_sub">保存したミックスと、季節の行事ミックス</string>
     <string name="scout_ratings_enabled">作品を評価</string>
     <string name="scout_ratings_enabled_sub">評価ボタン、長押しメニューの親指、映画後の質問を表示</string>
     <string name="scout_ratings_off_note">評価ボタン、メニュー内の評価項目、映画の後の質問を非表示にします。これまでの評価は引き続き反映されます。</string>
@@ -88,4 +90,6 @@
     <string name="scout_leave_out">除外</string>
     <string name="scout_leave_out_sub">見たくないジャンル</string>
     <string name="scout_leave_out_none">なし</string>
+    <string name="scout_menu_visible">メニューにScoutを表示</string>
+    <string name="scout_menu_visible_sub">ホームのScout行にはそれぞれ専用のスイッチがあります</string>
 </resources>

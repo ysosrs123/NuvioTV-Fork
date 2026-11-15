@@ -62,4 +62,8 @@
     <string name="scout_mixes_delete_title">Ištrinti %1$s?</string>
     <string name="scout_mixes_delete_detail">Jūsų serialai ir žiūrėjimo istorija lieka nepakitę</string>
     <string name="scout_mixes_delete_confirm">Ištrinti</string>
+    <string name="scout_mixes_menu_subtitle">Mikso veiksmai</string>
+    <string name="scout_mixes_menu_open">Atidaryti miksą</string>
+    <string name="scout_mixes_menu_remove">Pašalinti iš mano miksų</string>
+    <string name="scout_mixes_menu_hide">Slėpti iki kitų metų</string>
 </resources>

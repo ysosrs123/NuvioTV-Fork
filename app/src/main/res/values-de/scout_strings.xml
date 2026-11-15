@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Gut bewertete Titel, die wenige gesehen haben</string>
     <string name="scout_row_tiles">Scout-Kacheln</string>
     <string name="scout_row_tiles_sub">Überrasche mich, Stimmungen, Jahrzehnte</string>
+    <string name="scout_row_mixes">Mixe</string>
+    <string name="scout_row_mixes_sub">Deine gespeicherten Mixe und der Feiertagsmix der Saison</string>
     <string name="scout_ratings_enabled">Titel bewerten</string>
     <string name="scout_ratings_enabled_sub">Zeigt die Bewerten-Taste, die Daumen im Menü bei langem Drücken und die Frage nach einem Film</string>
     <string name="scout_ratings_off_note">Blendet die Bewerten-Taste, die Daumen im Menü und die Frage nach einem Film aus. Deine Bewertungen zählen weiter.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Auslassen</string>
     <string name="scout_leave_out_sub">Genres, die du nie sehen willst</string>
     <string name="scout_leave_out_none">Keine</string>
+    <string name="scout_menu_visible">Scout im Menü anzeigen</string>
+    <string name="scout_menu_visible_sub">Die Scout-Zeilen auf der Startseite haben eigene Schalter</string>
 </resources>

@@ -3,7 +3,7 @@
 
     <!-- Nuvio-test additions -->
     <string name="player_chapters">Skyriai</string>
-    <string name="player_chapter_number">%1$d skyrius</string>
+    <string name="player_chapter_number">Skyrius %1$d</string>
     <string name="player_chapter_named">%1$d skyrius: %2$s</string>
     <string name="player_chapter_now_playing">Atkuriama</string>
     <string name="playback_chapters">Skyriai grotuve</string>

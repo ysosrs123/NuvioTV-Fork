@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Títulos bem classificados que pouca gente viu</string>
     <string name="scout_row_tiles">Mosaicos Scout</string>
     <string name="scout_row_tiles_sub">Surpreende-me, estados de espírito, décadas</string>
+    <string name="scout_row_mixes">Misturas</string>
+    <string name="scout_row_mixes_sub">Os teus mixes guardados e o mix da época festiva</string>
     <string name="scout_ratings_enabled">Classificar títulos</string>
     <string name="scout_ratings_enabled_sub">Mostra o botão Classificar, os polegares no menu de pressão longa e a pergunta depois de um filme</string>
     <string name="scout_ratings_off_note">Oculta o botão Classificar, os polegares no menu e a pergunta após um filme. As classificações continuam a contar.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">Excluir</string>
     <string name="scout_leave_out_sub">Géneros que nunca queres ver</string>
     <string name="scout_leave_out_none">Nenhum</string>
+    <string name="scout_menu_visible">Mostrar o Scout no menu</string>
+    <string name="scout_menu_visible_sub">As linhas do Scout no Início têm os seus próprios interruptores</string>
 </resources>

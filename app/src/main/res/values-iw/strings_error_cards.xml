@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">הקובץ נקרא, אבל Arc לא מצא בו תמונה שאפשר להפעיל. כך זה בקבצים שנוצרו לעריכת וידאו, כמו Apple ProRes. כדאי לבחור עותק אחר של הכותרת.</string>
     <string name="player_error_card_silent_title">המקור לא הגיב</string>
     <string name="player_error_card_silent">השרת של המקור הזה לא שלח וידאו במשך %1$d שנ׳. זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר, או לנסות את המקור הזה שוב מאוחר יותר.</string>
+    <string name="player_error_card_slow_title">המקור הזה איטי מאוד</string>
+    <string name="player_error_card_slow">Arc קיבל %1$s ב-%2$d שנ׳, בערך %3$s. הסרט הזה צריך בערך %4$s כדי להתנגן בלי עצירות. זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר.</string>
     <string name="player_error_card_fault_title">יש תקלה בשרת של המקור</string>
     <string name="player_error_card_fault">השרת של המקור הזה החזיר שגיאה (%1$d). זה מגיע מהמקור, לא מ-Arc. כדאי לנסות מקור אחר, או לנסות את המקור הזה שוב מאוחר יותר.</string>
     <string name="player_error_card_blocked_title">המקור חסם את הקישור הזה</string>

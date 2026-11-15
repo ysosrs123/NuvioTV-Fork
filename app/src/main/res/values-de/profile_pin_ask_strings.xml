@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">PIN abfragen: %1$s</string>
+    <string name="profile_pin_ask_every">Jedes Mal</string>
+    <string name="profile_pin_ask_every_sub">Beim Öffnen dieses Profils wird immer die PIN abgefragt.</string>
+    <string name="profile_pin_ask_not_start">Nicht beim Start von Arc</string>
+    <string name="profile_pin_ask_not_start_sub">Mit Remember Last Profile öffnet Arc direkt %1$s. Wer %1$s in der Profilliste wählt, wird weiterhin gefragt.</string>
+    <string name="profile_pin_ask_limits">Nur für Kinder-Limits</string>
+    <string name="profile_pin_ask_limits_sub">%1$s öffnet ohne PIN. Sie wird weiterhin abgefragt, um über dem Limit eines Kinderprofils abzuspielen und um ein Limit zu ändern.</string>
+    <string name="profile_pin_ask_limits_warn">Jeder an diesem Gerät kann %1$s öffnen, auch Kinder.</string>
+    <string name="profile_pin_ask_heading">Wann die PIN von %1$s abgefragt wird</string>
+    <string name="profile_pin_ask_verify">PIN von %1$s eingeben, um zu ändern, wann sie abgefragt wird</string>
+    <string name="profile_pin_ask_saved">PIN von %1$s: %2$s</string>
+</resources>

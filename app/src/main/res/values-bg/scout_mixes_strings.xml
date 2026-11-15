@@ -56,4 +56,8 @@
     <string name="scout_mixes_delete_title">Изтриване на %1$s?</string>
     <string name="scout_mixes_delete_detail">Сериалите и историята ви остават непроменени</string>
     <string name="scout_mixes_delete_confirm">Изтриване</string>
+    <string name="scout_mixes_menu_subtitle">Действия с микса</string>
+    <string name="scout_mixes_menu_open">Отвори микса</string>
+    <string name="scout_mixes_menu_remove">Премахни от моите миксове</string>
+    <string name="scout_mixes_menu_hide">Скрий до следващата година</string>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Искане на ПИН: %1$s</string>
+    <string name="profile_pin_ask_every">Всеки път</string>
+    <string name="profile_pin_ask_every_sub">Отварянето на този профил винаги иска ПИН.</string>
+    <string name="profile_pin_ask_not_start">Не при стартиране на Arc</string>
+    <string name="profile_pin_ask_not_start_sub">При включено Запомни последния профил Arc отваря направо %1$s. Изборът на %1$s от списъка с профили пак иска ПИН.</string>
+    <string name="profile_pin_ask_limits">Само за детските ограничения</string>
+    <string name="profile_pin_ask_limits_sub">%1$s се отваря без ПИН. Той пак се иска за пускане над ограничението на детски профил и за промяна на ограничение.</string>
+    <string name="profile_pin_ask_limits_warn">Всеки на това устройство може да отвори %1$s, включително децата.</string>
+    <string name="profile_pin_ask_heading">Кога да се иска ПИН кодът на %1$s</string>
+    <string name="profile_pin_ask_verify">Въведете ПИН кода на %1$s, за да промените кога се иска</string>
+    <string name="profile_pin_ask_saved">ПИН на %1$s: %2$s</string>
+</resources>

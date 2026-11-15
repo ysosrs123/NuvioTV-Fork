@@ -59,4 +59,8 @@
     <string name="scout_mixes_delete_title">למחוק את %1$s?</string>
     <string name="scout_mixes_delete_detail">הסדרות והיסטוריית הצפייה שלך נשארות כפי שהן</string>
     <string name="scout_mixes_delete_confirm">מחיקה</string>
+    <string name="scout_mixes_menu_subtitle">פעולות מיקס</string>
+    <string name="scout_mixes_menu_open">פתיחת המיקס</string>
+    <string name="scout_mixes_menu_remove">הסרה מהמיקסים שלי</string>
+    <string name="scout_mixes_menu_hide">הסתרה עד השנה הבאה</string>
 </resources>

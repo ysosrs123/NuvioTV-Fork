@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Το Arc διάβασε αυτό το αρχείο και δεν βρήκε εικόνα που να μπορεί να αναπαράγει. Έτσι είναι τα αρχεία για επεξεργασία βίντεο, όπως το Apple ProRes. Επιλέξτε άλλο αντίγραφο του τίτλου.</string>
     <string name="player_error_card_silent_title">Η πηγή δεν απάντησε</string>
     <string name="player_error_card_silent">Ο διακομιστής αυτής της πηγής δεν έστειλε βίντεο για %1$d s. Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή ή δοκιμάστε ξανά αυτή αργότερα.</string>
+    <string name="player_error_card_slow_title">Αυτή η πηγή είναι πολύ αργή</string>
+    <string name="player_error_card_slow">Το Arc έλαβε %1$s σε %2$d s, περίπου %3$s. Αυτή η ταινία χρειάζεται περίπου %4$s για να παίζει χωρίς διακοπές. Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή.</string>
     <string name="player_error_card_fault_title">Βλάβη στον διακομιστή της πηγής</string>
     <string name="player_error_card_fault">Ο διακομιστής αυτής της πηγής απάντησε με σφάλμα (%1$d). Αυτό οφείλεται στην πηγή, όχι στο Arc. Δοκιμάστε άλλη πηγή ή δοκιμάστε ξανά αυτή αργότερα.</string>
     <string name="player_error_card_blocked_title">Η πηγή μπλόκαρε αυτόν τον σύνδεσμο</string>

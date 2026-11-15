@@ -59,4 +59,8 @@
     <string name="scout_mixes_delete_title">Обрисати %1$s?</string>
     <string name="scout_mixes_delete_detail">Ваше серије и историја гледања остају какве јесу</string>
     <string name="scout_mixes_delete_confirm">Обриши</string>
+    <string name="scout_mixes_menu_subtitle">Радње за микс</string>
+    <string name="scout_mixes_menu_open">Отвори микс</string>
+    <string name="scout_mixes_menu_remove">Уклони из мојих миксова</string>
+    <string name="scout_mixes_menu_hide">Сакриј до следеће године</string>
 </resources>

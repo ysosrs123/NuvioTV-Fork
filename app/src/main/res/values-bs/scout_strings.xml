@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Dobro ocijenjeni naslovi koje je vidjelo malo ljudi</string>
     <string name="scout_row_tiles">Scout pločice</string>
     <string name="scout_row_tiles_sub">Iznenadi me, raspoloženja, desetljeća</string>
+    <string name="scout_row_mixes">Miksevi</string>
+    <string name="scout_row_mixes_sub">Tvoji sačuvani miksovi i praznični miks u sezoni</string>
     <string name="scout_ratings_enabled">Ocjenjuj naslove</string>
     <string name="scout_ratings_enabled_sub">Prikazuje dugme Ocijeni, palčeve u meniju dugog pritiska i pitanje nakon filma</string>
     <string name="scout_ratings_off_note">Skriva dugme Ocijeni, palčeve u meniju i pitanje nakon filma. Tvoje ocjene se i dalje računaju.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">Izostavi</string>
     <string name="scout_leave_out_sub">Žanrovi koje nikad ne želiš vidjeti</string>
     <string name="scout_leave_out_none">Ništa</string>
+    <string name="scout_menu_visible">Prikaži Scout u meniju</string>
+    <string name="scout_menu_visible_sub">Scout redovi na početnoj imaju svoje prekidače</string>
 </resources>

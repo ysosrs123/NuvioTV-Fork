@@ -53,4 +53,8 @@
     <string name="scout_mixes_delete_title">%1$s silinsin mi?</string>
     <string name="scout_mixes_delete_detail">Dizileriniz ve izleme geçmişiniz olduğu gibi kalır</string>
     <string name="scout_mixes_delete_confirm">Sil</string>
+    <string name="scout_mixes_menu_subtitle">Karışım işlemleri</string>
+    <string name="scout_mixes_menu_open">Karışımı aç</string>
+    <string name="scout_mixes_menu_remove">Karışımlarımdan kaldır</string>
+    <string name="scout_mixes_menu_hide">Gelecek yıla kadar gizle</string>
 </resources>

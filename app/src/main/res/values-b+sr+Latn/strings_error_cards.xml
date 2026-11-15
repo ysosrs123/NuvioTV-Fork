@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc je pročitao ovaj fajl, ali u njemu nije našao sliku koju može da pusti. Takvi su fajlovi za video montažu, kao što je Apple ProRes. Izaberite drugu verziju naslova.</string>
     <string name="player_error_card_silent_title">Izvor nije odgovorio</string>
     <string name="player_error_card_silent">Server ovog izvora nije poslao video tokom %1$d s. Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor ili ovaj ponovo kasnije.</string>
+    <string name="player_error_card_slow_title">Ovaj izvor je veoma spor</string>
+    <string name="player_error_card_slow">Arc je primio %1$s za %2$d s, oko %3$s. Ovom filmu treba oko %4$s da bi se puštao bez zastoja. Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor.</string>
     <string name="player_error_card_fault_title">Server izvora ima kvar</string>
     <string name="player_error_card_fault">Server ovog izvora je odgovorio greškom (%1$d). Uzrok je na strani izvora, a ne aplikacije Arc. Probajte drugi izvor ili ovaj ponovo kasnije.</string>
     <string name="player_error_card_blocked_title">Izvor je blokirao ovaj link</string>

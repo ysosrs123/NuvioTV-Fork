@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Žádat PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Pokaždé</string>
+    <string name="profile_pin_ask_every_sub">Otevření tohoto profilu vždy žádá PIN.</string>
+    <string name="profile_pin_ask_not_start">Ne při spuštění Arcu</string>
+    <string name="profile_pin_ask_not_start_sub">Se zapnutým Pamatovat si poslední profil otevře Arc rovnou %1$s. Výběr profilu %1$s ze seznamu stále žádá PIN.</string>
+    <string name="profile_pin_ask_limits">Jen pro dětské limity</string>
+    <string name="profile_pin_ask_limits_sub">%1$s se otevře bez PINu. Stále se žádá pro přehrání nad limitem dětského profilu a pro změnu limitu.</string>
+    <string name="profile_pin_ask_limits_warn">Kdokoli na tomto zařízení může otevřít %1$s, i děti.</string>
+    <string name="profile_pin_ask_heading">Kdy žádat PIN profilu %1$s</string>
+    <string name="profile_pin_ask_verify">Zadejte PIN profilu %1$s pro změnu, kdy se žádá</string>
+    <string name="profile_pin_ask_saved">PIN profilu %1$s: %2$s</string>
+</resources>

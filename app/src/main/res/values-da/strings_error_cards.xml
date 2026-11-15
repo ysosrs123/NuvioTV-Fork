@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc læste filen og fandt intet billede i den, som kan afspilles. Filer lavet til videoredigering, som Apple ProRes, er sådan. Vælg en anden udgave af titlen.</string>
     <string name="player_error_card_silent_title">Kilden svarede ikke</string>
     <string name="player_error_card_silent">Kildens server sendte ingen video i %1$d s. Det skyldes kilden, ikke Arc. Prøv en anden kilde, eller prøv denne igen senere.</string>
+    <string name="player_error_card_slow_title">Denne kilde er meget langsom</string>
+    <string name="player_error_card_slow">Arc modtog %1$s på %2$d s, omkring %3$s. Denne film skal bruge omkring %4$s for at spille uden stop. Det skyldes kilden, ikke Arc. Prøv en anden kilde.</string>
     <string name="player_error_card_fault_title">Kildens server har en fejl</string>
     <string name="player_error_card_fault">Kildens server svarede med en fejl (%1$d). Det skyldes kilden, ikke Arc. Prøv en anden kilde, eller prøv denne igen senere.</string>
     <string name="player_error_card_blocked_title">Kilden blokerede linket</string>

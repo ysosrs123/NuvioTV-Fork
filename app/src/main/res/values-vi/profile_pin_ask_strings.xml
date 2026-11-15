@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Hỏi mã PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Mỗi lần</string>
+    <string name="profile_pin_ask_every_sub">Mở hồ sơ này luôn hỏi mã PIN.</string>
+    <string name="profile_pin_ask_not_start">Không hỏi khi Arc khởi động</string>
+    <string name="profile_pin_ask_not_start_sub">Khi bật Nhớ hồ sơ gần nhất, Arc mở thẳng vào %1$s. Chọn %1$s từ danh sách hồ sơ vẫn hỏi mã PIN.</string>
+    <string name="profile_pin_ask_limits">Chỉ cho giới hạn của trẻ em</string>
+    <string name="profile_pin_ask_limits_sub">%1$s mở mà không cần mã PIN. Mã PIN vẫn được hỏi khi phát nội dung vượt giới hạn của hồ sơ trẻ em và khi đổi giới hạn.</string>
+    <string name="profile_pin_ask_limits_warn">Bất kỳ ai trên thiết bị này đều mở được %1$s, kể cả trẻ em.</string>
+    <string name="profile_pin_ask_heading">Khi nào hỏi mã PIN của %1$s</string>
+    <string name="profile_pin_ask_verify">Nhập mã PIN của %1$s để đổi thời điểm hỏi</string>
+    <string name="profile_pin_ask_saved">Mã PIN của %1$s: %2$s</string>
+</resources>

@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc прочитав цей файл, але не знайшов у ньому зображення, яке може відтворити. Так буває з файлами для відеомонтажу, наприклад Apple ProRes. Виберіть іншу версію.</string>
     <string name="player_error_card_silent_title">Джерело не відповіло</string>
     <string name="player_error_card_silent">Сервер цього джерела не надсилав відео протягом %1$d с. Причина на боці джерела, а не Arc. Спробуйте інше джерело або повторіть спробу пізніше.</string>
+    <string name="player_error_card_slow_title">Це джерело дуже повільне</string>
+    <string name="player_error_card_slow">Arc отримав %1$s за %2$d с, приблизно %3$s. Цьому фільму потрібно приблизно %4$s, щоб відтворюватися без зупинок. Причина на боці джерела, а не Arc. Спробуйте інше джерело.</string>
     <string name="player_error_card_fault_title">Збій на сервері джерела</string>
     <string name="player_error_card_fault">Сервер цього джерела відповів помилкою (%1$d). Причина на боці джерела, а не Arc. Спробуйте інше джерело або повторіть спробу пізніше.</string>
     <string name="player_error_card_blocked_title">Джерело заблокувало посилання</string>

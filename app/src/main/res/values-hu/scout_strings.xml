@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Jól értékelt címek, amelyeket kevesen láttak</string>
     <string name="scout_row_tiles">Scout-csempék</string>
     <string name="scout_row_tiles_sub">Lepj meg, hangulatok, évtizedek</string>
+    <string name="scout_row_mixes">Mixek</string>
+    <string name="scout_row_mixes_sub">A mentett mixeid és az aktuális ünnepi mix</string>
     <string name="scout_ratings_enabled">Címek értékelése</string>
     <string name="scout_ratings_enabled_sub">Megjeleníti az Értékelés gombot, a hüvelykujjakat a hosszú nyomás menüben és a film utáni kérdést</string>
     <string name="scout_ratings_off_note">Elrejti az Értékelés gombot, a menü hüvelykujjait és a film utáni kérdést. Az értékeléseid továbbra is számítanak.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Kihagyás</string>
     <string name="scout_leave_out_sub">Műfajok, amelyeket sosem akarsz látni</string>
     <string name="scout_leave_out_none">Nincs</string>
+    <string name="scout_menu_visible">Scout megjelenítése a menüben</string>
+    <string name="scout_menu_visible_sub">A Scout kezdőlapi sorainak saját kapcsolóik vannak</string>
 </resources>

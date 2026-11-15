@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc heeft dit bestand gelezen en er geen beeld in gevonden dat het kan afspelen. Bestanden voor videobewerking, zoals Apple ProRes, zijn zo. Kies een andere versie van de titel.</string>
     <string name="player_error_card_silent_title">De bron gaf geen antwoord</string>
     <string name="player_error_card_silent">De server van deze bron heeft %1$d s geen video gestuurd. Dit ligt aan de bron, niet aan Arc. Probeer een andere bron, of probeer deze later opnieuw.</string>
+    <string name="player_error_card_slow_title">Deze bron is erg traag</string>
+    <string name="player_error_card_slow">Arc ontving %1$s in %2$d s, ongeveer %3$s. Deze film heeft ongeveer %4$s nodig om zonder haperen te spelen. Dit ligt aan de bron, niet aan Arc. Probeer een andere bron.</string>
     <string name="player_error_card_fault_title">De server van de bron heeft een storing</string>
     <string name="player_error_card_fault">De server van deze bron antwoordde met een fout (%1$d). Dit ligt aan de bron, niet aan Arc. Probeer een andere bron, of probeer deze later opnieuw.</string>
     <string name="player_error_card_blocked_title">De bron heeft deze link geblokkeerd</string>

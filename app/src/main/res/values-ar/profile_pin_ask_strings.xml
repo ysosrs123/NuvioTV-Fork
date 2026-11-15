@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">طلب رمز PIN: %1$s</string>
+    <string name="profile_pin_ask_every">في كل مرة</string>
+    <string name="profile_pin_ask_every_sub">فتح هذا الملف يطلب رمز PIN دائمًا.</string>
+    <string name="profile_pin_ask_not_start">ليس عند تشغيل Arc</string>
+    <string name="profile_pin_ask_not_start_sub">عند تفعيل تذكر آخر مستخدم، يفتح Arc الملف %1$s مباشرة. اختيار %1$s من قائمة الملفات ما زال يطلبه.</string>
+    <string name="profile_pin_ask_limits">لحدود الأطفال فقط</string>
+    <string name="profile_pin_ask_limits_sub">يفتح %1$s بدون رمز PIN. ما زال يُطلب لتشغيل ما يتجاوز حد ملف طفل ولتغيير الحد.</string>
+    <string name="profile_pin_ask_limits_warn">يمكن لأي شخص على هذا الجهاز فتح %1$s، بمن فيهم الأطفال.</string>
+    <string name="profile_pin_ask_heading">متى يُطلب رمز PIN الخاص بـ %1$s</string>
+    <string name="profile_pin_ask_verify">أدخل رمز PIN الخاص بـ %1$s لتغيير وقت طلبه</string>
+    <string name="profile_pin_ask_saved">رمز PIN لـ %1$s: %2$s</string>
+</resources>

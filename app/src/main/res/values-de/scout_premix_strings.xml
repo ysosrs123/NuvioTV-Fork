@@ -79,6 +79,8 @@
     <string name="scout_premix_why_laugh">Serien zum Mitlachen.</string>
     <string name="scout_premix_why_edge">Serien, die dich in Atem halten.</string>
     <string name="scout_premix_why_weird">Schräg, clever und anders als alles andere.</string>
+    <string name="scout_premix_why_magical">Magie, Wünsche und andere Welten, für die ganze Familie.</string>
+    <string name="scout_premix_why_action">Abenteuer mit viel Action, für die ganze Familie.</string>
     <string name="scout_premix_why_world">Comedys, Krimis und mehr von dort, für dich ausgewählt.</string>
 
     <string name="scout_premix_own_sub">Wähle ein paar Dinge aus. Scout sucht die Serien aus.</string>

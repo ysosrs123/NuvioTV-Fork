@@ -62,4 +62,8 @@
     <string name="scout_mixes_delete_title">Видалити %1$s?</string>
     <string name="scout_mixes_delete_detail">Ваші серіали та історія перегляду залишаться без змін</string>
     <string name="scout_mixes_delete_confirm">Видалити</string>
+    <string name="scout_mixes_menu_subtitle">Дії з міксом</string>
+    <string name="scout_mixes_menu_open">Відкрити мікс</string>
+    <string name="scout_mixes_menu_remove">Видалити з моїх міксів</string>
+    <string name="scout_mixes_menu_hide">Сховати до наступного року</string>
 </resources>

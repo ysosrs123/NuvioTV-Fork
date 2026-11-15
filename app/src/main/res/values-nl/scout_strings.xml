@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Goed beoordeelde titels die weinig mensen hebben gezien</string>
     <string name="scout_row_tiles">Scout-tegels</string>
     <string name="scout_row_tiles_sub">Verras me, stemmingen, decennia</string>
+    <string name="scout_row_mixes">Mixen</string>
+    <string name="scout_row_mixes_sub">Je opgeslagen mixen en de feestdagenmix van het seizoen</string>
     <string name="scout_ratings_enabled">Titels beoordelen</string>
     <string name="scout_ratings_enabled_sub">Toont de knop Beoordelen, de duimen in het menu bij lang indrukken en de vraag na een film</string>
     <string name="scout_ratings_off_note">Verbergt de knop Beoordelen, de duimen in het menu en de vraag na een film. Je beoordelingen tellen nog mee.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Weglaten</string>
     <string name="scout_leave_out_sub">Genres die je nooit wilt zien</string>
     <string name="scout_leave_out_none">Geen</string>
+    <string name="scout_menu_visible">Scout in het menu tonen</string>
+    <string name="scout_menu_visible_sub">De Scout-rijen op Home hebben hun eigen schakelaars</string>
 </resources>

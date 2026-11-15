@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">У виробництві</string>
     <string name="calendar_show_next_unknown">Дата наступного епізоду невідома</string>
     <string name="calendar_time_not_announced">Час не оголошено</string>
+    <string name="calendar_streaming">Стрімінг</string>
     <string name="calendar_unknown_title">Без назви</string>
     <string name="calendar_label_new_show">Новий серіал</string>
     <string name="calendar_label_season_premiere">Прем\'єра сезону</string>

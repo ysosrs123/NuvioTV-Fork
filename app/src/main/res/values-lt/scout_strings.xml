@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Gerai įvertinti pavadinimai, kuriuos matė nedaug žmonių</string>
     <string name="scout_row_tiles">Scout langeliai</string>
     <string name="scout_row_tiles_sub">Nustebink mane, nuotaikos, dešimtmečiai</string>
+    <string name="scout_row_mixes">Miksai</string>
+    <string name="scout_row_mixes_sub">Tavo išsaugoti miksai ir sezono šventinis miksas</string>
     <string name="scout_ratings_enabled">Vertinti pavadinimus</string>
     <string name="scout_ratings_enabled_sub">Rodo mygtuką Įvertinti, nykščius ilgo paspaudimo meniu ir klausimą po filmo</string>
     <string name="scout_ratings_off_note">Slepia mygtuką Įvertinti, nykščius meniu ir klausimą po filmo. Jūsų įvertinimai vis tiek skaičiuojami.</string>
@@ -91,4 +93,6 @@
     <string name="scout_leave_out">Praleisti</string>
     <string name="scout_leave_out_sub">Žanrai, kurių niekada nenorite matyti</string>
     <string name="scout_leave_out_none">Nėra</string>
+    <string name="scout_menu_visible">Rodyti Scout meniu</string>
+    <string name="scout_menu_visible_sub">Scout eilutės pradžios ekrane turi savo jungiklius</string>
 </resources>

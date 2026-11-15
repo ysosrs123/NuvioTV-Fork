@@ -53,4 +53,8 @@
     <string name="scout_mixes_delete_title">Xóa %1$s?</string>
     <string name="scout_mixes_delete_detail">Loạt phim và lịch sử xem của bạn vẫn giữ nguyên</string>
     <string name="scout_mixes_delete_confirm">Xóa</string>
+    <string name="scout_mixes_menu_subtitle">Tác vụ bản trộn</string>
+    <string name="scout_mixes_menu_open">Mở bản trộn</string>
+    <string name="scout_mixes_menu_remove">Xóa khỏi bản trộn của tôi</string>
+    <string name="scout_mixes_menu_hide">Ẩn đến năm sau</string>
 </resources>

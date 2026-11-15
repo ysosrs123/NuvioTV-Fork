@@ -62,4 +62,8 @@
     <string name="scout_mixes_delete_title">Usunąć %1$s?</string>
     <string name="scout_mixes_delete_detail">Twoje seriale i historia oglądania pozostają bez zmian</string>
     <string name="scout_mixes_delete_confirm">Usuń</string>
+    <string name="scout_mixes_menu_subtitle">Działania miksu</string>
+    <string name="scout_mixes_menu_open">Otwórz miks</string>
+    <string name="scout_mixes_menu_remove">Usuń z moich miksów</string>
+    <string name="scout_mixes_menu_hide">Ukryj do przyszłego roku</string>
 </resources>

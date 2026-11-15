@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Godt bedømte titler, som få har set</string>
     <string name="scout_row_tiles">Scout-felter</string>
     <string name="scout_row_tiles_sub">Overrask mig, stemninger, årtier</string>
+    <string name="scout_row_mixes">Mix</string>
+    <string name="scout_row_mixes_sub">Dine gemte mix og årets højtidsmix</string>
     <string name="scout_ratings_enabled">Bedøm titler</string>
     <string name="scout_ratings_enabled_sub">Viser knappen Bedøm, tommelfingrene i langtryksmenuen og spørgsmålet efter en film</string>
     <string name="scout_ratings_off_note">Skjuler knappen Bedøm, tommelfingrene i menuen og spørgsmålet efter en film. Dine bedømmelser tæller stadig.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Udelad</string>
     <string name="scout_leave_out_sub">Genrer, du aldrig vil se</string>
     <string name="scout_leave_out_none">Ingen</string>
+    <string name="scout_menu_visible">Vis Scout i menuen</string>
+    <string name="scout_menu_visible_sub">Scouts rækker på Hjem har deres egne kontakter</string>
 </resources>

@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">O Arc leu este ficheiro e não encontrou nenhuma imagem que consiga reproduzir. Os ficheiros feitos para edição de vídeo, como Apple ProRes, são assim. Escolhe outra cópia do título.</string>
     <string name="player_error_card_silent_title">A fonte não respondeu</string>
     <string name="player_error_card_silent">O servidor desta fonte não enviou vídeo durante %1$d s. Isto vem da fonte, não do Arc. Tenta outra fonte ou volta a tentar esta mais tarde.</string>
+    <string name="player_error_card_slow_title">Esta fonte é muito lenta</string>
+    <string name="player_error_card_slow">O Arc recebeu %1$s em %2$d s, cerca de %3$s. Este filme precisa de cerca de %4$s para ser reproduzido sem parar. Isto vem da fonte, não do Arc. Tenta outra fonte.</string>
     <string name="player_error_card_fault_title">O servidor da fonte tem uma avaria</string>
     <string name="player_error_card_fault">O servidor desta fonte respondeu com um erro (%1$d). Isto vem da fonte, não do Arc. Tenta outra fonte ou volta a tentar esta mais tarde.</string>
     <string name="player_error_card_blocked_title">A fonte bloqueou este link</string>

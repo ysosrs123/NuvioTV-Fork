@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Cere PIN-ul: %1$s</string>
+    <string name="profile_pin_ask_every">De fiecare dată</string>
+    <string name="profile_pin_ask_every_sub">Deschiderea acestui profil cere mereu PIN-ul.</string>
+    <string name="profile_pin_ask_not_start">Nu la pornirea Arc</string>
+    <string name="profile_pin_ask_not_start_sub">Cu opțiunea de reținere a ultimului profil activă, Arc deschide direct %1$s. Alegerea %1$s din lista de profiluri îl cere în continuare.</string>
+    <string name="profile_pin_ask_limits">Doar pentru limitele copiilor</string>
+    <string name="profile_pin_ask_limits_sub">%1$s se deschide fără PIN. Acesta este cerut în continuare pentru redare peste limita unui profil de copil și pentru schimbarea unei limite.</string>
+    <string name="profile_pin_ask_limits_warn">Oricine de pe acest dispozitiv poate deschide %1$s, inclusiv copiii.</string>
+    <string name="profile_pin_ask_heading">Când se cere PIN-ul pentru %1$s</string>
+    <string name="profile_pin_ask_verify">Introdu PIN-ul pentru %1$s ca să schimbi când este cerut</string>
+    <string name="profile_pin_ask_saved">PIN pentru %1$s: %2$s</string>
+</resources>

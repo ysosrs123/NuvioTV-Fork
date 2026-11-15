@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Dobro ocenjeni naslovi, ki jih je videlo malo ljudi</string>
     <string name="scout_row_tiles">Ploščice Scout</string>
     <string name="scout_row_tiles_sub">Presenti me, razpoloženja, desetletja</string>
+    <string name="scout_row_mixes">Miksi</string>
+    <string name="scout_row_mixes_sub">Tvoji shranjeni miksi in praznični miks v sezoni</string>
     <string name="scout_ratings_enabled">Ocenjevanje naslovov</string>
     <string name="scout_ratings_enabled_sub">Prikaže gumb Oceni, palce v meniju dolgega pritiska in vprašanje po filmu</string>
     <string name="scout_ratings_off_note">Skrije gumb Oceni, palce v meniju in vprašanje po filmu. Vaše ocene še vedno štejejo.</string>
@@ -91,4 +93,6 @@
     <string name="scout_leave_out">Izpusti</string>
     <string name="scout_leave_out_sub">Žanri, ki jih nikoli ne želite videti</string>
     <string name="scout_leave_out_none">Brez</string>
+    <string name="scout_menu_visible">Prikaži Scout v meniju</string>
+    <string name="scout_menu_visible_sub">Vrstice Scout na začetnem zaslonu imajo svoja stikala</string>
 </resources>

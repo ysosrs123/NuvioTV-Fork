@@ -59,4 +59,8 @@
     <string name="scout_mixes_delete_title">Eliminare %1$s?</string>
     <string name="scout_mixes_delete_detail">Le tue serie e la cronologia restano come sono</string>
     <string name="scout_mixes_delete_confirm">Elimina</string>
+    <string name="scout_mixes_menu_subtitle">Azioni del mix</string>
+    <string name="scout_mixes_menu_open">Apri mix</string>
+    <string name="scout_mixes_menu_remove">Rimuovi dai miei mix</string>
+    <string name="scout_mixes_menu_hide">Nascondi fino al prossimo anno</string>
 </resources>

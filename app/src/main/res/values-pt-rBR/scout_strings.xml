@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Títulos bem avaliados que pouca gente viu</string>
     <string name="scout_row_tiles">Mosaicos Scout</string>
     <string name="scout_row_tiles_sub">Me surpreenda, climas, décadas</string>
+    <string name="scout_row_mixes">Mixes</string>
+    <string name="scout_row_mixes_sub">Seus mixes salvos e o mix da data comemorativa</string>
     <string name="scout_ratings_enabled">Avaliar títulos</string>
     <string name="scout_ratings_enabled_sub">Mostra o botão Avaliar, os polegares no menu de pressionar e segurar e a pergunta depois de um filme</string>
     <string name="scout_ratings_off_note">Oculta o botão Avaliar, os polegares no menu e a pergunta depois de um filme. Suas avaliações continuam valendo.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">Excluir</string>
     <string name="scout_leave_out_sub">Gêneros que você nunca quer ver</string>
     <string name="scout_leave_out_none">Nenhum</string>
+    <string name="scout_menu_visible">Mostrar o Scout no menu</string>
+    <string name="scout_menu_visible_sub">As fileiras do Scout no Início têm seus próprios botões</string>
 </resources>

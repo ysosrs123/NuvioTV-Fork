@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc bu dosyayı okudu ancak içinde oynatabileceği bir görüntü bulamadı. Apple ProRes gibi video düzenleme için yapılmış dosyalar böyledir. Bu içeriğin başka bir kopyasını seç.</string>
     <string name="player_error_card_silent_title">Kaynak yanıt vermedi</string>
     <string name="player_error_card_silent">Bu kaynağın sunucusu %1$d saniye boyunca video göndermedi. Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene veya bunu daha sonra tekrar dene.</string>
+    <string name="player_error_card_slow_title">Bu kaynak çok yavaş</string>
+    <string name="player_error_card_slow">Arc %2$d saniyede %1$s aldı, yaklaşık %3$s. Bu filmin durmadan oynaması için yaklaşık %4$s gerekiyor. Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene.</string>
     <string name="player_error_card_fault_title">Kaynağın sunucusunda arıza var</string>
     <string name="player_error_card_fault">Bu kaynağın sunucusu bir hatayla yanıt verdi (%1$d). Sorun kaynakta, Arc\'ta değil. Başka bir kaynak dene veya bunu daha sonra tekrar dene.</string>
     <string name="player_error_card_blocked_title">Kaynak bu bağlantıyı engelledi</string>

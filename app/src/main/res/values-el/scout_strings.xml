@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Τίτλοι με καλή βαθμολογία που λίγοι έχουν δει</string>
     <string name="scout_row_tiles">Πλαίσια Scout</string>
     <string name="scout_row_tiles_sub">Εκπλήξτε με, διαθέσεις, δεκαετίες</string>
+    <string name="scout_row_mixes">Μείγματα</string>
+    <string name="scout_row_mixes_sub">Τα αποθηκευμένα μείγματά σου και το γιορτινό μείγμα της εποχής</string>
     <string name="scout_ratings_enabled">Βαθμολόγηση τίτλων</string>
     <string name="scout_ratings_enabled_sub">Εμφανίζει το κουμπί Βαθμολογία, τους αντίχειρες στο μενού παρατεταμένου πατήματος και την ερώτηση μετά από ταινία</string>
     <string name="scout_ratings_off_note">Κρύβει το κουμπί Βαθμολογία, τους αντίχειρες στο μενού και την ερώτηση μετά από ταινία. Οι βαθμολογίες σας μετρούν ακόμη.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Εξαίρεση</string>
     <string name="scout_leave_out_sub">Είδη που δεν θέλετε ποτέ να βλέπετε</string>
     <string name="scout_leave_out_none">Κανένα</string>
+    <string name="scout_menu_visible">Εμφάνιση του Scout στο μενού</string>
+    <string name="scout_menu_visible_sub">Οι σειρές του Scout στην Αρχική έχουν δικούς τους διακόπτες</string>
 </resources>

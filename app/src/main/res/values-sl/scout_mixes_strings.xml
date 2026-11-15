@@ -62,4 +62,8 @@
     <string name="scout_mixes_delete_title">Izbrišem %1$s?</string>
     <string name="scout_mixes_delete_detail">Vaše serije in zgodovina gledanja ostanejo, kot so</string>
     <string name="scout_mixes_delete_confirm">Izbriši</string>
+    <string name="scout_mixes_menu_subtitle">Dejanja za miks</string>
+    <string name="scout_mixes_menu_open">Odpri miks</string>
+    <string name="scout_mixes_menu_remove">Odstrani iz mojih miksov</string>
+    <string name="scout_mixes_menu_hide">Skrij do naslednjega leta</string>
 </resources>

@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">评分很高但少有人看的作品</string>
     <string name="scout_row_tiles">Scout 卡片</string>
     <string name="scout_row_tiles_sub">给我惊喜、心情、年代</string>
+    <string name="scout_row_mixes">混合</string>
+    <string name="scout_row_mixes_sub">你保存的混合和当季节日混合</string>
     <string name="scout_ratings_enabled">为作品评分</string>
     <string name="scout_ratings_enabled_sub">显示评分按钮、长按菜单中的拇指和电影结束后的提问</string>
     <string name="scout_ratings_off_note">隐藏评分按钮、菜单中的评价项和电影结束后的提问。你的评分仍然有效。</string>
@@ -88,4 +90,6 @@
     <string name="scout_leave_out">排除</string>
     <string name="scout_leave_out_sub">你永远不想看到的类型</string>
     <string name="scout_leave_out_none">无</string>
+    <string name="scout_menu_visible">在菜单中显示 Scout</string>
+    <string name="scout_menu_visible_sub">主页上的 Scout 行有各自的开关</string>
 </resources>

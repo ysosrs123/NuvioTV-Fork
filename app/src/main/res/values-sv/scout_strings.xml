@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Högt betygsatta titlar som få har sett</string>
     <string name="scout_row_tiles">Scout-rutor</string>
     <string name="scout_row_tiles_sub">Överraska mig, stämningar, årtionden</string>
+    <string name="scout_row_mixes">Mixar</string>
+    <string name="scout_row_mixes_sub">Dina sparade mixar och säsongens högtidsmix</string>
     <string name="scout_ratings_enabled">Betygsätt titlar</string>
     <string name="scout_ratings_enabled_sub">Visar knappen Betygsätt, tummarna i långtrycksmenyn och frågan efter en film</string>
     <string name="scout_ratings_off_note">Döljer knappen Betygsätt, tummarna i menyn och frågan efter en film. Dina betyg räknas fortfarande.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Uteslut</string>
     <string name="scout_leave_out_sub">Genrer du aldrig vill se</string>
     <string name="scout_leave_out_none">Inga</string>
+    <string name="scout_menu_visible">Visa Scout i menyn</string>
+    <string name="scout_menu_visible_sub">Scouts rader på Hem har egna reglage</string>
 </resources>

@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc đã đọc tệp này nhưng không tìm thấy hình ảnh nào có thể phát. Các tệp dùng để biên tập video, như Apple ProRes, thường như vậy. Hãy chọn một bản khác của nội dung này.</string>
     <string name="player_error_card_silent_title">Nguồn không phản hồi</string>
     <string name="player_error_card_silent">Máy chủ của nguồn này không gửi video trong %1$d giây. Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác, hoặc thử lại nguồn này sau.</string>
+    <string name="player_error_card_slow_title">Nguồn này rất chậm</string>
+    <string name="player_error_card_slow">Arc nhận được %1$s trong %2$d giây, khoảng %3$s. Phim này cần khoảng %4$s để phát không bị dừng. Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác.</string>
     <string name="player_error_card_fault_title">Máy chủ của nguồn đang gặp lỗi</string>
     <string name="player_error_card_fault">Máy chủ của nguồn này đã trả về lỗi (%1$d). Lỗi này đến từ nguồn, không phải từ Arc. Hãy thử nguồn khác, hoặc thử lại nguồn này sau.</string>
     <string name="player_error_card_blocked_title">Nguồn đã chặn liên kết này</string>

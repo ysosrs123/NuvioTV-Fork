@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">В производстве</string>
     <string name="calendar_show_next_unknown">Дата следующего эпизода неизвестна</string>
     <string name="calendar_time_not_announced">Время не объявлено</string>
+    <string name="calendar_streaming">Стриминг</string>
     <string name="calendar_unknown_title">Без названия</string>
     <string name="calendar_label_new_show">Новый сериал</string>
     <string name="calendar_label_season_premiere">Премьера сезона</string>

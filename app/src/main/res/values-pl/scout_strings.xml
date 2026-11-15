@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Dobrze oceniane tytuły, które widziało niewielu</string>
     <string name="scout_row_tiles">Kafelki Scout</string>
     <string name="scout_row_tiles_sub">Zaskocz mnie, nastroje, dekady</string>
+    <string name="scout_row_mixes">Miksy</string>
+    <string name="scout_row_mixes_sub">Twoje zapisane miksy i świąteczny miks w sezonie</string>
     <string name="scout_ratings_enabled">Oceniaj tytuły</string>
     <string name="scout_ratings_enabled_sub">Pokazuje przycisk Oceń, kciuki w menu długiego naciśnięcia i pytanie po filmie</string>
     <string name="scout_ratings_off_note">Ukrywa przycisk Oceń, kciuki w menu i pytanie po filmie. Twoje oceny nadal się liczą.</string>
@@ -91,4 +93,6 @@
     <string name="scout_leave_out">Pomijaj</string>
     <string name="scout_leave_out_sub">Gatunki, których nigdy nie chcesz widzieć</string>
     <string name="scout_leave_out_none">Brak</string>
+    <string name="scout_menu_visible">Pokazuj Scout w menu</string>
+    <string name="scout_menu_visible_sub">Rzędy Scout na ekranie głównym mają własne przełączniki</string>
 </resources>

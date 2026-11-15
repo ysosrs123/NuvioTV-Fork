@@ -56,4 +56,8 @@
     <string name="scout_mixes_delete_title">Slette %1$s?</string>
     <string name="scout_mixes_delete_detail">Seriene og loggen din forblir som de er</string>
     <string name="scout_mixes_delete_confirm">Slett</string>
+    <string name="scout_mixes_menu_subtitle">Handlinger for miks</string>
+    <string name="scout_mixes_menu_open">Åpne miks</string>
+    <string name="scout_mixes_menu_remove">Fjern fra mine mikser</string>
+    <string name="scout_mixes_menu_hide">Skjul til neste år</string>
 </resources>

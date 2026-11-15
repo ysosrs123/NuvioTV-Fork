@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">PIN sor: %1$s</string>
+    <string name="profile_pin_ask_every">Her seferinde</string>
+    <string name="profile_pin_ask_every_sub">Bu profili açmak her zaman PIN ister.</string>
+    <string name="profile_pin_ask_not_start">Arc açılırken değil</string>
+    <string name="profile_pin_ask_not_start_sub">Son Profili Hatırla açıkken Arc doğrudan %1$s profilini açar. Profil listesinden %1$s seçilince yine PIN sorulur.</string>
+    <string name="profile_pin_ask_limits">Yalnızca çocuk sınırları için</string>
+    <string name="profile_pin_ask_limits_sub">%1$s PIN olmadan açılır. Bir çocuk profilinin sınırının üstündekileri oynatmak ve sınırı değiştirmek için PIN yine sorulur.</string>
+    <string name="profile_pin_ask_limits_warn">Bu cihazdaki herkes, çocuklar dahil, %1$s profilini açabilir.</string>
+    <string name="profile_pin_ask_heading">%1$s PIN\'i ne zaman sorulsun</string>
+    <string name="profile_pin_ask_verify">Ne zaman sorulacağını değiştirmek için %1$s PIN\'ini girin</string>
+    <string name="profile_pin_ask_saved">%1$s PIN: %2$s</string>
+</resources>

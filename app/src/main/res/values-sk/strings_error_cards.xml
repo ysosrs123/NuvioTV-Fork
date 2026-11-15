@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc tento súbor prečítal, ale nenašiel v ňom obraz, ktorý vie prehrať. Takéto sú súbory na strih videa, napríklad Apple ProRes. Vyberte inú kópiu titulu.</string>
     <string name="player_error_card_silent_title">Zdroj neodpovedal</string>
     <string name="player_error_card_silent">Server tohto zdroja neposlal žiadne video počas %1$d s. Problém je na strane zdroja, nie Arc. Skúste iný zdroj alebo tento skúste znova neskôr.</string>
+    <string name="player_error_card_slow_title">Tento zdroj je veľmi pomalý</string>
+    <string name="player_error_card_slow">Arc prijal %1$s za %2$d s, asi %3$s. Tento film potrebuje asi %4$s, aby sa prehrával bez zastavenia. Problém je na strane zdroja, nie Arc. Skúste iný zdroj.</string>
     <string name="player_error_card_fault_title">Server zdroja má poruchu</string>
     <string name="player_error_card_fault">Server tohto zdroja odpovedal chybou (%1$d). Problém je na strane zdroja, nie Arc. Skúste iný zdroj alebo tento skúste znova neskôr.</string>
     <string name="player_error_card_blocked_title">Zdroj zablokoval tento odkaz</string>

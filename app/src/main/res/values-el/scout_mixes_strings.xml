@@ -56,4 +56,8 @@
     <string name="scout_mixes_delete_title">Διαγραφή %1$s;</string>
     <string name="scout_mixes_delete_detail">Οι σειρές και το ιστορικό σας μένουν ως έχουν</string>
     <string name="scout_mixes_delete_confirm">Διαγραφή</string>
+    <string name="scout_mixes_menu_subtitle">Ενέργειες μείγματος</string>
+    <string name="scout_mixes_menu_open">Άνοιγμα μείγματος</string>
+    <string name="scout_mixes_menu_remove">Αφαίρεση από τα μείγματά μου</string>
+    <string name="scout_mixes_menu_hide">Απόκρυψη μέχρι του χρόνου</string>
 </resources>

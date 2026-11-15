@@ -56,4 +56,8 @@
     <string name="scout_mixes_delete_title">%1$s हटाएँ?</string>
     <string name="scout_mixes_delete_detail">आपकी सीरीज़ और देखने का इतिहास वैसे ही रहेंगे</string>
     <string name="scout_mixes_delete_confirm">हटाएँ</string>
+    <string name="scout_mixes_menu_subtitle">मिक्स के विकल्प</string>
+    <string name="scout_mixes_menu_open">मिक्स खोलें</string>
+    <string name="scout_mixes_menu_remove">मेरे मिक्स से हटाएँ</string>
+    <string name="scout_mixes_menu_hide">अगले साल तक छिपाएँ</string>
 </resources>

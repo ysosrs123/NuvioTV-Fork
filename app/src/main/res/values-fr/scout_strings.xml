@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Des titres bien notés que peu de gens ont vus</string>
     <string name="scout_row_tiles">Tuiles Scout</string>
     <string name="scout_row_tiles_sub">Surprenez-moi, ambiances, décennies</string>
+    <string name="scout_row_mixes">Mix</string>
+    <string name="scout_row_mixes_sub">Tes mix enregistrés et le mix de fête de la saison</string>
     <string name="scout_ratings_enabled">Noter les titres</string>
     <string name="scout_ratings_enabled_sub">Affiche le bouton Noter, les pouces dans le menu d\'appui long et la question après un film</string>
     <string name="scout_ratings_off_note">Masque le bouton Noter, les pouces du menu et la question après un film. Vos notes comptent toujours.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">Exclure</string>
     <string name="scout_leave_out_sub">Les genres que vous ne voulez jamais voir</string>
     <string name="scout_leave_out_none">Aucun</string>
+    <string name="scout_menu_visible">Afficher Scout dans le menu</string>
+    <string name="scout_menu_visible_sub">Les rangées Scout de l\'accueil ont leurs propres interrupteurs</string>
 </resources>

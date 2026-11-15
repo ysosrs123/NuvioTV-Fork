@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arcはこのファイルを読み込みましたが、再生できる映像が見つかりませんでした。Apple ProResなどの動画編集用ファイルはこのようになります。このタイトルの別のファイルを選んでください。</string>
     <string name="player_error_card_silent_title">ソースが応答しません</string>
     <string name="player_error_card_silent">このソースのサーバーから%1$d秒間、映像が届きませんでした。原因はArcではなく、ソース側にあります。別のソースを試すか、時間をおいてこのソースをもう一度お試しください。</string>
+    <string name="player_error_card_slow_title">このソースはとても遅いです</string>
+    <string name="player_error_card_slow">Arcが%2$d秒で受け取れたのは%1$s（約%3$s）でした。この作品を止まらずに再生するには約%4$sが必要です。原因はArcではなく、ソース側にあります。別のソースを試してください。</string>
     <string name="player_error_card_fault_title">ソースのサーバーに障害があります</string>
     <string name="player_error_card_fault">このソースのサーバーがエラー（%1$d）を返しました。原因はArcではなく、ソース側にあります。別のソースを試すか、時間をおいてこのソースをもう一度お試しください。</string>
     <string name="player_error_card_blocked_title">ソースがこのリンクをブロックしました</string>

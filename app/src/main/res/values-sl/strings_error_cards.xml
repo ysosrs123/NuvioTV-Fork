@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc je prebral to datoteko, a v njej ni našel slike, ki bi jo lahko predvajal. Takšne so datoteke za video montažo, na primer Apple ProRes. Izberite drugo različico naslova.</string>
     <string name="player_error_card_silent_title">Vir se ni odzval</string>
     <string name="player_error_card_silent">Strežnik tega vira %1$d s ni poslal videa. Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir ali ta vir znova pozneje.</string>
+    <string name="player_error_card_slow_title">Ta vir je zelo počasen</string>
+    <string name="player_error_card_slow">Arc je v %2$d s prejel %1$s, približno %3$s. Ta film potrebuje približno %4$s za predvajanje brez ustavljanja. Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir.</string>
     <string name="player_error_card_fault_title">Strežnik vira ima napako</string>
     <string name="player_error_card_fault">Strežnik tega vira je odgovoril z napako (%1$d). Vzrok je pri viru, ne v aplikaciji Arc. Poskusite drug vir ali ta vir znova pozneje.</string>
     <string name="player_error_card_blocked_title">Vir je blokiral to povezavo</string>

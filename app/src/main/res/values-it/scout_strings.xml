@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Titoli ben valutati che pochi hanno visto</string>
     <string name="scout_row_tiles">Riquadri Scout</string>
     <string name="scout_row_tiles_sub">Sorprendimi, stati d\'animo, decenni</string>
+    <string name="scout_row_mixes">Mix</string>
+    <string name="scout_row_mixes_sub">I tuoi mix salvati e il mix delle feste di stagione</string>
     <string name="scout_ratings_enabled">Valuta i titoli</string>
     <string name="scout_ratings_enabled_sub">Mostra il pulsante Valuta, i pollici nel menu a pressione lunga e la domanda dopo un film</string>
     <string name="scout_ratings_off_note">Nasconde il pulsante Valuta, i pollici nel menu e la domanda dopo un film. Le tue valutazioni contano ancora.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">Escludi</string>
     <string name="scout_leave_out_sub">Generi che non vuoi mai vedere</string>
     <string name="scout_leave_out_none">Nessuno</string>
+    <string name="scout_menu_visible">Mostra Scout nel menu</string>
+    <string name="scout_menu_visible_sub">Le righe di Scout nella Home hanno i propri interruttori</string>
 </resources>

@@ -79,6 +79,8 @@
     <string name="scout_premix_why_laugh">Serije uz koje ćete se smejati.</string>
     <string name="scout_premix_why_edge">Serije koje vas drže u napetosti.</string>
     <string name="scout_premix_why_weird">Čudne, pametne i drugačije od svega ostalog.</string>
+    <string name="scout_premix_why_magical">Magija, želje i drugi svetovi, za celu porodicu.</string>
+    <string name="scout_premix_why_action">Avanture pune akcije, za celu porodicu.</string>
     <string name="scout_premix_why_world">Komedije, krimići i još mnogo toga odande, izabrano za vas.</string>
 
     <string name="scout_premix_own_sub">Izaberite nekoliko stvari. Scout bira serije.</string>

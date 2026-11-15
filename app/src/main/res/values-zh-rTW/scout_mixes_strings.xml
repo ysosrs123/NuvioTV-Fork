@@ -53,4 +53,8 @@
     <string name="scout_mixes_delete_title">刪除 %1$s？</string>
     <string name="scout_mixes_delete_detail">你的影集和觀看紀錄保持不變</string>
     <string name="scout_mixes_delete_confirm">刪除</string>
+    <string name="scout_mixes_menu_subtitle">混合操作</string>
+    <string name="scout_mixes_menu_open">開啟混合</string>
+    <string name="scout_mixes_menu_remove">從我的混合中移除</string>
+    <string name="scout_mixes_menu_hide">隱藏到明年</string>
 </resources>

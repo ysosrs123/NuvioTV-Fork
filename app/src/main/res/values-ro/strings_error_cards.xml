@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc a citit acest fișier și nu a găsit în el nicio imagine pe care să o poată reda. Fișierele făcute pentru editare video, cum ar fi Apple ProRes, sunt așa. Alege altă copie a titlului.</string>
     <string name="player_error_card_silent_title">Sursa nu a răspuns</string>
     <string name="player_error_card_silent">Serverul acestei surse nu a trimis niciun video timp de %1$d s. Asta vine de la sursă, nu de la Arc. Încearcă altă sursă sau reîncearcă această sursă mai târziu.</string>
+    <string name="player_error_card_slow_title">Această sursă este foarte lentă</string>
+    <string name="player_error_card_slow">Arc a primit %1$s în %2$d s, aproximativ %3$s. Acest film are nevoie de aproximativ %4$s ca să ruleze fără opriri. Asta vine de la sursă, nu de la Arc. Încearcă altă sursă.</string>
     <string name="player_error_card_fault_title">Serverul sursei are o defecțiune</string>
     <string name="player_error_card_fault">Serverul acestei surse a răspuns cu o eroare (%1$d). Asta vine de la sursă, nu de la Arc. Încearcă altă sursă sau reîncearcă această sursă mai târziu.</string>
     <string name="player_error_card_blocked_title">Sursa a blocat acest link</string>

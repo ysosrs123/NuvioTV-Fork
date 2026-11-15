@@ -59,4 +59,8 @@
     <string name="scout_mixes_delete_title">Ștergi %1$s?</string>
     <string name="scout_mixes_delete_detail">Serialele și istoricul tău rămân la fel</string>
     <string name="scout_mixes_delete_confirm">Șterge</string>
+    <string name="scout_mixes_menu_subtitle">Acțiuni pentru mix</string>
+    <string name="scout_mixes_menu_open">Deschide mixul</string>
+    <string name="scout_mixes_menu_remove">Elimină din mixurile mele</string>
+    <string name="scout_mixes_menu_hide">Ascunde până anul viitor</string>
 </resources>

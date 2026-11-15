@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc perskaitė šį failą, bet nerado jame vaizdo, kurį galėtų paleisti. Tokie būna vaizdo montavimui skirti failai, pvz., Apple ProRes. Pasirinkite kitą šio kūrinio kopiją.</string>
     <string name="player_error_card_silent_title">Šaltinis neatsakė</string>
     <string name="player_error_card_silent">Šio šaltinio serveris nesiuntė vaizdo %1$d s. Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį arba bandykite šį vėliau dar kartą.</string>
+    <string name="player_error_card_slow_title">Šis šaltinis labai lėtas</string>
+    <string name="player_error_card_slow">Arc per %2$d s gavo %1$s, apie %3$s. Kad šis filmas būtų rodomas be sustojimų, reikia apie %4$s. Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį.</string>
     <string name="player_error_card_fault_title">Šaltinio serveryje gedimas</string>
     <string name="player_error_card_fault">Šio šaltinio serveris atsakė klaida (%1$d). Tai šaltinio problema, ne Arc. Pabandykite kitą šaltinį arba bandykite šį vėliau dar kartą.</string>
     <string name="player_error_card_blocked_title">Šaltinis užblokavo šią nuorodą</string>

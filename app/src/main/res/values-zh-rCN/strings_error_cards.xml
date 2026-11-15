@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc 读取了此文件，但没有找到可以播放的画面。Apple ProRes 等用于视频剪辑的文件就是这样。请选择该标题的其他版本。</string>
     <string name="player_error_card_silent_title">来源没有响应</string>
     <string name="player_error_card_silent">此来源的服务器在 %1$d 秒内没有发送任何视频。问题出在来源一方，而不是 Arc。请尝试其他来源，或稍后再试此来源。</string>
+    <string name="player_error_card_slow_title">此来源非常慢</string>
+    <string name="player_error_card_slow">Arc 在 %2$d 秒内收到 %1$s，约 %3$s。这部影片需要约 %4$s 才能不中断地播放。问题出在来源一方，而不是 Arc。请尝试其他来源。</string>
     <string name="player_error_card_fault_title">来源服务器出现故障</string>
     <string name="player_error_card_fault">此来源的服务器返回了错误（%1$d）。问题出在来源一方，而不是 Arc。请尝试其他来源，或稍后再试此来源。</string>
     <string name="player_error_card_blocked_title">来源拦截了此链接</string>

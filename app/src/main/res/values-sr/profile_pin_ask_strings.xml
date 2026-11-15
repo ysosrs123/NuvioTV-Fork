@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Тражи PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Сваки пут</string>
+    <string name="profile_pin_ask_every_sub">Отварање овог профила увек тражи PIN.</string>
+    <string name="profile_pin_ask_not_start">Не при покретању Arcа</string>
+    <string name="profile_pin_ask_not_start_sub">Када је укључено памћење последњег профила, Arc одмах отвара %1$s. Бирање профила %1$s са листе и даље тражи PIN.</string>
+    <string name="profile_pin_ask_limits">Само за дечја ограничења</string>
+    <string name="profile_pin_ask_limits_sub">%1$s се отвара без PIN-а. И даље се тражи за пуштање изнад ограничења дечјег профила и за промену ограничења.</string>
+    <string name="profile_pin_ask_limits_warn">Свако на овом уређају може да отвори %1$s, укључујући децу.</string>
+    <string name="profile_pin_ask_heading">Када тражити PIN за %1$s</string>
+    <string name="profile_pin_ask_verify">Унесите PIN за %1$s да промените када се тражи</string>
+    <string name="profile_pin_ask_saved">PIN за %1$s: %2$s</string>
+</resources>

@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Titluri bine evaluate pe care puțini le-au văzut</string>
     <string name="scout_row_tiles">Dale Scout</string>
     <string name="scout_row_tiles_sub">Surprinde-mă, stări, decenii</string>
+    <string name="scout_row_mixes">Mixuri</string>
+    <string name="scout_row_mixes_sub">Mixurile tale salvate și mixul de sărbătoare din sezon</string>
     <string name="scout_ratings_enabled">Evaluează titluri</string>
     <string name="scout_ratings_enabled_sub">Afișează butonul Evaluează, degetele din meniul de apăsare lungă și întrebarea de după film</string>
     <string name="scout_ratings_off_note">Ascunde butonul Evaluează, degetele din meniu și întrebarea de după film. Evaluările tale contează în continuare.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">Exclude</string>
     <string name="scout_leave_out_sub">Genuri pe care nu vrei să le vezi niciodată</string>
     <string name="scout_leave_out_none">Niciunul</string>
+    <string name="scout_menu_visible">Afișează Scout în meniu</string>
+    <string name="scout_menu_visible_sub">Rândurile Scout de pe Acasă au propriile comutatoare</string>
 </resources>

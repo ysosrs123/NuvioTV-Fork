@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">PINの確認: %1$s</string>
+    <string name="profile_pin_ask_every">毎回</string>
+    <string name="profile_pin_ask_every_sub">このプロフィールを開くたびにPINを確認します。</string>
+    <string name="profile_pin_ask_not_start">Arcの起動時は確認しない</string>
+    <string name="profile_pin_ask_not_start_sub">最後のプロフィールを記憶がオンのとき、Arcは%1$sをそのまま開きます。プロフィール一覧から%1$sを選ぶときは確認します。</string>
+    <string name="profile_pin_ask_limits">子どもの制限のみ</string>
+    <string name="profile_pin_ask_limits_sub">%1$sはPINなしで開きます。子どものプロフィールの制限を超える作品の再生と、制限の変更にはPINが必要です。</string>
+    <string name="profile_pin_ask_limits_warn">このデバイスでは子どもを含め誰でも%1$sを開けます。</string>
+    <string name="profile_pin_ask_heading">%1$sのPINを確認するタイミング</string>
+    <string name="profile_pin_ask_verify">確認のタイミングを変更するには%1$sのPINを入力してください</string>
+    <string name="profile_pin_ask_saved">%1$sのPIN: %2$s</string>
+</resources>

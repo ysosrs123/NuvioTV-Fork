@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">U produkciji</string>
     <string name="calendar_show_next_unknown">Sljedeća epizoda još bez datuma</string>
     <string name="calendar_time_not_announced">Vrijeme nije najavljeno</string>
+    <string name="calendar_streaming">Striming</string>
     <string name="calendar_unknown_title">Bez naslova</string>
     <string name="calendar_label_new_show">Nova serija</string>
     <string name="calendar_label_season_premiere">Premijera sezone</string>

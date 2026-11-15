@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">PIN kérése: %1$s</string>
+    <string name="profile_pin_ask_every">Minden alkalommal</string>
+    <string name="profile_pin_ask_every_sub">A profil megnyitása mindig kéri a PIN-t.</string>
+    <string name="profile_pin_ask_not_start">Nem az Arc indításakor</string>
+    <string name="profile_pin_ask_not_start_sub">Bekapcsolt Utolsó profil megjegyzése mellett az Arc azonnal ezt nyitja meg: %1$s. Ha a profillistából a(z) %1$s profilt választják, továbbra is kéri.</string>
+    <string name="profile_pin_ask_limits">Csak a gyerekkorlátokhoz</string>
+    <string name="profile_pin_ask_limits_sub">%1$s PIN nélkül nyílik meg. A PIN-t továbbra is kéri a gyerekprofil korlátja feletti lejátszáshoz és a korlát módosításához.</string>
+    <string name="profile_pin_ask_limits_warn">Ezen az eszközön bárki megnyithatja: %1$s, a gyerekek is.</string>
+    <string name="profile_pin_ask_heading">Mikor kérje %1$s PIN-jét</string>
+    <string name="profile_pin_ask_verify">Add meg %1$s PIN-jét, hogy módosítsd, mikor kérje</string>
+    <string name="profile_pin_ask_saved">%1$s PIN: %2$s</string>
+</resources>

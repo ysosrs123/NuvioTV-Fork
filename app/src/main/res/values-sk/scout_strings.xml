@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Dobre hodnotené tituly, ktoré videlo málo ľudí</string>
     <string name="scout_row_tiles">Dlaždice Scout</string>
     <string name="scout_row_tiles_sub">Prekvap ma, nálady, dekády</string>
+    <string name="scout_row_mixes">Mixy</string>
+    <string name="scout_row_mixes_sub">Tvoje uložené mixy a sviatočný mix v sezóne</string>
     <string name="scout_ratings_enabled">Hodnotiť tituly</string>
     <string name="scout_ratings_enabled_sub">Zobrazí tlačidlo Hodnotiť, palce v ponuke dlhého stlačenia a otázku po filme</string>
     <string name="scout_ratings_off_note">Skryje tlačidlo Hodnotiť, palce v ponuke a otázku po filme. Vaše hodnotenia sa ďalej počítajú.</string>
@@ -91,4 +93,6 @@
     <string name="scout_leave_out">Vynechať</string>
     <string name="scout_leave_out_sub">Žánre, ktoré nikdy nechcete vidieť</string>
     <string name="scout_leave_out_none">Žiadne</string>
+    <string name="scout_menu_visible">Zobraziť Scout v ponuke</string>
+    <string name="scout_menu_visible_sub">Riadky Scoutu na domovskej obrazovke majú vlastné prepínače</string>
 </resources>

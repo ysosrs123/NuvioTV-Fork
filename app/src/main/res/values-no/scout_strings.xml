@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Godt vurderte titler som få har sett</string>
     <string name="scout_row_tiles">Scout-ruter</string>
     <string name="scout_row_tiles_sub">Overrask meg, stemninger, tiår</string>
+    <string name="scout_row_mixes">Mikser</string>
+    <string name="scout_row_mixes_sub">Dine lagrede mikser og høytidsmiksen i sesongen</string>
     <string name="scout_ratings_enabled">Vurder titler</string>
     <string name="scout_ratings_enabled_sub">Viser knappen Vurder, tomlene i langtrykkmenyen og spørsmålet etter en film</string>
     <string name="scout_ratings_off_note">Skjuler knappen Vurder, tomlene i menyen og spørsmålet etter en film. Vurderingene dine teller fortsatt.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Utelat</string>
     <string name="scout_leave_out_sub">Sjangre du aldri vil se</string>
     <string name="scout_leave_out_none">Ingen</string>
+    <string name="scout_menu_visible">Vis Scout i menyen</string>
+    <string name="scout_menu_visible_sub">Scout-radene på Hjem har egne brytere</string>
 </resources>

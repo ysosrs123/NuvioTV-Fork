@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Високо оцінені тайтли, які бачили небагато людей</string>
     <string name="scout_row_tiles">Плитки Scout</string>
     <string name="scout_row_tiles_sub">Здивуй мене, настрої, десятиліття</string>
+    <string name="scout_row_mixes">Мікси</string>
+    <string name="scout_row_mixes_sub">Твої збережені мікси та святковий мікс сезону</string>
     <string name="scout_ratings_enabled">Оцінювати тайтли</string>
     <string name="scout_ratings_enabled_sub">Показує кнопку Оцінити, пальці в меню довгого натискання та запитання після фільму</string>
     <string name="scout_ratings_off_note">Приховує кнопку Оцінити, пальці в меню та запитання після фільму. Ваші оцінки й далі враховуються.</string>
@@ -91,4 +93,6 @@
     <string name="scout_leave_out">Виключити</string>
     <string name="scout_leave_out_sub">Жанри, які ви ніколи не хочете бачити</string>
     <string name="scout_leave_out_none">Немає</string>
+    <string name="scout_menu_visible">Показувати Scout у меню</string>
+    <string name="scout_menu_visible_sub">Рядки Scout на головній мають власні перемикачі</string>
 </resources>

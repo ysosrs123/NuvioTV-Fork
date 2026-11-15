@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">अच्छी रेटिंग वाले टाइटल जिन्हें कम लोगों ने देखा</string>
     <string name="scout_row_tiles">Scout टाइल</string>
     <string name="scout_row_tiles_sub">सरप्राइज़ करें, मूड, दशक</string>
+    <string name="scout_row_mixes">मिक्स</string>
+    <string name="scout_row_mixes_sub">आपके सहेजे गए मिक्स और मौसम का त्योहार मिक्स</string>
     <string name="scout_ratings_enabled">टाइटल रेट करें</string>
     <string name="scout_ratings_enabled_sub">रेट बटन, लंबे दबाव वाले मेन्यू में थंब और फ़िल्म के बाद का सवाल दिखाता है</string>
     <string name="scout_ratings_off_note">रेट बटन, मेन्यू के थंब और फ़िल्म के बाद का सवाल छिपाता है। आपकी रेटिंग फिर भी गिनी जाती हैं।</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">बाहर रखें</string>
     <string name="scout_leave_out_sub">वे शैलियाँ जो आप कभी नहीं देखना चाहते</string>
     <string name="scout_leave_out_none">कोई नहीं</string>
+    <string name="scout_menu_visible">मेनू में Scout दिखाएँ</string>
+    <string name="scout_menu_visible_sub">होम पर Scout की पंक्तियों के अपने अलग स्विच हैं</string>
 </resources>

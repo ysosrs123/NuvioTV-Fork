@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">عناوين جيدة التقييم شاهدها قلة</string>
     <string name="scout_row_tiles">مربعات Scout</string>
     <string name="scout_row_tiles_sub">فاجئني، الأمزجة، العقود</string>
+    <string name="scout_row_mixes">المزيج</string>
+    <string name="scout_row_mixes_sub">مزيجاتك المحفوظة ومزيج العطلة في موسمه</string>
     <string name="scout_ratings_enabled">تقييم العناوين</string>
     <string name="scout_ratings_enabled_sub">يعرض زر التقييم والإبهام في قائمة الضغط المطول والسؤال بعد الفيلم</string>
     <string name="scout_ratings_off_note">يخفي زر التقييم والإبهام في القائمة والسؤال بعد الفيلم. تبقى تقييماتك محسوبة.</string>
@@ -93,4 +95,6 @@
     <string name="scout_leave_out">استبعاد</string>
     <string name="scout_leave_out_sub">أنواع لا تريد رؤيتها أبدًا</string>
     <string name="scout_leave_out_none">لا شيء</string>
+    <string name="scout_menu_visible">إظهار Scout في القائمة</string>
+    <string name="scout_menu_visible_sub">صفوف Scout في الرئيسية لها مفاتيحها الخاصة</string>
 </resources>

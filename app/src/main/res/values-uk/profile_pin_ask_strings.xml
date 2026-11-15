@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Запит PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Щоразу</string>
+    <string name="profile_pin_ask_every_sub">Відкриття цього профілю завжди запитує PIN.</string>
+    <string name="profile_pin_ask_not_start">Не під час запуску Arc</string>
+    <string name="profile_pin_ask_not_start_sub">Коли ввімкнено запам\'ятовування останнього профілю, Arc одразу відкриває %1$s. Вибір %1$s у списку профілів і далі запитує PIN.</string>
+    <string name="profile_pin_ask_limits">Лише для дитячих обмежень</string>
+    <string name="profile_pin_ask_limits_sub">%1$s відкривається без PIN. Він і далі потрібен, щоб увімкнути те, що вище обмеження дитячого профілю, і щоб змінити обмеження.</string>
+    <string name="profile_pin_ask_limits_warn">Будь-хто на цьому пристрої може відкрити %1$s, зокрема діти.</string>
+    <string name="profile_pin_ask_heading">Коли запитувати PIN профілю %1$s</string>
+    <string name="profile_pin_ask_verify">Введіть PIN профілю %1$s, щоб змінити, коли його запитувати</string>
+    <string name="profile_pin_ask_saved">PIN профілю %1$s: %2$s</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Minta PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Setiap kali</string>
+    <string name="profile_pin_ask_every_sub">Membuka profil ini selalu meminta PIN.</string>
+    <string name="profile_pin_ask_not_start">Tidak saat Arc dimulai</string>
+    <string name="profile_pin_ask_not_start_sub">Dengan Ingat Profil Terakhir aktif, Arc langsung membuka %1$s. Memilih %1$s dari daftar profil tetap meminta PIN.</string>
+    <string name="profile_pin_ask_limits">Hanya untuk batas anak</string>
+    <string name="profile_pin_ask_limits_sub">%1$s terbuka tanpa PIN. PIN tetap diminta untuk memutar di atas batas profil anak dan untuk mengubah batas.</string>
+    <string name="profile_pin_ask_limits_warn">Siapa pun di perangkat ini bisa membuka %1$s, termasuk anak-anak.</string>
+    <string name="profile_pin_ask_heading">Kapan PIN %1$s diminta</string>
+    <string name="profile_pin_ask_verify">Masukkan PIN %1$s untuk mengubah kapan PIN diminta</string>
+    <string name="profile_pin_ask_saved">PIN %1$s: %2$s</string>
+</resources>

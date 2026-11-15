@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Spørg om PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Hver gang</string>
+    <string name="profile_pin_ask_every_sub">Når denne profil åbnes, spørges der altid om PIN.</string>
+    <string name="profile_pin_ask_not_start">Ikke når Arc starter</string>
+    <string name="profile_pin_ask_not_start_sub">Med Husk seneste profil slået til åbner Arc direkte i %1$s. Vælges %1$s på profillisten, spørges der stadig.</string>
+    <string name="profile_pin_ask_limits">Kun til børnegrænser</string>
+    <string name="profile_pin_ask_limits_sub">%1$s åbner uden PIN. Der spørges stadig for at afspille over en børneprofils grænse og for at ændre en grænse.</string>
+    <string name="profile_pin_ask_limits_warn">Alle på denne enhed kan åbne %1$s, også børn.</string>
+    <string name="profile_pin_ask_heading">Hvornår der spørges om %1$ss PIN</string>
+    <string name="profile_pin_ask_verify">Indtast %1$ss PIN for at ændre, hvornår der spørges</string>
+    <string name="profile_pin_ask_saved">%1$ss PIN: %2$s</string>
+</resources>

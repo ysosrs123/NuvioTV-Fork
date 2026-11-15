@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Добре оценени заглавия, които малко хора са гледали</string>
     <string name="scout_row_tiles">Плочки на Scout</string>
     <string name="scout_row_tiles_sub">Изненадай ме, настроения, десетилетия</string>
+    <string name="scout_row_mixes">Миксове</string>
+    <string name="scout_row_mixes_sub">Запазените ти миксове и празничният микс в сезона</string>
     <string name="scout_ratings_enabled">Оценяване на заглавия</string>
     <string name="scout_ratings_enabled_sub">Показва бутона Оцени, палците в менюто при дълго натискане и въпроса след филм</string>
     <string name="scout_ratings_off_note">Скрива бутона Оцени, палците в менюто и въпроса след филм. Оценките ви продължават да се броят.</string>
@@ -89,4 +91,6 @@
     <string name="scout_leave_out">Изключване</string>
     <string name="scout_leave_out_sub">Жанрове, които никога не искате да виждате</string>
     <string name="scout_leave_out_none">Няма</string>
+    <string name="scout_menu_visible">Показване на Scout в менюто</string>
+    <string name="scout_menu_visible_sub">Редовете на Scout в началото имат свои превключватели</string>
 </resources>

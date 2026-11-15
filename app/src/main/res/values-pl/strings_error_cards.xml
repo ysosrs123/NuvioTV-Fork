@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc odczytał ten plik, ale nie znalazł w nim obrazu, który może odtworzyć. Tak jest z plikami do montażu wideo, np. Apple ProRes. Wybierz inną kopię tytułu.</string>
     <string name="player_error_card_silent_title">Źródło nie odpowiedziało</string>
     <string name="player_error_card_silent">Serwer tego źródła nie wysłał obrazu przez %1$d s. Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła albo spróbuj tego ponownie później.</string>
+    <string name="player_error_card_slow_title">To źródło jest bardzo wolne</string>
+    <string name="player_error_card_slow">Arc otrzymał %1$s w %2$d s, około %3$s. Do odtwarzania bez zatrzymań ten film potrzebuje około %4$s. Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła.</string>
     <string name="player_error_card_fault_title">Serwer źródła ma awarię</string>
     <string name="player_error_card_fault">Serwer tego źródła odpowiedział błędem (%1$d). Problem leży po stronie źródła, a nie Arc. Spróbuj innego źródła albo spróbuj tego ponownie później.</string>
     <string name="player_error_card_blocked_title">Źródło zablokowało ten link</string>

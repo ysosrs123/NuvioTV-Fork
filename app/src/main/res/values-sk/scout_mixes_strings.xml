@@ -62,4 +62,8 @@
     <string name="scout_mixes_delete_title">Odstrániť %1$s?</string>
     <string name="scout_mixes_delete_detail">Vaše seriály a história sledovania zostanú bez zmeny</string>
     <string name="scout_mixes_delete_confirm">Odstrániť</string>
+    <string name="scout_mixes_menu_subtitle">Akcie mixu</string>
+    <string name="scout_mixes_menu_open">Otvoriť mix</string>
+    <string name="scout_mixes_menu_remove">Odstrániť z mojich mixov</string>
+    <string name="scout_mixes_menu_hide">Skryť do budúceho roka</string>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Chiedi il PIN: %1$s</string>
+    <string name="profile_pin_ask_every">Ogni volta</string>
+    <string name="profile_pin_ask_every_sub">Aprire questo profilo chiede sempre il PIN.</string>
+    <string name="profile_pin_ask_not_start">Non all\'avvio di Arc</string>
+    <string name="profile_pin_ask_not_start_sub">Con Ricorda l\'ultimo profilo attivo, Arc apre direttamente %1$s. Scegliere %1$s dall\'elenco dei profili lo chiede ancora.</string>
+    <string name="profile_pin_ask_limits">Solo per i limiti dei bambini</string>
+    <string name="profile_pin_ask_limits_sub">%1$s si apre senza PIN. Viene ancora chiesto per riprodurre sopra il limite di un profilo bambino e per cambiare un limite.</string>
+    <string name="profile_pin_ask_limits_warn">Chiunque su questo dispositivo può aprire %1$s, bambini compresi.</string>
+    <string name="profile_pin_ask_heading">Quando chiedere il PIN di %1$s</string>
+    <string name="profile_pin_ask_verify">Inserisci il PIN di %1$s per cambiare quando viene chiesto</string>
+    <string name="profile_pin_ask_saved">PIN di %1$s: %2$s</string>
+</resources>

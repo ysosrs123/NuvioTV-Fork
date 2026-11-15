@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">PIN पूछें: %1$s</string>
+    <string name="profile_pin_ask_every">हर बार</string>
+    <string name="profile_pin_ask_every_sub">यह प्रोफ़ाइल खोलने पर हमेशा PIN पूछा जाता है।</string>
+    <string name="profile_pin_ask_not_start">Arc शुरू होने पर नहीं</string>
+    <string name="profile_pin_ask_not_start_sub">आखिरी प्रोफ़ाइल याद रखें चालू होने पर Arc सीधे %1$s खोलता है। प्रोफ़ाइल सूची से %1$s चुनने पर अब भी पूछा जाता है।</string>
+    <string name="profile_pin_ask_limits">सिर्फ़ बच्चों की सीमाओं के लिए</string>
+    <string name="profile_pin_ask_limits_sub">%1$s बिना PIN के खुलता है। बच्चों की प्रोफ़ाइल की सीमा से ऊपर चलाने और सीमा बदलने के लिए यह अब भी पूछा जाता है।</string>
+    <string name="profile_pin_ask_limits_warn">इस डिवाइस पर कोई भी %1$s खोल सकता है, बच्चे भी।</string>
+    <string name="profile_pin_ask_heading">%1$s का PIN कब पूछा जाए</string>
+    <string name="profile_pin_ask_verify">यह बदलने के लिए कि PIN कब पूछा जाए, %1$s का PIN डालें</string>
+    <string name="profile_pin_ask_saved">%1$s का PIN: %2$s</string>
+</resources>

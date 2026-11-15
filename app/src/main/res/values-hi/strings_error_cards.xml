@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc ने यह फ़ाइल पढ़ी, पर इसमें ऐसी कोई तस्वीर नहीं मिली जिसे वह चला सके। वीडियो एडिटिंग के लिए बनी फ़ाइलें, जैसे Apple ProRes, ऐसी ही होती हैं। इस टाइटल की कोई दूसरी कॉपी चुनें।</string>
     <string name="player_error_card_silent_title">सोर्स ने जवाब नहीं दिया</string>
     <string name="player_error_card_silent">इस सोर्स के सर्वर ने %1$d सेकंड तक कोई वीडियो नहीं भेजा। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ, या बाद में इसी को फिर से आज़माएँ।</string>
+    <string name="player_error_card_slow_title">यह सोर्स बहुत धीमा है</string>
+    <string name="player_error_card_slow">Arc को %2$d सेकंड में %1$s मिला, लगभग %3$s। बिना रुके चलने के लिए इस फ़िल्म को लगभग %4$s चाहिए। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ।</string>
     <string name="player_error_card_fault_title">सोर्स के सर्वर में खराबी है</string>
     <string name="player_error_card_fault">इस सोर्स के सर्वर ने त्रुटि के साथ जवाब दिया (%1$d)। यह समस्या सोर्स की ओर से है, Arc की ओर से नहीं। कोई दूसरा सोर्स आज़माएँ, या बाद में इसी को फिर से आज़माएँ।</string>
     <string name="player_error_card_blocked_title">सोर्स ने यह लिंक ब्लॉक कर दिया</string>

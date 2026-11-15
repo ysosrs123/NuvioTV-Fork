@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Pincode vragen: %1$s</string>
+    <string name="profile_pin_ask_every">Elke keer</string>
+    <string name="profile_pin_ask_every_sub">Dit profiel openen vraagt altijd de pincode.</string>
+    <string name="profile_pin_ask_not_start">Niet bij het starten van Arc</string>
+    <string name="profile_pin_ask_not_start_sub">Met Laatste profiel onthouden aan opent Arc meteen %1$s. Wie %1$s kiest in de profiellijst, krijgt de vraag nog steeds.</string>
+    <string name="profile_pin_ask_limits">Alleen voor kinderlimieten</string>
+    <string name="profile_pin_ask_limits_sub">%1$s opent zonder pincode. Die wordt nog gevraagd om boven de limiet van een kinderprofiel af te spelen en om een limiet te wijzigen.</string>
+    <string name="profile_pin_ask_limits_warn">Iedereen op dit apparaat kan %1$s openen, ook kinderen.</string>
+    <string name="profile_pin_ask_heading">Wanneer de pincode van %1$s wordt gevraagd</string>
+    <string name="profile_pin_ask_verify">Voer de pincode van %1$s in om te wijzigen wanneer die wordt gevraagd</string>
+    <string name="profile_pin_ask_saved">Pincode van %1$s: %2$s</string>
+</resources>

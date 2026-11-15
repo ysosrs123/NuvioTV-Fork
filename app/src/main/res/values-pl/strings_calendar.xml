@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">W produkcji</string>
     <string name="calendar_show_next_unknown">Brak daty kolejnego odcinka</string>
     <string name="calendar_time_not_announced">Godzina nieogłoszona</string>
+    <string name="calendar_streaming">Streaming</string>
     <string name="calendar_unknown_title">Bez tytułu</string>
     <string name="calendar_label_new_show">Nowy serial</string>
     <string name="calendar_label_season_premiere">Premiera sezonu</string>

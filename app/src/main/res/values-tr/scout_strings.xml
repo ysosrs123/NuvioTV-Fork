@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Az kişinin izlediği, yüksek puanlı içerikler</string>
     <string name="scout_row_tiles">Scout kutuları</string>
     <string name="scout_row_tiles_sub">Şaşırt beni, ruh halleri, on yıllar</string>
+    <string name="scout_row_mixes">Karışımlar</string>
+    <string name="scout_row_mixes_sub">Kaydettiğin karışımlar ve mevsimin bayram karışımı</string>
     <string name="scout_ratings_enabled">İçerikleri puanla</string>
     <string name="scout_ratings_enabled_sub">Puanla düğmesini, uzun basma menüsündeki başparmakları ve film sonrası soruyu gösterir</string>
     <string name="scout_ratings_off_note">Puanla düğmesini, menüdeki başparmakları ve film sonrası soruyu gizler. Puanlarınız sayılmaya devam eder.</string>
@@ -88,4 +90,6 @@
     <string name="scout_leave_out">Hariç tut</string>
     <string name="scout_leave_out_sub">Hiç görmek istemediğiniz türler</string>
     <string name="scout_leave_out_none">Yok</string>
+    <string name="scout_menu_visible">Scout\'u menüde göster</string>
+    <string name="scout_menu_visible_sub">Ana sayfadaki Scout satırlarının kendi anahtarları var</string>
 </resources>

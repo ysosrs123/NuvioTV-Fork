@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc membaca file ini dan tidak menemukan gambar yang bisa diputar. File untuk penyuntingan video, seperti Apple ProRes, memang seperti ini. Pilih salinan lain dari judul ini.</string>
     <string name="player_error_card_silent_title">Sumber tidak merespons</string>
     <string name="player_error_card_silent">Server sumber ini tidak mengirim video selama %1$d detik. Ini berasal dari sumber, bukan dari Arc. Coba sumber lain, atau coba sumber ini lagi nanti.</string>
+    <string name="player_error_card_slow_title">Sumber ini sangat lambat</string>
+    <string name="player_error_card_slow">Arc menerima %1$s dalam %2$d detik, sekitar %3$s. Film ini butuh sekitar %4$s agar bisa diputar tanpa berhenti. Ini berasal dari sumber, bukan dari Arc. Coba sumber lain.</string>
     <string name="player_error_card_fault_title">Server sumber sedang bermasalah</string>
     <string name="player_error_card_fault">Server sumber ini membalas dengan error (%1$d). Ini berasal dari sumber, bukan dari Arc. Coba sumber lain, atau coba sumber ini lagi nanti.</string>
     <string name="player_error_card_blocked_title">Sumber memblokir tautan ini</string>

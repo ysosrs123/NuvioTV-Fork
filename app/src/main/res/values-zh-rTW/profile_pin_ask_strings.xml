@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">詢問 PIN：%1$s</string>
+    <string name="profile_pin_ask_every">每次</string>
+    <string name="profile_pin_ask_every_sub">開啟此個人資料時一律詢問 PIN。</string>
+    <string name="profile_pin_ask_not_start">Arc 啟動時不詢問</string>
+    <string name="profile_pin_ask_not_start_sub">開啟「記住上次使用的個人資料」後，Arc 會直接開啟 %1$s。從個人資料清單選擇 %1$s 時仍會詢問。</string>
+    <string name="profile_pin_ask_limits">僅用於兒童限制</string>
+    <string name="profile_pin_ask_limits_sub">%1$s 不需 PIN 即可開啟。播放超出兒童個人資料限制的內容及變更限制時仍需 PIN。</string>
+    <string name="profile_pin_ask_limits_warn">此裝置上的任何人都能開啟 %1$s，包括兒童。</string>
+    <string name="profile_pin_ask_heading">何時詢問 %1$s 的 PIN</string>
+    <string name="profile_pin_ask_verify">輸入 %1$s 的 PIN 以變更詢問時機</string>
+    <string name="profile_pin_ask_saved">%1$s 的 PIN：%2$s</string>
+</resources>

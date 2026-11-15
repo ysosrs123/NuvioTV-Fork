@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc прочете този файл, но не откри в него картина, която може да възпроизведе. Такива са файловете за видеомонтаж, например Apple ProRes. Изберете друго копие на заглавието.</string>
     <string name="player_error_card_silent_title">Източникът не отговори</string>
     <string name="player_error_card_silent">Сървърът на този източник не изпрати видео в продължение на %1$d с. Причината е при източника, а не в Arc. Опитайте друг източник или този отново по-късно.</string>
+    <string name="player_error_card_slow_title">Този източник е много бавен</string>
+    <string name="player_error_card_slow">Arc получи %1$s за %2$d с, около %3$s. Този филм има нужда от около %4$s, за да върви без спиране. Причината е при източника, а не в Arc. Опитайте друг източник.</string>
     <string name="player_error_card_fault_title">Сървърът на източника има повреда</string>
     <string name="player_error_card_fault">Сървърът на този източник отговори с грешка (%1$d). Причината е при източника, а не в Arc. Опитайте друг източник или този отново по-късно.</string>
     <string name="player_error_card_blocked_title">Източникът блокира тази връзка</string>

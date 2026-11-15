@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">製作中</string>
     <string name="calendar_show_next_unknown">下一集日期未定</string>
     <string name="calendar_time_not_announced">時間未公布</string>
+    <string name="calendar_streaming">串流</string>
     <string name="calendar_unknown_title">無標題</string>
     <string name="calendar_label_new_show">新節目</string>
     <string name="calendar_label_season_premiere">季首播</string>

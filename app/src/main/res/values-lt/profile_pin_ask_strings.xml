@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_pin_ask_label">Prašyti PIN kodo: %1$s</string>
+    <string name="profile_pin_ask_every">Kiekvieną kartą</string>
+    <string name="profile_pin_ask_every_sub">Atidarant šį profilį visada prašoma PIN kodo.</string>
+    <string name="profile_pin_ask_not_start">Ne paleidžiant Arc</string>
+    <string name="profile_pin_ask_not_start_sub">Įjungus Prisiminti paskutinį profilį, Arc iškart atidaro %1$s. Renkantis %1$s profilių sąraše vis tiek prašoma.</string>
+    <string name="profile_pin_ask_limits">Tik vaikų apribojimams</string>
+    <string name="profile_pin_ask_limits_sub">%1$s atsidaro be PIN kodo. Jo vis tiek prašoma norint leisti virš vaiko profilio apribojimo ir keičiant apribojimą.</string>
+    <string name="profile_pin_ask_limits_warn">Bet kas šiame įrenginyje gali atidaryti %1$s, net vaikai.</string>
+    <string name="profile_pin_ask_heading">Kada prašyti %1$s PIN kodo</string>
+    <string name="profile_pin_ask_verify">Įveskite %1$s PIN kodą, kad pakeistumėte, kada jo prašoma</string>
+    <string name="profile_pin_ask_saved">%1$s PIN kodas: %2$s</string>
+</resources>

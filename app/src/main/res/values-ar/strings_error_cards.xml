@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">قرأ Arc هذا الملف ولم يجد فيه صورة يمكنه تشغيلها. ملفات تحرير الفيديو، مثل Apple ProRes، تكون هكذا. اختر نسخة أخرى من العنوان.</string>
     <string name="player_error_card_silent_title">لم يستجب المصدر</string>
     <string name="player_error_card_silent">لم يرسل خادم هذا المصدر أي فيديو خلال %1$d ث. هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر، أو أعد تجربة هذا المصدر لاحقًا.</string>
+    <string name="player_error_card_slow_title">هذا المصدر بطيء جدًا</string>
+    <string name="player_error_card_slow">استلم Arc ‏%1$s خلال %2$d ث، أي نحو %3$s. يحتاج هذا الفيلم إلى نحو %4$s ليُعرض دون توقف. هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر.</string>
     <string name="player_error_card_fault_title">خادم المصدر به عطل</string>
     <string name="player_error_card_fault">ردّ خادم هذا المصدر بخطأ (%1$d). هذه المشكلة من المصدر، وليست من Arc. جرّب مصدرًا آخر، أو أعد تجربة هذا المصدر لاحقًا.</string>
     <string name="player_error_card_blocked_title">حظر المصدر هذا الرابط</string>

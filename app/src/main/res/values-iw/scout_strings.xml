@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">כותרים בדירוג טוב שמעטים ראו</string>
     <string name="scout_row_tiles">משבצות Scout</string>
     <string name="scout_row_tiles_sub">תפתיעו אותי, מצבי רוח, עשורים</string>
+    <string name="scout_row_mixes">מיקסים</string>
+    <string name="scout_row_mixes_sub">המיקסים השמורים שלך ומיקס החג בעונתו</string>
     <string name="scout_ratings_enabled">דירוג כותרים</string>
     <string name="scout_ratings_enabled_sub">מציג את כפתור הדירוג, האגודלים בתפריט הלחיצה הארוכה והשאלה אחרי סרט</string>
     <string name="scout_ratings_off_note">מסתיר את כפתור הדירוג, את האגודלים בתפריט ואת השאלה אחרי סרט. הדירוגים עדיין נספרים.</string>
@@ -90,4 +92,6 @@
     <string name="scout_leave_out">החרגה</string>
     <string name="scout_leave_out_sub">ז\'אנרים שאף פעם לא רוצים לראות</string>
     <string name="scout_leave_out_none">ללא</string>
+    <string name="scout_menu_visible">הצגת Scout בתפריט</string>
+    <string name="scout_menu_visible_sub">לשורות של Scout במסך הבית יש מתגים משלהן</string>
 </resources>

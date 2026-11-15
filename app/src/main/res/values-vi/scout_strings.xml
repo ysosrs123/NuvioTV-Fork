@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Phim được đánh giá cao nhưng ít người xem</string>
     <string name="scout_row_tiles">Ô Scout</string>
     <string name="scout_row_tiles_sub">Bất ngờ, tâm trạng, thập niên</string>
+    <string name="scout_row_mixes">Bản trộn</string>
+    <string name="scout_row_mixes_sub">Các bản trộn bạn đã lưu và bản trộn ngày lễ theo mùa</string>
     <string name="scout_ratings_enabled">Đánh giá phim</string>
     <string name="scout_ratings_enabled_sub">Hiện nút Đánh giá, ngón tay cái trong menu nhấn giữ và câu hỏi sau khi xem phim</string>
     <string name="scout_ratings_off_note">Ẩn nút Đánh giá, ngón tay cái trong menu và câu hỏi sau khi xem phim. Đánh giá của bạn vẫn được tính.</string>
@@ -88,4 +90,6 @@
     <string name="scout_leave_out">Loại trừ</string>
     <string name="scout_leave_out_sub">Thể loại bạn không bao giờ muốn xem</string>
     <string name="scout_leave_out_none">Không có</string>
+    <string name="scout_menu_visible">Hiện Scout trong menu</string>
+    <string name="scout_menu_visible_sub">Các hàng Scout trên Trang chủ có công tắc riêng</string>
 </resources>

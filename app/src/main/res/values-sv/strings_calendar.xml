@@ -34,6 +34,7 @@
     <string name="calendar_show_in_production">I produktion</string>
     <string name="calendar_show_next_unknown">Nästa avsnitt har inget datum än</string>
     <string name="calendar_time_not_announced">Tid inte annonserad</string>
+    <string name="calendar_streaming">Streaming</string>
     <string name="calendar_unknown_title">Utan titel</string>
     <string name="calendar_label_new_show">Ny serie</string>
     <string name="calendar_label_season_premiere">Säsongspremiär</string>

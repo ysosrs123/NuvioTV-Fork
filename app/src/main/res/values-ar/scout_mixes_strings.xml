@@ -68,4 +68,8 @@
     <string name="scout_mixes_delete_title">حذف %1$s؟</string>
     <string name="scout_mixes_delete_detail">تبقى مسلسلاتك وسجل مشاهدتك كما هي</string>
     <string name="scout_mixes_delete_confirm">حذف</string>
+    <string name="scout_mixes_menu_subtitle">إجراءات المزيج</string>
+    <string name="scout_mixes_menu_open">فتح المزيج</string>
+    <string name="scout_mixes_menu_remove">إزالة من مزيجاتي</string>
+    <string name="scout_mixes_menu_hide">إخفاء حتى العام القادم</string>
 </resources>

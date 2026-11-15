@@ -3,6 +3,8 @@
     <string name="player_error_startup_video_track_unreadable">Arc a lu ce fichier et n\'y a trouvé aucune image qu\'il peut lire. Les fichiers conçus pour le montage vidéo, comme Apple ProRes, sont ainsi. Choisissez une autre copie du titre.</string>
     <string name="player_error_card_silent_title">La source n\'a pas répondu</string>
     <string name="player_error_card_silent">Le serveur de cette source n\'a envoyé aucune vidéo pendant %1$d s. Cela vient de la source, pas d\'Arc. Essayez une autre source, ou réessayez celle-ci plus tard.</string>
+    <string name="player_error_card_slow_title">Cette source est très lente</string>
+    <string name="player_error_card_slow">Arc a reçu %1$s en %2$d s, environ %3$s. Ce film a besoin d\'environ %4$s pour être lu sans s\'arrêter. Cela vient de la source, pas d\'Arc. Essayez une autre source.</string>
     <string name="player_error_card_fault_title">Le serveur de la source a un problème</string>
     <string name="player_error_card_fault">Le serveur de cette source a répondu par une erreur (%1$d). Cela vient de la source, pas d\'Arc. Essayez une autre source, ou réessayez celle-ci plus tard.</string>
     <string name="player_error_card_blocked_title">La source a bloqué ce lien</string>

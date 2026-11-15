@@ -53,4 +53,8 @@
     <string name="scout_mixes_delete_title">%1$s を削除しますか?</string>
     <string name="scout_mixes_delete_detail">作品と視聴履歴はそのまま残ります</string>
     <string name="scout_mixes_delete_confirm">削除</string>
+    <string name="scout_mixes_menu_subtitle">ミックスの操作</string>
+    <string name="scout_mixes_menu_open">ミックスを開く</string>
+    <string name="scout_mixes_menu_remove">マイミックスから削除</string>
+    <string name="scout_mixes_menu_hide">来年まで非表示</string>
 </resources>

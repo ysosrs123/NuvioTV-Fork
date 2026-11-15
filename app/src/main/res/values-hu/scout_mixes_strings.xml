@@ -56,4 +56,8 @@
     <string name="scout_mixes_delete_title">Törlöd: %1$s?</string>
     <string name="scout_mixes_delete_detail">A sorozataid és a megtekintési előzményeid változatlanok maradnak</string>
     <string name="scout_mixes_delete_confirm">Törlés</string>
+    <string name="scout_mixes_menu_subtitle">Mix műveletek</string>
+    <string name="scout_mixes_menu_open">Mix megnyitása</string>
+    <string name="scout_mixes_menu_remove">Eltávolítás a mixeim közül</string>
+    <string name="scout_mixes_menu_hide">Elrejtés jövő évig</string>
 </resources>

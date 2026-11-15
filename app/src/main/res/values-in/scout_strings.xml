@@ -20,6 +20,8 @@
     <string name="scout_row_gems_sub">Judul bernilai bagus yang jarang ditonton orang</string>
     <string name="scout_row_tiles">Kotak Scout</string>
     <string name="scout_row_tiles_sub">Kejutkan saya, suasana hati, dekade</string>
+    <string name="scout_row_mixes">Campuran</string>
+    <string name="scout_row_mixes_sub">Campuran yang kamu simpan dan campuran hari raya musim ini</string>
     <string name="scout_ratings_enabled">Nilai judul</string>
     <string name="scout_ratings_enabled_sub">Menampilkan tombol Beri nilai, jempol di menu tekan lama, dan pertanyaan setelah film</string>
     <string name="scout_ratings_off_note">Menyembunyikan tombol Beri nilai, jempol di menu, dan pertanyaan setelah film. Penilaian Anda tetap dihitung.</string>
@@ -88,4 +90,6 @@
     <string name="scout_leave_out">Kecualikan</string>
     <string name="scout_leave_out_sub">Genre yang tidak pernah ingin Anda lihat</string>
     <string name="scout_leave_out_none">Tidak ada</string>
+    <string name="scout_menu_visible">Tampilkan Scout di menu</string>
+    <string name="scout_menu_visible_sub">Baris Scout di Beranda punya sakelar sendiri</string>
 </resources>
