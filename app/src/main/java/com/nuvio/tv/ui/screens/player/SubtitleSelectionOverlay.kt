@@ -5,7 +5,7 @@ package com.nuvio.tv.ui.screens.player
 import com.nuvio.tv.data.local.SubtitleOutlineSize
 import com.nuvio.tv.data.local.next
 import com.nuvio.tv.ui.screens.settings.SubtitleFontDialog
-import com.nuvio.tv.ui.screens.settings.subtitleFontName
+import com.nuvio.tv.ui.screens.settings.subtitleFontLabel
 import com.nuvio.tv.ui.screens.settings.subtitleOutlineSizeName
 import com.nuvio.tv.ui.components.PanelEyebrow
 import com.nuvio.tv.ui.components.PanelActionRow
@@ -516,7 +516,7 @@ private fun SubtitleStyleRail(
             if (!bitmapTrack) {
                 item {
                     OverlaySectionCard(title = stringResource(R.string.subtitle_font_family), modifier = styleCardModifier) {
-                        SubtitleAppearanceButton(subtitleFontName(subtitleStyle.font), { showFontPicker = true },
+                        SubtitleAppearanceButton(subtitleFontLabel(subtitleStyle), { showFontPicker = true },
                             Modifier.focusRequester(requireNotNull(focusRequesters[StyleFocusKey.FontFamily]))
                                 .onFocusChanged { if (it.isFocused) onStyleFocused(StyleFocusKey.FontFamily) }
                                 .onPreviewKeyEvent { event ->
@@ -684,6 +684,23 @@ private fun SubtitleStyleRail(
                                     onFocusChanged = onStyleFocused
                                 )
                             }
+                            Box(modifier = if (shadow) Modifier else Modifier.alpha(0.35f)) {
+                                StepperRow(
+                                    value = subtitleStyle.shadowSize.toString(),
+                                    onDecrease = {
+                                        dispatchStyleEvent(PlayerEvent.OnSetSubtitleShadowSize(subtitleStyle.shadowSize - 1))
+                                    },
+                                    onIncrease = {
+                                        dispatchStyleEvent(PlayerEvent.OnSetSubtitleShadowSize(subtitleStyle.shadowSize + 1))
+                                    },
+                                    onMoveLeft = onMoveLeft,
+                                    decrementFocusRequester = focusRequesters[StyleFocusKey.ShadowSizeDecrease],
+                                    incrementFocusRequester = focusRequesters[StyleFocusKey.ShadowSizeIncrease],
+                                    decrementFocusKey = StyleFocusKey.ShadowSizeDecrease,
+                                    incrementFocusKey = StyleFocusKey.ShadowSizeIncrease,
+                                    onFocusChanged = onStyleFocused
+                                )
+                            }
                         }
                     }
                 }
@@ -744,8 +761,13 @@ private fun SubtitleStyleRail(
             }
         }
     }
-    if (showFontPicker && !bitmapTrack && !isStyleDisabledByLibass) SubtitleFontDialog(subtitleStyle.font,
-        { dispatchStyleEvent(PlayerEvent.OnSetSubtitleFont(it)) }) { showFontPicker = false }
+    if (showFontPicker && !bitmapTrack && !isStyleDisabledByLibass) SubtitleFontDialog(
+        selected = subtitleStyle.font,
+        selectedImportedId = subtitleStyle.importedFontId,
+        onSelected = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleFont(it)) },
+        onSelectedImported = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleImportedFont(it)) },
+        onDismiss = { showFontPicker = false }
+    )
 }
 
 @Composable
@@ -1139,6 +1161,8 @@ private object StyleFocusKey {
     const val ShadowToggle = "shadow_toggle"
     const val ShadowOpacityDecrease = "shadow_opacity_decrease"
     const val ShadowOpacityIncrease = "shadow_opacity_increase"
+    const val ShadowSizeDecrease = "shadow_size_decrease"
+    const val ShadowSizeIncrease = "shadow_size_increase"
 }
 
 private enum class OverlayFocusRail {
@@ -1157,7 +1181,8 @@ private fun styleListIndexForFocusKey(focusKey: String): Int {
         focusKey == StyleFocusKey.OpacityDecrease || focusKey == StyleFocusKey.OpacityIncrease -> 5
         focusKey == StyleFocusKey.OutlineToggle || focusKey.startsWith("${StyleFocusKey.OutlineColorPrefix}:") -> 6
         focusKey == StyleFocusKey.ShadowToggle || focusKey == StyleFocusKey.ShadowOpacityDecrease ||
-            focusKey == StyleFocusKey.ShadowOpacityIncrease -> 7
+            focusKey == StyleFocusKey.ShadowOpacityIncrease || focusKey == StyleFocusKey.ShadowSizeDecrease ||
+            focusKey == StyleFocusKey.ShadowSizeIncrease -> 7
         focusKey == StyleFocusKey.OffsetDecrease || focusKey == StyleFocusKey.OffsetIncrease -> 8
         focusKey == StyleFocusKey.Reset -> 9
         else -> 0
@@ -1185,6 +1210,8 @@ private fun rememberStyleFocusRequesters(): Map<String, FocusRequester> {
             StyleFocusKey.ShadowToggle,
             StyleFocusKey.ShadowOpacityDecrease,
             StyleFocusKey.ShadowOpacityIncrease,
+            StyleFocusKey.ShadowSizeDecrease,
+            StyleFocusKey.ShadowSizeIncrease,
             StyleFocusKey.OffsetDecrease,
             StyleFocusKey.OffsetIncrease,
             StyleFocusKey.DelaySet,

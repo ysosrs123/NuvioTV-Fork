@@ -1843,6 +1843,7 @@ fun PlayerScreen(
                             tunneledSurfaceFill = uiState.tunneledSurfaceFill,
                             useLibass = uiState.useLibass,
                             libassRenderMode = uiState.libassRenderMode,
+                            letterboxMaskEnabled = !(transparentLetterbox && playerSurfaceIsFullscreen),
                             subtitleStyle = uiState.effectiveSubtitleStyle,
                             dimAssOnHdr = uiState.isEditingHdrSubtitleStyle,
                             subtitleLiftPx = subtitleLiftPx,
@@ -2934,6 +2935,7 @@ private fun ExoPlayerSurface(
     tunneledSurfaceFill: Boolean,
     useLibass: Boolean,
     libassRenderMode: LibassRenderMode,
+    letterboxMaskEnabled: Boolean,
     subtitleStyle: SubtitleStyleSettings,
     dimAssOnHdr: Boolean,
     subtitleLiftPx: Float,
@@ -2974,6 +2976,9 @@ private fun ExoPlayerSurface(
                 player = player,
                 enabled = useLibass,
                 renderMode = libassRenderMode
+            )
+            it.syncLetterboxMask(
+                letterboxMaskEnabled && useLibass && libassRenderMode == LibassRenderMode.OVERLAY
             )
             latestBindSubtitleView(it.subtitleView)
         }
@@ -3328,7 +3333,7 @@ internal fun PlayerView.applySubtitleStyleIfNeeded(
         setFixedTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, scaledFontSize)
         setApplyEmbeddedFontSizes(false)
 
-        val typeface = subtitleTypeface(context, subtitleStyle.font, subtitleStyle.bold)
+        val typeface = resolvedSubtitleTypeface(context, subtitleStyle)
         val edges = exoSubtitleEdges(subtitleStyle)
 
         setStyle(

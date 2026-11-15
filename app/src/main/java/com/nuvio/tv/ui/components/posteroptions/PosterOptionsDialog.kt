@@ -28,6 +28,7 @@ import com.nuvio.tv.core.tracking.TrackingMembershipRemovalConfirmation
 import com.nuvio.tv.core.tracking.LOCAL_LIBRARY_LIST_KEY
 import com.nuvio.tv.core.tracking.supportsMembershipFor
 import com.nuvio.tv.domain.model.LibraryListTab
+import com.nuvio.tv.domain.model.isSeriesLikeType
 import com.nuvio.tv.domain.model.localizedMembershipTitle
 import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.ui.components.NuvioDialog
@@ -42,8 +43,6 @@ fun PosterOptionsDialog(
     isInLibrary: Boolean,
     isLibraryPending: Boolean,
     showManageLists: Boolean,
-    isMovie: Boolean,
-    isSeries: Boolean = false,
     isWatched: Boolean,
     isWatchedPending: Boolean,
     onDismiss: () -> Unit,
@@ -90,17 +89,15 @@ fun PosterOptionsDialog(
             )
         }
 
-        if (isMovie || isSeries) {
-            PanelActionRow(
-                label = if (isWatched) {
-                    stringResource(R.string.hero_mark_unwatched)
-                } else {
-                    stringResource(R.string.hero_mark_watched)
-                },
-                onClick = onToggleWatched,
-                enabled = !isWatchedPending
-            )
-        }
+        PanelActionRow(
+            label = if (isWatched) {
+                stringResource(R.string.hero_mark_unwatched)
+            } else {
+                stringResource(R.string.hero_mark_watched)
+            },
+            onClick = onToggleWatched,
+            enabled = !isWatchedPending
+        )
 
         if (onMoreLike != null) {
             PanelActionRow(label = stringResource(R.string.scout_pick_more_like), onClick = onMoreLike)
@@ -182,17 +179,12 @@ fun PosterOptionsHost(
 ) {
     val target = state.target
     if (target != null) {
-        val isMovie = target.apiType.equals("movie", ignoreCase = true)
-        val isSeries = target.apiType.equals("series", ignoreCase = true) ||
-            target.apiType.equals("tv", ignoreCase = true) ||
-            target.apiType.equals("anime", ignoreCase = true)
+        val isSeries = isSeriesLikeType(target.apiType)
         PosterOptionsDialog(
             title = target.name,
             isInLibrary = state.isInLibrary,
             isLibraryPending = state.isLibraryPending,
             showManageLists = state.librarySourceMode != LibrarySourceMode.LOCAL,
-            isMovie = isMovie,
-            isSeries = isSeries,
             isWatched = state.isWatched,
             isWatchedPending = state.isWatchedPending,
             scoutTitle = com.nuvio.tv.domain.model.ScoutTitle(target.id, target.apiType, target.name, target.poster),
@@ -211,10 +203,10 @@ fun PosterOptionsHost(
                 controller.openListPicker()
             },
             onToggleWatched = {
-                if (isMovie) {
-                    controller.toggleMovieWatched()
-                } else {
+                if (isSeries) {
                     controller.toggleSeriesWatched()
+                } else {
+                    controller.toggleMovieWatched()
                 }
                 controller.dismiss()
             }

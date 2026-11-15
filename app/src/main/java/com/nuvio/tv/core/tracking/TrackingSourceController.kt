@@ -108,7 +108,7 @@ class TrackingSourceController @Inject constructor(
                     provider.retainsLocalProgress(contentId)
                 }
             }
-            watchedItemsPreferences.clearAll(profileId)
+            watchedItemsPreferences.clearAllKeepingPendingProviderMarks(profileId)
             watchedSeriesStateHolder.update(emptySet())
             refreshAfterSwitch { provider.refresh(TrackingRefreshIntent.USER_INITIATED) }
         } else if (source == WatchProgressSource.NUVIO_SYNC) {

@@ -49,6 +49,9 @@ class TraktProgressServiceRefreshTest {
     @Volatile
     private var playbackHangs = false
 
+    @Volatile
+    private var signedIn = true
+
     @Test
     fun `watch action refetches only the changed watched list and the next poll skips it`() = runBlocking {
         val service = loadedService()
@@ -101,6 +104,16 @@ class TraktProgressServiceRefreshTest {
 
         assertEquals(1, watchedShowsCalls.get())
         assertEquals(1, watchedMoviesCalls.get())
+    }
+
+    @Test
+    fun `polling makes no Trakt calls while signed out`() = runBlocking {
+        signedIn = false
+        createService()
+        delay(SETTLE_MS)
+
+        assertEquals(0, lastActivitiesCalls.get())
+        assertEquals(0, playbackCalls.get())
     }
 
     @Test
@@ -186,6 +199,9 @@ class TraktProgressServiceRefreshTest {
 
         val authService = mockk<TraktAuthService>()
         every { authService.isCircuitClosed() } returns true
+        coEvery { authService.getCurrentAuthState() } answers {
+            if (signedIn) TraktAuthState(accessToken = "access", refreshToken = "refresh") else TraktAuthState()
+        }
         coEvery { authService.executeAuthorizedRequest<Any?>(any()) } coAnswers {
             firstArg<suspend (String) -> Response<Any?>>().invoke("Bearer test")
         }
@@ -214,8 +230,9 @@ class TraktProgressServiceRefreshTest {
             profileManager = profileManager,
             watchedSeriesStateHolder = watchedSeries,
             traktAuthDataStore = mockk<TraktAuthDataStore>(relaxed = true) {
-                every { state } returns MutableStateFlow(TraktAuthState(accessToken = "access", refreshToken = "refresh"))
-                coEvery { getCurrentState(any<Int>()) } returns TraktAuthState(accessToken = "access", refreshToken = "refresh")
+                val auth = if (signedIn) TraktAuthState(accessToken = "access", refreshToken = "refresh") else TraktAuthState()
+                every { state } returns MutableStateFlow(auth)
+                coEvery { getCurrentState(any<Int>()) } returns auth
             },
             savedWatchedMovies = TraktSavedWatchedMovies(FakeTraktWatchedMoviesStorage()),
             appVisibility = com.nuvio.tv.core.calendar.CalendarAppVisibility(),

@@ -301,6 +301,7 @@ class TraktAuthService @Inject constructor(
                 val isCredentialRejection =
                     response.code() == 400 || response.code() == 401 || response.code() == 403
                 if (!isCredentialRejection) {
+                    Log.w("TraktAuthService", "Token refresh failed with HTTP ${response.code()}; keeping credentials")
                     return@withLock false
                 }
                 lastFatalStatusCode = response.code()
@@ -308,7 +309,10 @@ class TraktAuthService @Inject constructor(
                     delay(refreshFatalRetryDelayMs)
                 }
             }
-            lastFatalStatusCode?.let { statusCode -> invalidateCredentials(statusCode) }
+            lastFatalStatusCode?.let { statusCode ->
+                Log.w("TraktAuthService", "Token refresh rejected with HTTP $statusCode; clearing credentials")
+                invalidateCredentials(statusCode)
+            }
             false
         }
     }

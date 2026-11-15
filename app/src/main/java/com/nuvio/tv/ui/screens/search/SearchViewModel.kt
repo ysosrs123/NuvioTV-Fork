@@ -311,6 +311,8 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun onQueryChanged(query: String) {
+        if (query == _uiState.value.query) return
+
         _uiState.update {
             val trimmedInput = query.trim()
             // Narrow the strip to what still matches before anything is fetched, so a letter

@@ -115,6 +115,7 @@ class TraktProgressServiceFailureTest {
 
         val authService = mockk<TraktAuthService>()
         every { authService.isCircuitClosed() } returns true
+        coEvery { authService.getCurrentAuthState() } returns TraktAuthState(accessToken = "access", refreshToken = "refresh")
         coEvery { authService.executeAuthorizedRequest<Any?>(any()) } coAnswers {
             firstArg<suspend (String) -> Response<Any?>>().invoke("Bearer test")
         }

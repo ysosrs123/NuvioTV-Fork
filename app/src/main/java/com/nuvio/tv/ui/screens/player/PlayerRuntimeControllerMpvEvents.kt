@@ -109,7 +109,14 @@ internal class MpvEventRelay(
 
     override fun eventProperty(property: String, value: Long) = Unit
     override fun eventProperty(property: String, value: Boolean) = Unit
-    override fun eventProperty(property: String, value: String) = Unit
+    override fun eventProperty(property: String, value: String) {
+        if (property != MPV_HWDEC_CURRENT_PROPERTY) return
+        if (!active.get() || epoch != controller.mpvEventRelayEpoch) return
+        controller.scope.launch {
+            if (!active.get() || epoch != controller.mpvEventRelayEpoch) return@launch
+            controller.mpvView?.onHwdecCurrentChanged(value)
+        }
+    }
     override fun eventProperty(property: String, value: Double) = Unit
     override fun eventProperty(property: String, value: MPVNode) = Unit
 }
@@ -275,6 +282,8 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
         ) {
             return
         }
+        val freshHttpCode = httpCode?.takeIf { isMpvHttpErrorFresh(mpvLastHttpErrorAtMs, SystemClock.elapsedRealtime()) }
+        if (tryRefreshExpiredLinkAfterError(detailedError, ReusedLinkRefresh.isLinkError(freshHttpCode, deadSource = false))) return
 
         val startupFailed = !hasRenderedFirstFrame
         if (startupFailed &&
@@ -293,12 +302,15 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
         }
         val retryCanHelp = httpCode == null || !isPermanentHttpStatus(httpCode)
         if (retryCanHelp && attemptMpvAutoRetry(detailedError = detailedError, savedPosition = savedPosition)) return
+        if (startupFailed && attemptStartupExhaustedSourceFailover(detailedError)) return
 
         finishLoadingDiagnostics("mpv_error")
         cancelNextEpisodeAutoPlayOnFatalError()
+        val card = if (startupFailed) runCatching { mpvStartErrorCard(httpCode, mpvLastErrorLogLine) }.getOrNull() else null
         _uiState.update {
             it.copy(
-                error = detailedError,
+                error = card?.message ?: detailedError,
+                errorCard = card,
                 showSwitchToMpvErrorAction = false,
                 showLoadingOverlay = false,
                 showPauseOverlay = false,
@@ -353,12 +365,13 @@ internal fun PlayerRuntimeController.maybeRunMpvStartupWatchdog(view: NuvioMpvSu
         recoveryArmed = mpvErrorRecoveryArmed,
         hasStream = currentStreamUrl.isNotBlank(),
         inBackground = isInBackground,
-        playerPaused = !waitingForSurface && view.isPausedNow()
+        playerPaused = !waitingForSurface && view.isPausedNow(),
+        mpvLoaded = view.isMpvLoaded
     )
     var idleActive = false
     var cacheProgressing = false
     if (enabled && !waitingForSurface) {
-        idleActive = runCatching { view.mpv.getPropertyBoolean("idle-active") }.getOrNull() == true
+        idleActive = runCatching { view.isIdleActiveNow() }.getOrDefault(false)
         if (!idleActive) {
             val cacheSec = runCatching { view.demuxerCacheDurationSec() }.getOrDefault(0.0)
             cacheProgressing = MpvStartupWatchdogPolicy.cacheIsProgressing(mpvLastDemuxerCacheSec, cacheSec)
@@ -453,7 +466,7 @@ internal fun isMpvHttpErrorFresh(loggedAtMs: Long, nowMs: Long): Boolean =
     loggedAtMs > 0L && nowMs - loggedAtMs <= MPV_HTTP_ERROR_FRESH_MS
 
 private fun PlayerRuntimeController.mpvCodecContextLine(): String? {
-    val mpv = mpvView?.mpv ?: return null
+    val mpv = mpvView?.takeIf { it.isMpvLoaded }?.mpv ?: return null
     fun prop(name: String): String? = runCatching {
         mpv.getPropertyString(name)
             ?.trim()

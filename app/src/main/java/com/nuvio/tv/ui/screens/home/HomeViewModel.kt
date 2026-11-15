@@ -482,6 +482,14 @@ class HomeViewModel @Inject constructor(
     internal val cwLastProcessedNextUpContentIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
     internal val cwProcessedOlderSeedContentIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
     internal val cwEnrichedNextUpOverlay = ConcurrentHashMap<String, NextUpInfo>()
+    /** Next-up overlay entries restored from the disk snapshot and not enriched yet in this session. */
+    internal val cwDiskSeededNextUpOverlayIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    /** Next-up seed keys an earlier launch found without a next episode, with their recheck time. */
+    internal val cwNoNextUpSeeds = ConcurrentHashMap<String, Long>()
+    /** Profile whose [cwNoNextUpSeeds] are loaded; null loads them again from disk. */
+    @Volatile internal var cwNoNextUpSeedsProfileId: Int? = null
+    /** Wall clock time the last Continue Watching cycle started, to spot releases passed since. */
+    @Volatile internal var cwLastCycleStartedAtMs: Long = System.currentTimeMillis()
     /** In-memory cache of enriched InProgress items per contentId+episode key. */
     internal val cwEnrichedInProgressOverlay = ConcurrentHashMap<String, ContinueWatchingItem.InProgress>()
     /** Bumped to force the CW pipeline to re-run (e.g. after cache clear). */
@@ -589,6 +597,7 @@ class HomeViewModel @Inject constructor(
             observeModernHomePresentation()
             observeCwEpisodeListsPipeline()
             loadContinueWatching()
+            observeContinueWatchingReleases()
             watchedSeriesStateHolder.loadFromDisk()
             observeExternalMetaPrefetchPreference()
             observeTrailerSourceChanges()
@@ -639,10 +648,13 @@ class HomeViewModel @Inject constructor(
                     cwTmdbIdCache.clear()
                     cwNextUpResolutionCache.clear()
                     cwNextUpNegativeCacheTimestamps.clear()
+                    cwNoNextUpSeeds.clear()
+                    cwNoNextUpSeedsProfileId = null
                     discoveredOlderNextUpItems.clear()
                     cwLastProcessedNextUpContentIds.clear()
                     cwProcessedOlderSeedContentIds.clear()
                     cwEnrichedNextUpOverlay.clear()
+                    cwDiskSeededNextUpOverlayIds.clear()
                     cwEnrichedInProgressOverlay.clear()
                     cwLastBadgeEpisodeKeys = emptySet()
                     cwLastShowIdSiblings = emptyMap()
@@ -703,10 +715,13 @@ class HomeViewModel @Inject constructor(
         cwTmdbIdCache.clear()
         cwNextUpResolutionCache.clear()
         cwNextUpNegativeCacheTimestamps.clear()
+        cwNoNextUpSeeds.clear()
+        cwNoNextUpSeedsProfileId = null
         discoveredOlderNextUpItems.clear()
         cwLastProcessedNextUpContentIds.clear()
         cwProcessedOlderSeedContentIds.clear()
         cwEnrichedNextUpOverlay.clear()
+        cwDiskSeededNextUpOverlayIds.clear()
         cwEnrichedInProgressOverlay.clear()
         cwLastBadgeEpisodeKeys = emptySet()
         cwLastShowIdSiblings = emptyMap()
@@ -780,6 +795,13 @@ class HomeViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collect { style ->
                     _uiState.update { it.copy(continueWatchingCardStyle = style) }
+                }
+        }
+        viewModelScope.launch {
+            layoutPreferenceDataStore.continueWatchingClickAction
+                .distinctUntilChanged()
+                .collect { action ->
+                    _uiState.update { it.copy(continueWatchingClickAction = action) }
                 }
         }
         viewModelScope.launch {
@@ -898,6 +920,7 @@ class HomeViewModel @Inject constructor(
                         cwMetaRefreshAtMs.clear()
                         cwMetaStaleKeys.clear()
                         cwEnrichedNextUpOverlay.clear()
+                        cwDiskSeededNextUpOverlayIds.clear()
                         cwEnrichedInProgressOverlay.clear()
                         discoveredOlderNextUpItems.clear()
                         cwLastProcessedNextUpContentIds.clear()

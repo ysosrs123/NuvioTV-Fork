@@ -95,6 +95,7 @@ import com.nuvio.tv.domain.model.Meta
 import com.nuvio.tv.domain.model.MDBListRatings
 import com.nuvio.tv.domain.model.Video
 import com.nuvio.tv.domain.model.NextToWatch
+import com.nuvio.tv.domain.model.isWatchedAsOneItem
 import com.nuvio.tv.ui.components.ImdbRatingSourceLabel
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.components.MDBListRatingsRow
@@ -470,7 +471,7 @@ fun HeroContentSection(
                             onFocused = onHeroActionFocused
                         )
 
-                        if (meta.apiType == "movie") {
+                        if (meta.isWatchedAsOneItem()) {
                             ActionIconButton(
                                 icon = if (isMovieWatched) {
                                     Icons.Default.Visibility

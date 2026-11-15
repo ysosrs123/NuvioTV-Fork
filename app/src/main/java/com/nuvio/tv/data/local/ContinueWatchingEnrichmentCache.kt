@@ -202,6 +202,39 @@ class ContinueWatchingEnrichmentCache @Inject constructor(
         }
     }
 
+    /** Next-up seed keys confirmed to have no next episode, with the time to look them up again. */
+    suspend fun getNoNextUpSeeds(profileId: Int): Map<String, Long> = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            try {
+                if (snapshotStorage.isRetired(profileId)) return@withContext emptyMap()
+                val file = snapshotFile("nonextup", profileId)
+                if (!file.exists()) return@withContext emptyMap()
+                gson.fromJson<Map<String, Long>>(
+                    file.readText(),
+                    object : TypeToken<Map<String, Long>>() {}.type
+                ) ?: emptyMap()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to read no next-up cache: ${e.message}")
+                emptyMap()
+            }
+        }
+    }
+
+    suspend fun saveNoNextUpSeeds(seeds: Map<String, Long>, profileId: Int) = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            if (snapshotStorage.isRetired(profileId)) return@withContext
+            try {
+                atomicWrite(snapshotFile("nonextup", profileId), gson.toJson(seeds))
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to write no next-up cache: ${e.message}")
+            }
+        }
+    }
+
     /** Deletes snapshots for the profile where the request started. */
     suspend fun clearAll() = clearAll(profileManager.activeProfileId.value)
 

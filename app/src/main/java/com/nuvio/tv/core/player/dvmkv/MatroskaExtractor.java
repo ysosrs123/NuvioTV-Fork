@@ -137,6 +137,23 @@ public class MatroskaExtractor implements Extractor {
       return true;
     }
 
+    /** Whether the first sample of an HEVC track with this codec string and config should be offered to {@link
+     * #relabelFromFirstSample}. */
+    default boolean probesFirstSample(
+        @Nullable String codecs, @Nullable byte[] dolbyVisionConfigBytes) {
+      return false;
+    }
+
+    /**
+     * Returns a replacement Format for the track, decided from its first length-delimited sample, or null to keep
+     * it. Called once, before that sample is written.
+     */
+    @Nullable
+    default Format relabelFromFirstSample(
+        Format format, byte[] sampleLengthDelimitedData, int sampleLength, int nalUnitLengthFieldLength) {
+      return null;
+    }
+
     /**
      * Called when Dolby Vision BlockAdditional data is encountered for an HEVC track.
      *
@@ -196,6 +213,18 @@ public class MatroskaExtractor implements Extractor {
      * (diagnostics only; laced blocks report the block time).
      */
     default void onSampleTimeUs(long timeUs) {}
+
+    /**
+     * Optionally rewrites an AV1 sample payload (a temporal unit of OBUs).
+     *
+     * <p>Same contract as {@link #transformHevcSample}: reads the first
+     * {@code sampleLength} bytes; a non-null result uses
+     * {@link #lastTransformedSampleLength()} as its valid length.
+     */
+    @Nullable
+    default byte[] transformAv1Sample(byte[] sample, int sampleLength) {
+      return null;
+    }
 
     /**
      * Optionally rewrites Dolby Vision codec signaling for output {@link Format}.
@@ -2559,7 +2588,10 @@ public class MatroskaExtractor implements Extractor {
         // If there is supplemental data, the structure of the sample data is:
         // encryption data (if any) || sample size (4 bytes) || sample data || supplemental data
         deferSupplementalMainSampleSizePrefix =
-            track.isHevc && !track.hasContentEncryption && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null;
+            (track.isHevc || CODEC_ID_AV1.equals(track.codecId))
+                && !track.hasContentEncryption
+                && track.requiresDolbyVisionTransform
+                && dolbyVisionSampleTransformer != null;
         if (!deferSupplementalMainSampleSizePrefix) {
           int sampleSize = size + sampleStrippedBytes.limit() - sampleBytesRead;
           writeSupplementalMainSampleSizePrefix(output, sampleSize);
@@ -2581,7 +2613,9 @@ public class MatroskaExtractor implements Extractor {
       }
     }
 
-    if (track.isHevc && !track.hasContentEncryption && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null) {
+    if (track.isHevc && !track.hasContentEncryption
+        && (track.requiresDolbyVisionTransform || track.probeFirstSample)
+        && dolbyVisionSampleTransformer != null) {
       int remainingSampleBytes = size - sampleBytesRead;
       if (dolbyVisionSampleBuffer.length < remainingSampleBytes) {
         int newSize = Math.max(remainingSampleBytes, dolbyVisionSampleBuffer.length * 2);
@@ -2592,23 +2626,43 @@ public class MatroskaExtractor implements Extractor {
       writeToTarget(input, sampleLengthDelimitedData, /* offset= */ 0, remainingSampleBytes);
       sampleBytesRead += remainingSampleBytes;
 
+      if (track.probeFirstSample) {
+        track.probeFirstSample = false;
+        try {
+          Format relabelled =
+              dolbyVisionSampleTransformer.relabelFromFirstSample(
+                  checkNotNull(track.format),
+                  sampleLengthDelimitedData,
+                  remainingSampleBytes,
+                  track.nalUnitLengthFieldLength);
+          if (relabelled != null) {
+            track.format = relabelled;
+            track.output.format(relabelled);
+          }
+        } catch (RuntimeException e) {
+          Log.w(TAG, "DolbyVisionSampleTransformer.relabelFromFirstSample failed: " + e.getMessage());
+        }
+      }
+
       byte[] payloadToWrite = sampleLengthDelimitedData;
       int payloadLength = remainingSampleBytes;
-      try {
-        dolbyVisionSampleTransformer.onSampleTimeUs(blockTimeUs);
-        byte[] transformedPayload =
-            dolbyVisionSampleTransformer.transformHevcSample(
-                sampleLengthDelimitedData,
-                remainingSampleBytes,
-                track.nalUnitLengthFieldLength,
-                track.pendingDolbyVisionBlockAdditionalData,
-                track.dolbyVisionConfigBytes);
-        if (transformedPayload != null) {
-          payloadToWrite = transformedPayload;
-          payloadLength = dolbyVisionSampleTransformer.lastTransformedSampleLength();
+      if (track.requiresDolbyVisionTransform) {
+        try {
+          dolbyVisionSampleTransformer.onSampleTimeUs(blockTimeUs);
+          byte[] transformedPayload =
+              dolbyVisionSampleTransformer.transformHevcSample(
+                  sampleLengthDelimitedData,
+                  remainingSampleBytes,
+                  track.nalUnitLengthFieldLength,
+                  track.pendingDolbyVisionBlockAdditionalData,
+                  track.dolbyVisionConfigBytes);
+          if (transformedPayload != null) {
+            payloadToWrite = transformedPayload;
+            payloadLength = dolbyVisionSampleTransformer.lastTransformedSampleLength();
+          }
+        } catch (RuntimeException e) {
+          Log.w(TAG, "DolbyVisionSampleTransformer.transformHevcSample failed: " + e.getMessage());
         }
-      } catch (RuntimeException e) {
-        Log.w(TAG, "DolbyVisionSampleTransformer.transformHevcSample failed: " + e.getMessage());
       }
 
       if (deferSupplementalMainSampleSizePrefix) {
@@ -2659,6 +2713,40 @@ public class MatroskaExtractor implements Extractor {
           sampleCurrentNalBytesRemaining -= bytesWritten;
         }
       }
+    } else if (CODEC_ID_AV1.equals(track.codecId)
+        && track.requiresDolbyVisionTransform
+        && dolbyVisionSampleTransformer != null
+        && sampleStrippedBytes.limit() == 0) {
+      int remainingSampleBytes = size - sampleBytesRead;
+      if (dolbyVisionSampleBuffer.length < remainingSampleBytes) {
+        int newSize = Math.max(remainingSampleBytes, dolbyVisionSampleBuffer.length * 2);
+        newSize = (newSize + 262143) & ~262143;
+        dolbyVisionSampleBuffer = new byte[newSize];
+      }
+      byte[] sampleData = dolbyVisionSampleBuffer;
+      writeToTarget(input, sampleData, /* offset= */ 0, remainingSampleBytes);
+      sampleBytesRead += remainingSampleBytes;
+
+      byte[] payloadToWrite = sampleData;
+      int payloadLength = remainingSampleBytes;
+      try {
+        byte[] transformedPayload =
+            dolbyVisionSampleTransformer.transformAv1Sample(sampleData, remainingSampleBytes);
+        if (transformedPayload != null) {
+          payloadToWrite = transformedPayload;
+          payloadLength = dolbyVisionSampleTransformer.lastTransformedSampleLength();
+        }
+      } catch (RuntimeException e) {
+        Log.w(TAG, "DolbyVisionSampleTransformer.transformAv1Sample failed: " + e.getMessage());
+      }
+
+      if (deferSupplementalMainSampleSizePrefix) {
+        writeSupplementalMainSampleSizePrefix(output, payloadLength);
+        sampleBytesWritten += 4;
+      }
+      ParsableByteArray payload = new ParsableByteArray(payloadToWrite, payloadLength);
+      output.sampleData(payload, payloadLength);
+      sampleBytesWritten += payloadLength;
     } else {
       if (track.trueHdSampleRechunker != null) {
         checkState(sampleStrippedBytes.limit() == 0);
@@ -3641,6 +3729,7 @@ public class MatroskaExtractor implements Extractor {
     public @MonotonicNonNull Format format;
     public int nalUnitLengthFieldLength;
     public boolean requiresDolbyVisionTransform;
+    public boolean probeFirstSample;
     public boolean isHevc;
     // Leading HEVC samples still to scan for an alternative transfer SEI.
     public int hevcAlternativeTransferSamplesToCheck = MAX_HEVC_ALTERNATIVE_TRANSFER_SAMPLES;
@@ -3951,6 +4040,13 @@ public class MatroskaExtractor implements Extractor {
         mimeType = MimeTypes.VIDEO_H265;
         codecs = DolbyVisionCompatibility.chooseHevcCodecsString(codecs, null);
       }
+      if (MimeTypes.VIDEO_DOLBY_VISION.equals(mimeType)
+          && codecs != null) {
+        String lowerCodecs = codecs.toLowerCase(Locale.ROOT);
+        if (lowerCodecs.startsWith("dav1.")) {
+          initializationData = null;
+        }
+      }
 
       @C.SelectionFlags int selectionFlags = 0;
       selectionFlags |= flagDefault ? C.SELECTION_FLAG_DEFAULT : 0;
@@ -4064,6 +4160,9 @@ public class MatroskaExtractor implements Extractor {
           dolbyVisionSampleTransformer != null && !hasContentEncryption
               && dolbyVisionSampleTransformer.shouldTransform(codecs, dolbyVisionConfigBytes);
       isHevc = CODEC_ID_H265.equals(codecId);
+      probeFirstSample =
+          isHevc && dolbyVisionSampleTransformer != null && !hasContentEncryption
+              && dolbyVisionSampleTransformer.probesFirstSample(codecs, dolbyVisionConfigBytes);
     }
 
     /** Forces any pending sample metadata to be flushed to the output. */

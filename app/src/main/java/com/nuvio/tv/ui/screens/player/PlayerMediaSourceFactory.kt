@@ -319,7 +319,7 @@ internal class PlayerMediaSourceFactory(
         // DefaultDataSource stays in front so data: manifests resolve; loopback engines serve
         // adaptive manifests slowly, so they get the long read timeout as well.
         val httpDataSourceFactory = if (isHls || isDash) {
-            DefaultDataSource.Factory(
+            val adaptiveFactory = DefaultDataSource.Factory(
                 context,
                 PlayerPlaybackNetworking.createHttpDataSourceFactory(
                     sanitizedHeaders,
@@ -327,6 +327,7 @@ internal class PlayerMediaSourceFactory(
                     slowStart = slowStart
                 )
             )
+            if (isHls) HlsParameterSetInitDataSource.Factory(adaptiveFactory) else adaptiveFactory
         } else {
             PlayerPlaybackNetworking.createDataSourceFactory(context, sanitizedHeaders, slowStart = slowStart)
         }
@@ -1304,7 +1305,10 @@ internal class PlayerMediaSourceFactory(
 
             query.split('&').forEach { parameter ->
                 val key = parameter.substringBefore('=', missingDelimiterValue = "").trim()
-                val value = parameter.substringAfter('=', missingDelimiterValue = "").trim()
+                val rawValue = parameter.substringAfter('=', missingDelimiterValue = "").trim()
+                val value = runCatching {
+                    URLDecoder.decode(rawValue.replace("+", "%2B"), Charsets.UTF_8.name())
+                }.getOrDefault(rawValue).lowercase(Locale.US)
                 if (key.isBlank() || value.isBlank()) return@forEach
 
                 when (key) {

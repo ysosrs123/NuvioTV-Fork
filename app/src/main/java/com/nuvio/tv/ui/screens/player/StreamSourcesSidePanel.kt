@@ -118,6 +118,29 @@ internal fun StreamSourcesSidePanel(
         }
     }
     val firstStreamKey = streamKeys.firstOrNull()
+    val currentStreamIndex = remember(
+        uiState.sourceFilteredStreams,
+        uiState.currentStreamInfoHash,
+        uiState.currentStreamFileIdx,
+        uiState.currentStreamAddonName,
+        uiState.currentStreamUrl,
+        uiState.currentStreamName,
+        uiState.currentStreamDescription,
+        currentFilename
+    ) {
+        findCurrentStreamIndex(
+            streams = uiState.sourceFilteredStreams,
+            currentStreamInfoHash = uiState.currentStreamInfoHash,
+            currentStreamFileIdx = uiState.currentStreamFileIdx,
+            currentStreamAddonName = uiState.currentStreamAddonName,
+            currentStreamUrl = uiState.currentStreamUrl,
+            currentStreamName = uiState.currentStreamName,
+            currentStreamDescription = uiState.currentStreamDescription,
+            currentFilename = currentFilename
+        )
+    }
+    // The panel opens on the stream playing now, falling back to the first result.
+    val currentStreamKey = streamKeys.getOrNull(currentStreamIndex)
     val streamFocusRequesters = remember { mutableMapOf<String, FocusRequester>() }
     streamKeys.forEach { key ->
         streamFocusRequesters.getOrPut(key) { FocusRequester() }
@@ -172,6 +195,16 @@ internal fun StreamSourcesSidePanel(
         }
     }
 
+    // Results keep arriving, so the playing stream may show up after the first one. Move to it
+    // then, unless the user has moved already.
+    var currentStreamFocusAssigned by remember { mutableStateOf(false) }
+    LaunchedEffect(currentStreamKey, userMovedFromFirstResult) {
+        if (currentStreamKey != null && !userMovedFromFirstResult && !currentStreamFocusAssigned) {
+            currentStreamFocusAssigned = true
+            firstStreamFocusRequestId += 1
+        }
+    }
+
     // When on "All" tab and new results arrive above the focused stream, move focus to the new first item.
     var trackedFirstStreamKey by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(firstStreamKey, uiState.sourceSelectedAddonFilter, listHasFocus) {
@@ -188,17 +221,22 @@ internal fun StreamSourcesSidePanel(
         trackedFirstStreamKey = firstStreamKey
     }
 
-    LaunchedEffect(firstStreamFocusRequestId, firstStreamKey, userMovedFromFirstResult) {
-        val requestedKey = firstStreamKey
+    LaunchedEffect(firstStreamFocusRequestId, firstStreamKey, currentStreamKey, userMovedFromFirstResult) {
+        val requestedKey = currentStreamKey ?: firstStreamKey
         if (firstStreamFocusRequestId <= 0 || requestedKey == null || userMovedFromFirstResult) {
             return@LaunchedEffect
         }
-        streamListState.scrollToItem(0)
+        val index = streamKeys.indexOf(requestedKey).coerceAtLeast(0)
+        streamListState.scrollToItem(index)
         snapshotFlow {
-            streamListState.layoutInfo.visibleItemsInfo.any { it.index == 0 }
+            streamListState.layoutInfo.visibleItemsInfo.any { it.index == index }
         }.first { it }
         withFrameNanos { }
-        if (!firstCardHasFocus) runCatching { streamsFocusRequester.requestFocus() }
+        if (index == 0) {
+            if (!firstCardHasFocus) runCatching { streamsFocusRequester.requestFocus() }
+        } else if (focusedStreamKey != requestedKey || !listHasFocus) {
+            runCatching { streamFocusRequesters[requestedKey]?.requestFocus() }
+        }
     }
 
     val chipListState = rememberLazyListState()
@@ -370,17 +408,6 @@ internal fun StreamSourcesSidePanel(
                 }
 
                 else -> {
-                    val currentStreamIndex = findCurrentStreamIndex(
-                        streams = uiState.sourceFilteredStreams,
-                        currentStreamInfoHash = uiState.currentStreamInfoHash,
-                        currentStreamFileIdx = uiState.currentStreamFileIdx,
-                        currentStreamAddonName = uiState.currentStreamAddonName,
-                        currentStreamUrl = uiState.currentStreamUrl,
-                        currentStreamName = uiState.currentStreamName,
-                        currentStreamDescription = uiState.currentStreamDescription,
-                        currentFilename = currentFilename
-                    )
-
                     val lastKeyRepeatDispatchRef = remember { java.util.concurrent.atomic.AtomicLong(0L) }
 
                     val lastVisibleIndex = remember(streamListState) {
@@ -415,7 +442,8 @@ internal fun StreamSourcesSidePanel(
                                     lastKeyRepeatDispatchRef.set(now)
                                 }
 
-                                if (event.key == Key.DirectionDown) {
+                                // Up counts too: the list can open on the playing stream, not the top.
+                                if (event.key == Key.DirectionDown || event.key == Key.DirectionUp) {
                                     userMovedFromFirstResult = true
                                 }
 

@@ -15,6 +15,8 @@ import androidx.datastore.preferences.core.Preferences
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -61,6 +63,12 @@ class WatchedItemsPreferences @Inject constructor(
     private val lastSuccessfulPushMsKey = longPreferencesKey("last_successful_watched_push_ms")
     private val deltaCursorKey = longPreferencesKey("watched_items_delta_cursor")
     private val deltaInitializedKey = booleanPreferencesKey("watched_items_delta_initialized")
+
+    // Content ids of single items (no season or episode) marked watched while a tracking provider
+    // was the watch progress source, which that provider has not reported yet. Its data alone
+    // decides what shows as watched, and it may never know an item, such as an add-on's YouTube
+    // video, so these marks are read alongside it until it reports them or they are unmarked.
+    private val pendingProviderMarksKey = stringSetPreferencesKey("pending_provider_watched_marks")
 
     suspend fun getLastSuccessfulPushMs(profileId: Int = profileManager.activeProfileId.value, generation: WatchedItemsGeneration? = null): Long {
         val prefs = owner(profileId, generation).readPreferences(generation?.epoch)
@@ -115,6 +123,43 @@ class WatchedItemsPreferences @Inject constructor(
 
     fun observeAllItems(profileId: Int): Flow<List<WatchedItem>> = owner(profileId).observe()
 
+    /** The active profile's pending provider marks; see [observePendingProviderMarks]. */
+    internal val pendingProviderMarks: Flow<Set<String>> = profileManager.activeProfileId.flatMapLatest { pid ->
+        val pendingIds = try { observePendingMarkIds(pid) } catch (error: kotlinx.coroutines.CancellationException) {
+            if (!kotlinx.coroutines.currentCoroutineContext().isActive) throw error
+            kotlinx.coroutines.flow.flowOf(emptySet<String>())
+        }
+        combine(allItems, pendingIds) { items, pending -> pendingMarksStillWatched(items, pending) }
+    }.distinctUntilChanged()
+
+    /**
+     * Content ids of single items marked watched while a tracking provider was the source and not
+     * reported by it yet, that are still marked here.
+     */
+    fun observePendingProviderMarks(profileId: Int): Flow<Set<String>> =
+        combine(observeAllItems(profileId), observePendingMarkIds(profileId)) { items, pending ->
+            pendingMarksStillWatched(items, pending)
+        }
+            .distinctUntilChanged()
+
+    private fun observePendingMarkIds(profileId: Int): Flow<Set<String>> =
+        owner(profileId).store.data
+            .map { preferences -> preferences[pendingProviderMarksKey].orEmpty() }
+            .distinctUntilChanged()
+            .catch { error ->
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                Log.w(TAG, "Could not read pending provider marks for profile $profileId", error)
+                emit(emptySet())
+            }
+
+    private fun pendingMarksStillWatched(items: List<WatchedItem>, pending: Set<String>): Set<String> {
+        if (pending.isEmpty()) return emptySet()
+        val singleItems = items.mapNotNullTo(HashSet()) { item ->
+            item.contentId.takeIf { item.season == null && item.episode == null }
+        }
+        return pending.filterTo(linkedSetOf()) { contentId -> contentId in singleItems }
+    }
+
     fun isWatched(contentId: String, season: Int? = null, episode: Int? = null): Flow<Boolean> {
         return allItems.map { items ->
             items.any { item ->
@@ -143,9 +188,14 @@ class WatchedItemsPreferences @Inject constructor(
         }.distinctUntilChanged()
     }
 
+    /**
+     * Stores [item]. With [pendingProviderMark], a single item is also kept as a pending provider
+     * mark, for a mark made while a tracking provider is the watch progress source.
+     */
     suspend fun markAsWatched(
         item: WatchedItem,
-        profileId: Int = profileManager.activeProfileId.value, generation: WatchedItemsGeneration? = null
+        profileId: Int = profileManager.activeProfileId.value, generation: WatchedItemsGeneration? = null,
+        pendingProviderMark: Boolean = false
     ) {
         owner(profileId, generation).edit(expectedEpoch = generation?.epoch) { preferences, decoder ->
             val current = preferences[watchedItemsKey] ?: emptySet()
@@ -155,6 +205,10 @@ class WatchedItemsPreferences @Inject constructor(
                 decoder.key(json) == itemKey
             }
             preferences[watchedItemsKey] = filtered.toSet() + gson.toJson(item)
+            if (pendingProviderMark && item.season == null && item.episode == null) {
+                preferences[pendingProviderMarksKey] =
+                    preferences[pendingProviderMarksKey].orEmpty() + item.contentId
+            }
         }
     }
 
@@ -188,6 +242,23 @@ class WatchedItemsPreferences @Inject constructor(
                 decoder.key(json) == removeKey
             }
             preferences[watchedItemsKey] = filtered.toSet()
+            if (season == null && episode == null) {
+                val pending = preferences[pendingProviderMarksKey].orEmpty()
+                if (contentId in pending) preferences[pendingProviderMarksKey] = pending - contentId
+            }
+        }
+    }
+
+    /** Stops treating [contentIds] as pending once the tracking provider reports them watched. */
+    suspend fun acknowledgePendingProviderMarks(
+        contentIds: Set<String>,
+        profileId: Int = profileManager.activeProfileId.value
+    ) {
+        if (contentIds.isEmpty()) return
+        owner(profileId).edit { preferences, _ ->
+            val pending = preferences[pendingProviderMarksKey].orEmpty()
+            val remaining = pending - contentIds
+            if (remaining.size != pending.size) preferences[pendingProviderMarksKey] = remaining
         }
     }
 
@@ -316,6 +387,36 @@ class WatchedItemsPreferences @Inject constructor(
     suspend fun clearAll(profileId: Int = profileManager.activeProfileId.value, generation: WatchedItemsGeneration? = null) {
         owner(profileId, generation).edit(expectedEpoch = generation?.epoch, reset = true) { preferences, decoder ->
             preferences.remove(watchedItemsKey)
+            preferences.remove(deltaCursorKey)
+            preferences.remove(deltaInitializedKey)
+            preferences.remove(pendingProviderMarksKey)
+        }
+    }
+
+    /**
+     * [clearAll] for a change of watch progress source, except for the pending provider marks,
+     * which no source can bring back.
+     */
+    suspend fun clearAllKeepingPendingProviderMarks(profileId: Int = profileManager.activeProfileId.value) {
+        owner(profileId).edit(reset = true) { preferences, decoder ->
+            val pending = preferences[pendingProviderMarksKey].orEmpty()
+            val current = preferences[watchedItemsKey].orEmpty()
+            val kept = if (pending.isEmpty()) {
+                emptySet()
+            } else {
+                decoder.decode(current)
+                current.filterTo(linkedSetOf()) { json ->
+                    val key = decoder.key(json)
+                    key != null && key.season == null && key.episode == null && key.contentId in pending
+                }
+            }
+            if (kept.isEmpty()) {
+                preferences.remove(watchedItemsKey)
+                preferences.remove(pendingProviderMarksKey)
+            } else {
+                preferences[watchedItemsKey] = kept
+                preferences[pendingProviderMarksKey] = kept.mapNotNullTo(linkedSetOf()) { json -> decoder.key(json)?.contentId }
+            }
             preferences.remove(deltaCursorKey)
             preferences.remove(deltaInitializedKey)
         }

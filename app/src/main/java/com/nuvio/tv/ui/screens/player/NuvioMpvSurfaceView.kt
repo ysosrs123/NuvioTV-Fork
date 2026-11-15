@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
+import com.nuvio.tv.core.player.ImportedSubtitleFontStore
 import com.nuvio.tv.data.local.MpvHardwareDecodeMode
 import com.nuvio.tv.data.local.NightModeLevel
 import com.nuvio.tv.data.local.SubtitleStyleSettings
@@ -11,6 +12,8 @@ import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.MPV
 import `is`.xyz.mpv.Utils
 import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.pow
 import kotlin.math.roundToLong
 
 internal const val MPV_TRACK_LIST_PROPERTY = "track-list"
@@ -21,12 +24,20 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 ) : BaseMPVView(context, attrs) {
 
     private var initialized = false
+    private var mpvLoadedImportedFontIds: Set<String> = emptySet()
+    private var lastMpvSubFont: MpvSubFontPick? = null
     private var appliedSoundFilterChain = ""
     private var appliedSwresampleOptions = ""
     private var soundGainDb = 0
     private var soundNightMode = NightModeLevel.OFF
     private var dialogueBoostDb = 0
     private var stereoDownmixLimited = false
+    private var allowedSpdifCodecs = ""
+    private var appliedSpdifCodecs: String? = null
+    private var bluetoothRoute = false
+    private var playbackSpeedNow = 1f
+    private var appliedDeinterlace: String? = null
+    private var deinterlaceUnsupported = false
     private var hasQueuedInitialMedia = false
     private var lastMediaRequestKey: String? = null
     private var pendingInitialMediaUrl: String? = null
@@ -221,6 +232,14 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     val hasPendingInitialMedia: Boolean
         get() = pendingInitialMediaUrl != null || deferredLoadUntilSurface
 
+    val isMpvLoaded: Boolean
+        get() = initialized
+
+    fun isIdleActiveNow(): Boolean {
+        if (!initialized) return false
+        return mpv.getPropertyBoolean("idle-active") == true
+    }
+
     /** False while mpv still reports the path recorded at the last media request. */
     fun isPositionFromRequestedMedia(): Boolean {
         if (!initialized) return false
@@ -257,9 +276,15 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     fun currentPositionMs(): Long {
         if (!initialized) return 0L
-        val seconds = mpv.getPropertyDouble("time-pos/full")
+        val timePos = mpv.getPropertyDouble("time-pos/full")
             ?: mpv.getPropertyDouble("time-pos")
             ?: 0.0
+        val seconds = mpvPlaybackPositionSec(
+            timePosSec = timePos,
+            audioPtsSec = mpv.getPropertyDouble("audio-pts"),
+            seeking = mpv.getPropertyBoolean("seeking") == true,
+            audioDelaySec = mpv.getPropertyDouble("audio-delay") ?: 0.0
+        )
         return (seconds * 1000.0).roundToLong().coerceAtLeast(0L)
     }
 
@@ -284,13 +309,56 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     fun setPlaybackSpeed(speed: Float) {
         if (!initialized) return
         mpv.setPropertyDouble("speed", speed.toDouble())
+        playbackSpeedNow = speed
+        applySpdifCodecs()
     }
 
     fun applyAudioAmplificationDb(db: Int, nightMode: NightModeLevel = NightModeLevel.OFF) {
         if (!initialized) return
         soundGainDb = db.coerceIn(AUDIO_AMPLIFICATION_MIN_DB, AUDIO_AMPLIFICATION_MAX_DB)
         soundNightMode = nightMode
+        applySpdifCodecs()
         applySoundFilterChain()
+    }
+
+    /** Codecs this output may take as a bitstream; cleared again while sound adjustments need decoded sound. */
+    fun setAllowedSpdifCodecs(codecs: String) {
+        allowedSpdifCodecs = codecs
+        if (!initialized) return
+        applySpdifCodecs()
+    }
+
+    private fun applySpdifCodecs() {
+        val codecs = mpvSpdifCodecsNow(
+            allowed = allowedSpdifCodecs,
+            isBluetooth = bluetoothRoute,
+            gainDb = soundGainDb,
+            nightMode = soundNightMode,
+            dialogueBoostDb = dialogueBoostDb,
+            playbackSpeed = playbackSpeedNow
+        )
+        if (codecs == appliedSpdifCodecs) return
+        runCatching {
+            mpv.setPropertyString("audio-spdif", codecs)
+            appliedSpdifCodecs = codecs
+            Log.i(TAG, "audio-spdif=[${codecs}]")
+        }.onFailure {
+            Log.w(TAG, "Failed to set mpv passthrough codecs ($codecs): ${it.message}")
+        }
+    }
+
+    fun onHwdecCurrentChanged(hwdecCurrent: String?) {
+        if (!initialized || deinterlaceUnsupported) return
+        val mode = mpvDeinterlaceFor(hwdecCurrent) ?: return
+        if (mode == appliedDeinterlace) return
+        runCatching {
+            mpv.setPropertyString("deinterlace", mode)
+            appliedDeinterlace = mode
+            Log.i(TAG, "deinterlace=$mode (hwdec=$hwdecCurrent)")
+        }.onFailure {
+            deinterlaceUnsupported = true
+            Log.w(TAG, "mpv rejected deinterlace=$mode: ${it.message}")
+        }
     }
 
     private fun applySoundFilterChain() {
@@ -309,6 +377,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     fun applyDialogueBoostDb(db: Int) {
         if (!initialized) return
         dialogueBoostDb = db
+        applySpdifCodecs()
         if (stereoDownmixLimited) applySoundFilterChain()
         val options = mpvSwresampleOptions(db)
         if (options == appliedSwresampleOptions) return
@@ -405,11 +474,10 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         if (!initialized) return
         if (reloadOutput) limitStereoDownmix(false)
         val wasPaused = !isPlayingNow()
+        bluetoothRoute = isBluetooth
         runCatching {
             mpv.setPropertyString("audio-channels", MpvBluetoothAudioPolicy.audioChannels(isBluetooth))
-            if (MpvBluetoothAudioPolicy.shouldClearAudioSpdif(isBluetooth)) {
-                mpv.setPropertyString("audio-spdif", "")
-            }
+            applySpdifCodecs()
             if (reloadOutput) {
                 reloadAudioOutput()
                 if (wasPaused) {
@@ -502,10 +570,20 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
             val subMarginY = (MPV_SUB_MARGIN_Y_MIN +
                 (normalizedOffset * (MPV_SUB_MARGIN_Y_MAX - MPV_SUB_MARGIN_Y_MIN))).toInt()
             val edges = mpvSubtitleEdges(style, isAssOrSsaSubtitleSelectedNow())
-            mpv.setPropertyString("sub-font", style.font.mpvFontName(style.bold))
+            val imported = importedMpvSubtitleFont(context, style)
+            val fontPick = mpvSubtitleFontPick(
+                importedId = imported?.id,
+                importedFamily = imported?.family,
+                loadedImportedIds = mpvLoadedImportedFontIds,
+                bundled = MpvSubFontPick(style.font.mpvFontName(style.bold), style.font.mpvBold(style.bold)),
+                importedBold = style.bold,
+                previous = lastMpvSubFont
+            )
+            lastMpvSubFont = fontPick
+            mpv.setPropertyString("sub-font", fontPick.font)
 
             mpv.setPropertyDouble("sub-scale", scale)
-            mpv.setPropertyBoolean("sub-bold", style.font.mpvBold(style.bold))
+            mpv.setPropertyBoolean("sub-bold", fontPick.bold)
             mpv.setPropertyDouble("sub-outline-size", edges.outlineSize)
             // Subtitles sit above the controls while they are shown; the user's offset still wins below that line.
             val liftedSubPos = if (subtitleLiftFraction > 0.0) {
@@ -549,7 +627,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         if (!initialized || width <= 0 || height <= 0 || isAssOrSsaSubtitleSelectedNow()) return null
         val fontSize = mpv.getPropertyDouble("sub-font-size") ?: return null
         val unitPx = height / MPV_SUBTITLE_REFERENCE_HEIGHT
-        val textSizePx = (fontSize / style.font.mpvLineHeightEm() * subtitleScale(style) * plainFontScale(style)).toFloat() * unitPx
+        val textSizePx = (fontSize / mpvLineHeightEm(style) * subtitleScale(style) * plainFontScale(style)).toFloat() * unitPx
         val marginXPx = (mpv.getPropertyInt("sub-margin-x") ?: MPV_SUBTITLE_DEFAULT_MARGIN_X) * unitPx
         val location = IntArray(2)
         getLocationInWindow(location)
@@ -565,11 +643,14 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     private fun subtitleScale(style: SubtitleStyleSettings): Double = (style.size / 100.0).coerceIn(0.5, 3.0)
 
+    private fun mpvLineHeightEm(style: SubtitleStyleSettings): Double =
+        importedMpvSubtitleFont(context, style)?.lineHeightEm ?: style.font.mpvLineHeightEm()
+
     private fun plainFontScale(style: SubtitleStyleSettings): Double {
         if (isAssOrSsaSubtitleSelectedNow()) return 1.0
         val metrics = resources.displayMetrics
         return mpvPlainSubtitleScale(
-            font = style.font,
+            lineHeightEm = mpvLineHeightEm(style),
             fontSize = mpv.getPropertyDouble("sub-font-size") ?: return 1.0,
             exoTextSizePx = android.util.TypedValue.applyDimension(
                 android.util.TypedValue.COMPLEX_UNIT_SP, EXO_SUBTITLE_BASE_SP, metrics
@@ -810,6 +891,8 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         appliedSoundFilterChain = ""
         appliedSwresampleOptions = ""
         stereoDownmixLimited = false
+        appliedSpdifCodecs = null
+        appliedDeinterlace = null
         hasQueuedInitialMedia = false
         lastMediaRequestKey = null
         pendingInitialMediaUrl = null
@@ -832,6 +915,8 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         mpv.setOptionString("sub-ass-override", "no")
         mpv.setOptionString("sub-codepage", "auto:utf-8")
         mpv.setOptionString("sub-fonts-dir", prepareMpvSubtitleFonts(context).absolutePath)
+        mpvLoadedImportedFontIds = ImportedSubtitleFontStore.get(context).fonts.value.mapTo(HashSet()) { it.id }
+        lastMpvSubFont = null
         mpv.setOptionString("sub-font", MPV_RENDERER_DEFAULT_SUBTITLE_FONT)
         mpv.setOptionString("sub-use-margins", "yes")
         mpv.setOptionString("sub-ass-force-margins", "yes")
@@ -861,6 +946,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         // Progress is polled by PlayerRuntimeController. Track-list changes are pushed so
         // the poll can skip re-reading an unchanged track list.
         mpv.observeProperty(MPV_TRACK_LIST_PROPERTY, MPV.mpvFormat.MPV_FORMAT_NONE)
+        mpv.observeProperty(MPV_HWDEC_CURRENT_PROPERTY, MPV.mpvFormat.MPV_FORMAT_STRING)
     }
 
     private fun applyHeaders(headers: Map<String, String>) {
@@ -1033,4 +1119,25 @@ internal fun isMpvPositionFromMediaRequest(
     if (requestedUrl == null) return true
     if (currentPath.isNullOrEmpty()) return false
     return currentPath == requestedUrl || currentPath != pathAtRequest
+}
+
+/** How far video may trail the audio clock outside a seek before its position is distrusted. */
+internal const val MPV_VIDEO_PTS_GLITCH_MIN_SEC = 10.0
+
+/**
+ * h264_mediacodec stamps a packet that has no PTS with 0 instead of leaving it unset. On streams
+ * with such packets (seen on some HLS hosts) mpv shows that frame as `time-pos` 0 while audio keeps
+ * playing at the real position, so the position snaps to the start for a moment: the Skip Intro
+ * button flashes mid-episode and a seek made then is counted from 0. When the video position is far
+ * behind a running audio clock outside a seek, the audio clock holds the real position.
+ */
+internal fun mpvPlaybackPositionSec(
+    timePosSec: Double,
+    audioPtsSec: Double?,
+    seeking: Boolean,
+    audioDelaySec: Double
+): Double {
+    if (audioPtsSec == null || seeking) return timePosSec
+    val glitchMinSec = MPV_VIDEO_PTS_GLITCH_MIN_SEC + abs(audioDelaySec)
+    return if (audioPtsSec - timePosSec > glitchMinSec) audioPtsSec else timePosSec
 }

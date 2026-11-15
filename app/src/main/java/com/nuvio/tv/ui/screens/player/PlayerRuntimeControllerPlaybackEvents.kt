@@ -4,6 +4,7 @@ import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.core.util.TtffTrace
 import android.net.Uri
 import android.util.Log
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.SeekParameters
 import com.nuvio.tv.R
@@ -703,6 +704,57 @@ internal fun PlayerRuntimeController.checkExoPlaybackOverrun(
     player.pause()
 }
 
+internal const val SOURCE_END_ERROR_WINDOW_MS = 2_000L
+
+/**
+ * A load or parse error within the last couple of seconds of a known duration: the
+ * film has been played out and only the tail of the file failed, typically a link that
+ * expired during a long pause.
+ */
+internal fun isSourceErrorAtEnd(
+    errorCode: Int,
+    positionMs: Long,
+    durationMs: Long,
+    isLive: Boolean
+): Boolean {
+    if (isLive || durationMs <= 0L) return false
+    if (errorCode < PlaybackException.ERROR_CODE_IO_UNSPECIFIED ||
+        errorCode >= PlaybackException.ERROR_CODE_DECODER_INIT_FAILED
+    ) {
+        return false
+    }
+    return positionMs >= durationMs - SOURCE_END_ERROR_WINDOW_MS
+}
+
+/** Ends the episode the way STATE_ENDED does when the source fails right at its end. */
+internal fun PlayerRuntimeController.finishOnSourceErrorAtEnd(
+    player: androidx.media3.exoplayer.ExoPlayer,
+    error: PlaybackException
+): Boolean {
+    if (!endDetectionArmed || !hasRenderedFirstFrame) return false
+    val positionMs = player.currentPosition
+    val durationMs = maxOf(player.duration, lastKnownDuration)
+    if (!isSourceErrorAtEnd(error.errorCode, positionMs, durationMs, player.isCurrentMediaItemLive)) return false
+    if (isPlaceholderPlayback() || !shouldTreatAsNaturalPlaybackCompletion(
+            hasRenderedFirstFrame = hasRenderedFirstFrame,
+            hasFatalError = !_uiState.value.error.isNullOrBlank(),
+            durationMs = durationMs
+        )
+    ) {
+        return false
+    }
+    exoSourceEndReached = true
+    Log.i(
+        PlayerRuntimeController.TAG,
+        "EXO_SOURCE_END: ${error.errorCodeName} at positionMs=$positionMs durationMs=$durationMs; " +
+            "finishing naturally host=${currentStreamUrl.safeHost()}"
+    )
+    errorRetryJob?.cancel()
+    _uiState.update { it.copy(playbackEnded = true, isBuffering = false) }
+    handleNaturalPlaybackEnded()
+    return true
+}
+
 internal fun PlayerRuntimeController.stopProgressUpdates() {
     progressJob?.cancel()
     progressJob = null
@@ -1121,7 +1173,7 @@ internal fun PlayerRuntimeController.getEffectiveDuration(position: Long): Long 
     val isEnded = if (isUsingMpvEngine()) {
         position >= (effectiveDuration - 500L)
     } else {
-        _exoPlayer?.playbackState == Player.STATE_ENDED || exoEndOverrunHandled
+        _exoPlayer?.playbackState == Player.STATE_ENDED || exoEndOverrunHandled || exoSourceEndReached
     }
     if (!isEnded && effectiveDuration < position) return 0L
 
@@ -1909,6 +1961,8 @@ fun PlayerRuntimeController.onEvent(
                     stopMpvProgressUpdatesForPause()
                     stopWatchProgressSaving()
                     emitPauseScrobbleForCurrentProgress()
+                    // Same as Exo's pause: a paused player left alone can be killed by the system.
+                    saveWatchProgress()
                     schedulePauseOverlay()
                 } else {
                     userPausedManually = false
@@ -2561,6 +2615,12 @@ fun PlayerRuntimeController.onEvent(
         }
         is PlayerEvent.OnSetSubtitleShadowOpacity -> {
             scope.launch { playerSettingsDataStore.setSubtitleShadowOpacity(event.opacity) }
+        }
+        is PlayerEvent.OnSetSubtitleShadowSize -> {
+            scope.launch { playerSettingsDataStore.setSubtitleShadowSize(event.size) }
+        }
+        is PlayerEvent.OnSetSubtitleImportedFont -> {
+            scope.launch { playerSettingsDataStore.setSubtitleImportedFont(event.id) }
         }
         is PlayerEvent.OnSetSubtitleOutlineColor -> {
             scope.launch { playerSettingsDataStore.setSubtitleOutlineColor(event.color) }

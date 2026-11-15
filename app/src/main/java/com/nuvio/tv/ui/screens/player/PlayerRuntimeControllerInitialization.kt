@@ -1574,13 +1574,14 @@ internal fun PlayerRuntimeController.initializePlayer(
                             },
                             dv5Enabled = playerSettings.dv5ToDv81Enabled,
                             manualDv81 = manualDv81Selected && !dv7Mode1Forced,
-                            autoMode2 = autoDv81Mode2 && !dv7Mode1Forced
+                            autoMode2 = autoDv81Mode2 && !dv7Mode1Forced,
+                            relabelUnlabelledP5 = DolbyVisionBaseLayerPolicy.decodesProfile5()
                         ),
                         stripDvRpu = stripDvRpuEnabled,
                         stripHdr10PlusSei = stripHdr10PlusSei,
                         injectHdr10Sei = playerSettings.injectHdr10MetadataOnStrip,
                         autoSyncObservesText = autoSyncObservesText
-                    )
+                    ).let { MkvFrameTimingExtractorsFactory(it, startMkvFrameTiming()) }
             // The thumbnail tap wraps the outermost factory. The libass path takes the unwrapped one and wraps
             // after its own Matroska swap.
             val effectiveExtractorsFactory: ExtractorsFactory =
@@ -1969,7 +1970,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                                 isBuffering = if (NuvioExoPlayerPerformanceHelper.shouldSuppressBufferingUi(
                                     suppressBufferingUiForSeek, seekBufferingUiDeferred, isBuffering
                                 )) false else isBuffering,
-                                playbackEnded = naturalEnded
+                                playbackEnded = naturalEnded ||
+                                    (playbackState == Player.STATE_IDLE && exoSourceEndReached)
                             )
                         }
                         updateAudioControlAvailability()
@@ -2336,6 +2338,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         cancelTunnelAvSyncWatchdog()
                         val detailedError = error.toDisplayMessage(context)
                         cancelStableProgressReset()
+                        if (finishOnSourceErrorAtEnd(this@apply, error)) return
 
                         if (Vc1VideoFormatHeuristics.isVc1PlaybackFailure(
                                 error = error,
@@ -2606,6 +2609,15 @@ internal fun PlayerRuntimeController.initializePlayer(
                             savedPosition = currentPosition,
                             paused = pausedByUser
                         )) {
+                            return
+                        }
+
+                        // A link that has likely expired is fetched again before anything else is tried on it.
+                        val linkError = ReusedLinkRefresh.isLinkError(
+                            error.findInvalidResponseCodeException()?.responseCode,
+                            isDeadSourcePlaybackError(error)
+                        )
+                        if (tryRefreshExpiredLinkAfterError(detailedError, linkError)) {
                             return
                         }
 
@@ -3355,6 +3367,7 @@ internal fun PlayerRuntimeController.resetLoadingOverlayForNewStream() {
     endDetectionArmed = false
     mpvEofSeenClear = false
     exoEndOverrunHandled = false
+    exoSourceEndReached = false
     hasMarkedCurrentEpisodeCompleted = false
     // The placeholder probe is a per-stream measurement, not a
     // per-screen one: the reuse path re-enters initializePlayer on the
@@ -3574,6 +3587,12 @@ private class SubtitleOffsetRenderersFactory(
             bluetoothForcePcm -> {
                 DefaultAudioSink.Builder()
                     .setAudioCapabilities(AudioOutputRouteDetector.bluetoothPcmOnlyCapabilities())
+            }
+            forceOpticalPassthrough -> {
+                val pinned = buildStableAudioCapabilities(context, true)
+                pinnedOutputEncodings = PassthroughOutputReturn.encodingsOf(pinned)
+                DefaultAudioSink.Builder()
+                    .setAudioCapabilities(pinned)
             }
             isTelevision -> {
                 val pinned = PassthroughOutputReturn.capabilities(context)

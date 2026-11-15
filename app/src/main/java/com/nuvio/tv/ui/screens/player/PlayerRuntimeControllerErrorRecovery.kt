@@ -916,6 +916,13 @@ internal fun PlayerRuntimeController.tryParsingErrorProbeFallback(
             if (isDeadSourcePlaybackError(error) && attemptDeadSourceFailover(error, detailedError)) {
                 return@launch
             }
+            val linkError = ReusedLinkRefresh.isLinkError(
+                error.findInvalidResponseCodeException()?.responseCode,
+                isDeadSourcePlaybackError(error)
+            )
+            if (tryRefreshExpiredLinkAfterError(detailedError, linkError)) {
+                return@launch
+            }
             if (maybeAutoSwitchInternalPlayerOnStartupError(detailedError = detailedError, allowEngineFailover = allowEngineFailover)) {
                 return@launch
             }

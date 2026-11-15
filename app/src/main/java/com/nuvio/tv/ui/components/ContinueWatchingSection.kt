@@ -4,7 +4,7 @@ import com.nuvio.tv.ui.screens.home.rowFocusRing
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
-import com.nuvio.tv.ui.screens.home.shuffleFocusKey
+import com.nuvio.tv.ui.screens.home.continueWatchingItemKey
 
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.foundation.BorderStroke
@@ -253,14 +253,7 @@ fun ContinueWatchingSection(
         ) {
             itemsIndexed(
                 items = items,
-                key = { _, progress ->
-                    progress.shuffleFocusKey ?: when (progress) {
-                        is ContinueWatchingItem.InProgress ->
-                            "cw_${progress.progress.contentId}_${progress.progress.videoId}_${progress.progress.season ?: -1}_${progress.progress.episode ?: -1}"
-                        is ContinueWatchingItem.NextUp ->
-                            "nextup_${progress.info.contentId}_${progress.info.videoId}_${progress.info.season}_${progress.info.episode}"
-                    }
-                }
+                key = { _, progress -> continueWatchingItemKey(progress) }
             ) { index, progress ->
                 val requester = focusRequesters.getOrPut(index) { FocusRequester() }
                 val focusModifier = Modifier.focusRequester(requester)

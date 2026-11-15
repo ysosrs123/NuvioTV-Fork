@@ -13,6 +13,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import com.nuvio.tv.core.player.ImportedSubtitleFonts
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.player.BufferAhead
 import com.nuvio.tv.core.player.BufferSizing
@@ -169,6 +170,9 @@ data class SubtitleStyleSettings(
     val outlineSize: SubtitleOutlineSize? = null, // null follows the legacy edge choice
     val shadowEnabled: Boolean? = null, // null follows the legacy edge choice
     val shadowOpacity: Int = DEFAULT_SUBTITLE_SHADOW_OPACITY, // 10-100 in steps of 10
+    val shadowSize: Int = DEFAULT_SUBTITLE_SHADOW_SIZE, // 1-8, 2 = the shadow earlier builds drew
+    /** An imported font, drawn instead of [font] while its file is on this device. */
+    val importedFontId: String? = null,
     val hdrStyleEnabled: Boolean = false,
     val hdrTextColor: Int = Color.White.toArgb(),
     val hdrBrightness: Int = HDR_BRIGHTNESS_DEFAULT, // 0-100, see hdrBrightnessFactor
@@ -385,6 +389,10 @@ data class PlayerSettings(
     val resolutionMatchingEnabled: Boolean = false,
     /** Extra wait after a refresh rate change, in seconds; 0 = Auto (two seconds, then until HDMI audio is back). */
     val afrSettleDelaySeconds: Int = 0,
+    /** Let a TV with QMS change rate without a mode change; off = always a real mode change. */
+    val afrAllowSeamlessSwitch: Boolean = false,
+    /** Play 25 and 30 fps at 25 and 30 Hz when the TV has them; off = 50 and 60 Hz. */
+    val afrAllowLowRates: Boolean = false,
     // Stream selection settings
     val streamAutoPlayMode: StreamAutoPlayMode = StreamAutoPlayMode.MANUAL,
     val streamAutoPlaySource: StreamAutoPlaySource = StreamAutoPlaySource.ALL_SOURCES,
@@ -397,6 +405,9 @@ data class PlayerSettings(
     val postPlayMovieThresholdPercent: Int = DEFAULT_POST_PLAY_MOVIE_THRESHOLD_PERCENT,
     val streamAutoPlayNextEpisodeEnabled: Boolean = false,
     val streamAutoPlayNextEpisodeFallbackEnabled: Boolean = true,
+    val streamAutoPlayFallbackOnFailure: Boolean = false,
+    val streamAutoPlayFallbackMaxSources: Int = DEFAULT_SOURCE_FALLBACK_MAX_SOURCES,
+    val streamAutoPlayFallbackStartupTimeoutSeconds: Int = DEFAULT_SOURCE_STARTUP_TIMEOUT_SECONDS,
     val streamAutoPlayPreferBingeGroupForNextEpisode: Boolean = true,
     val streamAutoPlayReuseBingeGroup: Boolean = false,
     val streamAutoPlayTimeoutSeconds: Int = 3,
@@ -466,6 +477,15 @@ data class PlayerSettings(
         get() = decoderPriority == 2
 
     /**
+     * Falling back to the next matching source applies only while auto source selection picks the
+     * stream and the internal player plays it.
+     */
+    val streamAutoPlayFallbackActive: Boolean
+        get() = streamAutoPlayFallbackOnFailure &&
+            streamAutoPlayMode != StreamAutoPlayMode.MANUAL &&
+            playerPreference != PlayerPreference.EXTERNAL
+
+    /**
      * Kodi model: passthrough wins, downmix applies only to what the app
      * decodes. Armed whenever the FFmpeg renderer exists (decoderPriority
      * != 0) - the same condition as softwareDecodersAvailable. Under
@@ -492,6 +512,15 @@ data class PlayerSettings(
         get() = if (effectiveTunnelingEnabled) LibassRenderMode.OVERLAY else libassRenderMode
 
     companion object {
+        /** How many further sources falling back may try after the auto-selected one fails. */
+        const val DEFAULT_SOURCE_FALLBACK_MAX_SOURCES = 3
+        const val MIN_SOURCE_FALLBACK_MAX_SOURCES = 1
+        const val MAX_SOURCE_FALLBACK_MAX_SOURCES = 10
+        /** How long a source may take to start before falling back treats it as failed, in seconds. */
+        const val DEFAULT_SOURCE_STARTUP_TIMEOUT_SECONDS = 15
+        const val MIN_SOURCE_STARTUP_TIMEOUT_SECONDS = 5
+        const val MAX_SOURCE_STARTUP_TIMEOUT_SECONDS = 45
+        const val SOURCE_STARTUP_TIMEOUT_SECONDS_STEP = 5
         const val DEFAULT_STILL_WATCHING_EPISODE_THRESHOLD = 3
         const val MIN_STILL_WATCHING_EPISODE_THRESHOLD = 2
         const val MAX_STILL_WATCHING_EPISODE_THRESHOLD = 6
@@ -884,6 +913,8 @@ class PlayerSettingsDataStore @Inject constructor(
     private val frameRateMatchingModeKey = stringPreferencesKey("frame_rate_matching_mode")
     private val resolutionMatchingEnabledKey = booleanPreferencesKey("resolution_matching_enabled")
     private val afrSettleDelaySecondsKey = intPreferencesKey("afr_settle_delay_seconds")
+    private val afrAllowSeamlessSwitchKey = booleanPreferencesKey("afr_allow_seamless_switch")
+    private val afrAllowLowRatesKey = booleanPreferencesKey("afr_allow_25_30_hz")
     private val streamAutoPlayModeKey = stringPreferencesKey("stream_auto_play_mode")
     private val streamAutoPlaySourceKey = stringPreferencesKey("stream_auto_play_source")
     private val streamAutoPlaySelectedAddonsKey = stringSetPreferencesKey("stream_auto_play_selected_addons")
@@ -894,6 +925,10 @@ class PlayerSettingsDataStore @Inject constructor(
     private val postPlayMovieThresholdPercentKey = intPreferencesKey("post_play_movie_threshold_percent")
     private val streamAutoPlayNextEpisodeEnabledKey = booleanPreferencesKey("stream_auto_play_next_episode_enabled")
     private val streamAutoPlayNextEpisodeFallbackEnabledKey = booleanPreferencesKey("stream_auto_play_next_episode_fallback_enabled")
+    private val streamAutoPlayFallbackOnFailureKey = booleanPreferencesKey("stream_auto_play_fallback_on_failure")
+    private val streamAutoPlayFallbackMaxSourcesKey = intPreferencesKey("stream_auto_play_fallback_max_sources")
+    private val streamAutoPlayFallbackStartupTimeoutSecondsKey =
+        intPreferencesKey("stream_auto_play_fallback_startup_timeout_seconds")
     private val streamAutoPlayPreferBingeGroupForNextEpisodeKey = booleanPreferencesKey("stream_auto_play_prefer_bingegroup_next_episode")
     private val streamAutoPlayReuseBingeGroupKey = booleanPreferencesKey("stream_auto_play_reuse_binge_group")
     private val streamAutoPlayTimeoutSecondsKey = intPreferencesKey("stream_auto_play_timeout_seconds")
@@ -960,6 +995,8 @@ class PlayerSettingsDataStore @Inject constructor(
     private val subtitleOutlineSizeKey = stringPreferencesKey("subtitle_outline_size")
     private val subtitleShadowEnabledKey = booleanPreferencesKey("subtitle_shadow_enabled")
     private val subtitleShadowOpacityKey = intPreferencesKey("subtitle_shadow_opacity")
+    private val subtitleShadowSizeKey = intPreferencesKey("subtitle_shadow_size")
+    private val subtitleImportedFontKey = stringPreferencesKey("subtitle_font_id")
     private val subtitleHdrStyleEnabledKey = booleanPreferencesKey("subtitle_hdr_style_enabled")
     private val subtitleHdrTextColorKey = intPreferencesKey("subtitle_hdr_text_color")
     private val subtitleHdrBrightnessKey = intPreferencesKey("subtitle_hdr_brightness")
@@ -1402,6 +1439,8 @@ class PlayerSettingsDataStore @Inject constructor(
                 } ?: if (prefs[frameRateMatchingKey] == true) FrameRateMatchingMode.START_STOP else FrameRateMatchingMode.OFF,
                 resolutionMatchingEnabled = prefs[resolutionMatchingEnabledKey] ?: false,
                 afrSettleDelaySeconds = (prefs[afrSettleDelaySecondsKey] ?: 0).coerceIn(0, AFR_SETTLE_DELAY_MAX_SECONDS),
+                afrAllowSeamlessSwitch = prefs[afrAllowSeamlessSwitchKey] ?: false,
+                afrAllowLowRates = prefs[afrAllowLowRatesKey] ?: false,
                 streamAutoPlayMode = prefs[streamAutoPlayModeKey]?.let {
                     runCatching { StreamAutoPlayMode.valueOf(it) }.getOrDefault(StreamAutoPlayMode.MANUAL)
                 } ?: StreamAutoPlayMode.MANUAL,
@@ -1422,6 +1461,19 @@ class PlayerSettingsDataStore @Inject constructor(
                 ),
                 streamAutoPlayNextEpisodeEnabled = prefs[streamAutoPlayNextEpisodeEnabledKey] ?: false,
                 streamAutoPlayNextEpisodeFallbackEnabled = prefs[streamAutoPlayNextEpisodeFallbackEnabledKey] ?: true,
+                streamAutoPlayFallbackOnFailure = prefs[streamAutoPlayFallbackOnFailureKey] ?: false,
+                streamAutoPlayFallbackMaxSources = prefs[streamAutoPlayFallbackMaxSourcesKey]
+                    ?.coerceIn(
+                        PlayerSettings.MIN_SOURCE_FALLBACK_MAX_SOURCES,
+                        PlayerSettings.MAX_SOURCE_FALLBACK_MAX_SOURCES
+                    )
+                    ?: PlayerSettings.DEFAULT_SOURCE_FALLBACK_MAX_SOURCES,
+                streamAutoPlayFallbackStartupTimeoutSeconds = prefs[streamAutoPlayFallbackStartupTimeoutSecondsKey]
+                    ?.coerceIn(
+                        PlayerSettings.MIN_SOURCE_STARTUP_TIMEOUT_SECONDS,
+                        PlayerSettings.MAX_SOURCE_STARTUP_TIMEOUT_SECONDS
+                    )
+                    ?: PlayerSettings.DEFAULT_SOURCE_STARTUP_TIMEOUT_SECONDS,
                 streamAutoPlayPreferBingeGroupForNextEpisode =
                     prefs[streamAutoPlayPreferBingeGroupForNextEpisodeKey] ?: true,
                 streamAutoPlayReuseBingeGroup =
@@ -1543,6 +1595,8 @@ class PlayerSettingsDataStore @Inject constructor(
                         shadowOpacity = normalizeSubtitleShadowOpacity(
                             prefs[subtitleShadowOpacityKey] ?: DEFAULT_SUBTITLE_SHADOW_OPACITY
                         ),
+                        shadowSize = normalizeSubtitleShadowSize(prefs[subtitleShadowSizeKey] ?: DEFAULT_SUBTITLE_SHADOW_SIZE),
+                        importedFontId = prefs[subtitleImportedFontKey]?.takeIf(ImportedSubtitleFonts::isImportedId),
                         hdrStyleEnabled = prefs[subtitleHdrStyleEnabledKey] ?: (prefs[dimHdrOverlaysKey] ?: false),
                         hdrTextColor = prefs[subtitleHdrTextColorKey] ?: Color.White.toArgb(),
                         hdrBrightness = prefs[subtitleHdrBrightnessKey] ?: SubtitleStyleSettings.HDR_BRIGHTNESS_DEFAULT,
@@ -2028,6 +2082,18 @@ class PlayerSettingsDataStore @Inject constructor(
         }
     }
 
+    suspend fun setAfrAllowSeamlessSwitch(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[afrAllowSeamlessSwitchKey] = enabled
+        }
+    }
+
+    suspend fun setAfrAllowLowRates(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[afrAllowLowRatesKey] = enabled
+        }
+    }
+
     suspend fun setFrameRateMatching(enabled: Boolean) {
         setFrameRateMatchingMode(
             if (enabled) FrameRateMatchingMode.START_STOP else FrameRateMatchingMode.OFF
@@ -2094,6 +2160,30 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setStreamAutoPlayNextEpisodeFallbackEnabled(enabled: Boolean) {
         store().edit { prefs ->
             prefs[streamAutoPlayNextEpisodeFallbackEnabledKey] = enabled
+        }
+    }
+
+    suspend fun setStreamAutoPlayFallbackOnFailure(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[streamAutoPlayFallbackOnFailureKey] = enabled
+        }
+    }
+
+    suspend fun setStreamAutoPlayFallbackMaxSources(count: Int) {
+        store().edit { prefs ->
+            prefs[streamAutoPlayFallbackMaxSourcesKey] = count.coerceIn(
+                PlayerSettings.MIN_SOURCE_FALLBACK_MAX_SOURCES,
+                PlayerSettings.MAX_SOURCE_FALLBACK_MAX_SOURCES
+            )
+        }
+    }
+
+    suspend fun setStreamAutoPlayFallbackStartupTimeoutSeconds(seconds: Int) {
+        store().edit { prefs ->
+            prefs[streamAutoPlayFallbackStartupTimeoutSecondsKey] = seconds.coerceIn(
+                PlayerSettings.MIN_SOURCE_STARTUP_TIMEOUT_SECONDS,
+                PlayerSettings.MAX_SOURCE_STARTUP_TIMEOUT_SECONDS
+            )
         }
     }
 
@@ -2507,7 +2597,18 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setSubtitleFont(font: SubtitleFont?) {
         store().edit { prefs ->
             if (font == null) prefs.remove(subtitleFontKey) else prefs[subtitleFontKey] = font.name
+            prefs.remove(subtitleImportedFontKey)
         }
+    }
+    suspend fun setSubtitleImportedFont(id: String) {
+        if (!ImportedSubtitleFonts.isImportedId(id)) return
+        store().edit { it[subtitleImportedFontKey] = id }
+    }
+    suspend fun forgetSubtitleImportedFont(id: String) {
+        store().edit { prefs -> if (prefs[subtitleImportedFontKey] == id) prefs.remove(subtitleImportedFontKey) }
+    }
+    suspend fun setSubtitleShadowSize(size: Int) {
+        store().edit { it[subtitleShadowSizeKey] = normalizeSubtitleShadowSize(size) }
     }
     suspend fun setSubtitleOutlineSize(size: SubtitleOutlineSize) {
         store().edit { prefs -> writeSubtitleEdges(prefs, size, currentSubtitleShadow(prefs)) }
@@ -2536,6 +2637,8 @@ class PlayerSettingsDataStore @Inject constructor(
         val defaults = SubtitleStyleSettings()
         store().edit { prefs ->
             prefs.remove(subtitleFontKey)
+            prefs.remove(subtitleImportedFontKey)
+            prefs[subtitleShadowSizeKey] = DEFAULT_SUBTITLE_SHADOW_SIZE
             writeSubtitleEdges(prefs, DEFAULT_SUBTITLE_EDGE_STYLE.toOutlineSize(), DEFAULT_SUBTITLE_EDGE_STYLE.hasShadow())
             prefs[subtitleShadowOpacityKey] = DEFAULT_SUBTITLE_SHADOW_OPACITY
             prefs[subtitleSizeKey] = defaults.size

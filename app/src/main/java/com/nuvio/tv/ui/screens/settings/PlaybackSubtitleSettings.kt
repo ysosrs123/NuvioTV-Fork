@@ -17,6 +17,8 @@ import com.nuvio.tv.data.local.PlayerPreference
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.MAX_SUBTITLE_SHADOW_OPACITY
 import com.nuvio.tv.data.local.MIN_SUBTITLE_SHADOW_OPACITY
+import com.nuvio.tv.data.local.MAX_SUBTITLE_SHADOW_SIZE
+import com.nuvio.tv.data.local.MIN_SUBTITLE_SHADOW_SIZE
 import com.nuvio.tv.data.local.SubtitleOutlineSize
 import com.nuvio.tv.data.local.SubtitleLanguageOption
 import com.nuvio.tv.data.local.SubtitleStyleSettings
@@ -125,16 +127,23 @@ internal fun PlaybackSubtitlesSection(
     )
 
     SettingsSectionLabel(text = stringResource(R.string.sub_style_label))
+    SubtitleStylePreview(style = style)
     var showFontPicker by remember { mutableStateOf(false) }
     SettingsActionRow(
         title = stringResource(R.string.subtitle_font_family),
-        subtitle = null,
-        value = subtitleFontName(style.font),
+        subtitle = if (subtitleImportedFontMissing(style)) stringResource(R.string.sub_font_missing) else null,
+        value = subtitleFontLabel(style),
         enabled = enabled,
         onClick = { showFontPicker = true }
     )
     if (showFontPicker && enabled) {
-        SubtitleFontDialog(style.font, { font -> onUpdate { setSubtitleFont(font) } }) { showFontPicker = false }
+        SubtitleFontDialog(
+            selected = style.font,
+            selectedImportedId = style.importedFontId,
+            onSelected = { font -> onUpdate { setSubtitleFont(font) } },
+            onSelectedImported = { id -> onUpdate { setSubtitleImportedFont(id) } },
+            onDismiss = { showFontPicker = false }
+        )
     }
     SliderSettingsItem(
         title = stringResource(R.string.sub_size),
@@ -213,6 +222,17 @@ internal fun PlaybackSubtitlesSection(
             maxValue = MAX_SUBTITLE_SHADOW_OPACITY,
             step = 10,
             onValueChange = { opacity -> onUpdate { setSubtitleShadowOpacity(opacity) } },
+            enabled = enabled
+        )
+        SliderSettingsItem(
+            title = stringResource(R.string.sub_shadow_size),
+            subtitle = stringResource(R.string.subtitle_shadow_size_sub),
+            value = style.shadowSize,
+            valueText = style.shadowSize.toString(),
+            minValue = MIN_SUBTITLE_SHADOW_SIZE,
+            maxValue = MAX_SUBTITLE_SHADOW_SIZE,
+            step = 1,
+            onValueChange = { size -> onUpdate { setSubtitleShadowSize(size) } },
             enabled = enabled
         )
     }

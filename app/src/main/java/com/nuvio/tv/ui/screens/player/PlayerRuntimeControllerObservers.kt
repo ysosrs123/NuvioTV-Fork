@@ -491,6 +491,9 @@ internal fun PlayerRuntimeController.observeSubtitleSettings() {
             addonSubtitlesEnabled = settings.addonSubtitlesEnabled
             currentInternalPlayerEngine = resolvedInternalPlayerEngine
             streamAutoPlayModeSetting = settings.streamAutoPlayMode
+            streamAutoPlayFallbackActive = settings.streamAutoPlayFallbackActive
+            streamAutoPlayFallbackMaxSources = settings.streamAutoPlayFallbackMaxSources
+            streamAutoPlayFallbackStartupTimeoutSeconds = settings.streamAutoPlayFallbackStartupTimeoutSeconds
             streamAutoPlayNextEpisodeEnabledSetting = settings.streamAutoPlayNextEpisodeEnabled
             streamAutoPlayTimeoutSecondsSetting = settings.streamAutoPlayTimeoutSeconds
             preloadNextEpisodeSourcesSetting = false // next-episode sources come from the binge lookahead
@@ -1219,6 +1222,7 @@ internal fun PlayerRuntimeController.maybeScheduleStallWatchdog() {
     stallWatchdogJob = scope.launch {
         var lastBufferedPosition = player.bufferedPosition
         var lastAdvanceAtMs = System.currentTimeMillis()
+        var dataAheadWaitLogged = false
 
         while (isActive) {
             delay(PlayerRuntimeController.STALL_WATCHDOG_POLL_INTERVAL_MS)
@@ -1248,7 +1252,19 @@ internal fun PlayerRuntimeController.maybeScheduleStallWatchdog() {
                     )
                 )
             ) {
-                PlayerStallWatchdogPolicy.Decision.KeepWaiting -> Unit
+                PlayerStallWatchdogPolicy.Decision.KeepWaiting -> {
+                    if (!dataAheadWaitLogged &&
+                        stalledForMs >= PlayerRuntimeController.STALL_WATCHDOG_THRESHOLD_MS
+                    ) {
+                        dataAheadWaitLogged = true
+                        Log.i(
+                            PlayerRuntimeController.TAG,
+                            "STALL_WATCHDOG: bufferedPosition stuck at $bufferedNow for ${stalledForMs}ms " +
+                                "(playhead=${livePlayer.currentPosition.coerceAtLeast(0L)}); " +
+                                "data buffered ahead, waiting for the source instead of skipping"
+                        )
+                    }
+                }
                 PlayerStallWatchdogPolicy.Decision.SkipUnknownDuration -> {
                     Log.w(
                         PlayerRuntimeController.TAG,

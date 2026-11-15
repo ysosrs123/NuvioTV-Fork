@@ -309,6 +309,28 @@
     <string name="sub_outline_sub">Dodaj obrys wokół tekstu napisów dla lepszej widoczności</string>
     <string name="sub_outline_color">Kolor obrysu</string>
     <string name="sub_opacity">Krycie</string>
+    <string name="sub_appearance">Wygląd napisów</string>
+    <string name="sub_appearance_desc">Czcionka, kolory, tło i cień</string>
+    <string name="sub_appearance_hint">Dotyczy napisów tekstowych. Stylizowane napisy ASS i napisy graficzne zachowują oryginalny wygląd.</string>
+    <string name="sub_preview">Podgląd</string>
+    <string name="sub_preview_text">Każda historia zaczyna się od odrobiny ciekawości.</string>
+    <string name="sub_font">Czcionka</string>
+    <string name="sub_font_default">Domyślna</string>
+    <string name="sub_font_serif">Szeryfowa</string>
+    <string name="sub_font_mono">O stałej szerokości</string>
+    <string name="sub_font_import">Importuj z telefonu</string>
+    <string name="sub_font_import_desc">Dodaj czcionkę .ttf lub .otf do 10 MB. Zaimportowane czcionki zostają na tym TV.</string>
+    <string name="sub_font_import_qr">Zeskanuj telefonem, aby dodać czcionkę .ttf lub .otf</string>
+    <string name="sub_font_missing">Czcionka jest niedostępna na tym urządzeniu. Używana jest czcionka domyślna.</string>
+    <string name="sub_font_remove">Usuń %1$s</string>
+    <string name="sub_background">Tło</string>
+    <string name="sub_bg_opacity">Krycie tła</string>
+    <string name="sub_bg_roundness">Zaokrąglenie rogów</string>
+    <string name="sub_shadow">Cień</string>
+    <string name="sub_shadow_desc">Oddziel tekst od jasnych scen</string>
+    <string name="sub_shadow_opacity">Krycie cienia</string>
+    <string name="sub_shadow_size">Rozmiar cienia</string>
+    <string name="sub_reset_appearance">Resetuj wygląd</string>
     <string name="sub_advanced_section">Zaawansowane renderowanie napisów</string>
     <string name="sub_libass">Używaj libass dla napisów ASS/SSA</string>
     <string name="sub_libass_sub">Zaawansowane renderowanie ASS/SSA (style, pozycjonowanie, animacje)</string>
@@ -450,6 +472,8 @@
     <string name="layout_cw_card_style_poster">Plakat</string>
     <string name="layout_trailer_button">Pokaż przycisk zwiastuna</string>
     <string name="layout_trailer_button_sub">Pokaż przycisk zwiastuna na stronie szczegółów (tylko gdy zwiastun jest dostępny).</string>
+    <string name="layout_imdb_trailers">Używaj zwiastunów z IMDb</string>
+    <string name="layout_imdb_trailers_sub">Odtwarzaj zwiastuny z IMDb bez reklam, gdy są dostępne (tylko HD); w przeciwnym razie używany jest YouTube. Wyszukiwanie w IMDb działa w tle.</string>
     <string name="layout_prefer_external_meta">Preferuj metadane z zewnętrznego dodatku</string>
     <string name="layout_prefer_external_meta_sub">Używaj metadanych z zewnętrznego dodatku zamiast dodatku katalogowego.</string>
     <string name="layout_show_full_release_date">Pokaż pełną datę premiery</string>
@@ -536,6 +560,13 @@
     <string name="web_custom_poster_none">Brak wzorca</string>
     <string name="web_custom_poster_loading">Ładowanie…</string>
     <string name="web_custom_poster_placeholders_info">Symbole: {id} przekazuje wszystkie ID treści. {imdb_id}, {tmdb_id}, {tvdb_id}, {kitsu_id} celują w jeden typ ID - jeśli niedostępny, oryginalny plakat zostaje. {imdb_id|tmdb_id|kitsu_id} deklaruje wspierane typy ID - pasujący zostanie użyty, lub oryginalny plakat zostaje. Dodaj ? aby symbol był opcjonalny, rozwiązując do pustego zamiast pomijania: {imdb_id?}. Inne symbole: {id_type}, {typed_id}, {type}, {shape}.</string>
+    <string name="web_subtitle_font_title">Czcionki napisów</string>
+    <string name="web_subtitle_font_subtitle">Wybierz plik .ttf lub .otf, aby używać go w napisach na TV.</string>
+    <string name="web_subtitle_font_choose">Wybierz plik czcionki</string>
+    <string name="web_subtitle_font_uploading">Przesyłanie…</string>
+    <string name="web_subtitle_font_added">Dodano do TV</string>
+    <string name="web_subtitle_font_error">Nie udało się zaimportować tej czcionki. Wybierz prawidłowy plik .ttf lub .otf mniejszy niż 10 MB.</string>
+    <string name="web_subtitle_font_connection_error">Błąd połączenia</string>
 
 
     <!-- MDBListSettingsScreen -->
@@ -1586,6 +1617,17 @@
     <string name="playback_engine_mvplayer">Libmpv (Beta)</string>
     <string name="playback_auto_switch_internal_player_on_error">Autoprzełączanie na ExoPlayer przy błędzie uruchomienia</string>
     <string name="playback_auto_switch_internal_player_on_error_sub">Jeśli uruchomienie strumienia w libmpv się nie powiedzie, automatycznie spróbuj ponownie z ExoPlayer.</string>
+    <string name="playback_auto_switch_internal_player_blocked_by_fallback">Wyłącz przechodzenie do kolejnego pasującego źródła, aby tego użyć.</string>
+    <string name="autoplay_fallback_next_source">Przejdź do kolejnego pasującego źródła przy błędzie</string>
+    <string name="autoplay_fallback_next_source_sub">Jeśli automatycznie wybrane źródło zgłosi błąd lub nie uruchomi się na czas, po cichu spróbuj kolejnych pasujących źródeł.</string>
+    <string name="autoplay_fallback_max_sources">Źródła do sprawdzenia przy błędzie</string>
+    <string name="autoplay_fallback_max_sources_sub">Ile kolejnych pasujących źródeł sprawdzić, zanim pojawi się błąd.</string>
+    <string name="autoplay_fallback_startup_timeout">Czas na uruchomienie źródła</string>
+    <string name="autoplay_fallback_startup_timeout_sub">Jak długo czekać na uruchomienie źródła, zanim zostanie sprawdzone kolejne.</string>
+    <string name="autoplay_fallback_startup_timeout_value">%1$ds</string>
+    <string name="autoplay_fallback_next_source_blocked_by_engine_switch">Wyłącz automatyczne przełączanie silnika przy błędzie, aby tego użyć.</string>
+    <string name="player_error_source_startup_timeout">Źródło nie uruchomiło się w ciągu %1$d sekund.</string>
+    <string name="playback_release_decoder_on_background">Zwalniaj dekoder w tle</string>
     <string name="playback_external_forward_subtitles">Przekazuj napisy do zewnętrznego odtwarzacza</string>
     <string name="playback_external_forward_subtitles_sub">Pobierz napisy w preferowanym języku z dodatków i przekaż je do zewnętrznego odtwarzacza.</string>
     <string name="playback_engine_exoplayer_desc">Najlepsza kompatybilność z funkcjami Nuvio Arc.</string>
@@ -2302,6 +2344,14 @@
     <string name="layout_cw_sort_streaming_desc">Wydane elementy najpierw, nadchodzące na końcu</string>
     <string name="layout_cw_sort_split_upcoming">Oddzielny rząd Nadchodzące</string>
     <string name="layout_cw_sort_split_upcoming_desc">Przenieś niewydane odcinki do oddzielnego rzędu Nadchodzące</string>
+    <string name="layout_cw_click_action">Po wybraniu</string>
+    <string name="layout_cw_click_action_sub">Co otwiera się po wybraniu elementu Kontynuuj oglądanie</string>
+    <string name="layout_cw_click_stream">Otwórz strumień</string>
+    <string name="layout_cw_click_stream_desc">Wybierz źródło lub wznów odtwarzanie</string>
+    <string name="layout_cw_click_details">Otwórz szczegóły</string>
+    <string name="layout_cw_click_details_desc">Otwórz stronę szczegółów tytułu</string>
+    <string name="layout_cw_click_details_upcoming">Szczegóły tylko dla nadchodzących</string>
+    <string name="layout_cw_click_details_upcoming_desc">Szczegóły dla odcinków, które jeszcze nie wyszły, strumień dla pozostałych</string>
     <string name="layout_discover_location_action">Lokalizacja Odkrywaj</string>
     <string name="layout_discover_location_dialog_title">Lokalizacja Odkrywaj</string>
     <string name="layout_discover_location_in_search">Pokaż w Szukaj</string>
@@ -3461,6 +3511,12 @@
     <string name="about_update_auto_install_notice_subtitle">Pokaż baner przy następnym uruchomieniu po automatycznej aktualizacji</string>
     <string name="update_installed_automatically">Zaktualizowano automatycznie, gdy urządzenie było bezczynne</string>
     <string name="layout_custom_poster_screen_tv_recommendations">Rekomendacje TV</string>
+
+    <string name="playback_exo_chapters_title">Pokaż rozdziały</string>
+    <string name="playback_exo_chapters_sub">Odczytuj rozdziały z plików MKV, aby oznaczać je na pasku postępu i przeskakiwać między nimi.</string>
+    <string name="playback_chapter_title_title">Pokaż tytuł rozdziału</string>
+    <string name="playback_chapter_title_sub">Pokazuj nazwę bieżącego rozdziału nad paskiem postępu.</string>
+
     <string name="player_engine_switch_title">Przełączyć na %1$s?</string>
     <string name="player_engine_switch_message">Film zostanie wznowiony od obecnego miejsca.</string>
     <string name="settings_stream_badges_in_player_title">Pokaż w odtwarzaczu</string>
@@ -3831,6 +3887,7 @@
     <string name="assessment_grounds_dv5_off_display">Wyświetlacz dekoduje DV natywnie - konwersja to zbędna praca</string>
     <string name="assessment_grounds_dv5_off_nopath">Brak dekodera P8 / mostka libdovi do konwersji</string>
     <string name="assessment_grounds_strip_on">Wyświetlacz nie zgłasza HDR10+, więc dynamiczne metadane mogą go tylko zmylić</string>
+    <string name="assessment_grounds_strip_sdr">Wyświetlacz nie zgłasza żadnego HDR, więc to ustawienie nic na nim nie zmienia</string>
     <string name="assessment_grounds_strip_off">Wyświetlacz zgłasza HDR10+ - zachowaj dynamiczne metadane</string>
     <string name="assessment_grounds_tunneling">Na niektórych urządzeniach przez to występują problemy z przewijaniem lub synchronizacją dźwięku, a Arc nie może tego sprawdzić z góry. Sprawdź na swoim zestawie, zanim zostawisz włączone</string>
     <string name="assessment_dv7_native">natywne przekazanie DV7</string>
@@ -4033,14 +4090,6 @@
     <string name="seek_thumbnails_prepare_on">Włączone</string>
     <string name="seek_thumbnails_prepare_on_desc">Przygotuj miniatury przewijania tytułu przed startem. \"Zacznij oglądać teraz\" lub Wstecz uruchamia odtwarzanie w dowolnej chwili.</string>
     <string name="seek_thumbnails_prepare_on_small_desc">Na tym urządzeniu filmy 4K wczytują się po utworzeniu ich miniatur.</string>
-    <string name="seek_thumbnails_before_play_title">Miniatury przed odtwarzaniem</string>
-    <string name="seek_thumbnails_before_play_subtitle">Ile miniatur powstaje, zanim tytuł zacznie się odtwarzać. Reszta powstaje podczas oglądania, aż do zwykłej szczegółowości.</string>
-    <string name="seek_thumbnails_before_play_full">Pełne</string>
-    <string name="seek_thumbnails_before_play_full_desc">Cały tytuł gęsto pokryty przed startem. Najdłuższe oczekiwanie.</string>
-    <string name="seek_thumbnails_before_play_faster">Szybciej</string>
-    <string name="seek_thumbnails_before_play_faster_desc">O połowę mniej miniatur przed startem, rozłożonych na cały tytuł.</string>
-    <string name="seek_thumbnails_before_play_fastest">Najszybciej</string>
-    <string name="seek_thumbnails_before_play_fastest_desc">Jedna czwarta miniatur przed startem. Najkrótsze oczekiwanie.</string>
     <string name="seek_thumbnails_from_copy_title">Miniatury z kopii</string>
     <string name="seek_thumbnails_from_copy_subtitle">Szybsze miniatury dla tytułów 4K z kopii 1080p lub 720p, a dla tytułów z sieci Usenet z kopii spoza tej sieci. Kopia z pamięci podręcznej TorBox może zostać na kilka minut dodana do Twojej listy.</string>
     <string name="seek_thumbnails_clear_title">Wyczyść zapisane miniatury</string>
@@ -4200,7 +4249,6 @@
     <string name="player_track_role_commentary">Komentarz</string>
     <string name="player_track_role_audio_description">Audiodeskrypcja</string>
 
-    <string name="playback_release_decoder_on_background">Zwalniaj dekoder w tle</string>
     <string name="playback_release_decoder_on_background_sub">Zwalnia dekoder wideo, gdy Nuvio Arc przechodzi w tło. Włącz, jeśli po powrocie do aplikacji odtwarzanie kończy się błędem dekodera. Po powrocie, także po wygaszaczu ekranu, odtwarzacz ładuje się od nowa</string>
     <string name="autosync_toast_no_fit">Synchronizacja nie powiodła się: te napisy nie pasują do tej wersji wideo.</string>
 
@@ -4277,6 +4325,13 @@
     <string name="subtitle_shadow">Cień</string>
     <string name="subtitle_shadow_sub">Cień za tekstem, także razem z obramowaniem. Nie jest widoczny przy kolorze tła.</string>
     <string name="subtitle_shadow_opacity">Krycie cienia</string>
+    <string name="subtitle_shadow_size_sub">2 to cień, którego Arc używa od zawsze</string>
+    <string name="subtitle_font_group_arc">Czcionki Arc</string>
+    <string name="subtitle_font_group_yours">Twoje czcionki</string>
+    <string name="subtitle_font_hold_to_remove">Przytrzymaj OK, aby usunąć</string>
+    <string name="subtitle_font_import_short">Dodaj czcionkę .ttf lub .otf</string>
+    <string name="subtitle_font_remove_action">Usuń</string>
+    <string name="subtitle_font_added">Dodano %1$s</string>
     <string name="seek_thumbnails_hardware_title">Dekoder sprzętowy dla miniatur</string>
     <string name="seek_thumbnails_hardware_subtitle">Szybsze miniatury tworzone przez dekoder sprzętowy urządzenia. Jeśli miniatury wyglądają źle lub urządzenie nie nadąża, wyłącz tę opcję, a będą tworzone w zwykły sposób.</string>
     <string name="party_kind_arc">Seans Arc</string>
@@ -4550,12 +4605,49 @@
     <string name="report_where_other">Gdzie indziej</string>
     <string name="report_item_note_bug_hint">Napisz, co poszło nie tak. Kilka słów najbardziej pomaga.</string>
     <string name="report_item_note_idea_hint">Napisz, co Arc powinien robić.</string>
-    <string name="report_sent_list_title">Wysłane zgłoszenia</string>
+    <string name="report_sent_list_title">Moje zgłoszenia</string>
     <string name="report_sent_list_empty">Wysłane zgłoszenia pojawią się tutaj.</string>
     <string name="report_sent_list_latest">%1$s, %2$s</string>
     <string name="report_sent_kind_playback">Odtwarzanie</string>
     <string name="report_sent_kind_bug">Coś nie działa</string>
     <string name="report_sent_kind_idea">Pomysł lub prośba</string>
+    <plurals name="report_my_reports_new">
+        <item quantity="one">%1$d nowe</item>
+        <item quantity="few">%1$d nowe</item>
+        <item quantity="many">%1$d nowych</item>
+        <item quantity="other">%1$d nowego</item>
+    </plurals>
+    <string name="report_my_reports_latest">%1$s: %2$s</string>
+    <string name="report_my_reports_hint">Sprawdzane raz dziennie. Arc to projekt hobbystyczny, więc nie każde zgłoszenie dostaje odpowiedź.</string>
+    <string name="report_my_reports_hint_off">Sprawdzanie jest wyłączone. Włącz Sprawdzaj moje zgłoszenia, aby widzieć, co dzieje się z Twoimi zgłoszeniami.</string>
+    <string name="report_follow_title">Sprawdzaj moje zgłoszenia</string>
+    <string name="report_follow_hint">Raz dziennie Arc sprawdza, czy Twoje zgłoszenia zostały przeczytane lub naprawione. Wysyłane są tylko kody zgłoszeń.</string>
+    <string name="report_status_sent">Wysłane</string>
+    <string name="report_status_read">Przeczytane</string>
+    <string name="report_status_cause_found">Znaleziono przyczynę</string>
+    <string name="report_status_fixed">Naprawione</string>
+    <string name="report_status_fixed_in">Naprawione w %1$s</string>
+    <string name="report_status_outside">Nie z winy Arc</string>
+    <string name="report_status_closed">Zamknięte</string>
+    <string name="report_status_gone">Usunięte po 90 dniach</string>
+    <string name="report_steps_sent_on">%1$s, wysłane %2$s</string>
+    <string name="report_steps_update">Masz %1$s. Poprawka przyjdzie z aktualizacją.</string>
+    <string name="report_steps_outside">Przyczyna leży poza Arc: źródło, dodatek, serwer debrid lub multimediów albo samo urządzenie. Najlepszy następny krok to inne źródło albo pomoc samego dodatku lub usługi.</string>
+    <string name="report_steps_gone">Zgłoszenia są usuwane 90 dni po dotarciu, więc tego nie da się już sprawdzić.</string>
+    <string name="report_steps_not_followed">To zgłoszenie wysłano, zanim Arc mógł śledzić zgłoszenia, więc jego status nie jest tu pokazany.</string>
+    <string name="report_ready_follow">Arc raz dziennie sprawdza, czy Twoje zgłoszenie zostało przeczytane lub naprawione, i pokazuje to w Moje zgłoszenia.</string>
+    <string name="report_ready_follow_off">Aby śledzić to zgłoszenie, zeskanuj telefonem kod na następnym ekranie.</string>
+    <string name="report_notice_title">Nowości w Twoim zgłoszeniu</string>
+    <plurals name="report_notice_many_title">
+        <item quantity="one">Nowości w %1$d Twoim zgłoszeniu</item>
+        <item quantity="few">Nowości w %1$d Twoich zgłoszeniach</item>
+        <item quantity="many">Nowości w %1$d Twoich zgłoszeniach</item>
+        <item quantity="other">Nowości w %1$d Twoich zgłoszeniach</item>
+    </plurals>
+    <string name="report_notice_one">%1$s, wysłane %2$s: %3$s.</string>
+    <string name="report_notice_many">Otwórz Moje zgłoszenia, aby zobaczyć, co się zmieniło.</string>
+    <string name="report_notice_open">Otwórz Moje zgłoszenia</string>
+    <string name="report_notice_later">Później</string>
     <string name="report_row_record">Nagraj problem</string>
     <string name="report_row_record_hint">Dla usterek, które pojawiają się i znikają. Nagrywa do 30 minut liczb, nigdy dźwięku ani obrazu.</string>
     <string name="report_mark_problem">Oznacz problem</string>
@@ -4586,11 +4678,15 @@
     <string name="qms_hint_keep">Zostaw bez zmian</string>
     <string name="sub_prefer_addon_subtitles">Najpierw napisy z dodatków</string>
     <string name="sub_prefer_addon_subtitles_desc">Wybiera napisy z dodatku zamiast napisów z pliku, gdy oba są w Twoim języku. Napisy z pliku są używane, gdy żaden dodatek ich nie ma.</string>
+    <string name="playback_afr_seamless_switch">Zmiana częstotliwości bez czarnego ekranu (QMS)</string>
+    <string name="playback_afr_seamless_switch_sub">Twój telewizor może zmienić częstotliwość bez pełnej zmiany trybu. Filmy startują bez czarnego ekranu, ale na niektórych urządzeniach obraz płynie mniej równo. Wyłączone: Arc wykonuje pełną zmianę trybu.</string>
     <string name="playback_afr_settle_delay">Opóźnienie po zmianie częstotliwości odświeżania</string>
     <string name="playback_afr_settle_delay_sub">Jak długo film czeka na telewizor po zmianie częstotliwości. Zwiększ, jeśli filmy startują z czarnym ekranem lub bez dźwięku przez amplituner lub soundbar.</string>
     <string name="playback_afr_settle_delay_auto">Auto</string>
     <string name="playback_afr_settle_delay_auto_sub">Dwie sekundy, potem do powrotu połączenia audio telewizora</string>
     <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="playback_afr_allow_low_rates">Zezwalaj na 25 i 30 Hz</string>
+    <string name="playback_afr_allow_low_rates_sub">Odtwarza wideo 25 i 30 kl./s przy 25 i 30 Hz zamiast 50 i 60 Hz, jeśli telewizor je obsługuje.</string>
     <string name="qms_hint_body_v2">Arc poprosił o %1$s Hz, ale ekran działa z częstotliwością %2$s Hz. %3$s</string>
     <string name="qms_hint_body_qms_v2">Arc poprosił o %1$s Hz. Telewizor zmienił częstotliwość bez pełnego przełączenia (QMS) i działa z %2$s Hz. %3$s</string>
     <string name="qms_hint_effect_repeat">Możesz zauważyć powtórzoną klatkę mniej więcej co %1$d s.</string>
@@ -4598,4 +4694,8 @@
     <string name="qms_hint_mode_tip">Niektóre przystawki i amplitunery mają ustawienie dokładnych częstotliwości filmowych (23,976 Hz), często nazywanych ułamkowymi. Arc nie może go zmienić.</string>
     <string name="qms_hint_off_hint_qms">Arc przestaje wtedy prosić o częstotliwość filmu. Telewizor nadal może sam zmieniać częstotliwość.</string>
     <string name="qms_hint_ok">OK</string>
+    <string name="about_update_optimize_install_title">Optymalizuj aktualizacje podczas instalacji</string>
+    <string name="about_update_optimize_install_subtitle">Szybsze pierwsze uruchomienie po aktualizacji, ale aplikacja zamyka się na około minutę podczas instalacji. Wyłącz, aby używać ekranu instalatora Androida</string>
+    <string name="update_ready_closes">Pobieranie zakończone. Aplikacja zamknie się na czas instalacji aktualizacji, co może potrwać minutę. Potem otwórz ją ponownie.</string>
+    <string name="update_ready_closes_and_reopens">Pobieranie zakończone. Aplikacja zamknie się na czas instalacji aktualizacji i sama otworzy się ponownie, co może potrwać minutę.</string>
 </resources>

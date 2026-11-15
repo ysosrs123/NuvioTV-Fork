@@ -791,6 +791,10 @@
     <string name="video_section">Vidéo</string>
     <string name="playback_true_black_letterbox">Bandes noires pures</string>
     <string name="playback_true_black_letterbox_sub">Laisse les bandes autour de l’image non peintes afin que le HDR conserve un noir pur. Gardez cette option désactivée si une ligne lumineuse apparaît sur les bandes.</string>
+    <string name="playback_exo_chapters_title">Afficher les chapitres</string>
+    <string name="playback_exo_chapters_sub">Lire les chapitres des fichiers MKV pour les repérer sur la barre de progression et passer de l’un à l’autre.</string>
+    <string name="playback_chapter_title_title">Afficher le titre du chapitre</string>
+    <string name="playback_chapter_title_sub">Afficher le nom du chapitre en cours au-dessus de la barre de progression.</string>
     <string name="audio_trailer_section">Bande-annonce</string>
     <string name="audio_autoplay_trailers">Lecture automatique des bandes-annonces</string>
     <string name="audio_autoplay_trailers_sub">Lire automatiquement les bandes-annonces sur les écrans de détail et de fin de lecture</string>
@@ -840,16 +844,12 @@
     <!-- <string name="dv7_libdovi_mode_row_title" translatable="false">Conversion mode</string> -->
     <!-- <string name="dv7_libdovi_mode_none_title" translatable="false">None</string> -->
     <!-- <string name="dv7_libdovi_mode_none_sub" translatable="false">No override. Uses the automatically selected conversion mode.</string> -->
-    <!-- <string name="dv7_libdovi_mode_0_title" translatable="false">Mode 0 — Copy (no convert)</string> -->
     <!-- <string name="dv7_libdovi_mode_0_sub" translatable="false">Parse the RPU and write it back untouched. No profile conversion.</string> -->
-    <!-- <string name="dv7_libdovi_mode_1_title" translatable="false">Mode 1 — MEL</string> -->
     <!-- <string name="dv7_libdovi_mode_1_sub" translatable="false">Convert the RPU to be MEL (Minimum Enhancement Layer) compatible.</string> -->
     <!-- <string name="dv7_libdovi_mode_2_title" translatable="false">Mode 2 — 8.1 (no-op mapping)</string> -->
     <!-- <string name="dv7_libdovi_mode_2_sub" translatable="false">Convert to profile 8.1 with luma and chroma mapping set to no-op. The standard conversion.</string> -->
     <!-- <string name="dv7_libdovi_mode_3_title" translatable="false">Mode 3 — Profile 5 to 8.1</string> -->
-    <!-- <string name="dv7_libdovi_mode_3_sub" translatable="false">Identique à Mode 2. libdovi traite les deux comme la même conversion 8.1, donc cela ne change rien. L\'option Convertir DV5 en DV8.1 utilise Mode 2.</string> -->
     <!-- <string name="dv7_libdovi_mode_4_title" translatable="false">Mode 4 — 8.4 (static)</string> -->
-    <!-- <string name="dv7_libdovi_mode_4_sub" translatable="false">Convert to static profile 8.4.</string> -->
     <string name="audio_mpv_hi10p_gnext_sw_title">Repli logiciel G-NEXT pour Hi10P (MPV uniquement)</string>
     <string name="audio_mpv_hi10p_gnext_sw_subtitle">Utilise le décodage logiciel G-NEXT lorsque les détails du flux identifient du H.264 Hi10P. Désactivé par défaut&#160;; à activer uniquement si la lecture Hi10P se fige ou échoue.</string>
     <string name="audio_mpv_hwdec_title">Décodage matériel (MPV uniquement)</string>
@@ -890,6 +890,33 @@
     <string name="sub_outline">Contour</string>
     <string name="sub_outline_sub">Ajouter un contour autour du texte des sous-titres pour une meilleure lisibilité</string>
     <string name="sub_outline_color">Couleur du contour</string>
+    <string name="sub_hdr_style">Style HDR / Dolby Vision distinct</string>
+    <string name="sub_hdr_style_sub">Utiliser une autre couleur de texte et une luminosité plus faible pour les sous-titres des vidéos HDR et Dolby Vision</string>
+    <string name="sub_hdr_text_color">Couleur du texte HDR</string>
+    <string name="sub_hdr_dim_player_controls">Atténuer les commandes du lecteur en HDR</string>
+    <string name="sub_hdr_dim_player_controls_sub">Appliquer la luminosité HDR aux commandes et aux menus du lecteur affichés sur les vidéos HDR et Dolby Vision</string>
+    <string name="sub_appearance">Apparence des sous-titres</string>
+    <string name="sub_appearance_desc">Police, couleurs, arrière-plan et ombre</string>
+    <string name="sub_appearance_hint">S’applique aux sous-titres texte. Les sous-titres ASS stylisés et les sous-titres image conservent leur apparence d’origine.</string>
+    <string name="sub_preview">Aperçu</string>
+    <string name="sub_preview_text">Chaque histoire commence par un peu de curiosité.</string>
+    <string name="sub_font">Police</string>
+    <string name="sub_font_default">Par défaut</string>
+    <string name="sub_font_serif">Avec empattement</string>
+    <string name="sub_font_mono">Chasse fixe</string>
+    <string name="sub_font_import">Importer depuis le téléphone</string>
+    <string name="sub_font_import_desc">Ajoutez une police .ttf ou .otf jusqu’à 10&#160;Mo. Les polices importées restent sur cette TV.</string>
+    <string name="sub_font_import_qr">Scannez avec votre téléphone pour ajouter une police .ttf ou .otf</string>
+    <string name="sub_font_missing">Police indisponible sur cet appareil. Utilisation de la police par défaut.</string>
+    <string name="sub_font_remove">Retirer %1$s</string>
+    <string name="sub_background">Arrière-plan</string>
+    <string name="sub_bg_opacity">Opacité de l’arrière-plan</string>
+    <string name="sub_bg_roundness">Arrondi des coins</string>
+    <string name="sub_shadow">Ombre portée</string>
+    <string name="sub_shadow_desc">Détacher le texte des scènes lumineuses</string>
+    <string name="sub_shadow_opacity">Opacité de l’ombre</string>
+    <string name="sub_shadow_size">Taille de l’ombre</string>
+    <string name="sub_reset_appearance">Réinitialiser l’apparence</string>
     <string name="sub_advanced_section">Rendu avancé des sous-titres</string>
     <string name="sub_libass">Utiliser libass pour les sous-titres ASS/SSA</string>
     <string name="sub_libass_sub">Expérimental&#160;: rendu ASS/SSA avancé (styles, positionnement, animations)</string>
@@ -1059,9 +1086,19 @@
     <string name="layout_cw_sort_streaming_desc">Éléments sortis d’abord, éléments à venir à la fin</string>
     <string name="layout_cw_sort_split_upcoming">Rangée «&#160;À venir&#160;» séparée</string>
     <string name="layout_cw_sort_split_upcoming_desc">Déplacer les épisodes non diffusés dans une rangée «&#160;À venir&#160;» distincte</string>
+    <string name="layout_cw_click_action">À la sélection</string>
+    <string name="layout_cw_click_action_sub">Ce qui s\'ouvre quand vous sélectionnez un élément de Continuer à regarder</string>
+    <string name="layout_cw_click_stream">Ouvrir le flux</string>
+    <string name="layout_cw_click_stream_desc">Choisir une source ou reprendre la lecture</string>
+    <string name="layout_cw_click_details">Ouvrir les détails</string>
+    <string name="layout_cw_click_details_desc">Ouvrir la page de détails du titre</string>
+    <string name="layout_cw_click_details_upcoming">Détails pour les épisodes à venir uniquement</string>
+    <string name="layout_cw_click_details_upcoming_desc">Ouvrir les détails des épisodes pas encore diffusés, le flux pour les autres</string>
     <string name="upcoming_section_title">À venir</string>
     <string name="layout_trailer_button">Afficher le bouton bande-annonce</string>
     <string name="layout_trailer_button_sub">Afficher le bouton bande-annonce sur la page de détail (uniquement lorsqu’une bande-annonce est disponible).</string>
+    <string name="layout_imdb_trailers">Utiliser les bandes-annonces IMDb</string>
+    <string name="layout_imdb_trailers_sub">Lire les bandes-annonces IMDb sans publicité lorsqu’elles sont disponibles (HD uniquement) ; sinon, YouTube est utilisé. La recherche IMDb s’exécute en arrière-plan.</string>
     <string name="layout_trailer_play_in_background">Lire en arrière-plan</string>
     <string name="layout_trailer_play_in_background_sub">Lire la bande-annonce à la place de l’arrière-plan, tout en laissant la page visible.</string>
     <string name="layout_trailer_pause_on_scroll">Mettre en pause lors du défilement</string>
@@ -1172,6 +1209,15 @@
     <string name="web_custom_poster_none">Aucun modèle défini</string>
     <string name="web_custom_poster_loading">Chargement…</string>
     <string name="web_custom_poster_placeholders_info">Espaces réservés&#160;: {id} transmet tous les ID de contenu. {imdb_id}, {tmdb_id}, {tvdb_id} et {kitsu_id} ciblent un seul type d’ID&#160;; s’il n’est pas disponible, l’affiche d’origine est conservée. {imdb_id|tmdb_id|kitsu_id} déclare les types d’ID pris en charge&#160;: celui qui correspond est utilisé, sinon l’affiche d’origine est conservée. Ajoutez ? pour rendre un espace réservé facultatif, qui devient alors vide au lieu d’être ignoré&#160;: {imdb_id?}. Autres espaces réservés&#160;: {id_type}, {typed_id}, {type}, {shape}.</string>
+    <string name="web_subtitle_font_title">Polices des sous-titres</string>
+    <string name="web_subtitle_font_subtitle">Choisissez un fichier .ttf ou .otf à utiliser pour les sous-titres sur votre TV.</string>
+    <string name="web_subtitle_font_choose">Choisir le fichier de police</string>
+    <string name="web_subtitle_font_uploading">Envoi…</string>
+    <string name="web_subtitle_font_added">Ajoutée à votre TV</string>
+    <string name="web_subtitle_font_error">Impossible d’importer cette police. Choisissez un fichier .ttf ou .otf valide de moins de 10&#160;Mo.</string>
+    <string name="web_subtitle_font_connection_error">Erreur de connexion</string>
+
+
     <string name="mdblist_name">MDBList</string>
     <string name="mdblist_tracking_description">Synchroniser l’historique de visionnage et la progression de lecture entre vos appareils</string>
     <string name="mdblist_connected_as">Connecté en tant que %1$s</string>
@@ -2375,19 +2421,9 @@
     <string name="audio_dv_sub">Associe Dolby Vision profil 7 à du HEVC standard pour les appareils sans prise en charge matérielle de la DV</string>
     <string name="dv7_handling_title">Gestion de Dolby Vision Profile 7</string>
     <string name="audio_dv7_preserve_mapping_sub">Demande à libdovi de conserver le mapping, mais il ne le peut pas dans cette version, donc la lecture utilise la conversion 8.1 standard et le mapping n\'est pas conservé.</string>
-    <string name="dv7_libdovi_mode_caption" translatable="false">Conversion mode (auto-selected, do not change unless instructed). Pick one to force it; None uses auto. Active only when DV7 Handling is Convert to DV8.1.</string>
-    <string name="dv7_libdovi_mode_row_title" translatable="false">Conversion mode</string>
-    <string name="dv7_libdovi_mode_none_title" translatable="false">None</string>
-    <string name="dv7_libdovi_mode_none_sub" translatable="false">No override. Uses the automatically selected conversion mode.</string>
     <string name="dv7_libdovi_mode_0_title">Mode 0 — Copie (sans conversion)</string>
-    <string name="dv7_libdovi_mode_0_sub" translatable="false">Parse the RPU and write it back untouched. No profile conversion.</string>
     <string name="dv7_libdovi_mode_1_title">Mode 1 — MEL</string>
-    <string name="dv7_libdovi_mode_1_sub" translatable="false">Convert the RPU to be MEL (Minimum Enhancement Layer) compatible.</string>
-    <string name="dv7_libdovi_mode_2_title" translatable="false">Mode 2 — 8.1 (no-op mapping)</string>
-    <string name="dv7_libdovi_mode_2_sub" translatable="false">Convert to profile 8.1 with luma and chroma mapping set to no-op. The standard conversion.</string>
-    <string name="dv7_libdovi_mode_3_title" translatable="false">Mode 3 — Profile 5 to 8.1</string>
     <string name="dv7_libdovi_mode_3_sub">Convertit les flux Profile 5 (DV5) en Profile 8.1. Même conversion que celle utilisée par l’option Convertir DV5 en DV8.1.</string>
-    <string name="dv7_libdovi_mode_4_title" translatable="false">Mode 4 — 8.4 (static)</string>
     <string name="dv7_libdovi_mode_4_sub">Convertit vers le Profile 8.4 statique.</string>
 
     <!-- SidebarNavigation / MainActivity -->
@@ -3740,6 +3776,7 @@
     <string name="assessment_grounds_dv5_off_display">L\'écran décode Dolby Vision nativement - la conversion est un travail inutile</string>
     <string name="assessment_grounds_dv5_off_nopath">Aucun décodeur P8 / pont libdovi disponible pour convertir</string>
     <string name="assessment_grounds_strip_on">L\'écran ne déclare pas le HDR10+, les métadonnées dynamiques ne peuvent donc que le perturber</string>
+    <string name="assessment_grounds_strip_sdr">L\'écran ne déclare aucun HDR, ce réglage ne change donc rien pour lui</string>
     <string name="assessment_grounds_strip_off">L\'écran déclare le HDR10+ - conserver les métadonnées dynamiques</string>
     <string name="assessment_grounds_tunneling">Sur certains appareils, cela pose des problèmes de saut, d\'avance rapide ou de synchro audio, et Arc ne peut pas le savoir à l\'avance. Vérifiez sur votre installation avant de le laisser activé</string>
     <string name="assessment_dv7_native">passthrough DV7 natif</string>
@@ -3942,14 +3979,6 @@
     <string name="seek_thumbnails_prepare_on">Activé</string>
     <string name="seek_thumbnails_prepare_on_desc">Crée les miniatures de navigation d\'un titre avant son démarrage. \"Regarder maintenant\" ou Retour lance la lecture à tout moment.</string>
     <string name="seek_thumbnails_prepare_on_small_desc">Sur cet appareil, les films 4K se chargent une fois leurs miniatures créées.</string>
-    <string name="seek_thumbnails_before_play_title">Miniatures avant la lecture</string>
-    <string name="seek_thumbnails_before_play_subtitle">Nombre de miniatures créées avant le début de la lecture d\'un titre. Les autres suivent pendant que vous regardez, jusqu\'au détail habituel.</string>
-    <string name="seek_thumbnails_before_play_full">Complet</string>
-    <string name="seek_thumbnails_before_play_full_desc">Tout le titre couvert de près avant son démarrage. L\'attente la plus longue.</string>
-    <string name="seek_thumbnails_before_play_faster">Plus rapide</string>
-    <string name="seek_thumbnails_before_play_faster_desc">Deux fois moins de miniatures avant le démarrage, réparties sur tout le titre.</string>
-    <string name="seek_thumbnails_before_play_fastest">Le plus rapide</string>
-    <string name="seek_thumbnails_before_play_fastest_desc">Quatre fois moins avant le démarrage. L\'attente la plus courte.</string>
     <string name="seek_thumbnails_from_copy_title">Miniatures à partir d\'une copie</string>
     <string name="seek_thumbnails_from_copy_subtitle">Des miniatures plus rapides pour les titres 4K à partir d\'une copie 1080p ou 720p, et pour les titres Usenet à partir d\'une copie hors Usenet. Une copie en cache sur TorBox peut être ajoutée à votre liste pendant quelques minutes.</string>
     <string name="seek_thumbnails_clear_title">Effacer les miniatures enregistrées</string>
@@ -4130,9 +4159,6 @@
     <string name="audio_dtshd_tv_passthrough_sub">Choisissez Passthrough par la TV si votre barre de son affiche un simple DTS ou ne joue rien sur les films DTS-HD ou DTS:X.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Standard</string>
     <string name="audio_dtshd_tv_passthrough_tv">Passthrough par la TV</string>
-    <string name="sub_hdr_style">Style HDR / Dolby Vision distinct</string>
-    <string name="sub_hdr_style_sub">Utiliser une autre couleur de texte et une luminosité plus faible pour les sous-titres des vidéos HDR et Dolby Vision</string>
-    <string name="sub_hdr_text_color">Couleur du texte HDR</string>
     <string name="sub_hdr_brightness">Luminosité des sous-titres HDR</string>
     <string name="sub_libass_render_scale">Résolution de rendu des sous-titres</string>
     <string name="sub_libass_render_scale_sub">Une résolution plus basse améliore les performances avec les mises en forme complexes, au prix d’une moindre netteté</string>
@@ -4199,6 +4225,13 @@
     <string name="subtitle_shadow">Ombre</string>
     <string name="subtitle_shadow_sub">Ombre derrière le texte, aussi avec un contour. Non affichée avec une couleur de fond.</string>
     <string name="subtitle_shadow_opacity">Opacité de l\'ombre</string>
+    <string name="subtitle_shadow_size_sub">2 est l\'ombre qu\'Arc a toujours utilisée</string>
+    <string name="subtitle_font_group_arc">Polices d\'Arc</string>
+    <string name="subtitle_font_group_yours">Vos polices</string>
+    <string name="subtitle_font_hold_to_remove">Maintenez OK pour supprimer</string>
+    <string name="subtitle_font_import_short">Ajouter une police .ttf ou .otf</string>
+    <string name="subtitle_font_remove_action">Supprimer</string>
+    <string name="subtitle_font_added">%1$s ajoutée</string>
     <string name="seek_thumbnails_hardware_title">Décodeur matériel pour les miniatures</string>
     <string name="seek_thumbnails_hardware_subtitle">Des miniatures plus rapides créées par le décodeur matériel de votre appareil. Si les miniatures s\'affichent mal ou si votre appareil peine, désactivez cette option et elles seront créées de la façon habituelle.</string>
     <string name="party_kind_arc">Soirée Arc</string>
@@ -4470,12 +4503,47 @@
     <string name="report_where_other">Ailleurs</string>
     <string name="report_item_note_bug_hint">Dites-nous ce qui n\'a pas marché. Quelques mots aident beaucoup.</string>
     <string name="report_item_note_idea_hint">Dites-nous ce que vous aimeriez qu\'Arc fasse.</string>
-    <string name="report_sent_list_title">Signalements envoyés</string>
+    <string name="report_sent_list_title">Mes signalements</string>
     <string name="report_sent_list_empty">Les signalements que vous envoyez seront listés ici.</string>
     <string name="report_sent_list_latest">%1$s, %2$s</string>
     <string name="report_sent_kind_playback">Lecture</string>
     <string name="report_sent_kind_bug">Quelque chose ne marche pas</string>
     <string name="report_sent_kind_idea">Idée ou demande</string>
+    <plurals name="report_my_reports_new">
+        <item quantity="one">%1$d nouveau</item>
+        <item quantity="many">%1$d nouveaux</item>
+        <item quantity="other">%1$d nouveaux</item>
+    </plurals>
+    <string name="report_my_reports_latest">%1$s : %2$s</string>
+    <string name="report_my_reports_hint">Vérifié une fois par jour. Arc est un projet amateur, tous les signalements ne reçoivent donc pas de réponse.</string>
+    <string name="report_my_reports_hint_off">La vérification est désactivée. Activez Vérifier mes signalements pour voir ce que deviennent vos signalements.</string>
+    <string name="report_follow_title">Vérifier mes signalements</string>
+    <string name="report_follow_hint">Une fois par jour, Arc regarde si vos signalements ont été lus ou corrigés. Seuls les codes des signalements sont envoyés.</string>
+    <string name="report_status_sent">Envoyé</string>
+    <string name="report_status_read">Lu</string>
+    <string name="report_status_cause_found">Cause trouvée</string>
+    <string name="report_status_fixed">Corrigé</string>
+    <string name="report_status_fixed_in">Corrigé dans %1$s</string>
+    <string name="report_status_outside">Ne vient pas d\'Arc</string>
+    <string name="report_status_closed">Fermé</string>
+    <string name="report_status_gone">Supprimé après 90 jours</string>
+    <string name="report_steps_sent_on">%1$s, envoyé le %2$s</string>
+    <string name="report_steps_update">Vous avez %1$s. La correction arrive avec la mise à jour.</string>
+    <string name="report_steps_outside">La cause est hors d\'Arc : la source, l\'addon, le serveur debrid ou multimédia, ou le boîtier lui-même. Une autre source, ou l\'aide de l\'addon ou du service, est la meilleure étape suivante.</string>
+    <string name="report_steps_gone">Les signalements sont supprimés 90 jours après leur arrivée, celui-ci ne peut donc plus être vérifié.</string>
+    <string name="report_steps_not_followed">Ce signalement a été envoyé avant qu\'Arc puisse suivre les signalements, son statut n\'est donc pas affiché ici.</string>
+    <string name="report_ready_follow">Arc vérifie une fois par jour si votre signalement a été lu ou corrigé, et l\'affiche dans Mes signalements.</string>
+    <string name="report_ready_follow_off">Pour suivre ce signalement, scannez le code de l\'écran suivant avec votre téléphone.</string>
+    <string name="report_notice_title">Votre signalement a évolué</string>
+    <plurals name="report_notice_many_title">
+        <item quantity="one">%1$d de vos signalements a évolué</item>
+        <item quantity="many">%1$d de vos signalements ont évolué</item>
+        <item quantity="other">%1$d de vos signalements ont évolué</item>
+    </plurals>
+    <string name="report_notice_one">%1$s, envoyé le %2$s : %3$s.</string>
+    <string name="report_notice_many">Ouvrez Mes signalements pour voir ce qui a changé.</string>
+    <string name="report_notice_open">Ouvrir Mes signalements</string>
+    <string name="report_notice_later">Plus tard</string>
     <string name="report_row_record">Enregistrer un problème</string>
     <string name="report_row_record_hint">Pour les pannes qui vont et viennent. Enregistre jusqu\'à 30 minutes de valeurs, jamais le son ni l\'image.</string>
     <string name="report_mark_problem">Marquer le problème</string>
@@ -4502,11 +4570,15 @@
     <string name="qms_hint_keep">Ne rien changer</string>
     <string name="sub_prefer_addon_subtitles">Sous-titres des addons d\'abord</string>
     <string name="sub_prefer_addon_subtitles_desc">Choisit un sous-titre d\'addon plutôt que celui du fichier quand les deux sont dans votre langue. Celui du fichier sert quand aucun addon n\'en a.</string>
+    <string name="playback_afr_seamless_switch">Changer de fréquence sans écran noir (QMS)</string>
+    <string name="playback_afr_seamless_switch_sub">Votre téléviseur peut changer de fréquence sans changement de mode complet. Les films démarrent sans écran noir, mais sur certains boîtiers l\'image est moins régulière. Désactivé : Arc fait un changement de mode complet.</string>
     <string name="playback_afr_settle_delay">Délai après changement de fréquence</string>
     <string name="playback_afr_settle_delay_sub">Durée pendant laquelle un film attend le téléviseur après un changement de fréquence. Augmentez-la si les films démarrent sans image ou sans son via un ampli ou une barre de son.</string>
     <string name="playback_afr_settle_delay_auto">Auto</string>
     <string name="playback_afr_settle_delay_auto_sub">Deux secondes, puis jusqu\'au retour de la liaison audio du téléviseur</string>
     <string name="playback_afr_settle_delay_seconds">%1$d s</string>
+    <string name="playback_afr_allow_low_rates">Autoriser 25 et 30 Hz</string>
+    <string name="playback_afr_allow_low_rates_sub">Lit les vidéos à 25 et 30 i/s en 25 et 30 Hz au lieu de 50 et 60 Hz, si votre téléviseur les prend en charge.</string>
     <string name="qms_hint_body_v2">Arc a demandé %1$s Hz, mais votre écran fonctionne à %2$s Hz. %3$s</string>
     <string name="qms_hint_body_qms_v2">Arc a demandé %1$s Hz. Votre téléviseur a changé de fréquence sans changement complet (QMS) et fonctionne à %2$s Hz. %3$s</string>
     <string name="qms_hint_effect_repeat">Une image peut être répétée environ toutes les %1$d secondes.</string>
@@ -4514,4 +4586,8 @@
     <string name="qms_hint_mode_tip">Certains boîtiers et amplis ont un réglage pour les fréquences de film exactes (23,976 Hz), souvent appelées fréquences fractionnaires. Arc ne peut pas le modifier.</string>
     <string name="qms_hint_off_hint_qms">Arc cesse alors de demander la fréquence du film. Votre téléviseur peut quand même changer de fréquence de lui-même.</string>
     <string name="qms_hint_ok">OK</string>
+    <string name="about_update_optimize_install_title">Optimiser les mises à jour à l’installation</string>
+    <string name="about_update_optimize_install_subtitle">Premier lancement plus rapide après une mise à jour, mais l’application se ferme environ une minute pendant l’installation. Désactivez pour utiliser l’écran d’installation d’Android</string>
+    <string name="update_ready_closes">Téléchargement terminé. L’application se ferme pendant l’installation de la mise à jour, ce qui peut prendre une minute. Rouvrez-la ensuite.</string>
+    <string name="update_ready_closes_and_reopens">Téléchargement terminé. L’application se ferme pendant l’installation de la mise à jour et se rouvre d’elle-même, ce qui peut prendre une minute.</string>
 </resources>

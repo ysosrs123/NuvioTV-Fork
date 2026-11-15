@@ -52,6 +52,8 @@ import com.nuvio.tv.domain.model.TraktCommentReview
 import com.nuvio.tv.domain.model.Video
 import com.nuvio.tv.domain.model.WatchProgress
 import com.nuvio.tv.domain.model.enabledAddons
+import com.nuvio.tv.domain.model.isSeriesLikeType
+import com.nuvio.tv.domain.model.isWatchedAsOneItem
 import com.nuvio.tv.domain.repository.LibraryRepository
 import com.nuvio.tv.domain.repository.MetaRepository
 import com.nuvio.tv.domain.repository.WatchProgressRepository
@@ -155,7 +157,8 @@ class MetaDetailsViewModel @Inject constructor(
     private val profileManager: com.nuvio.tv.core.profile.ProfileManager,
     private val streamBadgeSettingsDataStore: com.nuvio.tv.data.local.StreamBadgeSettingsDataStore,
     private val serverEpisodeStates: com.nuvio.tv.data.mediaserver.ServerEpisodeStates,
-    private val addonRepository: com.nuvio.tv.domain.repository.AddonRepository
+    private val addonRepository: com.nuvio.tv.domain.repository.AddonRepository,
+    private val calendarComingUp: com.nuvio.tv.ui.screens.home.CalendarComingUpSource
 ) : ViewModel() {
     private val traceSetup = com.nuvio.tv.core.performance.DetailEntryTrace.mark("viewmodel_setup")
     private val itemId: String = savedStateHandle["itemId"] ?: ""
@@ -926,7 +929,7 @@ class MetaDetailsViewModel @Inject constructor(
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private fun observeMovieWatched() {
-        if (itemType.lowercase() != "movie") return
+        if (isSeriesLikeType(itemType)) return
         viewModelScope.launch {
             _effectiveContentId.flatMapLatest { cid ->
                 _uiState.map { it.meta?.imdbId?.takeIf { id -> id != cid && id.isNotBlank() } }
@@ -1319,8 +1322,9 @@ class MetaDetailsViewModel @Inject constructor(
      * enrichment, then re-published (with backdrop/logo/etc.) on the enriched
      * pass. Side effects run once, on the enriched applyMeta below.
      */
-    private fun publishMetaToUi(meta: Meta) {
+    private fun publishMetaToUi(addonMeta: Meta) {
         com.nuvio.tv.core.performance.DetailEntryTrace.mark("metadata_publish")
+        val meta = calendarComingUp.withEarlierReleases(addonMeta)
         // Update the effective content ID so watch-progress observers pick up
         // the canonical ID (e.g. IMDB "tt0396375") instead of the navigation ID
         // (which may be "tmdb:13836").  Don't downgrade from an IMDB ID to a
@@ -3006,7 +3010,7 @@ class MetaDetailsViewModel @Inject constructor(
 
     private fun toggleMovieWatched() {
         val meta = _uiState.value.meta ?: return
-        if (meta.apiType != "movie") return
+        if (!meta.isWatchedAsOneItem()) return
         if (_uiState.value.isMovieWatchedPending) return
 
         viewModelScope.launch {

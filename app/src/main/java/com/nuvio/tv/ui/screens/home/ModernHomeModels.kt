@@ -640,13 +640,10 @@ internal fun buildCollectionFolderItem(
     )
 }
 
+// One key per show, like the shuffle key: when its card moves to another episode it stays the
+// same row item, so focus stays on it instead of passing to the next card.
 internal fun continueWatchingItemKey(item: ContinueWatchingItem): String {
-    return item.shuffleFocusKey ?: when (item) {
-        is ContinueWatchingItem.InProgress ->
-            "cw_inprogress_${item.progress.contentId}_${item.progress.season ?: -1}_${item.progress.episode ?: -1}"
-        is ContinueWatchingItem.NextUp ->
-            "cw_nextup_${item.info.contentId}_${item.info.season}_${item.info.episode}"
-    }
+    return item.shuffleFocusKey ?: "cw_${item.contentId()}"
 }
 
 /** Two entries with one key would crash the row: every list the home rows get passes through here. */

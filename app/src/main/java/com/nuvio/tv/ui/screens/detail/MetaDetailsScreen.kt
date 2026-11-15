@@ -94,9 +94,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.toggleableState
-import androidx.compose.ui.state.ToggleableState
 import com.nuvio.tv.R
+import com.nuvio.tv.ui.components.posteroptions.PosterListPickerDialog
 import com.nuvio.tv.ui.util.dpadVerticalFastScroll
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -127,13 +126,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextOverflow
 import com.nuvio.tv.domain.model.ContentType
 import com.nuvio.tv.domain.model.DetailImdbRatingsVisibility
 import com.nuvio.tv.domain.model.EpisodeOptionsOverlayStyle
 import com.nuvio.tv.domain.model.HomeImdbRatingsVisibility
 import com.nuvio.tv.domain.model.LibraryListTab
-import com.nuvio.tv.domain.model.localizedMembershipTitle
 import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.domain.model.Meta
 import com.nuvio.tv.domain.model.MetaCastMember
@@ -149,7 +146,6 @@ import com.nuvio.tv.ui.components.ErrorState
 import com.nuvio.tv.ui.components.MetaDetailsSkeleton
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.components.PanelActionRow
-import com.nuvio.tv.ui.components.PlayerPanelRow
 import com.nuvio.tv.ui.components.PanelEyebrow
 import com.nuvio.tv.ui.components.SynopsisOverlay
 import com.nuvio.tv.ui.components.TrailerPlayer
@@ -1162,7 +1158,7 @@ fun MetaDetailsScreen(
                 tab.supportsMembershipFor(contentType)
             }
             val combinedTabs = listOf(nuvioListTab) + providerTabs
-            LibraryListPickerDialog(
+            PosterListPickerDialog(
                 title = uiState.meta?.name ?: stringResource(R.string.detail_lists_fallback),
                 tabs = combinedTabs,
                 membership = uiState.pickerMembership,
@@ -3746,68 +3742,6 @@ private fun PeopleSectionTabButton(
                 else -> NuvioTheme.colors.TextPrimary.copy(alpha = 0.55f)
             },
             modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxs, vertical = NuvioTheme.spacing.xxs)
-        )
-    }
-}
-
-@OptIn(ExperimentalTvMaterial3Api::class)
-@Composable
-private fun LibraryListPickerDialog(
-    title: String,
-    tabs: List<LibraryListTab>,
-    membership: Map<String, Boolean>,
-    isPending: Boolean,
-    error: String?,
-    onToggle: (String) -> Unit,
-    onSave: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val primaryFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(Unit) {
-        primaryFocusRequester.requestFocus()
-    }
-
-    NuvioDialog(
-        onDismiss = onDismiss,
-        title = title,
-        subtitle = stringResource(R.string.detail_lists_subtitle),
-        width = 500.dp
-    ) {
-        if (!error.isNullOrBlank()) {
-            Text(
-                text = error,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFFFFB6B6)
-            )
-        }
-
-        LazyColumn(
-            contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 300.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            items(tabs, key = { it.key }) { tab ->
-                val selected = membership[tab.key] == true
-                PlayerPanelRow(
-                    title = if (selected) "\u2713 ${tab.localizedMembershipTitle()}" else tab.localizedMembershipTitle(),
-                    selected = selected,
-                    onClick = { if (!isPending) onToggle(tab.key) },
-                    modifier = Modifier.semantics {
-                        role = Role.Checkbox
-                        toggleableState = if (selected) ToggleableState.On else ToggleableState.Off
-                    },
-                    focusRequester = if (tab.key == tabs.firstOrNull()?.key) primaryFocusRequester else null
-                )
-            }
-        }
-
-        PanelActionRow(
-            label = if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save),
-            onClick = onSave,
-            enabled = !isPending
         )
     }
 }
