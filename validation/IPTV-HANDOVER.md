@@ -453,7 +453,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; the US slots moved an hour later on 1 November and the European ones
   on 25 October.
-  - A UFC method posted later (cards end on Sunday mornings Brisbane; UFC 334 on 15 November):
+  - A UFC method posted later (cards end on Sunday mornings Brisbane; none in four full cards, the
+    last UFC 334 on 15 November; one more before 30 November, a Fight Night on the 22nd):
     Sundays 10:27, 12:27, 14:27 (`IPTV capture – daily US evening`, cut to Sundays and Mondays on
     10 November; daily from 1 November; 09:27, 11:27, 13:27 before).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
