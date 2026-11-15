@@ -218,7 +218,16 @@ class SimklSyncRepository @Inject constructor(
                     .getOrNull()
             }
         if (playbackOverride != null) {
-            snapshot = snapshot.copy(playback = playbackOverride)
+            snapshot = snapshot.copy(playback = playbackOverride.playback)
+            playbackOverride.check?.let { check ->
+                snapshot = snapshot.copy(
+                    isInitialized = check.isInitialized,
+                    watermark = check.watermark,
+                    activities = check.activities,
+                    lastSyncedAtEpochMs = check.lastSyncedAtEpochMs,
+                    lastCheckedAtEpochMs = check.lastCheckedAtEpochMs
+                )
+            }
         }
         val projection = buildProjection(snapshot)
         if (profileId == profileManager.activeProfileId.value) {
@@ -265,8 +274,17 @@ class SimklSyncRepository @Inject constructor(
         }
         authRepository.synchronizeUserSettings(merged.activities?.settings?.all)
         if (!isCurrent(profileId, generation)) return@withLock
-        val storedSnapshot = merged.withFreshStorageRevision()
-        storage.save(profileId, encodeSnapshot(storedSnapshot))
+        val historyUnchanged = previous.hasLoaded && merged.entries === previous.snapshot.entries
+        val storedSnapshot = if (historyUnchanged) {
+            merged.copy(storageRevision = previous.snapshot.storageRevision)
+        } else {
+            merged.withFreshStorageRevision()
+        }
+        if (historyUnchanged) {
+            storage.savePlayback(profileId, encodePlayback(storedSnapshot))
+        } else {
+            storage.save(profileId, encodeSnapshot(storedSnapshot))
+        }
         if (isCurrent(profileId, generation)) {
             _projection.value = projection
             _state.value = SimklSyncState(snapshot = storedSnapshot, hasLoaded = true)
@@ -309,22 +327,35 @@ class SimklSyncRepository @Inject constructor(
     private suspend fun decodePlaybackOverride(
         payload: String,
         persistedSnapshot: SimklSyncSnapshot?
-    ): List<SimklPlaybackSession>? = withContext(Dispatchers.Default) {
+    ): SimklPlaybackOverride? = withContext(Dispatchers.Default) {
         val override = runCatching {
             json.decodeFromString<SimklPlaybackOverride>(payload)
         }.getOrNull()
         if (override != null) {
-            return@withContext override.playback.takeIf {
+            return@withContext override.takeIf {
                 persistedSnapshot != null && override.storageRevision == persistedSnapshot.storageRevision
             }
         }
         runCatching { json.decodeFromString<List<SimklPlaybackSession>>(payload) }.getOrNull()
             ?.takeIf { persistedSnapshot != null && persistedSnapshot.storageRevision == null }
+            ?.let { SimklPlaybackOverride(null, it) }
     }
 
     private suspend fun encodePlayback(snapshot: SimklSyncSnapshot): String =
         withContext(Dispatchers.Default) {
-            json.encodeToString(SimklPlaybackOverride(snapshot.storageRevision, snapshot.playback))
+            json.encodeToString(
+                SimklPlaybackOverride(
+                    snapshot.storageRevision,
+                    snapshot.playback,
+                    SimklCheckState(
+                        isInitialized = snapshot.isInitialized,
+                        watermark = snapshot.watermark,
+                        activities = snapshot.activities,
+                        lastSyncedAtEpochMs = snapshot.lastSyncedAtEpochMs,
+                        lastCheckedAtEpochMs = snapshot.lastCheckedAtEpochMs
+                    )
+                )
+            )
         }
 
     private fun SimklSyncSnapshot.withFreshStorageRevision(): SimklSyncSnapshot =
@@ -335,8 +366,19 @@ class SimklSyncRepository @Inject constructor(
     }
 }
 
+/** Playback and the last check, kept apart so a check that finds nothing new does not rewrite the library. */
 @Serializable
 private data class SimklPlaybackOverride(
     val storageRevision: String? = null,
-    val playback: List<SimklPlaybackSession>
+    val playback: List<SimklPlaybackSession>,
+    val check: SimklCheckState? = null
+)
+
+@Serializable
+private data class SimklCheckState(
+    val isInitialized: Boolean = false,
+    val watermark: String? = null,
+    val activities: SimklActivities? = null,
+    val lastSyncedAtEpochMs: Long? = null,
+    val lastCheckedAtEpochMs: Long? = null
 )

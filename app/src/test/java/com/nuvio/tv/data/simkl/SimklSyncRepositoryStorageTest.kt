@@ -309,6 +309,48 @@ class SimklSyncRepositoryStorageTest {
         assertNull(syncStore.value[snapshotKey])
     }
 
+    @Test
+    fun `a check that finds nothing new keeps the library on disk and remembers the check`() = runTest {
+        val storage = FakeSimklSyncStorage()
+        val activeProfile = MutableStateFlow(1)
+        val profileManager = mockk<ProfileManager> { every { activeProfileId } returns activeProfile }
+        val engine = mockk<SimklSyncEngine>()
+        io.mockk.coEvery { engine.synchronize(any()) } answers {
+            firstArg<SimklSyncSnapshot>().copy(watermark = "w2", lastCheckedAtEpochMs = 123L)
+        }
+        val authStorage = mockk<SimklAuthStorage>(relaxed = true) {
+            every { state } returns MutableStateFlow(SimklAuthState(isAuthenticated = true))
+        }
+        val entries = (1..300).map { i ->
+            SimklLibraryEntry(
+                mediaType = SimklMediaType.MOVIES,
+                movie = SimklMedia(title = "Movie $i", ids = mapOf("imdb" to JsonPrimitive("tt$i")))
+            )
+        }
+        storage.snapshots[1] = json.encodeToString(
+            SimklSyncSnapshot(isInitialized = true, watermark = "w1", entries = entries, storageRevision = "r1")
+        )
+        val library = storage.snapshots[1]
+        fun repository() = SimklSyncRepository(
+            engine = engine,
+            storage = storage,
+            authRepository = mockk(relaxed = true),
+            authStorage = authStorage,
+            profileManager = profileManager
+        )
+        repository().also { it.refresh(com.nuvio.tv.core.tracking.TrackingRefreshIntent.USER_INITIATED) }
+
+        assertEquals(0, storage.saveSnapshotCalls)
+        assertEquals(library, storage.snapshots[1])
+
+        val restarted = repository()
+        restarted.ensureLoaded()
+        val loaded = restarted.state.value.snapshot
+        assertEquals(300, loaded.entries.size)
+        assertEquals("w2", loaded.watermark)
+        assertEquals(123L, loaded.lastCheckedAtEpochMs)
+    }
+
     private class RecordingPreferencesDataStore(
         private val name: String,
         initial: Preferences = emptyPreferences(),

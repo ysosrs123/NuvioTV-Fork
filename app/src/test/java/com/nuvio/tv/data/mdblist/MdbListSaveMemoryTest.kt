@@ -53,8 +53,10 @@ class MdbListSaveMemoryTest {
             if (full) throw OutOfMemoryError("test") else json.encodeToString(it)
         })
         repository.ensureLoaded()
+        repository.invalidate(repository.currentScope(), setOf(MdbListSyncBucket.WATCHED))
         val original = harness.storage.profiles[1]
         harness.remote.activities = harness.remote.activities.copy(serverTime = "2026-09-06T01:00:00Z")
+        harness.remote.watched = listOf(mdbListTestMovie(1), mdbListTestMovie(2))
 
         repository.refresh(TrackingRefreshIntent.USER_INITIATED)
         assertEquals(original, harness.storage.profiles[1])

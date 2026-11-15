@@ -24,6 +24,13 @@ class InMemoryWeTrakrSyncStorage : WeTrakrSyncStorage {
     }
     override suspend fun remove(profileId: Int, checkScope: () -> Unit) {
         values.remove(profileId)
+        checks.remove(profileId)
+    }
+    val checks = mutableMapOf<Int, String>()
+    override suspend fun loadCheck(profileId: Int): String? = checks[profileId]
+    override suspend fun saveCheck(profileId: Int, payload: String, checkScope: () -> Unit) {
+        checkScope()
+        checks[profileId] = payload
     }
 }
 

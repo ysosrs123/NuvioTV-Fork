@@ -119,6 +119,41 @@ class WeTrakrSyncRepositoryTest {
     }
 
     @Test
+    fun `a check that finds nothing new keeps the history on disk and remembers the check`() = runTest {
+        val harness = WeTrakrHarness().apply { signIn(); seed() }
+        val stored = harness.storage.values[1]
+        val remote = SlowRemote(activities).apply { release.complete(Unit) }
+        harness.repository(TestScope(testScheduler), remote).refresh(TrackingRefreshIntent.USER_INITIATED)
+
+        assertEquals(stored, harness.storage.values[1])
+        assertTrue(harness.storage.checks[1] != null)
+
+        val restarted = harness.repository(TestScope(testScheduler), remote)
+        restarted.ensureLoaded()
+        assertEquals(harness.now, restarted.currentSnapshot()?.checkedAtEpochMs)
+    }
+
+    @Test
+    fun `after a watched mark is saved, the next check that finds nothing new keeps the history file`() = runTest {
+        val harness = WeTrakrHarness().apply { signIn(); seed() }
+        val scope = TestScope(testScheduler)
+        val remote = SlowRemote(activities).apply { release.complete(Unit) }
+        val repository = harness.repository(scope, remote)
+        repository.ensureLoaded()
+        val target = requireNotNull(movie.toWeTrakrTarget())
+        repository.mutate(harness.store.scope()) { it.withLocalPlay(target, harness.now) to Unit }
+        advanceTimeBy(WeTrakrSyncRepository.SAVE_DELAY_MS + 1)
+        runCurrent()
+        val saved = harness.storage.values[1]
+
+        repository.refresh(TrackingRefreshIntent.USER_INITIATED)
+        runCurrent()
+
+        assertEquals(saved, harness.storage.values[1])
+        assertTrue(harness.storage.checks[1] != null)
+    }
+
+    @Test
     fun `extras and automatic syncs stop when only the write reserve is left`() = runTest {
         val harness = WeTrakrHarness().apply { signIn() }
         val scope = harness.store.scope()

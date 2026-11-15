@@ -226,7 +226,7 @@ class WeTrakrSyncEngine(
         } catch (error: Exception) {
             return snapshot
         }
-        return snapshot.copy(customLists = lists, customListsCheckedAtEpochMs = now())
+        return snapshot.copy(customLists = if (lists == snapshot.customLists) snapshot.customLists else lists, customListsCheckedAtEpochMs = now())
     }
 
     private fun overlap(mark: String): String {

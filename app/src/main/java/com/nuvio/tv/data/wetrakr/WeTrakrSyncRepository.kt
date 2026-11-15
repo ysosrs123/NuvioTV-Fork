@@ -61,6 +61,8 @@ interface WeTrakrSyncStorage {
     suspend fun load(profileId: Int): String?
     suspend fun save(profileId: Int, payload: String, checkScope: () -> Unit)
     suspend fun remove(profileId: Int, checkScope: () -> Unit)
+    suspend fun loadCheck(profileId: Int): String? = null
+    suspend fun saveCheck(profileId: Int, payload: String, checkScope: () -> Unit) {}
 }
 
 @Singleton
@@ -82,11 +84,25 @@ class AndroidWeTrakrSyncStorage @Inject constructor(
             checkScope()
             preferences.remove(SNAPSHOT)
         }
+        factory.get(profileId, CHECK_FEATURE).edit { preferences -> preferences.remove(CHECK) }
+    }
+
+    override suspend fun loadCheck(profileId: Int): String? =
+        factory.get(profileId, CHECK_FEATURE).data.first()[CHECK]?.ifEmpty { null }
+
+    override suspend fun saveCheck(profileId: Int, payload: String, checkScope: () -> Unit) {
+        factory.get(profileId, CHECK_FEATURE).edit { preferences ->
+            checkScope()
+            if (factory.isProfileDeleted(profileId)) throw WeTrakrAccountChangedException("WeTrakr profile removed")
+            preferences[CHECK] = payload
+        }
     }
 
     private companion object {
         const val FEATURE = "wetrakr_sync"
+        const val CHECK_FEATURE = "wetrakr_check"
         val SNAPSHOT = stringPreferencesKey("snapshot")
+        val CHECK = stringPreferencesKey("check")
     }
 }
 
@@ -103,6 +119,8 @@ class WeTrakrSyncRepository(
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val mutex = Mutex()
     private var saveJob: Job? = null
+    /** The snapshot as last written to or read from disk, for the profile it belongs to. */
+    @Volatile private var persisted: Pair<Int, WeTrakrSnapshot>? = null
     private val gate = TrackingRefreshGate()
     private val mutableState = MutableStateFlow(WeTrakrSyncState())
     private val mutableProjection = MutableStateFlow(WeTrakrProjectionState())
@@ -217,10 +235,16 @@ class WeTrakrSyncRepository(
         val accountId = authorization.user?.id ?: return null
         val current = mutableState.value
         if (current.scope == scope && current.snapshot?.accountId == accountId) return current.snapshot
-        val snapshot = storage.load(scope.profileId)
+        val saved = storage.load(scope.profileId)
             ?.let { runCatching { json.decodeFromString(WeTrakrSnapshot.serializer(), it) }.getOrNull() }
             ?.takeIf { it.accountId == accountId }
-            ?: WeTrakrSnapshot(accountId)
+        persisted = saved?.let { scope.profileId to it }
+        val check = saved?.let { base ->
+            storage.loadCheck(scope.profileId)
+                ?.let { runCatching { json.decodeFromString(WeTrakrCheckState.serializer(), it) }.getOrNull() }
+                ?.takeIf { it.accountId == accountId && it.snapshotRevision == base.storageRevision }
+        }
+        val snapshot = saved?.let { base -> check?.applyTo(base) ?: base } ?: WeTrakrSnapshot(accountId)
         checkScope(scope)
         val projection = runCatching { WeTrakrProgressProjection(snapshot) }.getOrNull()
         val usable = if (projection != null) snapshot else WeTrakrSnapshot(accountId)
@@ -241,9 +265,18 @@ class WeTrakrSyncRepository(
         } else {
             WeTrakrProgressProjection(stored)
         }
+        val onDisk = persisted?.takeIf { it.first == scope.profileId }?.second
+        val historyUnchanged = onDisk != null && saveJob?.isActive != true && onDisk.sameHistoryAs(stored)
+        if (historyUnchanged) {
+            storage.saveCheck(scope.profileId, json.encodeToString(WeTrakrCheckState.serializer(), WeTrakrCheckState.of(onDisk!!, stored))) {
+                checkScope(scope)
+            }
+        }
         saveJob?.cancel()
         saveJob = null
-        if (saveDelayMs <= 0L) {
+        if (historyUnchanged) {
+            Unit
+        } else if (saveDelayMs <= 0L) {
             save(scope, stored)
         } else {
             saveJob = coroutineScope.launch {
@@ -264,6 +297,7 @@ class WeTrakrSyncRepository(
 
     private suspend fun save(scope: WeTrakrAuthScope, snapshot: WeTrakrSnapshot) {
         storage.save(scope.profileId, json.encodeToString(WeTrakrSnapshot.serializer(), snapshot)) { checkScope(scope) }
+        persisted = scope.profileId to snapshot
     }
 
     private fun shouldRefresh(intent: TrackingRefreshIntent): Boolean {
@@ -297,5 +331,51 @@ class WeTrakrSyncRepository(
         const val SAVE_DELAY_MS = 5_000L
         private const val SYNC_ATTEMPTS = 3
         private const val TAG = "WeTrakrSync"
+    }
+}
+
+private fun WeTrakrSnapshot.sameHistoryAs(other: WeTrakrSnapshot): Boolean =
+    accountId == other.accountId &&
+        watchedMovies === other.watchedMovies &&
+        watchedEpisodes === other.watchedEpisodes &&
+        playback === other.playback &&
+        lists === other.lists &&
+        customLists === other.customLists &&
+        showIds === other.showIds &&
+        appliedEntryIds === other.appliedEntryIds &&
+        pendingPlays === other.pendingPlays
+
+/** The last check, kept apart so a check that finds nothing new does not rewrite the whole history. */
+@kotlinx.serialization.Serializable
+internal data class WeTrakrCheckState(
+    val accountId: Long,
+    val snapshotRevision: String? = null,
+    val activities: Map<String, String> = emptyMap(),
+    val journalMark: String? = null,
+    val checkedAtEpochMs: Long? = null,
+    val customListsCheckedAtEpochMs: Long? = null,
+    val isInitialized: Boolean = false,
+    val invalidated: Boolean = false
+) {
+    fun applyTo(snapshot: WeTrakrSnapshot): WeTrakrSnapshot = snapshot.copy(
+        activities = activities,
+        journalMark = journalMark,
+        checkedAtEpochMs = checkedAtEpochMs,
+        customListsCheckedAtEpochMs = customListsCheckedAtEpochMs,
+        isInitialized = isInitialized,
+        invalidated = invalidated
+    )
+
+    companion object {
+        fun of(onDisk: WeTrakrSnapshot, current: WeTrakrSnapshot) = WeTrakrCheckState(
+            accountId = current.accountId,
+            snapshotRevision = onDisk.storageRevision,
+            activities = current.activities,
+            journalMark = current.journalMark,
+            checkedAtEpochMs = current.checkedAtEpochMs,
+            customListsCheckedAtEpochMs = current.customListsCheckedAtEpochMs,
+            isInitialized = current.isInitialized,
+            invalidated = current.invalidated
+        )
     }
 }

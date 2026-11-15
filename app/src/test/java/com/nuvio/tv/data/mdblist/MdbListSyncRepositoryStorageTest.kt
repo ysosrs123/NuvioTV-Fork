@@ -297,4 +297,47 @@ class MdbListSyncRepositoryStorageTest {
             Unit
         }
     }
+
+    @Test
+    fun `a check that finds nothing new keeps the saved history and remembers the check`() = runTest {
+        val harness = MdbListSyncTestHarness(backgroundScope)
+        harness.seed(harness.snapshot().copy(watched = (1..200).map { mdbListTestMovie(it.toLong()) }))
+        harness.repository.ensureLoaded()
+        val history = harness.storage.profiles[1]
+        val saves = harness.storage.saveCalls
+        harness.http.now += MdbListSyncRepository.AUTOMATIC_INTERVAL_MS
+        harness.repository.refresh(com.nuvio.tv.core.tracking.TrackingRefreshIntent.AUTOMATIC)
+
+        assertEquals(saves, harness.storage.saveCalls)
+        assertEquals(history, harness.storage.profiles[1])
+        val checkedAt = harness.repository.currentSnapshot()?.checkedAtEpochMs
+        assertEquals(harness.http.now, checkedAt)
+
+        val restarted = MdbListSyncTestHarness(backgroundScope)
+        restarted.storage.profiles.putAll(harness.storage.profiles)
+        restarted.storage.playbacks.putAll(harness.storage.playbacks)
+        restarted.http.now = harness.http.now
+        restarted.repository.ensureLoaded()
+        assertEquals(checkedAt, restarted.repository.currentSnapshot()?.checkedAtEpochMs)
+        assertEquals(200, restarted.repository.currentSnapshot()?.watched?.size)
+        restarted.repository.refresh(com.nuvio.tv.core.tracking.TrackingRefreshIntent.AUTOMATIC)
+        assertTrue(restarted.remote.calls.isEmpty())
+    }
+
+    @Test
+    fun `a newly watched title still saves the whole history`() = runTest {
+        val harness = MdbListSyncTestHarness(backgroundScope)
+        harness.seed()
+        harness.repository.ensureLoaded()
+        val saves = harness.storage.saveCalls
+        harness.repository.mutate(harness.http.store.scope()) { snapshot ->
+            snapshot.copy(watched = snapshot.watched + mdbListTestMovie(2)) to Unit
+        }
+        assertEquals(saves + 1, harness.storage.saveCalls)
+        val restarted = MdbListSyncTestHarness(backgroundScope)
+        restarted.storage.profiles.putAll(harness.storage.profiles)
+        restarted.storage.playbacks.putAll(harness.storage.playbacks)
+        restarted.repository.ensureLoaded()
+        assertEquals(2, restarted.repository.currentSnapshot()?.watched?.size)
+    }
 }
