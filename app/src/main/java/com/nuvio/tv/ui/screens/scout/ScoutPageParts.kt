@@ -124,6 +124,11 @@ internal fun ScoutWord(
     var focused by remember { mutableStateOf(false) }
     val v2 = LocalV2Appearance.current != null
     val shape = RoundedCornerShape(NuvioTheme.radii.md)
+    val contentColor = when {
+        !v2 && focused -> NuvioTheme.colors.OnSecondary
+        on || focused -> NuvioTheme.colors.TextPrimary
+        else -> NuvioTheme.colors.TextSecondary
+    }
     Card(
         onClick = onClick,
         modifier = modifier
@@ -137,7 +142,8 @@ internal fun ScoutWord(
         scale = CardDefaults.scale(focusedScale = 1f),
         colors = CardDefaults.colors(
             containerColor = Color.Transparent,
-            focusedContainerColor = if (v2) NuvioTheme.colors.Secondary.copy(alpha = .3f) else NuvioTheme.colors.Secondary
+            focusedContainerColor = if (v2) NuvioTheme.colors.Secondary.copy(alpha = .3f) else NuvioTheme.colors.Secondary,
+            focusedContentColor = if (v2) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.OnSecondary
         ),
         border = CardDefaults.border(
             focusedBorder = if (v2) Border.None else Border(NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs), shape = shape)
@@ -152,7 +158,7 @@ internal fun ScoutWord(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleSmall,
-                    color = if (on || focused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary,
+                    color = contentColor,
                     maxLines = 1
                 )
             }
@@ -161,7 +167,14 @@ internal fun ScoutWord(
                     .padding(top = NuvioTheme.spacing.xxs)
                     .width(NuvioTheme.spacing.lg)
                     .height(NuvioTheme.spacing.xxs)
-                    .background(if (on) NuvioTheme.colors.Secondary else Color.Transparent, RoundedCornerShape(NuvioTheme.radii.full))
+                    .background(
+                        when {
+                            !on -> Color.Transparent
+                            !v2 && focused -> NuvioTheme.colors.OnSecondary
+                            else -> NuvioTheme.colors.Secondary
+                        },
+                        RoundedCornerShape(NuvioTheme.radii.full)
+                    )
             )
         }
     }
