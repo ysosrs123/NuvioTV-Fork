@@ -2300,11 +2300,22 @@ October. The five-round main event ended `STATUS_FINAL` at `period` 5 with `disp
 Still unconfirmed: as in the fifty-seventh pass. One more UFC card falls before 30 November
 (Fight Night, 22 November from 04:00 Brisbane).
 
-## Fifty-ninth pass (16 November 10:28)
+## Fifty-ninth pass (16 November 10:28 and 12:28)
 
-One scheduled capture. The LPGA's ANNIKA finished without a playoff (Duncan by two). The PGA's
+Two scheduled captures. The LPGA's ANNIKA finished without a playoff (Duncan by two). The PGA's
 Austin event: event `STATUS_IN_PROGRESS`, competition `STATUS_SUSPENDED` `Round 3 - Suspended`,
 the leaders through 18 holes and an empty fourth-round line, the shape seen at Bermuda on 26
 October. No parser change.
+
+At 12:28 the competition had moved to `Round 4 - Suspended` (`period` 4) with nobody started: all
+120 players have an empty fourth-round line (`displayValue` `-`, no holes) whose unlabelled stats
+end with the Monday tee time, e.g. `Mon Nov 16 10:31:00 PST 2026` (Eastern wall-clock time despite
+the label, as on 9 October). Trimmed copy (the first six players) in
+`app/src/test/resources/sports/espn-pga-scoreboard-real-20261116.json`
+(`SportsRealDataMondayFinishTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Golf final round suspended before it starts | As above; the event stays `STATUS_IN_PROGRESS`. | None: the event stays live, the golf card says `Round 4`, the leaders show their tee times and the bug `T. Crowe -14` with `Round 4 - Suspended` |
 
 Still unconfirmed: as in the fifty-seventh pass.

@@ -159,6 +159,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 105 (16 November 10:28): nothing new. The LPGA ended without a playoff; the PGA's
     Austin event was suspended in the third round (as Bermuda) and finishes on the US Monday,
     outside every capture slot.
+  - Capture 106 (16 November 12:28): Austin moved to `Round 4 - Suspended` before anyone teed
+    off; the app shows the round-4 tee times under the suspended status (fixture and a test only).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
