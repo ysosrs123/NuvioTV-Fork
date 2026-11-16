@@ -156,6 +156,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Captures 102 to 104 (15 November 10:28 to 14:28, with a five-hour UFC poll through UFC 334):
     nothing new; the fourth full card with every method posted with its result, and a majority
     draw read as a draw (no winner, no method row).
+  - Capture 105 (16 November 10:28): nothing new. The LPGA ended without a playoff; the PGA's
+    Austin event was suspended in the third round (as Bermuda) and finishes on the US Monday,
+    outside every capture slot.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
