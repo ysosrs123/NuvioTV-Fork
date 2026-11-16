@@ -2300,9 +2300,9 @@ October. The five-round main event ended `STATUS_FINAL` at `period` 5 with `disp
 Still unconfirmed: as in the fifty-seventh pass. One more UFC card falls before 30 November
 (Fight Night, 22 November from 04:00 Brisbane).
 
-## Fifty-ninth pass (16 November 10:28 and 12:28)
+## Fifty-ninth pass (16 November 10:28 to 14:28)
 
-Two scheduled captures. The LPGA's ANNIKA finished without a playoff (Duncan by two). The PGA's
+Three scheduled captures (nothing new at 14:28). The LPGA's ANNIKA finished without a playoff (Duncan by two). The PGA's
 Austin event: event `STATUS_IN_PROGRESS`, competition `STATUS_SUSPENDED` `Round 3 - Suspended`,
 the leaders through 18 holes and an empty fourth-round line, the shape seen at Bermuda on 26
 October. No parser change.
