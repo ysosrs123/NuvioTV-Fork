@@ -1,32 +1,38 @@
 package com.nuvio.tv.ui.screens.player
 
 import android.content.Context
+import android.media.AudioFormat
 import androidx.media3.common.MimeTypes
 import com.nuvio.tv.core.player.AudioPassthroughPolicy
 import com.nuvio.tv.core.player.SurroundFormatResolver.DirectSupport
 import com.nuvio.tv.data.local.NightModeLevel
 import com.nuvio.tv.data.local.PlayerSettings
 
-internal enum class MpvSpdifCodec(val mpvName: String, val mimeType: String) {
-    AC3("ac3", MimeTypes.AUDIO_AC3),
-    EAC3("eac3", MimeTypes.AUDIO_E_AC3),
-    DTS("dts", MimeTypes.AUDIO_DTS),
-    DTS_HD("dts-hd", MimeTypes.AUDIO_DTS_HD),
-    TRUEHD("truehd", MimeTypes.AUDIO_TRUEHD)
+/**
+ * mpv hands every bitstream to Android in a 48 kHz carrier, so only AC-3 and the DTS core fit. E-AC-3, DTS-HD and
+ * TrueHD need 192 kHz and are refused by the output; mpv decodes those to multichannel PCM instead. A DTS-HD track
+ * with only "dts" allowed sends its DTS core.
+ */
+internal enum class MpvSpdifCodec(val mpvName: String, val mimeType: String, val sinkEncodings: Set<Int>) {
+    AC3("ac3", MimeTypes.AUDIO_AC3, setOf(AudioFormat.ENCODING_AC3)),
+    DTS("dts", MimeTypes.AUDIO_DTS, setOf(AudioFormat.ENCODING_DTS, AudioFormat.ENCODING_DTS_HD))
 }
 
 /**
- * The codecs mpv may send as a bitstream on this output: the ones the device plays directly and Arc's
- * passthrough settings allow. Force optical adds AC-3 and DTS, as it does on the ExoPlayer path.
+ * The codecs mpv may send as a bitstream on this output: the ones the device plays directly, the TV or receiver
+ * lists in its HDMI report ([sinkEncodings], null when the box gives none) and Arc's passthrough settings allow.
+ * The box may decode AC-3 itself for a TV that takes only PCM, but mpv's bitstream goes to the TV as it is.
+ * Force optical adds AC-3 and DTS, as it does on the ExoPlayer path.
  */
 internal fun mpvAllowedSpdifCodecs(
     policy: AudioPassthroughPolicy,
     direct: DirectSupport?,
-    forceOptical: Boolean
+    forceOptical: Boolean,
+    sinkEncodings: Set<Int>? = null
 ): String = MpvSpdifCodec.entries
     .filter { codec ->
         !policy.deniesPassthrough(codec.mimeType) &&
-            (direct.supports(codec) || (forceOptical && codec.isOpticalCodec()))
+            (forceOptical || (direct.supports(codec) && (sinkEncodings == null || codec.sinkEncodings.any { it in sinkEncodings })))
     }
     .joinToString(",") { it.mpvName }
 
@@ -74,28 +80,40 @@ internal fun PlayerRuntimeController.mpvAllowedSpdifCodecsForRoute(context: Cont
     return mpvAllowedSpdifCodecs(
         policy = surround.resolution.policy,
         direct = AudioChainProbe.snapshot(context, route?.key).direct,
-        forceOptical = forceOptical
+        forceOptical = forceOptical,
+        sinkEncodings = if (mpvSinkReportApplies(route?.key)) AudioChainProbe.hdmiPlugSnapshot(context).encodings else null
     )
 }
 
+/** The HDMI report describes the TV or receiver only when the sound goes out over HDMI; optical and USB have their own. */
+internal fun mpvSinkReportApplies(routeKey: String?): Boolean = routeKey?.startsWith("type:hdmi") == true
+
 internal fun PlayerRuntimeController.applyMpvPassthroughCodecs(view: NuvioMpvSurfaceView) {
-    val codecs = runCatching { mpvAllowedSpdifCodecsForRoute(context, currentPlayerSettingsForReport) }
-        .getOrDefault("")
-    view.setAllowedSpdifCodecs(codecs)
+    view.setAllowedSpdifCodecs(
+        mpvCodecsToApply(currentStreamUrl, mpvDecodedSoundStreamUrls) {
+            runCatching { mpvAllowedSpdifCodecsForRoute(context, currentPlayerSettingsForReport) }.getOrDefault("")
+        }
+    )
 }
+
+/** A stream whose start stalled while it sent a bitstream plays its sound decoded from then on. */
+internal fun mpvCodecsToApply(streamUrl: String, decodedSoundStreamUrls: Set<String>, allowed: () -> String): String =
+    if (streamUrl in decodedSoundStreamUrls) "" else allowed()
+
+/**
+ * A start that never shows a frame while mpv sends a bitstream may be a format the output takes but never plays; the
+ * retry decodes the sound. A stall with decoded sound already is left to the normal retry.
+ */
+internal fun mpvRetryDecodesSound(source: String, firstFrameRendered: Boolean, bitstreamActive: Boolean): Boolean =
+    bitstreamActive && !firstFrameRendered && (source == "startup_stall" || source == "startup_absolute")
 
 private fun DirectSupport?.supports(codec: MpvSpdifCodec): Boolean {
     val d = this ?: return false
     return when (codec) {
         MpvSpdifCodec.AC3 -> d.ac3
-        MpvSpdifCodec.EAC3 -> d.eac3
         MpvSpdifCodec.DTS -> d.dts
-        MpvSpdifCodec.DTS_HD -> d.dtsHd
-        MpvSpdifCodec.TRUEHD -> d.trueHd
     }
 }
-
-private fun MpvSpdifCodec.isOpticalCodec(): Boolean = this == MpvSpdifCodec.AC3 || this == MpvSpdifCodec.DTS
 
 internal const val MPV_HWDEC_CURRENT_PROPERTY = "hwdec-current"
 private const val MPV_HWDEC_SOFTWARE = "no"

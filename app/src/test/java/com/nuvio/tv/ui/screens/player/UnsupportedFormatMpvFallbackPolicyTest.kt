@@ -24,9 +24,10 @@ class UnsupportedFormatMpvFallbackPolicyTest {
         switched: Boolean = false,
         firstFrame: Boolean = false,
         fileName: String? = null,
-        streamMime: String? = null
+        streamMime: String? = null,
+        local: Boolean = false
     ) = UnsupportedFormatMpvFallbackPolicy.shouldSwitchForFatalError(
-        exo, switched, firstFrame, errorCode, mime, fileName, streamMime
+        exo, switched, firstFrame, errorCode, mime, fileName, streamMime, isLocalFile = local
     )
 
     @Test
@@ -56,6 +57,71 @@ class UnsupportedFormatMpvFallbackPolicyTest {
         assertFalse(fatal(code, mime = null, fileName = wmv, firstFrame = true))
         assertFalse(fatal(code, mime = null, fileName = wmv, switched = true))
         assertFalse(fatal(code, mime = null, fileName = wmv, exo = false))
+    }
+
+    @Test
+    fun refusedLocalBlurayFile_goesToMpvByName() {
+        val code = PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
+        assertTrue(fatal(code, mime = null, fileName = "/storage/usb/BDMV/STREAM/00001.m2ts", local = true))
+        assertTrue(fatal(code, mime = null, fileName = "content://media/camera/00012.MTS", local = true))
+        assertFalse(fatal(code, mime = null, fileName = "/storage/usb/BDMV/STREAM/00001.m2ts", local = true, firstFrame = true))
+    }
+
+    @Test
+    fun refusedLinkWithABlurayName_isNotTrustedByNameAlone() {
+        val code = PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
+        assertFalse(fatal(code, mime = null, fileName = "https://host/d/Film.2009.Remux.M2TS?token=abc"))
+        assertFalse(fatal(code, mime = null, fileName = "camera/00012.MTS", streamMime = MimeTypes.VIDEO_MP2T))
+    }
+
+    @Test
+    fun refusedPlainTransportStream_staysOnTheDeadLinkPath() {
+        val code = PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED
+        assertFalse(fatal(code, mime = null, fileName = "https://host/live/channel.ts", streamMime = MimeTypes.VIDEO_MP2T))
+        assertFalse(fatal(code, mime = null, streamMime = MimeTypes.VIDEO_MP2T))
+    }
+
+    @Test
+    fun blurayCheck_runsForBlurayNamesAndUnnamedLinks() {
+        val check = UnsupportedFormatMpvFallbackPolicy::shouldCheckForBlurayTransportStream
+        assertTrue(check("https://host/d/Film.2009.Remux.m2ts?token=abc", MimeTypes.VIDEO_MP2T))
+        assertTrue(check("Film 2009 BluRay Remux", null))
+        assertTrue(check("https://debrid.example/d/AB12CD34", null))
+        assertTrue(check("https://debrid.example/d/AB12CD34", "application/octet-stream"))
+        assertTrue(check(null, null))
+    }
+
+    @Test
+    fun blurayCheck_skipsLinksThatAlreadySayWhatTheyAre() {
+        val check = UnsupportedFormatMpvFallbackPolicy::shouldCheckForBlurayTransportStream
+        assertFalse(check("https://host/Film.2019.2160p.mkv", null))
+        assertFalse(check("https://host/live/channel.ts", MimeTypes.VIDEO_MP2T))
+        assertFalse(check("https://host/Film.part1.rar", null))
+        assertFalse(check("https://host/expired", "text/html"))
+        assertFalse(check("https://debrid.example/d/AB12CD34", MimeTypes.VIDEO_MATROSKA))
+        assertFalse(check("https://host/d/Film.m2ts", "text/html; charset=utf-8"))
+    }
+
+    @Test
+    fun bytesWithATimestampBeforeEveryPacket_areABlurayTransportStream() {
+        val bdav = ByteArray(1024).also { bytes -> for (i in 4 until bytes.size step 192) bytes[i] = 0x47 }
+        assertTrue(UnsupportedFormatMpvFallbackPolicy.isBlurayTransportStream(bdav))
+    }
+
+    @Test
+    fun plainTransportStreamsWebPagesAndShortBodies_areNot() {
+        val plain = ByteArray(1024).also { bytes -> for (i in 0 until bytes.size step 188) bytes[i] = 0x47 }
+        val html = "<!DOCTYPE html><html><head><title>Not found</title></head>".padEnd(1024, ' ').toByteArray()
+        val short = ByteArray(400).also { bytes -> for (i in 4 until bytes.size step 192) bytes[i] = 0x47 }
+        val oneBadPacket = ByteArray(1024).also { bytes ->
+            for (i in 4 until bytes.size step 192) bytes[i] = 0x47
+            bytes[4 + 3 * 192] = 0
+        }
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.isBlurayTransportStream(plain))
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.isBlurayTransportStream(html))
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.isBlurayTransportStream(short))
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.isBlurayTransportStream(oneBadPacket))
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.isBlurayTransportStream(ByteArray(0)))
     }
 
     @Test
@@ -153,5 +219,15 @@ class UnsupportedFormatMpvFallbackPolicyTest {
         assertTrue(fail(firstFrame = false, code = PlaybackException.ERROR_CODE_DECODING_FAILED))
         assertFalse(fail(firstFrame = true))
         assertFalse(fail(firstFrame = false, code = PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED))
+    }
+
+    @Test
+    fun `Blu-ray names are found in links with tokens and in plain file names`() {
+        assertTrue(UnsupportedFormatMpvFallbackPolicy.hasBlurayTransportStreamName("http://127.0.0.1:8765/clip/a4-dtshd-ma.m2ts"))
+        assertTrue(UnsupportedFormatMpvFallbackPolicy.hasBlurayTransportStreamName("https://host/f/00001.M2TS?token=abc#t=10"))
+        assertTrue(UnsupportedFormatMpvFallbackPolicy.hasBlurayTransportStreamName("Holiday 2009.mts"))
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.hasBlurayTransportStreamName("https://host/film.ts?name=x.m2ts"))
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.hasBlurayTransportStreamName("film.mkv"))
+        assertFalse(UnsupportedFormatMpvFallbackPolicy.hasBlurayTransportStreamName(null))
     }
 }

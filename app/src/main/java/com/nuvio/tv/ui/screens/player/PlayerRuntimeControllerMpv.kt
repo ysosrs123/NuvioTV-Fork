@@ -8,9 +8,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.abs
 
 private const val MPV_RESUME_SEEK_TOLERANCE_MS = 1500L
+private const val MPV_RELEASE_WAIT_MS = 5_000L
 
 internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
     if (mpvView === view) return
@@ -20,19 +23,31 @@ internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
     mpvView = view
 
     if (view == null) return
+    startMpvOnAttachedView(view)
+}
+
+private fun PlayerRuntimeController.startMpvOnAttachedView(view: NuvioMpvSurfaceView) {
     if (!isUsingMpvEngine()) return
     if (currentStreamUrl.isBlank()) return
     if (!mpvMediaLoadPrepared) return
     if (mpvInitializationInProgress) return
+
+    performPendingMpvHardRestartIfNeeded(view)
+    val waiting = waitForMpvRelease(
+        view = view,
+        allowEngineFailover = true,
+        stillWanted = { mpvView === view && !view.isMpvLoaded }
+    ) { startMpvOnAttachedView(view) }
+    if (waiting) return
 
     runCatching {
         setLoadingStatus(
             phase = "mpv_starting",
             message = context.getString(com.nuvio.tv.R.string.player_loading_starting)
         )
-        performPendingMpvHardRestartIfNeeded(view)
         view.applyHi10pGnextSoftwareFallback(shouldUseMpvHi10pGnextSoftwareFallback())
         view.applyHardwareDecodeMode(mpvHardwareDecodeModeSetting)
+        applyMpvDirectDecodeMode(view)
         registerMpvEventRelay(view)
         view.setMedia(currentStreamUrl, currentHeaders)
         val playerInitLine =
@@ -72,6 +87,7 @@ internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
             )
         }
         cancelPauseOverlay()
+        mpvNoProgressCheck.arm(android.os.SystemClock.elapsedRealtime())
         startProgressUpdates()
         startWatchProgressSaving()
         updateMpvAvailableTracks()
@@ -141,6 +157,23 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
         }
         return
     }
+    startMpvPlayback(view, url, headers, allowEngineFailover)
+}
+
+private fun PlayerRuntimeController.startMpvPlayback(
+    view: NuvioMpvSurfaceView,
+    url: String,
+    headers: Map<String, String>,
+    allowEngineFailover: Boolean
+) {
+    performPendingMpvHardRestartIfNeeded(view)
+    val generation = playbackRecoveryGate.generation
+    val waiting = waitForMpvRelease(
+        view = view,
+        allowEngineFailover = allowEngineFailover,
+        stillWanted = { mpvView === view && isUsingMpvEngine() && generation == playbackRecoveryGate.generation }
+    ) { startMpvPlayback(view, url, headers, allowEngineFailover) }
+    if (waiting) return
 
     runCatching {
         setLoadingStatus(
@@ -148,9 +181,9 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
             message = context.getString(com.nuvio.tv.R.string.player_loading_starting),
             showOverlay = true
         )
-        performPendingMpvHardRestartIfNeeded(view)
         view.applyHi10pGnextSoftwareFallback(shouldUseMpvHi10pGnextSoftwareFallback())
         view.applyHardwareDecodeMode(mpvHardwareDecodeModeSetting)
+        applyMpvDirectDecodeMode(view)
         registerMpvEventRelay(view)
         val initialResumePosition = resolvePendingInitialResumePosition()
             .takeIf { it > 0L }
@@ -209,6 +242,7 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
         clearChapterSkipState()
         recomputeMergedSkipIntervals()
         cancelPauseOverlay()
+        mpvNoProgressCheck.arm(android.os.SystemClock.elapsedRealtime())
         startProgressUpdates()
         startWatchProgressSaving()
         updateMpvAvailableTracks()
@@ -247,6 +281,44 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
 internal fun PlayerRuntimeController.releaseMpvPlayer() {
     unregisterMpvEventRelay()
     runCatching { mpvView?.releasePlayer() }
+}
+
+/**
+ * A view that needs a new libmpv instance while an earlier one is still being torn down starts once that
+ * teardown has finished, so the main thread does not wait for it. True when [start] was deferred.
+ */
+private fun PlayerRuntimeController.waitForMpvRelease(
+    view: NuvioMpvSurfaceView,
+    allowEngineFailover: Boolean,
+    stillWanted: () -> Boolean,
+    start: () -> Unit
+): Boolean {
+    val worker = MpvWorker.shared
+    if (view.isMpvLoaded || !worker.isBusy) return false
+    scope.launch {
+        val released = withTimeoutOrNull(MPV_RELEASE_WAIT_MS) { worker.awaitIdleSuspending() } != null
+        if (!stillWanted()) return@launch
+        if (released) start() else failMpvStartBehindHungRelease(allowEngineFailover)
+    }
+    return true
+}
+
+/** The last MPV player never finished closing, so a new one cannot start: ExoPlayer takes over, or the error shows. */
+private fun PlayerRuntimeController.failMpvStartBehindHungRelease(allowEngineFailover: Boolean) {
+    Log.w(PlayerRuntimeController.TAG, "MPV_RELEASE_HUNG: previous libmpv still closing after ${MPV_RELEASE_WAIT_MS}ms")
+    playbackAnalyticsDiagnostics.recordRawEventLine("MPV_RELEASE_HUNG: waitedMs=$MPV_RELEASE_WAIT_MS")
+    val explanation = context.getString(com.nuvio.tv.R.string.player_error_mpv_playback_failed)
+    if (maybeAutoSwitchInternalPlayerOnStartupError(detailedError = explanation, allowEngineFailover = allowEngineFailover)) return
+    cancelNextEpisodeAutoPlayOnFatalError()
+    _uiState.update {
+        it.copy(
+            error = explanation,
+            showLoadingOverlay = false,
+            isBuffering = false,
+            playbackEnded = false,
+            postPlayMode = null
+        )
+    }
 }
 
 private fun String.safeMpvTraceHost(): String {
@@ -372,6 +444,7 @@ internal fun PlayerRuntimeController.resumeForLifecycle() {
                 setPlaybackPaused(false)
             }
             Log.i(PlayerRuntimeController.TAG, "MPV_START_RESUME: restarting start check paused=$userPausedManually")
+            mpvNoProgressCheck.arm(android.os.SystemClock.elapsedRealtime())
             startProgressUpdates()
             startWatchProgressSaving()
         }
@@ -458,10 +531,15 @@ internal fun PlayerRuntimeController.updateMpvAvailableTracks() {
     mpvTrackRefreshInProgress = true
     mpvTrackRefreshJob = scope.launch {
         try {
-            val snapshot = view.readTrackSnapshot()
+            val wantChapters = chaptersEnabled || skipIntroEnabled
+            val generation = view.coreGeneration
+            // Track reads wait on mpv's core, which a stalled stream can hold for seconds.
+            val (snapshot, chapters) = withContext(MpvWorker.shared.dispatcher) {
+                view.readTrackSnapshot(generation) to if (wantChapters) view.readChapters(generation) else emptyList()
+            }
             if (!isUsingMpvEngine() || mpvView !== view || currentStreamUrl != streamUrlAtRefresh) return@launch
             applyMpvTrackSnapshot(snapshot)
-            refreshMpvChapters(view)
+            refreshMpvChapters(chapters)
             tryAutoSelectPreferredSubtitleFromAvailableTracks()
         } catch (error: CancellationException) {
             throw error

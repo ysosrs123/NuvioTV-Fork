@@ -151,6 +151,7 @@ internal fun PlayerRuntimeController.unregisterMpvEventRelay() {
 internal fun PlayerRuntimeController.onMpvEvent(eventId: Int, data: MPVNode) {
     when (eventId) {
         MPV.mpvEvent.MPV_EVENT_START_FILE -> onMpvStartFile(data)
+        MPV.mpvEvent.MPV_EVENT_FILE_LOADED -> mpvView?.onFileLoaded()
         MPV.mpvEvent.MPV_EVENT_END_FILE -> onMpvEndFile(data)
         MPV.mpvEvent.MPV_EVENT_SHUTDOWN -> onMpvCoreShutdown()
         else -> Unit
@@ -158,6 +159,7 @@ internal fun PlayerRuntimeController.onMpvEvent(eventId: Int, data: MPVNode) {
 }
 
 private fun PlayerRuntimeController.onMpvStartFile(data: MPVNode) {
+    mpvView?.onStartFile()
     mpvActivePlaylistEntryId = data.asMap()?.get("playlist_entry_id")?.asInt()
     mpvIdleActiveTicks = 0
 }
@@ -275,6 +277,11 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
         )
         lastPlaybackDiagnosticsForReport =
             lastPlaybackDiagnosticsForReport.copy(result = "Error: $detailedError")
+        holdFailoverCard(
+            if (hasRenderedFirstFrame) null
+            else runCatching { plainMpvStartErrorCard(httpCode, mpvLastErrorLogLine) }.getOrNull(),
+            detailedError
+        )
 
         if (isMpvDeadLinkHttpStatus(httpCode) &&
             isMpvHttpErrorFresh(mpvLastHttpErrorAtMs, SystemClock.elapsedRealtime()) &&
@@ -301,12 +308,18 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
             mpvView?.currentPositionMs()?.coerceAtLeast(0L) ?: 0L
         }
         val retryCanHelp = httpCode == null || !isPermanentHttpStatus(httpCode)
+        if (retryCanHelp && mpvRetryDecodesSound(source, hasRenderedFirstFrame, mpvView?.bitstreamSoundActive == true) && currentStreamUrl.isNotBlank() &&
+            mpvDecodedSoundStreamUrls.add(currentStreamUrl)
+        ) {
+            Log.w(PlayerRuntimeController.TAG, "MPV_SOUND_FALLBACK: start stalled ($source); the retry decodes the sound")
+        }
         if (retryCanHelp && attemptMpvAutoRetry(detailedError = detailedError, savedPosition = savedPosition)) return
         if (startupFailed && attemptStartupExhaustedSourceFailover(detailedError)) return
 
         finishLoadingDiagnostics("mpv_error")
         cancelNextEpisodeAutoPlayOnFatalError()
         val card = if (startupFailed) runCatching { mpvStartErrorCard(httpCode, mpvLastErrorLogLine) }.getOrNull() else null
+        cancelStartupWatchdog()
         _uiState.update {
             it.copy(
                 error = card?.message ?: detailedError,
@@ -424,6 +437,43 @@ internal fun PlayerRuntimeController.maybeRunMpvStartupWatchdog(view: NuvioMpvSu
         )
     }
 }
+
+internal fun PlayerRuntimeController.maybeRunMpvNoProgressCheck(
+    view: NuvioMpvSurfaceView,
+    positionMs: Long,
+    playingNow: Boolean,
+    cacheBuffering: Boolean
+) {
+    if (!hasRenderedFirstFrame || isReleasingPlayer || mpvErrorRecoveryArmed || _uiState.value.error != null) return
+    val stalled = mpvNoProgressCheck.step(
+        nowMs = SystemClock.elapsedRealtime(),
+        positionMs = positionMs,
+        playing = playingNow && !view.isEofReached(),
+        userPaused = userPausedManually,
+        pausedForCache = cacheBuffering,
+        seeking = view.isSeekingNow()
+    )
+    if (stalled) onMpvNoProgress(view, positionMs)
+}
+
+/**
+ * Picture up but the position stuck after a start or resume: the decoded-sound retry, once per stream. No seek nudge:
+ * a seek waits on the same stalled core.
+ */
+private fun PlayerRuntimeController.onMpvNoProgress(view: NuvioMpvSurfaceView, positionMs: Long) {
+    val bitstream = view.bitstreamSoundActive
+    Log.w(PlayerRuntimeController.TAG, "MPV_NO_PROGRESS: position stuck at ${positionMs}ms bitstream=$bitstream")
+    playbackAnalyticsDiagnostics.recordRawEventLine("MPV_NO_PROGRESS: positionMs=$positionMs bitstream=$bitstream")
+    if (mpvNoProgressRetriesDecodedSound(bitstream, currentStreamUrl, mpvDecodedSoundStreamUrls)) {
+        mpvDecodedSoundStreamUrls.add(currentStreamUrl)
+        Log.w(PlayerRuntimeController.TAG, "MPV_SOUND_FALLBACK: playback stalled (no_progress); the retry decodes the sound")
+        attemptMpvAutoRetry(detailedError = "no_progress", savedPosition = positionMs)
+    }
+}
+
+/** The decoded-sound retry is used once per stream, and only while mpv sends a bitstream. */
+internal fun mpvNoProgressRetriesDecodedSound(bitstreamActive: Boolean, streamUrl: String, decodedSoundStreamUrls: Set<String>): Boolean =
+    bitstreamActive && streamUrl.isNotBlank() && streamUrl !in decodedSoundStreamUrls
 
 internal fun PlayerRuntimeController.resetMpvStartupWatchdog() {
     mpvSurfaceWaitTicks = 0

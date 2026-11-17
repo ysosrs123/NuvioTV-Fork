@@ -35,13 +35,16 @@ internal object UnsupportedFormatMpvFallbackPolicy {
         videoMimeType: String?,
         fileName: String?,
         streamMimeType: String?,
-        videoCodecs: String? = null
+        videoCodecs: String? = null,
+        isLocalFile: Boolean = false
     ): Boolean {
         if (!exoPlayerActive || alreadySwitched) return false
         return when (errorCode) {
-            // Dead links and web pages end here too, so the name or type must say it is such a file.
+            // Dead links and web pages end here too, so the name or type must say it is such a file. A Blu-ray name
+            // alone is trusted only for a local file; a link is checked by its first bytes in the probe.
             PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED ->
-                !hasRenderedFirstFrame && isMpvOnlyContainer(fileName, streamMimeType)
+                !hasRenderedFirstFrame &&
+                    (isMpvOnlyContainer(fileName, streamMimeType) || (isLocalFile && hasBlurayTransportStreamName(fileName)))
             PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
             PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED,
             PlaybackException.ERROR_CODE_DECODING_FAILED,
@@ -99,8 +102,50 @@ internal object UnsupportedFormatMpvFallbackPolicy {
         return MPV_ONLY_CONTAINER_EXTENSIONS.any { name.endsWith(it) }
     }
 
+    /** Blu-ray / AVCHD transport streams (.m2ts, .mts), whose 192-byte packets ExoPlayer cannot follow. */
+    fun hasBlurayTransportStreamName(fileName: String?): Boolean {
+        val name = cleanName(fileName) ?: return false
+        return BLURAY_TRANSPORT_STREAM_EXTENSIONS.any { name.endsWith(it) }
+    }
+
+    /**
+     * Whether a link ExoPlayer refused is worth checking for the Blu-ray layout: its name says .m2ts / .mts, or it
+     * has no name that already says what it is. Links named or typed as another container, a web page or an archive
+     * go straight on to the dead-link handling.
+     */
+    fun shouldCheckForBlurayTransportStream(fileName: String?, streamMimeType: String?): Boolean {
+        val mime = streamMimeType?.lowercase()?.substringBefore(';')?.trim().orEmpty()
+        if (mime.isNotEmpty() && mime != MimeTypes.VIDEO_MP2T && mime != MIME_OCTET_STREAM) return false
+        val name = cleanName(fileName) ?: return true
+        if (hasBlurayTransportStreamName(name)) return true
+        val lastSegment = name.substringAfterLast('/')
+        return NAMED_OTHER_EXTENSIONS.none { lastSegment.endsWith(it) }
+    }
+
+    private fun cleanName(fileName: String?): String? =
+        fileName?.substringBefore('?')?.substringBefore('#')?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
+
+    /** A transport stream with a 4-byte timestamp before each 188-byte packet, as on Blu-ray discs and AVCHD cameras. */
+    fun isBlurayTransportStream(head: ByteArray): Boolean {
+        if (head.size < BDAV_PACKET_SIZE * (BDAV_SNIFF_PACKETS - 1) + BDAV_SYNC_OFFSET + 1) return false
+        return (0 until BDAV_SNIFF_PACKETS).all { head[BDAV_SYNC_OFFSET + it * BDAV_PACKET_SIZE] == TS_SYNC_BYTE }
+    }
+
+    const val BDAV_SNIFF_BYTES = 1024
+    private const val BDAV_PACKET_SIZE = 192
+    private const val BDAV_SYNC_OFFSET = 4
+    private const val BDAV_SNIFF_PACKETS = 5
+    private const val TS_SYNC_BYTE = 0x47.toByte()
+
     private val TRANSPORT_STREAM_EXTENSIONS = listOf(".ts", ".m2ts", ".mts", ".m2t")
     private val MPV_ONLY_CONTAINER_EXTENSIONS = listOf(".wmv", ".asf", ".rm", ".rmvb", ".ogm")
+    private val BLURAY_TRANSPORT_STREAM_EXTENSIONS = listOf(".m2ts", ".mts")
+    private val NAMED_OTHER_EXTENSIONS = listOf(
+        ".mkv", ".mk3d", ".mp4", ".m4v", ".mov", ".webm", ".avi", ".ts", ".m2t", ".mpg", ".mpeg", ".vob", ".flv",
+        ".wmv", ".asf", ".rm", ".rmvb", ".ogm", ".ogv", ".m3u8", ".m3u", ".mpd", ".iso", ".rar", ".zip", ".7z",
+        ".torrent", ".html", ".htm", ".json", ".txt", ".nfo", ".srt", ".jpg", ".png"
+    )
+    private const val MIME_OCTET_STREAM = "application/octet-stream"
     private val MPV_ONLY_CONTAINER_MIMES = listOf(
         "video/x-ms-wmv", "video/x-ms-asf", "application/vnd.ms-asf", "application/vnd.rn-realmedia",
         "video/vnd.rn-realvideo"
