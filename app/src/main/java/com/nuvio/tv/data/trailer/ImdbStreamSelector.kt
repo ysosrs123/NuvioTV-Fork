@@ -22,7 +22,12 @@ class ImdbStreamSelector @Inject constructor() {
     private val client = OkHttpClient.Builder().dns(IPv4FirstDns()).socketFactory(NoDelaySocketFactory).connectTimeout(2, TimeUnit.SECONDS)
         .readTimeout(2, TimeUnit.SECONDS).callTimeout(2, TimeUnit.SECONDS).build()
 
-    internal data class Selection(val source: TrailerPlaybackSource?, val complete: Boolean)
+    /** [lowResolution] is IMDb's best SD file, kept for when no HD trailer comes from anywhere. */
+    internal data class Selection(
+        val source: TrailerPlaybackSource?,
+        val complete: Boolean,
+        val lowResolution: TrailerPlaybackSource? = null
+    )
 
     internal suspend fun select(
         video: ImdbTrailerData.Video,
@@ -50,7 +55,12 @@ class ImdbStreamSelector @Inject constructor() {
             }
             true
         }
-        Selection(best, complete && finished == true)
+        val settled = complete && finished == true
+        // Only a fully read answer proves there is no HD; a master that failed to load may still hold one.
+        val lowResolution = if (best == null && settled) {
+            ImdbTrailerData.bestLowResolutionMp4(video)?.let { TrailerPlaybackSource(it.url) }
+        } else null
+        Selection(best, settled, lowResolution)
     }
 
     private suspend fun fetch(url: String): String? = suspendCancellableCoroutine { continuation ->

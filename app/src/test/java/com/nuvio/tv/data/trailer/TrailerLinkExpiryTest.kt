@@ -262,7 +262,7 @@ class TrailerLinkExpiryTest {
         val tmdbService = mockk<TmdbService>(relaxed = true) {
             every { apiKey() } returns "tmdb-key"
         }
-        val imdb = mockk<ImdbTrailerResolver>(relaxed = true)
+        val imdb = relaxedImdbResolver()
         val tmdbSettingsDataStore = mockk<TmdbSettingsDataStore> {
             every { settings } returns MutableStateFlow(TmdbSettings(language = "en", useTrailers = true))
         }

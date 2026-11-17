@@ -34,6 +34,24 @@ class ImdbStreamSelectorTest {
         assertNull(result.source)
         assertTrue(result.complete)
     }
+    @Test fun `SD-only title keeps its best SD file as a last resort`() = runTest {
+        val result = selector.select(video(480)) { master(576) }
+        assertEquals("https://imdb-video.media-imdb.com/video.mp4", result.lowResolution?.videoUrl)
+    }
+    @Test fun `SD is not kept when the master failed to load`() = runTest {
+        val result = selector.select(video(480)) { null }
+        assertNull(result.lowResolution)
+    }
+    @Test fun `SD is not kept when the master timed out`() = runTest {
+        val result = selector.select(video(480)) { kotlinx.coroutines.delay(5_000); master(1080) }
+        assertNull(result.source)
+        assertFalse(result.complete)
+        assertNull(result.lowResolution)
+    }
+    @Test fun `HD title offers no SD last resort`() = runTest {
+        val result = selector.select(video(1080)) { master(1080) }
+        assertNull(result.lowResolution)
+    }
     @Test fun `failed manifest is not a permanent SD classification`() = runTest {
         val result = selector.select(video(480)) { null }
         assertNull(result.source)

@@ -52,7 +52,7 @@ class TrailerServiceRateLimitTest {
             every { settings } returns MutableStateFlow(TmdbSettings(language = "en", useTrailers = true))
         },
         tmdbService = mockk<TmdbService> { every { apiKey() } returns "tmdb-key" },
-        imdbTrailerResolver = mockk(relaxed = true),
+        imdbTrailerResolver = relaxedImdbResolver(),
         trailerSettingsDataStore = mockk<TrailerSettingsDataStore> {
             every { settings } returns MutableStateFlow(TrailerSettings())
         },

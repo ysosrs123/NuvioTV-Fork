@@ -51,6 +51,9 @@ internal object ImdbTrailerData {
     fun bestMp4(video: Video): Encoding? = video.encodings
         .filter { it.mp4 && it.height >= 720 }.maxByOrNull { it.height }
 
+    fun bestLowResolutionMp4(video: Video): Encoding? = video.encodings
+        .filter { it.mp4 && it.height < 720 }.maxByOrNull { it.height }
+
     fun height(label: String): Int {
         val value = label.trim().uppercase().removePrefix("DEF_")
         return when (value) {

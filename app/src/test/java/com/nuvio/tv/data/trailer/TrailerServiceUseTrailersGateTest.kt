@@ -103,7 +103,7 @@ class TrailerServiceUseTrailersGateTest {
             inAppYouTubeExtractor = extractor,
             tmdbSettingsDataStore = tmdbSettingsDataStore,
             tmdbService = tmdbService,
-            imdbTrailerResolver = mockk(relaxed = true),
+            imdbTrailerResolver = relaxedImdbResolver(),
             trailerSettingsDataStore = mockk(relaxed = true)
         )
         return HarnessedService(

@@ -132,7 +132,7 @@ class TrailerServiceCandidateRankingTest {
             inAppYouTubeExtractor = extractor,
             tmdbSettingsDataStore = tmdbSettingsDataStore,
             tmdbService = tmdbService,
-            imdbTrailerResolver = mockk(relaxed = true),
+            imdbTrailerResolver = relaxedImdbResolver(),
             trailerSettingsDataStore = mockk(relaxed = true)
         )
 
@@ -176,7 +176,7 @@ class TrailerServiceCandidateRankingTest {
             inAppYouTubeExtractor = extractor,
             tmdbSettingsDataStore = tmdbSettingsDataStore,
             tmdbService = tmdbService,
-            imdbTrailerResolver = mockk(relaxed = true),
+            imdbTrailerResolver = relaxedImdbResolver(),
             trailerSettingsDataStore = mockk(relaxed = true)
         )
 

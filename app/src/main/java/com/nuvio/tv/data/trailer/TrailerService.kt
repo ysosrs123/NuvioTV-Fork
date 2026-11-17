@@ -30,6 +30,7 @@ private const val TAG = "TrailerService"
 private const val TMDB_TRAILER_FALLBACK_LANGUAGE = "en-US"
 private const val TMDB_TRAILER_MAX_CANDIDATES = 3
 private const val YOUTUBE_REFUSAL_REST_MS = 10 * 60_000L
+private const val LOW_RESOLUTION_TTL_MS = 5 * 60_000L
 
 @Singleton
 class TrailerService(
@@ -133,10 +134,20 @@ class TrailerService(
             }
             try {
                 var imdbFailed = false
+                var imdbId: String? = null
+                // No HD trailer anywhere: IMDb's SD one beats an empty trailer slot.
+                suspend fun lowResolution(): TrailerLookupResult? {
+                    val sd = imdbId?.let(imdbTrailerResolver::lowResolutionFallback) ?: return null
+                    mediaCache?.initialize()
+                    val fresh = sd.copy(validUntilMs = minOf(clock.millis() + LOW_RESOLUTION_TTL_MS, TrailerSourceExpiry.expiresAtMs(sd)))
+                    cache.put(key, fresh, LOW_RESOLUTION_TTL_MS)
+                    return TrailerLookupResult(fresh)
+                }
                 if (provider == TrailerSource.IMDB) {
                     val imdb = suppliedImdb ?: numericId?.toInt()?.let {
                         tmdbService.tmdbToImdb(it, mediaType ?: "movie")
                     }
+                    imdbId = imdb
                     if (imdb != null) {
                         val source = imdbTrailerResolver.resolve(imdb, type)
                         if (source != null && TrailerSourceExpiry.isUsable(source, clock.millis())) {
@@ -148,7 +159,7 @@ class TrailerService(
                         imdbFailed = true
                     }
                 }
-                if (!useYouTube) return@withLock TrailerLookupResult(null, definiteMiss = !imdbFailed)
+                if (!useYouTube) return@withLock lowResolution() ?: TrailerLookupResult(null, definiteMiss = !imdbFailed)
                 val resolvedTmdb = numericId ?: suppliedImdb?.let { tmdbService.ensureTmdbId(it, type ?: "movie") }
                 // While YouTube turns this device away, IMDb stands in and YouTube is left alone.
                 val youTubeFirst = provider != TrailerSource.IMDB
@@ -164,6 +175,7 @@ class TrailerService(
                         val imdb = suppliedImdb ?: numericId?.toInt()?.let {
                             tmdbService.tmdbToImdb(it, mediaType ?: "movie")
                         }
+                        imdbId = imdb
                         imdb?.let { imdbTrailerResolver.resolveFromDataService(it) }
                     } catch (cancelled: CancellationException) {
                         throw cancelled
@@ -179,6 +191,7 @@ class TrailerService(
                         return@withLock TrailerLookupResult(fresh)
                     }
                 }
+                if (lookup.source == null) lowResolution()?.let { return@withLock it }
                 val ttl = if (provider == TrailerSource.IMDB) 30_000L else 30 * 60_000L
                 val source = lookup.source?.let {
                     it.copy(validUntilMs = minOf(clock.millis() + ttl, TrailerSourceExpiry.expiresAtMs(it)))

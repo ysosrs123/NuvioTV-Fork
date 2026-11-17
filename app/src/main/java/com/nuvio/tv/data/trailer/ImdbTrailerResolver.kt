@@ -42,6 +42,7 @@ class ImdbTrailerResolver @Inject constructor(
 
     private val webViews = TrailerResourceGate(Dispatchers.Main)
     private val sourceCache = TrailerSourceCache()
+    private val lowResolutionCache = TrailerSourceCache()
 
     private class NetFlag { @Volatile var tripped = false }
 
@@ -103,7 +104,19 @@ class ImdbTrailerResolver @Inject constructor(
         return resolved.source
     }
 
-    fun invalidate(videoUrl: String) = sourceCache.invalidate(videoUrl)
+    /** IMDb's SD trailer for a title that has no HD one, when a lookup has seen it. */
+    fun lowResolutionFallback(imdbId: String): TrailerPlaybackSource? =
+        lowResolutionCache.get(imdbId)?.source?.takeIf { TrailerSourceExpiry.isUsable(it) }
+
+    fun invalidate(videoUrl: String) {
+        sourceCache.invalidate(videoUrl)
+        lowResolutionCache.invalidate(videoUrl)
+    }
+
+    private fun rememberLowResolution(imdbId: String, selection: ImdbStreamSelector.Selection) {
+        selection.lowResolution?.takeIf { TrailerSourceExpiry.isUsable(it) }
+            ?.let { lowResolutionCache.put(imdbId, it, 30 * 60_000L) }
+    }
 
     // Null when IMDb's data service gave no clear answer: the title page decides then.
     private suspend fun resolveFromApi(imdbId: String): Resolution? {
@@ -111,6 +124,7 @@ class ImdbTrailerResolver @Inject constructor(
         if (answer == ImdbTrailerData.Result.Missing) return Resolution(null, true)
         val video = (answer as? ImdbTrailerData.Result.Found)?.video?.takeIf { it.encodings.isNotEmpty() } ?: return null
         val selection = streamSelector.select(video)
+        rememberLowResolution(imdbId, selection)
         val source = selection.source ?: return if (selection.complete) Resolution(null, true) else null
         if (!TrailerSourceExpiry.isUsable(source)) return null
         Log.i(TAG, "SELECTED ${video.id} api")
@@ -145,7 +159,9 @@ class ImdbTrailerResolver @Inject constructor(
         val title = loadVideoData(wv, "https://www.imdb.com/title/$imdbId/", imdbId, true, flag)
         if (title == ImdbTrailerData.Result.Missing) return Resolution(null, true)
         val hero = (title as? ImdbTrailerData.Result.Found)?.video ?: return Resolution(null, false)
-        streamSelector.select(hero).source?.let { source ->
+        val heroSelection = streamSelector.select(hero)
+        rememberLowResolution(imdbId, heroSelection)
+        heroSelection.source?.let { source ->
             Log.i(TAG, "SELECTED ${hero.id} title-page")
             return Resolution(source.takeIf { TrailerSourceExpiry.isUsable(it) }, TrailerSourceExpiry.isUsable(source))
         }
@@ -153,6 +169,7 @@ class ImdbTrailerResolver @Inject constructor(
         val video = loadVideoData(wv, "https://www.imdb.com/video/${hero.id}/", hero.id, false, flag)
         val info = (video as? ImdbTrailerData.Result.Found)?.video ?: return Resolution(null, false)
         val selection = streamSelector.select(info)
+        rememberLowResolution(imdbId, selection)
         val source = selection.source
         Log.i(TAG, "video-page ${hero.id} selected=${source != null}")
         return if (source == null || TrailerSourceExpiry.isUsable(source)) Resolution(source, source != null || selection.complete)

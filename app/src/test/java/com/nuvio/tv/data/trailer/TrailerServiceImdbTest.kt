@@ -23,7 +23,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 
 class TrailerServiceImdbTest {
-    private val imdb = mockk<ImdbTrailerResolver>(relaxed = true)
+    private val imdb = relaxedImdbResolver()
     private val tmdb = mockk<TmdbService>(relaxed = true)
     private val api = mockk<TmdbApi>(relaxed = true)
     private val extractor = mockk<InAppYouTubeExtractor>(relaxed = true)
@@ -88,6 +88,39 @@ class TrailerServiceImdbTest {
         val result = service.getTrailerPlaybackSource("A", tmdbId = "tt1234567", type = "movie")
         assertEquals("https://cdn.test/youtube.mp4", result?.videoUrl)
         assertEquals(clock.millis() + 30_000L, result?.validUntilMs)
+    }
+
+    @Test fun `SD-only IMDb title plays IMDb's SD trailer when YouTube has none`() = runTest {
+        val service = service()
+        coEvery { imdb.resolve(any(), any()) } returns null
+        every { imdb.lowResolutionFallback("tt1234567") } returns TrailerPlaybackSource("https://cdn.test/sd.mp4")
+        coEvery { tmdb.ensureTmdbId("tt1234567", "movie") } returns "123"
+        every { tmdb.apiKey() } returns "key"
+        coEvery { api.getMovieVideos(any(), any(), any()) } returns Response.success(TmdbVideosResponse(123, emptyList()))
+        val result = service.getTrailerPlaybackSource("A", tmdbId = "tt1234567", type = "movie")
+        assertEquals("https://cdn.test/sd.mp4", result?.videoUrl)
+    }
+
+    @Test fun `a YouTube trailer still wins over IMDb's SD one`() = runTest {
+        val service = service()
+        coEvery { imdb.resolve(any(), any()) } returns null
+        every { imdb.lowResolutionFallback(any()) } returns TrailerPlaybackSource("https://cdn.test/sd.mp4")
+        coEvery { tmdb.ensureTmdbId("tt1234567", "movie") } returns "123"
+        every { tmdb.apiKey() } returns "key"
+        coEvery { api.getMovieVideos(any(), any(), any()) } returns Response.success(TmdbVideosResponse(123,
+            listOf(TmdbVideoResult(key = "abcdefghijk", site = "YouTube", type = "Trailer"))))
+        coEvery { extractor.extractPlaybackSource(any()) } returns TrailerPlaybackSource("https://cdn.test/youtube.mp4")
+        val result = service.getTrailerPlaybackSource("A", tmdbId = "tt1234567", type = "movie")
+        assertEquals("https://cdn.test/youtube.mp4", result?.videoUrl)
+    }
+
+    @Test fun `SD-only IMDb title plays its SD trailer when YouTube trailers are off`() = runTest {
+        val service = service(useTrailers = false)
+        coEvery { imdb.resolve(any(), any()) } returns null
+        every { imdb.lowResolutionFallback("tt1234567") } returns TrailerPlaybackSource("https://cdn.test/sd.mp4")
+        val result = service.getTrailerPlaybackSource("A", tmdbId = "tt1234567", type = "movie")
+        assertEquals("https://cdn.test/sd.mp4", result?.videoUrl)
+        coVerify(exactly = 0) { api.getMovieVideos(any(), any(), any()) }
     }
 
     @Test fun `cancelled IMDb lookup is not cached as a miss`() = runTest {

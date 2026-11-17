@@ -39,7 +39,7 @@ class TrailerServiceYouTubeRefusedTest {
     }
     private val tmdbApi = mockk<TmdbApi>()
     private val extractor = mockk<InAppYouTubeExtractor>()
-    private val imdb = mockk<ImdbTrailerResolver>(relaxed = true)
+    private val imdb = relaxedImdbResolver()
     private val tmdb = mockk<TmdbService> { every { apiKey() } returns "tmdb-key" }
     private val service = TrailerService(
         trailerApi = mockk<TrailerApi>(relaxed = true),
@@ -115,6 +115,23 @@ class TrailerServiceYouTubeRefusedTest {
         coEvery { imdb.resolveFromDataService("tt0000101") } returns TrailerPlaybackSource("https://cdn.example/imdb.mp4")
 
         assertEquals("https://cdn.example/imdb.mp4", lookup("101").source?.videoUrl)
+    }
+
+    @Test
+    fun `IMDb's SD trailer stands in when YouTube demands a sign-in and IMDb has no HD`() = runTest {
+        youTubeDemandsSignIn()
+        every { imdb.lowResolutionFallback("tt0000101") } returns TrailerPlaybackSource("https://cdn.example/imdb-sd.mp4")
+
+        assertEquals("https://cdn.example/imdb-sd.mp4", lookup("101").source?.videoUrl)
+    }
+
+    @Test
+    fun `a title YouTube removed does not reach for IMDb's SD trailer`() = runTest {
+        coEvery { extractor.extractPlaybackSource(any()) } returns null
+        every { extractor.unplayableReason(any()) } returns YouTubeUnplayableReason.UNAVAILABLE
+        every { imdb.lowResolutionFallback(any()) } returns TrailerPlaybackSource("https://cdn.example/imdb-sd.mp4")
+
+        assertNull(lookup("101").source)
     }
 
     @Test
