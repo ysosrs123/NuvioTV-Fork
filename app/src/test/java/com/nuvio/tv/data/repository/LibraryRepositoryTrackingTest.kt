@@ -241,7 +241,8 @@ class LibraryRepositoryTrackingTest {
             metaRepository = mockk<MetaRepository>(relaxed = true),
             trackingProviders = TrackingLibraryProviderRegistry(providers),
             profileManager = mockk<ProfileManager> { every { activeProfileId } returns MutableStateFlow(1) },
-            genreFill = mockk<LibraryGenreFill> { every { fill(any()) } answers { firstArg() } }
+            genreFill = mockk<LibraryGenreFill> { every { fill(any()) } answers { firstArg() } },
+            addonEventDispatcher = mockk(relaxed = true)
         )
     }
 

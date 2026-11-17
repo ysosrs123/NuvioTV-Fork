@@ -137,7 +137,7 @@
     <string name="error_stream_tried_issues">Đã thử các tiện ích phát trực tuyến: %1$s. Không thể tải luồng phát cho id=%2$s (type=%3$s). Lỗi: %4$s.</string>
 
     <string name="continue_watching">Tiếp tục xem</string>
-    <string name="cw_upcoming">Sắp chiếu</string>
+    <string name="cw_upcoming">Sắp phát sóng</string>
     <string name="cw_next_up">Tiếp theo</string>
     <string name="cw_next_up_short">Kế tiếp</string>
     <string name="cw_new_episode">Tập mới</string>
@@ -776,6 +776,16 @@
     <string name="playback_engine_mvplayer">Libmpv (Beta)</string>
     <string name="playback_auto_switch_internal_player_on_error">Tự động chuyển sang ExoPlayer khi khởi động bị lỗi</string>
     <string name="playback_auto_switch_internal_player_on_error_sub">Nếu khởi động luồng phát thất bại trong libmpv, tự động thử lại bằng ExoPlayer.</string>
+    <string name="playback_auto_switch_internal_player_blocked_by_fallback">Tắt chuyển sang nguồn phát khớp tiếp theo để dùng tính năng này.</string>
+    <string name="autoplay_fallback_next_source">Chuyển sang nguồn phát khớp tiếp theo khi lỗi</string>
+    <string name="autoplay_fallback_next_source_sub">Nếu nguồn phát tự động chọn bị lỗi hoặc không khởi chạy đúng thời gian, thử các nguồn phát khớp tiếp theo.</string>
+    <string name="autoplay_fallback_max_sources">Nguồn phát sẽ thử khi lỗi</string>
+    <string name="autoplay_fallback_max_sources_sub">Số lượng nguồn phát khớp thêm cần thử trước khi hiển thị lỗi.</string>
+    <string name="autoplay_fallback_startup_timeout">Thời gian để nguồn phát khởi chạy</string>
+    <string name="autoplay_fallback_startup_timeout_sub">Thời gian chờ một nguồn phát khởi chạy trước khi chuyển sang thử nguồn phát tiếp theo.</string>
+    <string name="autoplay_fallback_startup_timeout_value">%1$ds</string>
+    <string name="autoplay_fallback_next_source_blocked_by_engine_switch">Tắt tự động chuyển lõi trình phát khi phát lại lỗi để sử dụng tùy chọn này.</string>
+    <string name="player_error_source_startup_timeout">Nguồn phát đã không khởi chạy trong vòng %1$d giây.</string>
     <string name="playback_external_forward_subtitles">Chuyển phụ đề sang trình phát bên ngoài</string>
     <string name="playback_external_forward_subtitles_sub">Tải phụ đề bằng ngôn ngữ ưu tiên từ các tiện ích rồi chuyển sang trình phát bên ngoài.</string>
     <string name="playback_external_send_skip_segments">Gửi mốc thời gian phần giới thiệu và đoạn kết</string>
@@ -927,8 +937,8 @@
     <string name="sub_preview_text">Mọi câu chuyện đều bắt đầu từ một chút tò mò.</string>
     <string name="sub_font">Phông chữ</string>
     <string name="sub_font_default">Mặc định</string>
-    <string name="sub_font_serif">Kiểu chữ có chân</string>
-    <string name="sub_font_mono">Kiểu chữ đơn cách</string>
+    <string name="sub_font_serif">Có chân</string>
+    <string name="sub_font_mono">Đơn cách</string>
     <string name="sub_font_import">Nhập từ điện thoại</string>
     <string name="sub_font_import_desc">Thêm phông chữ .ttf hoặc .otf có dung lượng tối đa 10 MB. Phông chữ đã nhập sẽ được lưu trên TV này.</string>
     <string name="sub_font_import_qr">Quét bằng điện thoại để thêm phông chữ .ttf hoặc .otf</string>
@@ -1109,18 +1119,18 @@
     <string name="layout_cw_sort_default">Mặc định</string>
     <string name="layout_cw_sort_default_desc">Sắp xếp tất cả mục theo độ gần đây</string>
     <string name="layout_cw_sort_streaming">Kiểu phát luồng</string>
-    <string name="layout_cw_sort_streaming_desc">Mục đã phát hành trước, sắp tới ở sau cùng</string>
+    <string name="layout_cw_sort_streaming_desc">Mục đã phát hành trước, sắp phát sóng ở sau cùng</string>
     <string name="layout_cw_sort_split_upcoming">Tách hàng Sắp ra mắt</string>
-    <string name="layout_cw_sort_split_upcoming_desc">Chuyển các tập chưa phát sóng vào hàng Sắp ra mắt riêng biệt.</string>
+    <string name="layout_cw_sort_split_upcoming_desc">Chuyển các tập chưa phát sóng vào hàng Sắp phát sóng riêng biệt.</string>
     <string name="layout_cw_click_action">Khi chọn</string>
     <string name="layout_cw_click_action_sub">Nội dung mở ra khi bạn chọn một mục trong Tiếp tục xem</string>
     <string name="layout_cw_click_stream">Mở luồng</string>
-    <string name="layout_cw_click_stream_desc">Chọn nguồn hoặc tiếp tục phát</string>
+    <string name="layout_cw_click_stream_desc">Chọn một nguồn hoặc tiếp tục phát</string>
     <string name="layout_cw_click_details">Mở chi tiết</string>
     <string name="layout_cw_click_details_desc">Mở trang chi tiết của nội dung</string>
     <string name="layout_cw_click_details_upcoming">Chỉ mở chi tiết cho nội dung sắp ra mắt</string>
-    <string name="layout_cw_click_details_upcoming_desc">Mở chi tiết cho các tập chưa phát sóng, mở luồng cho các tập còn lại</string>
-    <string name="upcoming_section_title">Sắp ra mắt</string>
+    <string name="layout_cw_click_details_upcoming_desc">Mở chi tiết cho tập chưa phát sóng, mở luồng phát cho các tập còn lại.</string>
+    <string name="upcoming_section_title">Sắp phát sóng</string>
     <string name="layout_trailer_button">Hiển thị nút Trailer</string>
     <string name="layout_trailer_button_sub">Hiển thị nút trailer trên trang chi tiết (chỉ khi có trailer).</string>
     <string name="layout_imdb_trailers">Dùng trailer IMDb</string>
@@ -1562,7 +1572,7 @@
     <string name="trakt_continue_watching_window">Cửa sổ Xem tiếp</string>
     <string name="trakt_continue_watching_subtitle">Lịch sử Trakt được dùng cho mục Tiếp tục xem</string>
     <string name="trakt_unaired_next_up">Tập tiếp theo chưa phát sóng</string>
-    <string name="trakt_unaired_next_up_subtitle">Hiển thị các tập sắp tới trước khi phát sóng</string>
+    <string name="trakt_unaired_next_up_subtitle">Hiển thị các tập sắp phát sóng trước khi phát sóng</string>
     <string name="trakt_unaired_shown">Hiển thị</string>
     <string name="trakt_unaired_hidden">Ẩn</string>
     <string name="trakt_unaired_now_shown">Tập tiếp theo chưa phát sóng hiện đang hiển thị</string>
@@ -1756,6 +1766,13 @@
     <string name="addon_installing">Đang cài đặt</string>
     <string name="addon_install_btn">Cài đặt</string>
     <string name="addon_install_success">Đã cài đặt %1$s</string>
+    <string name="addon_tracking_consent_title">Tiện ích theo dõi</string>
+    <string name="addon_tracking_consent_body">%1$s là một tiện ích theo dõi. Nuvio Arc sẽ gửi cho tiện ích này hoạt động của bạn: những gì bạn phát, tạm dừng và dừng kèm vị trí phát lại, nội dung bạn thêm vào hoặc xóa khỏi thư viện và nội dung bạn đánh dấu đã xem hoặc chưa xem. Dữ liệu này sẽ rời khỏi Nuvio Arc và được xử lý bởi nhà phát triển tiện ích cùng dịch vụ mà nó kết nối tới.</string>
+    <string name="addon_tracking_consent_checkbox">Tôi đồng ý chia sẻ hoạt động xem và thư viện với tiện ích này</string>
+    <string name="addon_tracking_consent_checked">Đã chọn</string>
+    <string name="addon_tracking_consent_unchecked">Chưa chọn</string>
+    <string name="addon_tracking_consent_cancel">Hủy</string>
+    <string name="addon_tracking_consent_install">Cài đặt</string>
     <string name="addon_error_invalid_url">Nhập URL tiện ích hợp lệ</string>
     <string name="addon_error_invalid_scheme">URL tiện ích phải bắt đầu bằng http hoặc https</string>
     <string name="addon_installed_section">Đã cài đặt</string>
@@ -2179,15 +2196,12 @@
     <string name="library_status_dropped">Đã bỏ</string>
     <string name="library_syncing_library">Đang đồng bộ thư viện\u2026</string>
     <string name="library_type_all">Tất cả</string>
-    <string name="library_type_items">mục</string>
-    <string name="library_empty_local_title">Chưa có %1$s</string>
-    <string name="library_empty_trakt_title">Chưa có %1$s trong danh sách này</string>
-    <string name="library_empty_local_subtitle">Bắt đầu lưu mục yêu thích để xem ở đây</string>
-    <string name="library_empty_trakt_subtitle">Sử dụng + trong chi tiết để thêm vào danh sách theo dõi hoặc danh sách</string>
+    <string name="library_empty_title">Không có mục nào để hiển thị</string>
+    <string name="library_empty_local_hint">Thay đổi bộ lọc hoặc bắt đầu lưu các mục yêu thích để xem tại đây</string>
+    <string name="library_empty_trakt_hint">Thay đổi bộ lọc hoặc sử dụng dấu + trong chi tiết để thêm các mục vào danh sách theo dõi hoặc danh sách khác</string>
+    <string name="library_empty_simkl_hint">Thay đổi bộ lọc hoặc sử dụng dấu + trong chi tiết để thêm các mục vào trạng thái Simkl</string>
     <string name="library_empty_trakt_not_auth_title">Trakt chưa được kết nối</string>
     <string name="library_empty_trakt_not_auth_subtitle">Kết nối tài khoản Trakt trong Cài đặt để xem thư viện Trakt của bạn</string>
-    <string name="library_empty_simkl_title">Không có %1$s trong trạng thái này</string>
-    <string name="library_empty_simkl_subtitle">Sử dụng + trong chi tiết để thêm mục vào trạng thái Simkl</string>
     <string name="library_empty_simkl_not_auth_title">Simkl chưa được kết nối</string>
     <string name="library_empty_simkl_not_auth_subtitle">Kết nối tài khoản Simkl trong Cài đặt để xem thư viện Simkl của bạn</string>
     <string name="library_list_create_dialog_title">Tạo danh sách</string>
@@ -4586,8 +4600,8 @@
     <string name="qms_hint_mode_tip">Một số đầu phát và bộ thu có cài đặt cho tần số phim chính xác (23,976 Hz), thường gọi là tần số phân số. Arc không thể thay đổi cài đặt đó.</string>
     <string name="qms_hint_off_hint_qms">Khi đó Arc ngừng yêu cầu tần số của phim. TV của bạn vẫn có thể tự đổi tần số.</string>
     <string name="qms_hint_ok">OK</string>
-    <string name="about_update_optimize_install_title">Tối ưu bản cập nhật khi cài đặt</string>
-    <string name="about_update_optimize_install_subtitle">Mở lần đầu nhanh hơn sau khi cập nhật, nhưng ứng dụng sẽ đóng khoảng một phút trong lúc cài đặt. Tắt để dùng màn hình trình cài đặt của Android</string>
-    <string name="update_ready_closes">Tải xuống hoàn tất. Ứng dụng sẽ đóng trong khi cài đặt bản cập nhật, việc này có thể mất một phút. Sau đó hãy mở lại ứng dụng.</string>
-    <string name="update_ready_closes_and_reopens">Tải xuống hoàn tất. Ứng dụng sẽ đóng trong khi cài đặt bản cập nhật rồi tự mở lại, việc này có thể mất một phút.</string>
+    <string name="about_update_optimize_install_title">Tối ưu hóa bản cập nhật khi cài đặt</string>
+    <string name="about_update_optimize_install_subtitle">Khởi chạy lần đầu nhanh hơn sau khi cập nhật, nhưng ứng dụng sẽ đóng trong khoảng một phút khi cài đặt. Tắt tùy chọn này để sử dụng màn hình cài đặt của Android.</string>
+    <string name="update_ready_closes">Tải xuống hoàn tất. Ứng dụng sẽ đóng trong khi cài đặt bản cập nhật, quá trình này có thể mất một phút. Vui lòng mở lại ứng dụng sau đó.</string>
+    <string name="update_ready_closes_and_reopens">Tải xuống hoàn tất. Ứng dụng sẽ đóng trong khi cài đặt bản cập nhật và tự mở lại, quá trình này có thể mất một phút.</string>
 </resources>

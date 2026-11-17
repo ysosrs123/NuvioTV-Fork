@@ -2027,6 +2027,13 @@
     <string name="addon_installing">Installing</string>
     <string name="addon_install_btn">Install</string>
     <string name="addon_install_success">Installed %1$s</string>
+    <string name="addon_tracking_consent_title">Tracking addon</string>
+    <string name="addon_tracking_consent_body">%1$s is a tracking addon. Nuvio Arc will send it your activity: what you play, pause and stop with the playback position, what you add to or remove from your library, and what you mark as watched or unwatched. This data leaves Nuvio Arc and is handled by the addon\'s developer and the service it connects to.</string>
+    <string name="addon_tracking_consent_checkbox">I agree to share my watch activity and library with this addon</string>
+    <string name="addon_tracking_consent_checked">Checked</string>
+    <string name="addon_tracking_consent_unchecked">Not checked</string>
+    <string name="addon_tracking_consent_cancel">Cancel</string>
+    <string name="addon_tracking_consent_install">Install</string>
     <string name="addon_error_invalid_url">Enter a valid addon URL</string>
     <string name="addon_error_invalid_scheme">Addon URL must start with http or https</string>
     <string name="addon_installed_section">Installed</string>
@@ -2637,15 +2644,12 @@
     <string name="library_status_dropped">Dropped</string>
     <string name="library_syncing_library">Syncing library\u2026</string>
     <string name="library_type_all">All</string>
-    <string name="library_type_items">items</string>
-    <string name="library_empty_local_title">No %1$s yet</string>
-    <string name="library_empty_trakt_title">No %1$s in this list</string>
-    <string name="library_empty_local_subtitle">Start saving your favorites to see them here</string>
-    <string name="library_empty_trakt_subtitle">Use + in details to add items to watchlist or lists</string>
+    <string name="library_empty_title">No items to display</string>
+    <string name="library_empty_local_hint">Change your filters or start saving your favorites to see them here</string>
+    <string name="library_empty_trakt_hint">Change your filters or use + in details to add items to watchlist or lists</string>
+    <string name="library_empty_simkl_hint">Change your filters or use + in details to add items to a Simkl status</string>
     <string name="library_empty_trakt_not_auth_title">Trakt not connected</string>
     <string name="library_empty_trakt_not_auth_subtitle">Connect your Trakt account in Settings to view your Trakt library</string>
-    <string name="library_empty_simkl_title">No %1$s in this status</string>
-    <string name="library_empty_simkl_subtitle">Use + in details to add items to a Simkl status</string>
     <string name="library_empty_simkl_not_auth_title">Simkl not connected</string>
     <string name="library_empty_simkl_not_auth_subtitle">Connect your Simkl account in Settings to view your Simkl library</string>
     <string name="library_empty_mdblist_title">No %1$s on your watchlist</string>
@@ -4556,6 +4560,7 @@
     <string name="format_check_answer_atmos">Dolby Atmos</string>
     <string name="format_check_answer_truehd">Dolby TrueHD</string>
     <string name="format_check_answer_eac3">Dolby Digital Plus</string>
+    <string name="format_check_answer_dolby_digital" translatable="false">Dolby Digital</string>
     <string name="format_check_answer_dtsx">DTS:X</string>
     <string name="format_check_answer_dtshd">DTS-HD</string>
     <string name="format_check_answer_dts">DTS</string>

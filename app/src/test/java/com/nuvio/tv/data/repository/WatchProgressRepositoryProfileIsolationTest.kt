@@ -227,7 +227,8 @@ class WatchProgressRepositoryProfileIsolationTest {
             trackingProgressProviders = TrackingProgressProviderRegistry(emptySet()),
             trackingHistoryWriters = TrackingHistoryWriterRegistry(emptySet()),
             mutationStore = mutationStore,
-            serverWatched = mockk(relaxed = true)
+            serverWatched = mockk(relaxed = true),
+            addonEventDispatcher = mockk(relaxed = true)
         )
         return Harness(
             repository = repository,

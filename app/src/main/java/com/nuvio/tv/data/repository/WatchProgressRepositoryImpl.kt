@@ -157,6 +157,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
     private val trackingHistoryWriters: TrackingHistoryWriterRegistry,
     private val mutationStore: WatchStateMutationStore,
     private val serverWatched: ServerWatched,
+    private val addonEventDispatcher: AddonEventDispatcher,
 ) : WatchProgressRepository {
     companion object {
         private const val TAG = "WatchProgressRepo"
@@ -937,9 +938,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
         }
         if (syncRemote) {
             if (profileManager.activeProfileId.value == profileId) {
-                activeProgressProvider()?.let { provider ->
-                    progressList.forEach { progress -> provider.applyOptimisticProgress(progress, quiet = false) }
-                }
+                activeProgressProvider()?.applyOptimisticProgressBatch(progressList, quiet = false)
             }
         }
         watchProgressPreferences.saveProgressBatch(progressList, profileId = profileId)
@@ -994,6 +993,47 @@ class WatchProgressRepositoryImpl @Inject constructor(
         episode: Int?,
         wholeSeries: Boolean
     ) {
+        if (!addonEventDispatcher.hasEnabledAddonFor(ADDON_LIBRARY_RESOURCE)) {
+            removeFromHistoryInternal(contentId, videoId, season, episode, wholeSeries)
+            return
+        }
+        val isEpisode = season != null || episode != null
+        val wasWatched = runCatching { isWatched(contentId, videoId, season, episode).first() }.getOrDefault(true)
+        val type = resolveAddonContentType(contentId, isEpisode)
+        removeFromHistoryInternal(contentId, videoId, season, episode, wholeSeries)
+        if (!wasWatched) return
+        if (!isEpisode) {
+            addonEventDispatcher.library(type, contentId, AddonLibraryAction.UNWATCHED)
+        } else {
+            addonEventDispatcher.libraryVideos(
+                type = type,
+                id = contentId,
+                action = AddonLibraryAction.UNWATCHED,
+                videoIds = listOf(addonEpisodeVideoId(contentId, videoId, season, episode))
+            )
+        }
+    }
+
+    private fun addonEpisodeVideoId(contentId: String, videoId: String?, season: Int?, episode: Int?): String =
+        videoId?.takeIf { it.isNotBlank() && it != contentId } ?: "$contentId:${season ?: 0}:${episode ?: 0}"
+
+    private suspend fun resolveAddonContentType(contentId: String, isEpisode: Boolean): String {
+        val profileId = profileManager.activeProfileId.value
+        val knownType = runCatching {
+            watchedItemsPreferences.getAllItems(profileId).firstOrNull { it.contentId == contentId }?.contentType
+                ?: watchProgressPreferences.getAllRawEntries(profileId).values
+                    .firstOrNull { it.contentId == contentId }?.contentType
+        }.getOrNull()
+        return knownType?.takeIf { it.isNotBlank() } ?: if (isEpisode) "series" else "movie"
+    }
+
+    private suspend fun removeFromHistoryInternal(
+        contentId: String,
+        videoId: String?,
+        season: Int?,
+        episode: Int?,
+        wholeSeries: Boolean
+    ) {
         val profileId = profileManager.activeProfileId.value
         val watchedGeneration = watchedItemsPreferences.captureGeneration(profileId)
         val remoteDeleteKeys = resolveRemoteDeleteKeys(contentId, season, episode, profileId = profileId)
@@ -1040,6 +1080,31 @@ class WatchProgressRepositoryImpl @Inject constructor(
         episodes: List<Triple<Int, Int, String?>>
     ) {
         if (episodes.isEmpty()) return
+        if (!addonEventDispatcher.hasEnabledAddonFor(ADDON_LIBRARY_RESOURCE)) {
+            removeFromHistoryBatchInternal(contentId, videoId, episodes)
+            return
+        }
+        val watchedEpisodes = runCatching { getWatchedShowEpisodes()[contentId] }.getOrNull()
+        val type = resolveAddonContentType(contentId, isEpisode = true)
+        removeFromHistoryBatchInternal(contentId, videoId, episodes)
+        val changedEpisodes = episodes.filter { (season, episode, _) ->
+            watchedEpisodes?.contains(season to episode) ?: true
+        }
+        addonEventDispatcher.libraryVideos(
+            type = type,
+            id = contentId,
+            action = AddonLibraryAction.UNWATCHED,
+            videoIds = changedEpisodes.map { (season, episode, episodeVideoId) ->
+                addonEpisodeVideoId(contentId, episodeVideoId, season, episode)
+            }
+        )
+    }
+
+    private suspend fun removeFromHistoryBatchInternal(
+        contentId: String,
+        videoId: String?,
+        episodes: List<Triple<Int, Int, String?>>
+    ) {
         val profileId = profileManager.activeProfileId.value
         val watchedGeneration = watchedItemsPreferences.captureGeneration(profileId)
         val episodePairs = episodes.map { (season, episode, _) -> season to episode }
@@ -1054,9 +1119,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
         watchProgressPreferences.removeProgressBatch(contentId, episodePairs, profileId)
         watchedItemsPreferences.unmarkAsWatchedBatch(contentId, episodePairs, profileId = profileId, generation = watchedGeneration)
         connectedProgressProviders().forEach { provider ->
-            episodes.forEach { (season, episode, _) ->
-                provider.applyOptimisticRemoval(contentId, season, episode)
-            }
+            provider.applyOptimisticRemovalBatch(contentId, episodePairs)
         }
         val media = episodes.map { (season, episode, epVideoId) ->
             buildTrackingMediaReference(
@@ -1093,6 +1156,39 @@ class WatchProgressRepositoryImpl @Inject constructor(
     }
 
     override suspend fun markAsCompleted(
+        progress: WatchProgress,
+        profileId: Int,
+        broadcastTrackingHistory: Boolean
+    ) {
+        val emitsAddonEvent = broadcastTrackingHistory &&
+            addonEventDispatcher.hasEnabledAddonFor(ADDON_LIBRARY_RESOURCE)
+        val wasWatched = emitsAddonEvent && runCatching {
+            isWatched(progress.contentId, progress.videoId, progress.season, progress.episode).first()
+        }.getOrDefault(false)
+        markAsCompletedInternal(progress, profileId, broadcastTrackingHistory)
+        if (emitsAddonEvent && !wasWatched) {
+            emitAddonWatchedEvents(listOf(progress))
+        }
+    }
+
+    private fun emitAddonWatchedEvents(progressList: List<WatchProgress>) {
+        progressList.groupBy { it.contentType to it.contentId }.forEach { (key, items) ->
+            val (type, contentId) = key
+            val episodes = items.filter { it.season != null || it.episode != null }
+            if (episodes.size < items.size) {
+                addonEventDispatcher.library(type, contentId, AddonLibraryAction.WATCHED)
+            } else {
+                addonEventDispatcher.libraryVideos(
+                    type = type,
+                    id = contentId,
+                    action = AddonLibraryAction.WATCHED,
+                    videoIds = episodes.map { addonEpisodeVideoId(contentId, it.videoId, it.season, it.episode) }
+                )
+            }
+        }
+    }
+
+    private suspend fun markAsCompletedInternal(
         progress: WatchProgress,
         profileId: Int,
         broadcastTrackingHistory: Boolean
@@ -1143,6 +1239,25 @@ class WatchProgressRepositoryImpl @Inject constructor(
 
     override suspend fun markAsCompletedBatch(progressList: List<WatchProgress>) {
         if (progressList.isEmpty()) return
+        if (!addonEventDispatcher.hasEnabledAddonFor(ADDON_LIBRARY_RESOURCE)) {
+            markAsCompletedBatchInternal(progressList)
+            return
+        }
+        val watchedEpisodes = runCatching { getWatchedShowEpisodes() }.getOrDefault(emptyMap())
+        val changedProgress = progressList.filterNot { progress ->
+            val season = progress.season
+            val episode = progress.episode
+            if (season != null && episode != null) {
+                watchedEpisodes[progress.contentId]?.contains(season to episode) == true
+            } else {
+                runCatching { isWatched(progress.contentId, progress.videoId, null, null).first() }.getOrDefault(false)
+            }
+        }
+        markAsCompletedBatchInternal(progressList)
+        emitAddonWatchedEvents(changedProgress)
+    }
+
+    private suspend fun markAsCompletedBatchInternal(progressList: List<WatchProgress>) {
         val profileId = profileManager.activeProfileId.value
         val watchedGeneration = watchedItemsPreferences.captureGeneration(profileId)
         val firstProgress = progressList.first()
@@ -1168,10 +1283,8 @@ class WatchProgressRepositoryImpl @Inject constructor(
         mutationStore.queueProgressUpserts(completedList.associateBy(::progressKey), profileId)
         if (profileManager.activeProfileId.value == profileId) {
             activeProgressProvider()?.let { provider ->
-                completedList.forEach { progress ->
-                    optimisticContinueWatchingUpdates.tryEmit(progress)
-                    provider.applyOptimisticProgress(progress, quiet = false)
-                }
+                completedList.forEach { progress -> optimisticContinueWatchingUpdates.tryEmit(progress) }
+                provider.applyOptimisticProgressBatch(completedList, quiet = false)
             }
         }
         watchProgressPreferences.saveProgressBatch(completedList, profileId = profileId)

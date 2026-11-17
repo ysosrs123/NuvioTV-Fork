@@ -1917,12 +1917,17 @@ fun PlayerScreen(
         // Controls remain above that window, preserving the existing overlay ordering.
         Box(Modifier.fillMaxSize().zIndex(3f).hdrOverlayDim(dimHdr)) {
             LoadingOverlay(
-                visible = uiState.showLoadingOverlay && uiState.error == null && !postPlayRecommendationState.isVisible,
+                visible = (uiState.showLoadingOverlay || uiState.showEpisodeAutoPlayLoadingOverlay) &&
+                    uiState.error == null && !postPlayRecommendationState.isVisible,
                 backdropUrl = uiState.backdrop,
                 logoUrl = uiState.logo,
                 title = uiState.title,
-                message = uiState.loadingMessage.takeIf { uiState.showPlayerLoadingStatus || uiState.isTorrentStream },
-                sourceLine = if (!uiState.showPlayerLoadingSource) null else run {
+                message = if (uiState.isEpisodeAutoPlaySearching) {
+                    stringResource(R.string.stream_finding_source).takeIf { uiState.showPlayerLoadingStatus }
+                } else {
+                    uiState.loadingMessage.takeIf { uiState.showPlayerLoadingStatus || uiState.isTorrentStream }
+                },
+                sourceLine = if (!uiState.showPlayerLoadingSource || uiState.isEpisodeAutoPlaySearching) null else run {
                     val provider = resolveStreamProvider(
                         streamName = uiState.currentStreamName,
                         streamDescription = null,
@@ -1934,8 +1939,10 @@ fun PlayerScreen(
                         .joinToString(" \u00b7 ")
                         .takeIf { it.isNotBlank() }
                 },
-                filename = viewModel.currentFilename.takeIf { uiState.showPlayerLoadingSource },
-                progress = uiState.loadingProgress,
+                filename = viewModel.currentFilename.takeIf {
+                    uiState.showPlayerLoadingSource && !uiState.isEpisodeAutoPlaySearching
+                },
+                progress = uiState.loadingProgress.takeUnless { uiState.isEpisodeAutoPlaySearching },
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(2f)
@@ -2571,7 +2578,8 @@ fun PlayerScreen(
 
             // Episodes/streams side panel (slides in from right)
             AnimatedVisibility(
-                visible = uiState.showEpisodesPanel && uiState.error == null,
+                visible = uiState.showEpisodesPanel && uiState.error == null &&
+                    !uiState.showEpisodeAutoPlayLoadingOverlay,
                 enter = fadeIn(animationSpec = tween(120)),
                 exit = fadeOut(animationSpec = tween(120))
             ) {
@@ -2585,7 +2593,8 @@ fun PlayerScreen(
 
             // Panel itself (slides in from right)
             AnimatedVisibility(
-                visible = uiState.showEpisodesPanel && uiState.error == null,
+                visible = uiState.showEpisodesPanel && uiState.error == null &&
+                    !uiState.showEpisodeAutoPlayLoadingOverlay,
                 enter = slideInHorizontally(
                     animationSpec = tween(220),
                     initialOffsetX = { it }

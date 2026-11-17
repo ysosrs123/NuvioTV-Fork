@@ -2,6 +2,8 @@ package com.nuvio.tv.ui.screens.player
 
 import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.core.util.TtffTrace
+import com.nuvio.tv.data.repository.AddonPlayerAction
+import com.nuvio.tv.data.repository.AddonPlayerEventTarget
 import android.net.Uri
 import android.util.Log
 import androidx.media3.common.PlaybackException
@@ -421,6 +423,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                     var firstFrameReady = hasRenderedFirstFrame
                         if (!firstFrameReady) {
                             firstFrameReady = view.isPositionFromRequestedMedia() &&
+                                view.isPositionReportedByMpv() &&
                                 (pos > 0L || (playingNow && !cacheBuffering && playerDuration > 0L))
                             if (firstFrameReady) {
                                 hasRenderedFirstFrame = true
@@ -447,6 +450,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                             }
                         }
                     maybeRunMpvStartupWatchdog(view)
+                    maybeRunMpvNoProgressCheck(view, pos, playingNow, cacheBuffering)
                     if (playerDuration > lastKnownDuration) {
                         lastKnownDuration = playerDuration
                     }
@@ -467,7 +471,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                         playerReportsLive = view.isLiveStreamNow() || mpvDurationGrowth.grew,
                         isPlaying = playingForWatchClock
                     )
-                    recordMpvSample(pos, cacheAheadMs, playingNow, cacheBuffering)
+                    recordMpvSample(pos, cacheAheadMs, playingNow, cacheBuffering) { view.frameDrops() }
                     // Prefer the largest known duration; MPV can report a shorter one transiently.
                     // The playerDuration check stays: lastKnownDuration can still hold the previous
                     // stream's value until it resets.
@@ -970,6 +974,7 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport(choices: Playback
     val filmFps = _exoPlayer?.videoFormat?.frameRate?.takeIf { it > 0f }
     val measuredHz = com.nuvio.tv.core.player.DisplayRefreshMeter.latest?.takeIf { it.reliable }?.measuredHz
     val arcMatching = currentPlayerSettingsForReport.frameRateMatchingMode.name
+    val arcRequest = com.nuvio.tv.core.player.FrameRateUtils.lastRequest
     val requestVersion = playbackIssueReportRequestVersion.incrementAndGet()
     _uiState.update {
         it.copy(
@@ -985,7 +990,7 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport(choices: Playback
                 input.copy(
                     network = PlaybackReportFacts.network(appContext),
                     box = PlaybackReportFacts.box(appContext),
-                    display = PlaybackReportFacts.display(appContext, filmFps, arcMatching, measuredHz)
+                    display = PlaybackReportFacts.display(appContext, filmFps, arcMatching, measuredHz, arcRequest)
                 )
             )
         }
@@ -1229,6 +1234,7 @@ internal fun PlayerRuntimeController.handleNaturalPlaybackEnded() {
         return
     }
 
+    emitAddonPlayerEvent(AddonPlayerAction.STOP)
     emitCompletionScrobbleStop(progressPercent = 99.5f)
     if (contentType.equals("cloud", ignoreCase = true)) {
         saveCloudLibraryProgress(position, duration, completed = true)
@@ -1405,7 +1411,38 @@ internal fun PlayerRuntimeController.buildScrobbleItem(): TrackingMediaReference
     }
 }
 
+internal fun PlayerRuntimeController.emitAddonPlayerEvent(
+    action: AddonPlayerAction,
+    resend: Boolean = false
+) {
+    if (isPlaceholderPlayback()) return
+    val positionMs = currentPlaybackPositionMs() ?: 0L
+    val durationMs = currentPlaybackDurationMs().takeIf { it > 0 } ?: lastKnownDuration
+    val active = activeAddonPlayerEventTarget
+    if (action == AddonPlayerAction.STOP) {
+        if (active == null) return
+        activeAddonPlayerEventTarget = null
+        lastAddonPlayerAction = null
+        addonEventDispatcher.player(active, AddonPlayerAction.STOP, positionMs, durationMs)
+        return
+    }
+    val type = contentType ?: return
+    val videoId = currentVideoId?.takeIf { it.isNotBlank() } ?: contentId ?: return
+    val target = AddonPlayerEventTarget(type = type, videoId = videoId)
+    if (active != null && active != target) {
+        addonEventDispatcher.player(active, AddonPlayerAction.STOP, positionMs, durationMs)
+        activeAddonPlayerEventTarget = null
+        lastAddonPlayerAction = null
+    }
+    if (action == AddonPlayerAction.PAUSE && activeAddonPlayerEventTarget == null) return
+    if (!resend && action == lastAddonPlayerAction && activeAddonPlayerEventTarget == target) return
+    activeAddonPlayerEventTarget = target
+    lastAddonPlayerAction = action
+    addonEventDispatcher.player(target, action, positionMs, durationMs)
+}
+
 internal fun PlayerRuntimeController.emitScrobbleStart() {
+    emitAddonPlayerEvent(AddonPlayerAction.START)
     logScrobbleDiagnostic("start_evaluated")
     if (isPlaceholderPlayback()) {
         logScrobbleDiagnostic("start_skipped", "reason=short_placeholder")
@@ -1552,6 +1589,7 @@ internal fun PlayerRuntimeController.emitCompletionScrobbleStop(progressPercent:
 }
 
 internal fun PlayerRuntimeController.emitStopScrobbleForCurrentProgress() {
+    emitAddonPlayerEvent(AddonPlayerAction.STOP)
     val progressPercent = currentPlaybackProgressPercent()
     if (shouldSendStopWhenLeftPaused(
             hasPausedScrobbleForCurrentItem,
@@ -1592,6 +1630,7 @@ private fun PlayerRuntimeController.emitStopWhenLeftPaused(progressPercent: Floa
 }
 
 internal fun PlayerRuntimeController.emitPauseScrobbleForCurrentProgress() {
+    emitAddonPlayerEvent(AddonPlayerAction.PAUSE)
     emitScrobblePause(progressPercent = currentPlaybackProgressPercent())
 }
 
@@ -1639,6 +1678,7 @@ internal fun PlayerRuntimeController.scheduleProgressSyncAfterSeek() {
     seekProgressSyncJob = scope.launch {
         delay(seekProgressSyncDebounceMs)
         saveWatchProgress()
+        lastAddonPlayerAction?.let { action -> emitAddonPlayerEvent(action, resend = true) }
 
         val progressPercent = currentPlaybackProgressPercent()
         emitSeekScrobbleRestart(progressPercent = progressPercent)
@@ -1845,6 +1885,17 @@ internal fun PlayerRuntimeController.deferFilmOpen(positionMs: Long) {
 }
 
 private const val DEFERRED_OPEN_FAILSAFE_MS = 8_000L
+
+/**
+ * A Blu-ray .m2ts / .mts goes on to MPV once ExoPlayer refuses it, and nothing can read it for a thumbnails screen,
+ * so it opens at once instead of waiting out [DEFERRED_OPEN_FAILSAFE_MS].
+ */
+internal fun PlayerRuntimeController.keepsDeferredOpenFor(fileName: String?): Boolean {
+    if (!UnsupportedFormatMpvFallbackPolicy.hasBlurayTransportStreamName(fileName)) return true
+    com.nuvio.tv.core.player.thumbnail.SeekThumbnails.deferredOpenEnded()
+    Log.i(PlayerRuntimeController.TAG, "prepare: Blu-ray transport stream, the film opens without the thumbnails screen")
+    return false
+}
 
 internal fun PlayerRuntimeController.openDeferredFilm(play: Boolean, why: String) {
     if (!openDeferredForThumbnails) return
@@ -2422,7 +2473,8 @@ fun PlayerRuntimeController.onEvent(
             _uiState.update {
                 it.copy(
                     showEpisodeStreams = false,
-                    isLoadingEpisodeStreams = false
+                    isLoadingEpisodeStreams = false,
+                    isEpisodeAutoPlaySearching = false
                 )
             }
         }
@@ -2488,6 +2540,7 @@ fun PlayerRuntimeController.onEvent(
             playbackIssueReportRequestVersion.incrementAndGet()
             resetErrorRetryState()
             deadSourceFailoverCount = 0
+            torrentErrorRecoveryHash = null
             serverDeadAnswerRetried.clear()
             lastPlaybackIssueError = null
             clearPendingEngineSwitchTrackPreference()
@@ -2506,7 +2559,12 @@ fun PlayerRuntimeController.onEvent(
                     showSubtitleDelayOverlay = false
                 )
             }
-            if (isTorrentStream && currentInfoHash != null) {
+            val retryTorrent = TorrentRetryTarget.choose(
+                streamIsTorrent = isTorrentStream || _uiState.value.isTorrentStream,
+                live = currentInfoHash?.let { TorrentRetryTarget(it, currentFileIdx) },
+                saved = lastTorrentRetryTarget
+            )
+            if (retryTorrent != null) {
                 releasePlayer()
                 stopTorrentStream()
                 launchTorrentSourceStream(
@@ -2516,14 +2574,15 @@ fun PlayerRuntimeController.onEvent(
                         description = null,
                         url = null,
                         ytId = null,
-                        infoHash = currentInfoHash,
-                        fileIdx = currentFileIdx,
+                        infoHash = retryTorrent.infoHash,
+                        fileIdx = retryTorrent.fileIdx,
                         externalUrl = null,
                         behaviorHints = null,
                         addonName = currentAddonName ?: "",
-                        addonLogo = currentAddonLogo
+                        addonLogo = currentAddonLogo,
+                        sources = currentTorrentSources
                     ),
-                    infoHash = currentInfoHash!!,
+                    infoHash = retryTorrent.infoHash,
                     loadSavedProgress = true
                 )
             } else {
@@ -2573,6 +2632,7 @@ fun PlayerRuntimeController.onEvent(
         PlayerEvent.OnDismissNextEpisodeCard -> {
             nextEpisodeAutoPlayJob?.cancel()
             nextEpisodeAutoPlayJob = null
+            streamRepository.stopNextEpisodePluginSearches()
             _uiState.update {
                 it.copy(
                     postPlayMode = null,
@@ -2901,7 +2961,8 @@ private fun PlayerRuntimeController.seekSettleApplies(): Boolean = SeekSettle.ap
 /** The last key of a run came up: playback holds on the target for [SeekSettle.waitMs], then seeks. */
 private fun PlayerRuntimeController.startSeekSettle() {
     pendingPreviewSeekExpiryJob?.cancel()
-    holdPlaybackForScrub(always = true)
+    val playing = hasActivePlayIntent() || (scrubHoldPaused && !userPausedManually)
+    if (SeekSettle.holdsDuringWait(seekingMode)) holdPlaybackForScrub(always = true) else releaseScrubHold()
     // A glide publishes a few times a second; the bar and the thumbnail take its last position.
     pendingPreviewSeekPosition?.let { target ->
         _uiState.update { it.copy(pendingPreviewSeekPosition = target, previewThumbPositionMs = target) }
@@ -2912,7 +2973,9 @@ private fun PlayerRuntimeController.startSeekSettle() {
     }
     seekSettleJob?.cancel()
     seekSettleJob = scope.launch {
-        kotlinx.coroutines.delay(SeekSettle.waitMs(afterHold = scrubHoldClock.releasedAfterHold, mode = seekingMode))
+        kotlinx.coroutines.delay(
+            SeekSettle.waitMs(afterHold = scrubHoldClock.releasedAfterHold, mode = seekingMode, playing = playing)
+        )
         seekSettleJob = null
         finishSeekSettle(seek = SeekSettle.seeksAfterWait(seekingMode), reason = "timeout")
     }

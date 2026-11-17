@@ -155,6 +155,9 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.auth.DeviceSessionRegistration
 import com.nuvio.tv.core.deeplink.DeepLinkHandler
+import com.nuvio.tv.core.deeplink.DeepLinkInstallResult
+import com.nuvio.tv.data.repository.TrackingAddonConsentController
+import com.nuvio.tv.ui.components.TrackingAddonConsentDialog
 import com.nuvio.tv.core.deeplink.DeepLinkParser
 import com.nuvio.tv.core.player.PlayerWindowBackdrop
 import com.nuvio.tv.core.profile.ProfileManager
@@ -206,10 +209,12 @@ import com.nuvio.tv.ui.theme.NuvioLayout
 import com.nuvio.tv.ui.theme.NuvioMotion
 import com.nuvio.tv.ui.theme.NuvioPrimitives
 import com.nuvio.tv.ui.theme.NuvioRadii
+import com.nuvio.tv.core.performance.rememberLauncherOnlyAccessibility
 import com.nuvio.tv.ui.theme.NuvioStrokes
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.theme.ThemeColors
 import com.nuvio.tv.ui.theme.accentBrush
+import com.nuvio.tv.ui.util.InstallGentlePrefetchScheduler
 import com.nuvio.tv.ui.util.LocalFastHorizontalNavigationEnabled
 import com.nuvio.tv.ui.util.LocalRecompositionHighlighterEnabled
 import com.nuvio.tv.ui.util.rememberDrawerItemFocusRequesters
@@ -372,6 +377,9 @@ open class MainActivity : ComponentActivity() {
     @Inject
     lateinit var calendarEpisodeResolver: dagger.Lazy<com.nuvio.tv.core.calendar.CalendarEpisodeResolver>
 
+    @Inject
+    lateinit var trackingAddonConsentController: TrackingAddonConsentController
+
     private val pendingDeepLinkUrl = MutableStateFlow<String?>(null)
     private val pendingLaunchIntent = MutableStateFlow<Intent?>(null)
 
@@ -485,7 +493,7 @@ open class MainActivity : ComponentActivity() {
         val launchEpisodeTitle = intent?.getStringExtra("episodeTitle")
         captureDeepLinkIntent(intent)
 
-        setContent { LauncherOnlySemantics(hideSemanticsTree.value) {
+        setContent { InstallGentlePrefetchScheduler(); LauncherOnlySemantics(rememberLauncherOnlyAccessibility().value) {
             var hasSelectedProfileThisSession by rememberSaveable { mutableStateOf(false) }
             var v2ProfilePickerRequested by rememberSaveable { mutableStateOf(false) }
             var onboardingCompletedThisSession by remember { mutableStateOf(false) }
@@ -951,8 +959,31 @@ open class MainActivity : ComponentActivity() {
                             if (pendingDeepLinkUrl.value == url) {
                                 pendingDeepLinkUrl.value = null
                             }
-                            Toast.makeText(context, installResult.message, Toast.LENGTH_LONG).show()
+                            if (installResult !is DeepLinkInstallResult.ConsentRequired) {
+                                Toast.makeText(context, installResult.message, Toast.LENGTH_LONG).show()
+                            }
                         }
+                    }
+
+                    val pendingTrackingInstall by trackingAddonConsentController.pending.collectAsState()
+                    pendingTrackingInstall?.let { pending ->
+                        TrackingAddonConsentDialog(
+                            addonName = pending.addon.displayName.ifBlank { pending.addon.baseUrl },
+                            onInstall = {
+                                lifecycleScope.launch {
+                                    val installed = trackingAddonConsentController.install() ?: return@launch
+                                    Toast.makeText(
+                                        context,
+                                        context.getString(
+                                            R.string.addon_install_success,
+                                            installed.displayName.ifBlank { installed.baseUrl }
+                                        ),
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            },
+                            onDismiss = trackingAddonConsentController::dismiss
+                        )
                     }
 
                     if (needsEssentialAddonSetup) {
@@ -1222,7 +1253,9 @@ open class MainActivity : ComponentActivity() {
                                 if (pendingDeepLinkUrl.value == url) {
                                     pendingDeepLinkUrl.value = null
                                 }
-                                Toast.makeText(context, installResult.message, Toast.LENGTH_LONG).show()
+                                if (installResult !is DeepLinkInstallResult.ConsentRequired) {
+                                    Toast.makeText(context, installResult.message, Toast.LENGTH_LONG).show()
+                                }
                             }
                             null -> {
                                 pendingDeepLinkUrl.value = null
@@ -1600,11 +1633,9 @@ open class MainActivity : ComponentActivity() {
         } }
     }
 
-    private val hideSemanticsTree = mutableStateOf(false)
-
     override fun onResume() {
         super.onResume()
-        hideSemanticsTree.value = com.nuvio.tv.core.performance.launcherOnlySemanticsTest(this)
+        com.nuvio.tv.core.image.PosterUpdates.cameBack(System.currentTimeMillis(), android.os.SystemClock.elapsedRealtime())
         ambientIdleController.dismiss()
         qualityGovernor.resume(System.nanoTime())
         if (::jankStats.isInitialized) jankStats.isTrackingEnabled = true
@@ -1756,6 +1787,7 @@ open class MainActivity : ComponentActivity() {
     override fun onStop() {
         externalPlaybackTracker.onExternalPlayerCoveredApp()
         super.onStop()
+        com.nuvio.tv.core.image.PosterUpdates.wentAway(System.currentTimeMillis())
         startupSyncService.stopPeriodicSurfacePulls()
         androidTvChannelSyncService.onForegroundChanged(false)
         partyRuntime.setAppVisible(false)
@@ -1770,7 +1802,7 @@ open class MainActivity : ComponentActivity() {
     }
 }
 
-/** Test switch: see [com.nuvio.tv.core.performance.launcherOnlySemanticsTest]. */
+/** See [com.nuvio.tv.core.performance.launcherOnlyNow]. */
 @Composable
 private fun LauncherOnlySemantics(hide: Boolean, content: @Composable () -> Unit) {
     Box(

@@ -24,6 +24,7 @@ import com.nuvio.tv.data.local.PlayerSettingsDataStore
 import com.nuvio.tv.data.local.TraktAuthDataStore
 import com.nuvio.tv.data.local.TraktSettingsDataStore
 import com.nuvio.tv.data.local.TmdbSettingsDataStore
+import com.nuvio.tv.data.repository.AddonEpisodeAirDate
 import com.nuvio.tv.data.repository.rankedEntries
 import com.nuvio.tv.data.repository.ImdbEpisodeRatingsRepository
 import com.nuvio.tv.data.trailer.TrailerPlaybackFailures
@@ -60,6 +61,9 @@ import com.nuvio.tv.domain.repository.WatchProgressRepository
 import com.nuvio.tv.data.local.WatchedItemsPreferences
 import com.nuvio.tv.data.local.TrailerSettingsDataStore
 import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.ui.components.posteroptions.TitleAlias
+import com.nuvio.tv.ui.components.posteroptions.isInLibraryOrAlias
+import com.nuvio.tv.ui.components.posteroptions.toggleDefaultMerging
 import com.nuvio.tv.data.mediaserver.withoutUnmarked
 import com.nuvio.tv.data.trailer.TrailerService
 import com.nuvio.tv.core.util.withAppLocale
@@ -162,6 +166,8 @@ class MetaDetailsViewModel @Inject constructor(
 ) : ViewModel() {
     private val traceSetup = com.nuvio.tv.core.performance.DetailEntryTrace.mark("viewmodel_setup")
     private val itemId: String = savedStateHandle["itemId"] ?: ""
+    /** The id the page was opened with; a poster menu may have saved the title under it. */
+    val navigationItemId: String get() = itemId
     private val isServerItem = ServerItemRef.isServerId(itemId)
     private val itemType: String = savedStateHandle["itemType"] ?: ""
     private val preferredAddonBaseUrl: String? = savedStateHandle.get<String>("addonBaseUrl")
@@ -758,7 +764,7 @@ class MetaDetailsViewModel @Inject constructor(
 
         viewModelScope.launch {
             canonicalKey
-                .flatMapLatest { (id, type) -> libraryRepository.isInLibrary(itemId = id, itemType = type) }
+                .flatMapLatest { (id, type) -> libraryRepository.isInLibraryOrAlias(id, type, navigationAlias()) }
                 .distinctUntilChanged()
                 .collectLatest { inLibrary ->
                     _uiState.update { state ->
@@ -1947,7 +1953,8 @@ class MetaDetailsViewModel @Inject constructor(
 
                 val ratings = imdbEpisodeRatingsRepository.getEpisodeRatings(
                     imdbId = imdbId,
-                    tmdbId = tmdbId
+                    tmdbId = tmdbId,
+                    addonEpisodes = meta.videos.map { AddonEpisodeAirDate(it.season, it.episode, it.released) }
                 )
 
                 _uiState.update { state ->
@@ -2758,7 +2765,9 @@ class MetaDetailsViewModel @Inject constructor(
             val wasInLibrary = _uiState.value.isInLibrary
             _uiState.update { it.copy(defaultLibraryTogglePending = true) }
             runCatching {
-                toggleDefaultWithTimeout(input)
+                withLibraryToggleTimeout({ context.getString(com.nuvio.tv.R.string.detail_error_update_library_failed) }) {
+                    libraryRepository.toggleDefaultMerging(input, navigationAlias())
+                }
             }.onSuccess { result ->
                 if (result.requiresRemovalConfirmation) {
                     pendingDefaultLibraryToggle = input
@@ -2788,6 +2797,8 @@ class MetaDetailsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun navigationAlias(): TitleAlias? = TitleAlias.of(itemId, itemType)
 
     private suspend fun toggleDefaultWithTimeout(
         input: LibraryEntryInput,

@@ -1777,21 +1777,22 @@ class StreamScreenViewModel @Inject constructor(
                     updateUiStateIfChanged {
                         it.copy(directAutoPlayMessage = context.getString(R.string.debrid_not_cached_trying_next))
                     }
-                    resolveStreamForPlayback(next, tried)?.also {
-                        if (playedFallbackSource == null) playedFallbackSource = next
-                        updateUiStateIfChanged { state ->
-                            if (state.isDirectAutoPlayFlow) state.copy(directAutoPlayMessage = null)
-                            else state.copy(showDirectAutoPlayOverlay = false, directAutoPlayMessage = null)
-                        }
-                    }
+                    resolveFallbackSource(next, tried)
                 } else {
                     showDirectDebridPlaybackError(context.getString(R.string.debrid_not_cached), refreshStreams = false)
                     null
                 }
             }
             DirectDebridResolveResult.Stale -> {
-                showDirectDebridPlaybackError(context.getString(R.string.debrid_stale_stream), refreshStreams = true)
-                null
+                val tried = triedKeys + listOfNotNull(SourceFailoverSelection.failoverKey(stream))
+                val next = nextCachedSourceAfter(stream, tried)
+                if (next != null && tried.size <= MAX_NOT_CACHED_FALLBACKS) {
+                    Log.i(TAG, "resolveStreamForPlayback: result expired, trying the next cached source")
+                    resolveFallbackSource(next, tried)
+                } else {
+                    showDirectDebridPlaybackError(context.getString(R.string.debrid_stale_stream), refreshStreams = true)
+                    null
+                }
             }
             is DirectDebridResolveResult.Busy -> {
                 showDirectDebridPlaybackError(context.getString(R.string.debrid_busy, result.httpStatus), refreshStreams = false)
@@ -1960,6 +1961,15 @@ class StreamScreenViewModel @Inject constructor(
             updateUiStateIfChanged { it.copy(externalPlayerOverlayVisible = false) }
         }
     }
+
+    private suspend fun resolveFallbackSource(next: Stream, tried: Set<String>): StreamPlaybackInfo? =
+        resolveStreamForPlayback(next, tried)?.also {
+            if (playedFallbackSource == null) playedFallbackSource = next
+            updateUiStateIfChanged { state ->
+                if (state.isDirectAutoPlayFlow) state.copy(directAutoPlayMessage = null)
+                else state.copy(showDirectAutoPlayOverlay = false, directAutoPlayMessage = null)
+            }
+        }
 
     /** The next entry in the list, after [stream], that is a ready link or a cached debrid source. */
     private fun nextCachedSourceAfter(stream: Stream, tried: Set<String>): Stream? {

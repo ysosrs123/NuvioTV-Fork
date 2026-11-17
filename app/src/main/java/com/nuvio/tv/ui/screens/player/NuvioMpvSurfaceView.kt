@@ -6,10 +6,12 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.nuvio.tv.core.player.ImportedSubtitleFontStore
 import com.nuvio.tv.data.local.MpvHardwareDecodeMode
+import com.nuvio.tv.data.local.MpvDirectDecodeMode
 import com.nuvio.tv.data.local.NightModeLevel
 import com.nuvio.tv.data.local.SubtitleStyleSettings
 import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.MPV
+import `is`.xyz.mpv.MPVNode
 import `is`.xyz.mpv.Utils
 import java.util.Locale
 import kotlin.math.abs
@@ -23,7 +25,27 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : BaseMPVView(context, attrs) {
 
+    @Volatile
     private var initialized = false
+    private val propertyCache = MpvPropertyCache(clockMs = android.os.SystemClock::elapsedRealtime)
+
+    /** True while the mpv worker is still tearing the last core down. */
+    @Volatile
+    private var closing = false
+
+    /** Changes with every start and release, so work queued for one core never runs on the next. */
+    @Volatile
+    var coreGeneration = 0
+        private set
+    private val propertyCacheObserver = object : MPV.EventObserver {
+        override fun eventProperty(property: String) = cacheProperty(property, null)
+        override fun eventProperty(property: String, value: Long) = cacheProperty(property, value)
+        override fun eventProperty(property: String, value: Boolean) = cacheProperty(property, value)
+        override fun eventProperty(property: String, value: String) = cacheProperty(property, value)
+        override fun eventProperty(property: String, value: Double) = cacheProperty(property, value)
+        override fun eventProperty(property: String, value: MPVNode) = Unit
+        override fun event(eventId: Int, data: MPVNode) = Unit
+    }
     private var mpvLoadedImportedFontIds: Set<String> = emptySet()
     private var lastMpvSubFont: MpvSubFontPick? = null
     private var appliedSoundFilterChain = ""
@@ -46,8 +68,15 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     private var requestedMediaUrl: String? = null
     private var pathAtMediaRequest: String? = null
     private var hardwareDecodeMode: MpvHardwareDecodeMode = MpvHardwareDecodeMode.AUTO_SAFE
+    private var directDecodeMode: MpvDirectDecodeMode = MpvDirectDecodeMode.AUTOMATIC
+    private var directRefusedOnThisBox = false
+    private var directRequestedFrom: String? = null
+    /** Records a refusal of the direct decoder for a file; returns true once the box counts as refusing it. */
+    var onDirectDecodeRefused: ((String?) -> Boolean)? = null
+    var onDirectDecodeWorked: (() -> Unit)? = null
     private var hi10pGnextSoftwareFallbackActive = false
     private var appliedHi10pGnextSoftwareFallback: Boolean? = null
+    @Volatile
     private var cachedTrackList: MpvTrackListCache? = null
     private var currentAspectMode: AspectMode = AspectMode.ORIGINAL
     private var pendingAspectRetryCount = 0
@@ -55,8 +84,22 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         applyAspectModeInternal(currentAspectMode, allowRetry = true)
     }
 
+    init {
+        mpv.addObserver(propertyCacheObserver)
+    }
+
+    private fun cacheProperty(name: String, value: Any?) {
+        if (name in MpvCachedProperty.all) propertyCache.put(name, value)
+    }
+
     fun ensureInitialized() {
         if (initialized) return
+        check(!MpvWorker.shared.isWorkerThread) { "No mpv start on the mpv worker" }
+        // The same core is started again, so the last release must have finished first. Callers wait for that
+        // off the main thread; this only covers a short gap and fails into the normal start-failure path.
+        check(MpvWorker.shared.awaitIdle(START_RELEASE_WAIT_MS)) { "Previous libmpv is still closing" }
+        propertyCache.clear()
+        coreGeneration += 1
         Utils.copyAssets(context)
         initialize(
             configDir = context.filesDir.path,
@@ -67,6 +110,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     fun setMedia(url: String, headers: Map<String, String>, startPositionMs: Long = 0L) {
         ensureInitialized()
+        cancelDirectRequest(restoreHwdec = true)
         val requestKey = buildMediaRequestKey(url = url, headers = headers) +
             "#start=${startPositionMs.coerceAtLeast(0L)}"
         if (hasQueuedInitialMedia && requestKey == lastMediaRequestKey) {
@@ -120,6 +164,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        if (closing) return
         super.surfaceCreated(holder)
         deferredLoadUntilSurface = false
         val url = pendingInitialMediaUrl ?: return
@@ -144,6 +189,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     fun setMediaUsingLoadfile(url: String, headers: Map<String, String>) {
         ensureInitialized()
+        cancelDirectRequest(restoreHwdec = true)
         val requestKey = buildMediaRequestKey(url = url, headers = headers)
         applyHeaders(headers)
         markMediaRequested(url)
@@ -191,40 +237,52 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     fun setPaused(paused: Boolean) {
         if (!initialized) return
         mpv.setPropertyBoolean("pause", paused)
+        propertyCache.put(MpvCachedProperty.PAUSE, paused)
     }
+
+    // State reads below come from what mpv last reported, so the main thread never waits on mpv's core.
 
     fun isPlayingNow(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("pause") == false
+        return propertyCache.boolean(MpvCachedProperty.PAUSE) == false
     }
 
     fun isPausedNow(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("pause") == true
+        return propertyCache.boolean(MpvCachedProperty.PAUSE) == true
     }
 
     fun isPausedForCacheNow(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("paused-for-cache") == true
+        return propertyCache.boolean(MpvCachedProperty.PAUSED_FOR_CACHE) == true
     }
 
     fun isSeekingNow(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("seeking") == true
+        return propertyCache.boolean(MpvCachedProperty.SEEKING) == true
     }
 
     fun demuxerCacheDurationSec(): Double {
         if (!initialized) return 0.0
-        return mpv.getPropertyDouble("demuxer-cache-duration") ?: 0.0
+        return propertyCache.double(MpvCachedProperty.DEMUXER_CACHE_DURATION) ?: 0.0
+    }
+
+    /** MPV's own drop counts for the open file; null before it has any. */
+    internal fun frameDrops(): MpvFrameDrops? {
+        if (!initialized) return null
+        val output = propertyCache.long(MpvCachedProperty.FRAME_DROP_COUNT)?.toInt()
+        val decoder = propertyCache.long(MpvCachedProperty.DECODER_FRAME_DROP_COUNT)?.toInt()
+        if (output == null && decoder == null) return null
+        return MpvFrameDrops(outputDropped = output, decoderDropped = decoder)
     }
 
     fun isCoreIdleNow(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("core-idle") == true
+        return propertyCache.boolean(MpvCachedProperty.CORE_IDLE) == true
     }
 
     fun markMediaRequested(url: String) {
-        val path = if (initialized) mpv.getPropertyString("path") else null
+        val path = if (initialized) propertyCache.string(MpvCachedProperty.PATH) else null
         pathAtMediaRequest = mpvPathBaselineForRequest(url, requestedMediaUrl, pathAtMediaRequest, path)
         requestedMediaUrl = url
     }
@@ -237,7 +295,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     fun isIdleActiveNow(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("idle-active") == true
+        return propertyCache.boolean(MpvCachedProperty.IDLE_ACTIVE) == true
     }
 
     /** False while mpv still reports the path recorded at the last media request. */
@@ -246,18 +304,19 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         return isMpvPositionFromMediaRequest(
             requestedUrl = requestedMediaUrl,
             pathAtRequest = pathAtMediaRequest,
-            currentPath = mpv.getPropertyString("path")
+            currentPath = propertyCache.string(MpvCachedProperty.PATH)
         )
     }
 
     fun isEofReached(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("eof-reached") == true
+        return propertyCache.boolean(MpvCachedProperty.EOF_REACHED) == true
     }
 
     fun seekToMs(positionMs: Long) {
         if (!initialized) return
         val seconds = (positionMs.coerceAtLeast(0L) / 1000.0)
+        propertyCache.onSeekRequested(seconds)
         mpv.setPropertyDouble("time-pos", seconds)
     }
 
@@ -265,44 +324,40 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     fun seekToMsExact(positionMs: Long) {
         if (!initialized) return
         val seconds = String.format(Locale.US, "%.3f", positionMs.coerceAtLeast(0L) / 1000.0)
+        propertyCache.onSeekRequested(positionMs.coerceAtLeast(0L) / 1000.0)
         runCatching { mpv.command("seek", seconds, "absolute+exact") }
             .onFailure { Log.w(TAG, "Exact seek failed: ${it.message}") }
     }
 
     fun currentSubtitleText(): String? {
         if (!initialized) return null
-        return mpv.getPropertyString("sub-text")
+        return propertyCache.string(MpvCachedProperty.SUB_TEXT)
     }
 
     fun currentPositionMs(): Long {
         if (!initialized) return 0L
-        val timePos = mpv.getPropertyDouble("time-pos/full")
-            ?: mpv.getPropertyDouble("time-pos")
-            ?: 0.0
-        val seconds = mpvPlaybackPositionSec(
-            timePosSec = timePos,
-            audioPtsSec = mpv.getPropertyDouble("audio-pts"),
-            seeking = mpv.getPropertyBoolean("seeking") == true,
-            audioDelaySec = mpv.getPropertyDouble("audio-delay") ?: 0.0
-        )
-        return (seconds * 1000.0).roundToLong().coerceAtLeast(0L)
+        return propertyCache.positionMs()
     }
+
+    /** True once mpv reported a position of its own after the last seek and is not seeking any more. */
+    fun isPositionReportedByMpv(): Boolean = initialized &&
+        propertyCache.positionReportedSinceSeek &&
+        propertyCache.boolean(MpvCachedProperty.SEEKING) != true
 
     fun durationMs(): Long {
         if (!initialized) return 0L
-        val seconds = mpv.getPropertyDouble("duration/full") ?: 0.0
-        return (seconds * 1000.0).roundToLong().coerceAtLeast(0L)
+        return propertyCache.durationMs()
     }
 
     /** Live HLS/DASH in mpv is typically reported as not seekable. VOD HLS is seekable. */
     fun isLiveStreamNow(): Boolean {
         if (!initialized) return false
-        return mpv.getPropertyBoolean("seekable") == false
+        return propertyCache.boolean(MpvCachedProperty.SEEKABLE) == false
     }
 
     fun hasVideoTrackSelectedNow(): Boolean {
         if (!initialized) return false
-        val vid = mpv.getPropertyString("vid")?.trim()
+        val vid = propertyCache.string(MpvCachedProperty.VID)?.trim()
         return !vid.isNullOrBlank() && !vid.equals("no", ignoreCase = true)
     }
 
@@ -320,6 +375,8 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         applySpdifCodecs()
         applySoundFilterChain()
     }
+
+    val bitstreamSoundActive: Boolean get() = !appliedSpdifCodecs.isNullOrEmpty()
 
     /** Codecs this output may take as a bitstream; cleared again while sound adjustments need decoded sound. */
     fun setAllowedSpdifCodecs(codecs: String) {
@@ -348,7 +405,9 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     }
 
     fun onHwdecCurrentChanged(hwdecCurrent: String?) {
-        if (!initialized || deinterlaceUnsupported) return
+        if (!initialized) return
+        checkDirectDecodeOutcome(hwdecCurrent)
+        if (deinterlaceUnsupported) return
         val mode = mpvDeinterlaceFor(hwdecCurrent) ?: return
         if (mode == appliedDeinterlace) return
         runCatching {
@@ -402,7 +461,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     fun audioOutputChannelCount(): Int {
         if (!initialized) return 0
-        return runCatching { mpv.getPropertyInt("audio-out-params/channel-count") ?: 0 }.getOrDefault(0)
+        return propertyCache.long(MpvCachedProperty.AUDIO_OUT_CHANNEL_COUNT)?.toInt() ?: 0
     }
 
     fun applyAudioLanguagePreferences(languages: List<String>) {
@@ -424,6 +483,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     fun applyHardwareDecodeMode(mode: MpvHardwareDecodeMode) {
         hardwareDecodeMode = mode
+        directRequestedFrom = null
         if (!initialized || hi10pGnextSoftwareFallbackActive) return
         runCatching {
             mpv.setPropertyString("hwdec", mode.toMpvHwdecValue())
@@ -432,8 +492,76 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         }
     }
 
+    fun applyDirectDecodeMode(mode: MpvDirectDecodeMode, directRefusedOnThisBox: Boolean) {
+        directDecodeMode = mode
+        this.directRefusedOnThisBox = directRefusedOnThisBox
+    }
+
+    /** A new file starts on the usual decoder; [onFileLoaded] decides again once mpv has opened it. */
+    fun onStartFile() = cancelDirectRequest(restoreHwdec = true)
+
+    private fun cancelDirectRequest(restoreHwdec: Boolean) {
+        directRequestedFrom = null
+        if (!restoreHwdec || !initialized || hi10pGnextSoftwareFallbackActive) return
+        runCatching {
+            val usual = hardwareDecodeMode.toMpvHwdecValue()
+            if (mpv.getPropertyString("hwdec") != usual) mpv.setPropertyString("hwdec", usual)
+        }
+    }
+
+    /** Called once mpv has opened a file: a video may get the direct decoder, decided by the Direct decoding setting. */
+    fun onFileLoaded() {
+        directRequestedFrom = null
+        if (!initialized || hi10pGnextSoftwareFallbackActive) return
+        runCatching {
+            val width = mpv.getPropertyInt("current-tracks/video/demux-w")
+            val height = mpv.getPropertyInt("current-tracks/video/demux-h")
+            val directDecoder = if (hasVideoTrack(width, height)) {
+                mpvHwdecForDirectMode(
+                    mode = directDecodeMode,
+                    directRefusedOnThisBox = directRefusedOnThisBox,
+                    softwareDecodeForced = hardwareDecodeMode == MpvHardwareDecodeMode.DISABLED
+                )
+            } else {
+                null
+            }
+            val wanted = directDecoder ?: hardwareDecodeMode.toMpvHwdecValue()
+            val current = mpv.getPropertyString("hwdec")
+            if (wanted == current) return@runCatching
+            val before = mpv.getPropertyString(MPV_HWDEC_CURRENT_PROPERTY)
+            mpv.setPropertyString("hwdec", wanted)
+            directRequestedFrom = if (directDecoder != null) before.orEmpty() else null
+            Log.i(TAG, "Direct decoding: ${width}x$height hwdec=$wanted (was $current, now $before, mode=$directDecodeMode)")
+        }.onFailure {
+            Log.w(TAG, "Failed to choose the direct decoder: ${it.message}")
+        }
+    }
+
+    private fun checkDirectDecodeOutcome(hwdecCurrent: String?) {
+        val before = directRequestedFrom ?: return
+        when (directDecodeOutcome(hwdecCurrent, before)) {
+            DirectDecodeOutcome.WAITING -> Unit
+            DirectDecodeOutcome.WORKED -> {
+                directRequestedFrom = null
+                Log.i(TAG, "Direct decoding: direct decoder in use")
+                onDirectDecodeWorked?.invoke()
+            }
+            DirectDecodeOutcome.REFUSED -> {
+                directRequestedFrom = null
+                Log.w(TAG, "Direct decoding: direct decoder refused (got $hwdecCurrent, before $before), mode=$directDecodeMode")
+                if (directDecodeMode == MpvDirectDecodeMode.AUTOMATIC) {
+                    runCatching { mpv.setPropertyString("hwdec", hardwareDecodeMode.toMpvHwdecValue()) }
+                    if (isCountableDirectRefusal(before) && onDirectDecodeRefused?.invoke(requestedMediaUrl) == true) {
+                        directRefusedOnThisBox = true
+                    }
+                }
+            }
+        }
+    }
+
     fun applyHi10pGnextSoftwareFallback(active: Boolean) {
         hi10pGnextSoftwareFallbackActive = active
+        directRequestedFrom = null
         if (!initialized || appliedHi10pGnextSoftwareFallback == active) return
         runCatching {
             val videoOutput = if (active) MPV_VIDEO_OUTPUT_GPU_NEXT else MPV_VIDEO_OUTPUT_GPU
@@ -550,9 +678,8 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         postDelayed(aspectReapplyRunnable, delayMs)
     }
 
-    fun isHdrVideo(): Boolean = initialized && runCatching {
-        mpv.getPropertyString("video-params/gamma") in setOf("pq", "hlg", "st2084")
-    }.getOrDefault(false)
+    fun isHdrVideo(): Boolean = initialized &&
+        propertyCache.string(MpvCachedProperty.VIDEO_GAMMA) in setOf("pq", "hlg", "st2084")
     var subtitleLiftFraction: Double = 0.0
 
     fun applySubtitleStyle(style: SubtitleStyleSettings) {
@@ -615,7 +742,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     /** True for PQ/HLG video, false for any other transfer, null until mpv knows the video params. */
     fun readVideoIsHdr(): Boolean? {
         if (!initialized) return null
-        val gamma = runCatching { mpv.getPropertyString("video-params/gamma") }.getOrNull()
+        val gamma = propertyCache.string(MpvCachedProperty.VIDEO_GAMMA)
             ?.trim()
             ?.lowercase(Locale.ROOT)
             ?.takeIf { it.isNotBlank() }
@@ -772,8 +899,8 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
      * can carry close to a hundred tracks, a dozen properties each), or for a few ticks while an
      * audio track still lacks its channel count.
      */
-    fun readTrackSnapshot(): MpvTrackSnapshot {
-        if (!initialized) return MpvTrackSnapshot(emptyList(), emptyList())
+    fun readTrackSnapshot(generation: Int = coreGeneration): MpvTrackSnapshot {
+        if (!initialized || generation != coreGeneration) return MpvTrackSnapshot(emptyList(), emptyList())
         val trackCount = runCatching { mpv.getPropertyInt("track-list/count") ?: 0 }
             .getOrDefault(0)
         if (trackCount <= 0) {
@@ -868,8 +995,8 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         return tracks
     }
 
-    fun readChapters(): List<PlayerChapter> {
-        if (!initialized) return emptyList()
+    fun readChapters(generation: Int = coreGeneration): List<PlayerChapter> {
+        if (!initialized || generation != coreGeneration) return emptyList()
         val count = runCatching { mpv.getPropertyInt("chapter-list/count") ?: 0 }.getOrDefault(0)
         if (count <= 0) return emptyList()
         return (0 until count).mapNotNull { i ->
@@ -882,17 +1009,32 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         }
     }
 
+    /**
+     * The view lets go of libmpv at once; the native teardown, which waits for mpv's core and can take many
+     * seconds on a stalled stream, runs on the mpv worker thread.
+     */
     fun releasePlayer() {
         if (!initialized) return
         removeCallbacks(aspectReapplyRunnable)
-        runCatching { destroy() }
-            .onFailure { Log.w(TAG, "Failed to destroy libmpv view cleanly: ${it.message}") }
         initialized = false
+        coreGeneration += 1
+        // The surface callback stays until the core is gone, so a surface going away meanwhile gives it a moment.
+        closing = true
+        MpvWorker.shared.release {
+            try {
+                releaseNativePlayer()
+            } finally {
+                holder.removeCallback(this)
+                closing = false
+            }
+        }
+        propertyCache.clear()
         appliedSoundFilterChain = ""
         appliedSwresampleOptions = ""
         stereoDownmixLimited = false
         appliedSpdifCodecs = null
         appliedDeinterlace = null
+        directRequestedFrom = null
         hasQueuedInitialMedia = false
         lastMediaRequestKey = null
         pendingInitialMediaUrl = null
@@ -902,6 +1044,24 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         pathAtMediaRequest = null
         appliedHi10pGnextSoftwareFallback = null
         cachedTrackList = null
+    }
+
+    private fun releaseNativePlayer() {
+        mpv.destroy()
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+        if (closing) return
+        super.surfaceChanged(holder, format, width, height)
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
+        if (closing) {
+            // Never touches the closing core from here: that waits on the same stuck core. A short bounded wait only.
+            MpvWorker.shared.awaitIdle(SURFACE_CLOSE_WAIT_MS)
+            return
+        }
+        super.surfaceDestroyed(holder)
     }
 
     override fun initOptions() {
@@ -947,6 +1107,16 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         // the poll can skip re-reading an unchanged track list.
         mpv.observeProperty(MPV_TRACK_LIST_PROPERTY, MPV.mpvFormat.MPV_FORMAT_NONE)
         mpv.observeProperty(MPV_HWDEC_CURRENT_PROPERTY, MPV.mpvFormat.MPV_FORMAT_STRING)
+        MpvCachedProperty.all.forEach { (name, format) ->
+            mpv.observeProperty(name, format.toMpvFormat())
+        }
+    }
+
+    private fun MpvCachedFormat.toMpvFormat(): Int = when (this) {
+        MpvCachedFormat.FLAG -> MPV.mpvFormat.MPV_FORMAT_FLAG
+        MpvCachedFormat.INT64 -> MPV.mpvFormat.MPV_FORMAT_INT64
+        MpvCachedFormat.DOUBLE -> MPV.mpvFormat.MPV_FORMAT_DOUBLE
+        MpvCachedFormat.STRING -> MPV.mpvFormat.MPV_FORMAT_STRING
     }
 
     private fun applyHeaders(headers: Map<String, String>) {
@@ -1038,6 +1208,8 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
 
     companion object {
         private const val TAG = "NuvioMpvSurfaceView"
+        private const val SURFACE_CLOSE_WAIT_MS = 500L
+        private const val START_RELEASE_WAIT_MS = 400L
         private const val MPV_SUBTITLE_REFERENCE_HEIGHT = 720f
         private const val MPV_SUBTITLE_DEFAULT_MARGIN_X = 25
         private const val MPV_SUBTITLE_INNER_PADDING_RATIO = 0.125f
