@@ -911,6 +911,7 @@ fun MetaDetailsScreen(
                     parentalGuideState = parentalGuideState,
                     parentalGuidePendingState = parentalGuidePendingState,
                     meta = meta,
+                    openedWithId = viewModel.navigationItemId,
                     heroLogoUrl = heroLogoUrl,
                     detailReturnEpisodeFocusRequest = DetailReturnEpisodeFocusRequest(
                         season = returnFocusSeason,
@@ -1264,6 +1265,7 @@ private fun MetaDetailsContent(
     parentalGuideState: State<List<com.nuvio.tv.data.repository.ParentalGuideEntry>>,
     parentalGuidePendingState: State<Boolean>,
     meta: Meta,
+    openedWithId: String? = null,
     heroLogoUrl: String? = null,
     detailReturnEpisodeFocusRequest: DetailReturnEpisodeFocusRequest? = null,
     onDetailReturnEpisodeFocusConsumed: () -> Unit,
@@ -2667,6 +2669,7 @@ private fun MetaDetailsContent(
                         scoutTitle = if (com.nuvio.tv.domain.model.ScoutFeature.available) {
                             com.nuvio.tv.domain.model.ScoutTitle(meta.id, meta.apiType, meta.name, meta.poster)
                         } else null,
+                        scoutAliasId = openedWithId,
                         hideLogoDuringTrailer = hideLogoDuringTrailer,
                         isTrailerPlaying = isTrailerPlaying,
                         playButtonFocusRequester = heroPlayButtonFocusRequester,

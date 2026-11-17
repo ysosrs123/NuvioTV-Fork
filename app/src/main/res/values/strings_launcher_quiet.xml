@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Smoother with launcher services</string>
+    <string name="advanced_quiet_for_launchers_subtitle">When the only accessibility service on this box belongs to a launcher such as Projectivy, Arc stops describing its screen to it, so scrolling is smoother. Screen readers like TalkBack always get the full screen.</string>
+</resources>

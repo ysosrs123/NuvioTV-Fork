@@ -11,6 +11,7 @@ import com.nuvio.tv.data.remote.dto.PlaybackIssueAppDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueContentDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDeviceDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDiagnosticsDto
+import com.nuvio.tv.data.remote.dto.PlaybackIssueDisplayDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueErrorDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueLoadingDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssuePlayerDto
@@ -140,6 +141,19 @@ class RecorderReportTest {
         val report = baseReport().copy(recorder = recorderSection("seek fromMs=1 toMs=2"))
         val sent = report.applyViewerChoices(PlaybackIssueViewerChoices(includeLog = true))
         assertEquals(listOf("seek fromMs=1 toMs=2"), sent.recorder!!.eventLines)
+    }
+
+    @Test fun `the screen mode comes before the large sections so a cut report keeps it`() {
+        val report = baseReport().copy(
+            display = PlaybackIssueDisplayDto(modeId = 3, refreshHz = 23.976f, width = 3840, height = 2160),
+            recorder = recorderSection("seek fromMs=1 toMs=2")
+        )
+        val json = Moshi.Builder().build().adapter(PlaybackIssueReportRequestDto::class.java).toJson(report)
+        val display = json.indexOf("\"display\":")
+        assertTrue(json, display in 0 until json.indexOf("\"content\":"))
+        assertTrue(json, display < json.indexOf("\"diagnostics\":"))
+        assertTrue(json, display < json.indexOf("\"recorder\":"))
+        assertTrue(json, json.contains("\"modeId\":3"))
     }
 
     @Test fun `a report without a recorder section is unchanged by the log switch`() {

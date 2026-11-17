@@ -68,7 +68,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
 
         private val START_PREFERENCES = listOf(
             "server_configuration", "floppy_auth", "mdblist_auth", "wetrakr_auth", "media_servers",
-            "member_access_snapshot", "member_catalogs", "backup_restore", "app_locale"
+            "member_access_snapshot", "member_catalogs", "backup_restore", "app_locale", "image_performance"
         )
 
         /** Long enough that the walk cannot contend with cold start. */
@@ -135,6 +135,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_create")
+        com.nuvio.tv.core.image.PosterUpdates.started(System.currentTimeMillis(), android.os.SystemClock.elapsedRealtime())
         warmStartPreferences()
         com.nuvio.tv.core.network.ArcDns.init(this)
         (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).let { am ->
@@ -232,11 +233,15 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun newImageLoader(context: android.content.Context): ImageLoader {
+        runCatching {
+            com.nuvio.tv.core.image.PosterUpdates.interval =
+                com.nuvio.tv.data.local.ImagePerformancePreferences(this).posterUpdateInterval
+        }
         val imageOkHttpClient by lazy {
-            val imageDispatcher = okhttp3.Dispatcher().apply {
-                maxRequests = 32
+            val imageDispatcher = com.nuvio.tv.core.network.ArcHttpDispatchers.image(
+                normalMaxRequests = 32,
                 maxRequestsPerHost = 16
-            }
+            )
             OkHttpClient.Builder()
                 .eventListenerFactory(com.nuvio.tv.core.image.ArtworkDiagnostics.networkEvents)
                 .withServerTrust()
@@ -328,9 +333,10 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
                         // its background revalidation client has no cache, so a
                         // 200 downloads the new body and discards it; the card's reload then hits the
                         // unchanged disk entry and the strategy serves the stale copy again (and
-                        // re-fetches the body every 10-minute cooldown). Server cache rules plus the
-                        // interceptor above keep the foreground conditional-GET path that does update
-                        // the disk entry; every saved copy counts as fresh for a week.
+                        // re-fetches the body every 10-minute cooldown). SavedCopyOnErrorFetcher shows a
+                        // saved copy that is due and checks it with this fetcher in the background, so a
+                        // new picture is written to the disk cache. How long a copy counts as fresh
+                        // follows the Poster updates setting (ImageFreshness.kt).
                         cacheStrategy = { com.nuvio.tv.core.image.imageCacheStrategy },
                     ))
                 )

@@ -229,4 +229,11 @@ class RecorderRecordingReportTest {
             result = "r"
         )
     )
+
+    @Test fun `an untimed sample sends an empty frame row and timed ones keep their counts`() {
+        val flat = IntArray(FRAME_BUCKET_COUNT) { RECORDER_UNKNOWN } + IntArray(FRAME_BUCKET_COUNT) { it }
+        val rows = frameBucketRows(flat, 2)
+        assertEquals(emptyList<Int>(), rows[0])
+        assertEquals(List(FRAME_BUCKET_COUNT) { it }, rows[1])
+    }
 }

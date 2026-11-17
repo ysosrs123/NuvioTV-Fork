@@ -1,8 +1,11 @@
 package com.nuvio.tv.data.repository
 
+import com.nuvio.tv.core.player.AfrRequest
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDisplayDto
 import com.squareup.moshi.Moshi
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -60,5 +63,52 @@ class ReportDisplayFactsTest {
         assertTrue(json, json.contains("\"systemMatchFrameRate\":\"never\""))
         assertTrue(json, json.contains("\"arcFrameRateMatching\":\"OFF\""))
         assertTrue(json, json.contains("\"cadence\":\"3:2 pulldown (23.976p on 60 Hz)\""))
+    }
+
+    private fun request(result: String = AfrRequest.REACHED) = AfrRequest(
+        modeId = 5, refreshHz = 23.976f, width = 3840, height = 2160, videoFps = 23.976025f, fromModeId = 1, result = result
+    )
+
+    @Test fun `no frame rate request means no target`() {
+        assertNull(afrTarget(null, 1, 60f))
+    }
+
+    @Test fun `the screen on the asked mode is on target`() {
+        val target = afrTarget(request(), 5, 23.976f)!!
+        assertEquals(5, target.modeId)
+        assertEquals(23.976f, target.refreshHz)
+        assertEquals(1, target.fromModeId)
+        assertEquals("reached", target.result)
+        assertEquals(true, target.displayOnTarget)
+    }
+
+    @Test fun `the screen still on the old mode is off target`() {
+        assertEquals(false, afrTarget(request(AfrRequest.ASKED), 1, 60f)!!.displayOnTarget)
+        assertEquals(false, afrTarget(request(), 9, 60f)!!.displayOnTarget)
+    }
+
+    @Test fun `another mode id at the asked rate counts as on target`() {
+        assertEquals(true, afrTarget(request(), 7, 23.976f)!!.displayOnTarget)
+    }
+
+    @Test fun `a kept mode is on target only while the screen stays there`() {
+        val kept = AfrRequest(1, 60f, 1920, 1080, 30f, 1, AfrRequest.KEPT)
+        assertEquals(true, afrTarget(kept, 1, 60f)!!.displayOnTarget)
+        assertFalse(afrTarget(kept, 2, 50f)!!.displayOnTarget!!)
+    }
+
+    @Test fun `an unreadable screen mode leaves the answer open`() {
+        assertNull(afrTarget(request(), null, null)!!.displayOnTarget)
+    }
+
+    @Test fun `mode id and target reach the display json`() {
+        val dto = PlaybackIssueDisplayDto(
+            modeId = 1, refreshHz = 60f, width = 3840, height = 2160, hdrTypes = listOf("HDR10"),
+            arcFrameRateMatching = "START_STOP", filmFps = 23.976f, arcTarget = afrTarget(request(AfrRequest.TIMED_OUT), 1, 60f)
+        )
+        val json = Moshi.Builder().build().adapter(PlaybackIssueDisplayDto::class.java).toJson(dto)
+        assertTrue(json, json.startsWith("{\"modeId\":1,\"refreshHz\":60.0"))
+        assertTrue(json, json.contains("\"arcTarget\":{\"modeId\":5,\"refreshHz\":23.976"))
+        assertTrue(json, json.contains("\"result\":\"timed_out\",\"displayOnTarget\":false"))
     }
 }

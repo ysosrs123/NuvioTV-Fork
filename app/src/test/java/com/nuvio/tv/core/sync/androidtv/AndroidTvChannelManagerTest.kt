@@ -18,6 +18,8 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -193,6 +195,53 @@ class AndroidTvChannelManagerTest {
         verify(exactly = 1) { ContentUris.withAppendedId(any(), 100L) }
         verify(exactly = 1) { contentResolver.update(any(), any(), null, null) }
         verify(exactly = 1) { contentResolver.delete(any(), null, null) }
+    }
+
+    @Test
+    fun `a row the launcher already holds is left alone after a restart`() {
+        val values = mapOf<String, Any?>(
+            "title" to "Test Title", "weight" to 2147483646, "poster_art_uri" to null,
+            "last_playback_position_millis" to 61_000, "duration_millis" to 3_600_000
+        )
+        val stored = mapOf(
+            "title" to "Test Title", "weight" to "2147483646", "poster_art_uri" to null,
+            "last_playback_position_millis" to "60000", "duration_millis" to "3600000"
+        )
+
+        assertTrue(AndroidTvChannelManager.storedProgramMatches(values, stored))
+    }
+
+    @Test
+    fun `a changed title, position or picture is written again`() {
+        val stored = mapOf(
+            "title" to "Test Title", "last_playback_position_millis" to "60000", "poster_art_uri" to null
+        )
+
+        assertFalse(AndroidTvChannelManager.storedProgramMatches(mapOf("title" to "Other"), stored))
+        assertFalse(
+            AndroidTvChannelManager.storedProgramMatches(mapOf("last_playback_position_millis" to 90_000), stored)
+        )
+        assertFalse(AndroidTvChannelManager.storedProgramMatches(mapOf("poster_art_uri" to "https://x/y.jpg"), stored))
+        assertFalse(AndroidTvChannelManager.storedProgramMatches(mapOf("short_description" to "New"), stored))
+        assertFalse(AndroidTvChannelManager.storedProgramMatches(mapOf("title" to "Test Title"), emptyMap()))
+    }
+
+    @Test
+    fun `the synopsis is compared in the column preview programs keep it in`() {
+        val columns = AndroidTvChannelManager.COMPARED_COLUMNS
+        assertTrue(TvContractCompat.PreviewPrograms.COLUMN_SHORT_DESCRIPTION in columns)
+        assertFalse("description" in columns)
+        assertTrue(AndroidTvChannelManager.storedProgramMatches(
+            mapOf("short_description" to "Same"), mapOf("short_description" to "Same")
+        ))
+        assertFalse(AndroidTvChannelManager.storedProgramMatches(
+            mapOf("short_description" to "New episode"), mapOf("short_description" to "Old episode")
+        ))
+    }
+
+    @Test
+    fun `the engagement time is not compared`() {
+        assertFalse("last_engagement_time_utc_millis" in AndroidTvChannelManager.COMPARED_COLUMNS)
     }
 
     // --- helpers ---

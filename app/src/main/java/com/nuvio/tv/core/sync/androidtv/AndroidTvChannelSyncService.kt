@@ -63,6 +63,9 @@ class AndroidTvChannelSyncService @Inject constructor(
     // (user returns to the launcher), see [onForegroundChanged].
     @Volatile private var appInForeground = false
 
+    /** The channel is only seen from the launcher; while Arc is in front a sync only competes with the screen. */
+    val isAppInForeground: Boolean get() = appInForeground
+
     // A sync asked for while frames are on screen waits for the next pause or stop, the same
     // rule the single Watch Next write follows, so the provider call never hitches the player.
     @Volatile private var syncWaitsForPlayback = false

@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.util
 
 import android.view.KeyEvent
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -221,35 +222,7 @@ fun Modifier.dpadVerticalFastScroll(
                 scope.launch {
                     try {
                         scrollableState.scroll {
-                            val dragStartNanos = withFrameNanos { it }
-                            var lastFrame = dragStartNanos
-                            while (true) {
-                                val now = withFrameNanos { it }
-                                val dtSec = ((now - lastFrame) / 1_000_000_000f)
-                                    .coerceAtMost(maxFrameDtSec)
-                                lastFrame = now
-
-                                if (sign > 0 && shouldHaltForward()) break
-
-                                // Start ramp: smoothstep from MIN_EASE up to full
-                                // velocity across RAMP_UP_NANOS, so the drag glides
-                                // in rather than jerking to full speed on frame one.
-                                val rampT = ((now - dragStartNanos).toFloat() /
-                                    RAMP_UP_NANOS.toFloat()).coerceIn(0f, 1f)
-                                val smooth = rampT * rampT * (3f - 2f * rampT)
-                                val ease = MIN_EASE + (1f - MIN_EASE) * smooth
-                                val easedVelocity = velocityPxPerSec * ease
-
-                                val delta = sign * easedVelocity * dtSec
-                                val consumed = scrollBy(delta)
-                                // Stop ramp falls out naturally: as the list nears
-                                // its edge scrollBy consumes less than requested,
-                                // and when it consumes nothing the drag ends and
-                                // focus lands (endFastScroll), so the last frames
-                                // decelerate against the edge instead of stopping
-                                // dead mid-travel.
-                                if (consumed == 0f && delta != 0f) break
-                            }
+                            holdDrag(sign, velocityPxPerSec, maxFrameDtSec, shouldHaltForward)
                         }
                         // Loop exited because the list can't move further
                         // (or the forward halt fired). Land focus immediately
@@ -288,5 +261,37 @@ fun Modifier.dpadVerticalFastScroll(
         } else {
             verticalKeys
         }
+    }
+}
+
+/**
+ * Drags at [velocityPxPerSec] until the list stops moving or [shouldHaltForward] says stop. Each step is taken
+ * inside the frame, so the list is laid out with the frame instead of in the gap after it.
+ */
+internal suspend fun ScrollScope.holdDrag(
+    sign: Int,
+    velocityPxPerSec: Float,
+    maxFrameDtSec: Float,
+    shouldHaltForward: () -> Boolean,
+) {
+    val dragStartNanos = withFrameNanos { it }
+    var lastFrame = dragStartNanos
+    while (true) {
+        val keepGoing = withFrameNanos { now ->
+            val dtSec = ((now - lastFrame) / 1_000_000_000f).coerceAtMost(maxFrameDtSec)
+            lastFrame = now
+            if (sign > 0 && shouldHaltForward()) return@withFrameNanos false
+            // Start ramp: smoothstep from MIN_EASE up to full velocity across RAMP_UP_NANOS, so the drag
+            // glides in rather than jerking to full speed on frame one.
+            val rampT = ((now - dragStartNanos).toFloat() / RAMP_UP_NANOS.toFloat()).coerceIn(0f, 1f)
+            val smooth = rampT * rampT * (3f - 2f * rampT)
+            val ease = MIN_EASE + (1f - MIN_EASE) * smooth
+            val delta = sign * velocityPxPerSec * ease * dtSec
+            // Near the edge scrollBy consumes less than asked; when it consumes nothing the drag ends and
+            // focus lands, so the last frames slow against the edge instead of stopping dead.
+            val consumed = scrollBy(delta)
+            !(consumed == 0f && delta != 0f)
+        }
+        if (!keepGoing) break
     }
 }

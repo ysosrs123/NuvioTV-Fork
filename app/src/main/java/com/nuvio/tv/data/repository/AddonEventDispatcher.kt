@@ -117,7 +117,7 @@ class AddonEventDispatcher @Inject constructor(
         id: String,
         extra: List<Pair<String, String>>
     ) {
-        if (type.isBlank() || id.isBlank() || ServerItemRef.isServerId(id)) return
+        if (type.isBlank() || id.isBlank() || isArcOnlyItem(type, id)) return
         events.trySend(AddonEvent(resource, type, id, extra))
     }
 
@@ -159,6 +159,16 @@ class AddonEventDispatcher @Inject constructor(
 }
 
 private const val LIBRARY_EVENT_VIDEOS_COUNT = 100
+
+/** Items only Arc knows: media server and cloud library files, local files and trailers. */
+internal fun isArcOnlyItem(type: String, id: String): Boolean =
+    ServerItemRef.isServerId(id) ||
+        type.equals(ARC_CLOUD_CONTENT_TYPE, ignoreCase = true) ||
+        ARC_ONLY_ID_PREFIXES.any { id.startsWith(it, ignoreCase = true) } ||
+        "://" in id
+
+private const val ARC_CLOUD_CONTENT_TYPE = "cloud"
+private val ARC_ONLY_ID_PREFIXES = listOf("file:", "yt:")
 
 internal fun libraryVideoIdChunks(videoIds: Collection<String>): List<List<String>> =
     videoIds

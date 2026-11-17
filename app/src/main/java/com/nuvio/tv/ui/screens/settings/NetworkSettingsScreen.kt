@@ -402,6 +402,16 @@ fun AdvancedSettingsContent(
                     }
                 )
                 SettingsToggleRow(
+                    title = stringResource(R.string.advanced_quiet_for_launchers),
+                    subtitle = stringResource(R.string.advanced_quiet_for_launchers_subtitle),
+                    checked = uiState.quietForLaunchersEnabled,
+                    onToggle = {
+                        viewModel.onEvent(
+                            AdvancedSettingsEvent.SetQuietForLaunchersEnabled(!uiState.quietForLaunchersEnabled)
+                        )
+                    }
+                )
+                SettingsToggleRow(
                     title = "Add-on health indicators",
                     subtitle = "Show OK/Slow/Down status on add-ons and resolvers. Passive - no background scanning.",
                     checked = uiState.addonHealthEnabled,
@@ -760,6 +770,10 @@ fun AdvancedSettingsContent(
 
         item(key = "clear_image_cache") {
             SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
+                PosterUpdatesRow(
+                    selected = uiState.posterUpdateInterval,
+                    onSelected = { viewModel.onEvent(AdvancedSettingsEvent.SetPosterUpdateInterval(it)) }
+                )
                 // 0 = idle, 1 = clearing, 2 = done
                 var clearState by remember { mutableStateOf(0) }
                 SettingsActionRow(
@@ -865,6 +879,57 @@ fun AdvancedSettingsContent(
             targetMode = ExperienceMode.ESSENTIAL,
             onConfirm = { experienceModeViewModel.setMode(ExperienceMode.ESSENTIAL) },
             onDismiss = { showExperienceModeConfirmation = false }
+        )
+    }
+}
+
+@Composable
+private fun PosterUpdatesRow(
+    selected: com.nuvio.tv.core.image.PosterUpdateInterval,
+    onSelected: (com.nuvio.tv.core.image.PosterUpdateInterval) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val options = listOf(
+        SettingsPickerOption(
+            com.nuvio.tv.core.image.PosterUpdateInterval.EVERY_START,
+            stringResource(R.string.advanced_poster_updates_every_start),
+            stringResource(R.string.advanced_poster_updates_every_start_desc)
+        ),
+        SettingsPickerOption(
+            com.nuvio.tv.core.image.PosterUpdateInterval.DAILY,
+            stringResource(R.string.advanced_poster_updates_daily),
+            stringResource(R.string.advanced_poster_updates_daily_desc)
+        ),
+        SettingsPickerOption(
+            com.nuvio.tv.core.image.PosterUpdateInterval.WEEKLY,
+            stringResource(R.string.advanced_poster_updates_weekly),
+            stringResource(R.string.advanced_poster_updates_weekly_desc)
+        ),
+        SettingsPickerOption(
+            com.nuvio.tv.core.image.PosterUpdateInterval.MONTHLY,
+            stringResource(R.string.advanced_poster_updates_monthly),
+            stringResource(R.string.advanced_poster_updates_monthly_desc)
+        )
+    )
+    SettingsActionRow(
+        title = stringResource(R.string.advanced_poster_updates),
+        subtitle = stringResource(R.string.advanced_poster_updates_subtitle),
+        value = options.firstOrNull { it.value == selected }?.title,
+        onClick = { showDialog = true }
+    )
+    if (showDialog) {
+        SettingsSingleChoiceDialog(
+            title = stringResource(R.string.advanced_poster_updates),
+            subtitle = stringResource(R.string.advanced_poster_updates_dialog_subtitle),
+            options = options,
+            selectedValue = selected,
+            onOptionSelected = {
+                onSelected(it)
+                showDialog = false
+            },
+            onDismiss = { showDialog = false },
+            width = 460.dp,
+            maxHeight = 420.dp
         )
     }
 }

@@ -75,8 +75,18 @@ class TraktTrackingProgressProvider @Inject constructor(
         if (quiet) service.updateOptimisticProgressQuietly(progress) else service.applyOptimisticProgress(progress)
     }
 
+    override fun applyOptimisticProgressBatch(progressList: List<WatchProgress>, quiet: Boolean) {
+        if (progressList.isEmpty()) return
+        service.applyOptimisticProgressBatch(progressList, requestSync = !quiet)
+    }
+
     override fun applyOptimisticRemoval(contentId: String, season: Int?, episode: Int?) =
         service.applyOptimisticRemoval(contentId, season, episode)
+
+    override fun applyOptimisticRemovalBatch(contentId: String, episodes: List<Pair<Int, Int>>) {
+        if (episodes.isEmpty()) return
+        service.applyOptimisticRemovalBatch(contentId, episodes)
+    }
 
     override fun clearOptimistic() = service.clearOptimistic()
 

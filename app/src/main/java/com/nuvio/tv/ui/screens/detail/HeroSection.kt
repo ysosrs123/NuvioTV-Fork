@@ -249,6 +249,7 @@ fun HeroContentSection(
     onRandomEpisodeClick: () -> Unit = {},
     randomEpisodeFocusRequester: FocusRequester? = null,
     scoutTitle: com.nuvio.tv.domain.model.ScoutTitle? = null,
+    scoutAliasId: String? = null,
     hideLogoDuringTrailer: Boolean = false,
     mdbListRatings: MDBListRatings? = null,
     mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER,
@@ -518,9 +519,11 @@ fun HeroContentSection(
                             val scoutRatings: com.nuvio.tv.ui.scout.ScoutRatingViewModel = androidx.hilt.navigation.compose.hiltViewModel()
                             val scoutProfile = scoutRatings.profile.collectAsStateWithLifecycle().value
                             if (scoutProfile.settings.ratingsEnabled) {
+                                val scoutAliases = setOfNotNull(scoutAliasId?.takeIf(String::isNotBlank)) - scoutTitle.id
                                 ScoutRateAction(
-                                    rating = scoutProfile.rating(scoutTitle.id),
-                                    onRate = { scoutRatings.setRating(scoutTitle, it) },
+                                    rating = scoutProfile.rating(scoutTitle.id)
+                                        ?: scoutAliases.firstNotNullOfOrNull(scoutProfile::rating),
+                                    onRate = { scoutRatings.setRatingMerging(scoutTitle, scoutAliases, it) },
                                     onFocused = onHeroActionFocused,
                                     onOpenChanged = { rateOpen = it }
                                 )

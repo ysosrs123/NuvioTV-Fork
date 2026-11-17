@@ -101,13 +101,16 @@ class ProfileEditorFocusTest {
             NuvioTheme {
                 EditProfileOverlay(
                     profile = profile,
+                    localAvatarId = null,
                     avatarCatalog = avatars,
                     profileBackgroundCatalog = emptyList(),
                     hasProfileBackgroundAccess = false,
                     isSaving = false,
                     avatarUrlResolver = { null },
                     onDismiss = {},
-                    onSaveProfile = {}
+                    ratingLimit = null,
+                    ratingLimitOwner = null,
+                    onSaveProfile = { _, _ -> }
                 )
             }
         }

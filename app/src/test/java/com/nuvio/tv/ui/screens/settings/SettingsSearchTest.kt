@@ -161,7 +161,8 @@ class SettingsSearchTest {
         "SettingsSectionComponents.kt", "SiloSignInDialog.kt", "TrackingProviderDialogs.kt"
     )
 
-    private val rowsWithoutSearch = setOf("experience_mode_switch_to_advanced")
+    // dv_output_title only exists on the AM9 FEL kernel; search can't hide an entry per device
+    private val rowsWithoutSearch = setOf("experience_mode_switch_to_advanced", "dv_output_title")
 
     @Test
     fun `every settings row with a fixed name can be found`() {

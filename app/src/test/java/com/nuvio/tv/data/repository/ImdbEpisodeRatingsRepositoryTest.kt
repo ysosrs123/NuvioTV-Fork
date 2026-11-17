@@ -31,8 +31,8 @@ class ImdbEpisodeRatingsRepositoryTest {
         coEvery { fallback.getSeasonRatings(any()) } returns Response.success(backup)
         val repository = ImdbEpisodeRatingsRepository(primary, fallback).apply { primaryConfigured = true }
 
-        assertEquals(mapOf((1 to 1) to 8.1), repository.getEpisodeRatings("tt0000001", 11))
-        assertEquals(mapOf((1 to 1) to 8.1), repository.getEpisodeRatings("tt0000002", 12))
+        assertEquals(mapOf((1 to 1) to 8.1), repository.getEpisodeRatings("tt0000001", 11, emptyList()))
+        assertEquals(mapOf((1 to 1) to 8.1), repository.getEpisodeRatings("tt0000002", 12, emptyList()))
 
         coVerify(exactly = 1) { primary.getSeasonRatings(any()) }
         coVerify(exactly = 2) { fallback.getSeasonRatings(any()) }
@@ -45,8 +45,8 @@ class ImdbEpisodeRatingsRepositoryTest {
         val fallback = mockk<SeriesGraphApi>()
         val repository = ImdbEpisodeRatingsRepository(primary, fallback).apply { primaryConfigured = true }
 
-        repository.getEpisodeRatings("tt0000001", 11)
-        repository.getEpisodeRatings("tt0000002", 12)
+        repository.getEpisodeRatings("tt0000001", 11, emptyList())
+        repository.getEpisodeRatings("tt0000002", 12, emptyList())
 
         coVerify(exactly = 2) { primary.getSeasonRatings(any()) }
         coVerify(exactly = 0) { fallback.getSeasonRatings(any()) }
@@ -59,7 +59,7 @@ class ImdbEpisodeRatingsRepositoryTest {
         coEvery { fallback.getSeasonRatings(any()) } returns Response.success(backup)
         val repository = ImdbEpisodeRatingsRepository(primary, fallback).apply { primaryConfigured = false }
 
-        assertEquals(mapOf((1 to 1) to 8.1), repository.getEpisodeRatings("tt0000001", 11))
+        assertEquals(mapOf((1 to 1) to 8.1), repository.getEpisodeRatings("tt0000001", 11, emptyList()))
         coVerify(exactly = 0) { primary.getSeasonRatings(any()) }
     }
 

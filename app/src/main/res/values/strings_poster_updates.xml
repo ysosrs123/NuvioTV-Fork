@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Poster updates</string>
+    <string name="advanced_poster_updates_subtitle">How often posters from add-ons and rating services are checked for a new picture.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Saved posters show at once; a new picture replaces them in the background. TMDB and the big artwork sites are always kept for at least a week.</string>
+    <string name="advanced_poster_updates_every_start">Every time Arc starts</string>
+    <string name="advanced_poster_updates_every_start_desc">New pictures soon after each start. For small Home pages and add-ons that change their artwork.</string>
+    <string name="advanced_poster_updates_daily">Daily</string>
+    <string name="advanced_poster_updates_daily_desc">Each poster is checked at most once a day.</string>
+    <string name="advanced_poster_updates_weekly">Weekly</string>
+    <string name="advanced_poster_updates_weekly_desc">The default. Each poster is checked at most once a week; smoothest for big Home pages.</string>
+    <string name="advanced_poster_updates_monthly">Monthly</string>
+    <string name="advanced_poster_updates_monthly_desc">Fewest checks. Rating posters can be up to a month old.</string>
+</resources>

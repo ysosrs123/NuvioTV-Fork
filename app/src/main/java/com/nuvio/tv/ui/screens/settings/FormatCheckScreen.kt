@@ -685,6 +685,7 @@ private fun answerLabel(answer: String): String = stringResource(
         FormatCheckAnswers.ATMOS -> R.string.format_check_answer_atmos
         FormatCheckAnswers.TRUEHD -> R.string.format_check_answer_truehd
         FormatCheckAnswers.EAC3 -> R.string.format_check_answer_eac3
+        FormatCheckAnswers.DOLBY_DIGITAL -> R.string.format_check_answer_dolby_digital
         FormatCheckAnswers.DTS_X -> R.string.format_check_answer_dtsx
         FormatCheckAnswers.DTS_HD -> R.string.format_check_answer_dtshd
         FormatCheckAnswers.DTS_OTHER -> R.string.format_check_answer_dts

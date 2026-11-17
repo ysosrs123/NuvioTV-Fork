@@ -2,9 +2,11 @@ package com.nuvio.tv.ui.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nuvio.tv.core.image.PosterUpdateInterval
 import com.nuvio.tv.core.runtime.AppRestarter
 import com.nuvio.tv.data.local.DeviceLocalPlayerPreferences
 import com.nuvio.tv.data.local.ImagePerformancePreferences
+import com.nuvio.tv.data.local.LauncherAccessibilityPreferences
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.data.local.PlayerSettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +25,9 @@ data class AdvancedSettingsUiState(
     val playbackIssueReportsEnabled: Boolean = false,
     val playerStatsHudEnabled: Boolean = false,
     val addonHealthEnabled: Boolean = true,
-    val rgb565Enabled: Boolean = true
+    val rgb565Enabled: Boolean = true,
+    val posterUpdateInterval: PosterUpdateInterval = PosterUpdateInterval.DEFAULT,
+    val quietForLaunchersEnabled: Boolean = true
 )
 
 sealed class AdvancedSettingsEvent {
@@ -34,6 +38,8 @@ sealed class AdvancedSettingsEvent {
     data class SetAddonHealthEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetPlayerStatsHudEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetRgb565Enabled(val enabled: Boolean) : AdvancedSettingsEvent()
+    data class SetPosterUpdateInterval(val interval: PosterUpdateInterval) : AdvancedSettingsEvent()
+    data class SetQuietForLaunchersEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
 }
 
 @HiltViewModel
@@ -42,13 +48,20 @@ class AdvancedSettingsViewModel @Inject constructor(
     private val playerSettingsDataStore: PlayerSettingsDataStore,
     private val deviceLocalPlayerPreferences: DeviceLocalPlayerPreferences,
     private val imagePerformancePreferences: ImagePerformancePreferences,
+    private val launcherAccessibilityPreferences: LauncherAccessibilityPreferences,
     private val appRestarter: AppRestarter
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AdvancedSettingsUiState())
     val uiState: StateFlow<AdvancedSettingsUiState> = _uiState.asStateFlow()
 
     init {
-        _uiState.update { it.copy(rgb565Enabled = imagePerformancePreferences.rgb565Enabled) }
+        _uiState.update {
+            it.copy(
+                rgb565Enabled = imagePerformancePreferences.rgb565Enabled,
+                posterUpdateInterval = imagePerformancePreferences.posterUpdateInterval,
+                quietForLaunchersEnabled = launcherAccessibilityPreferences.quietForLaunchers
+            )
+        }
         viewModelScope.launch {
             layoutPreferenceDataStore.fastHorizontalNavigationEnabled.collectLatest { enabled ->
                 _uiState.update { it.copy(fastHorizontalNavigationEnabled = enabled) }
@@ -113,6 +126,14 @@ class AdvancedSettingsViewModel @Inject constructor(
                     _uiState.update { it.copy(rgb565Enabled = event.enabled) }
                     appRestarter.restart()
                 }
+            }
+            is AdvancedSettingsEvent.SetPosterUpdateInterval -> {
+                imagePerformancePreferences.setPosterUpdateInterval(event.interval)
+                _uiState.update { it.copy(posterUpdateInterval = event.interval) }
+            }
+            is AdvancedSettingsEvent.SetQuietForLaunchersEnabled -> {
+                launcherAccessibilityPreferences.setQuietForLaunchers(event.enabled)
+                _uiState.update { it.copy(quietForLaunchersEnabled = event.enabled) }
             }
             is AdvancedSettingsEvent.SetAddonHealthEnabled -> {
                 viewModelScope.launch {

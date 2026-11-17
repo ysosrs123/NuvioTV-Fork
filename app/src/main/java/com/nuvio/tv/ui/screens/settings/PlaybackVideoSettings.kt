@@ -40,10 +40,12 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.player.DisplayCapabilities
+import com.nuvio.tv.core.player.amlfel.AmlDvOutput
 import com.nuvio.tv.core.player.amlfel.AmlFelSupport
 import com.nuvio.tv.data.local.Dv7HandlingMode
 import com.nuvio.tv.data.local.FrameRateMatchingMode
 import com.nuvio.tv.data.local.MpvHardwareDecodeMode
+import com.nuvio.tv.data.local.MpvDirectDecodeMode
 import com.nuvio.tv.data.local.PlayerPreference
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -147,6 +149,15 @@ internal fun PlaybackVideoSection(
             enabled = enabled,
             onClick = { onOpenDialog(PlaybackDialog.DV7_HANDLING_MODE) }
         )
+        if (rememberDvOutputRowShown()) {
+            SettingsActionRow(
+                title = stringResource(R.string.dv_output_title),
+                subtitle = stringResource(R.string.dv_output_sub),
+                value = stringResource(if (settings.dvOutputBoxHdr10) R.string.dv_output_box else R.string.dv_output_tv_short),
+                enabled = enabled,
+                onClick = { onOpenDialog(PlaybackDialog.DV_OUTPUT) }
+            )
+        }
         if (dv81Conversion) {
             SettingsToggleRow(
                 title = stringResource(R.string.audio_dv5_to_dv81_title),
@@ -192,6 +203,13 @@ internal fun PlaybackVideoSection(
             enabled = enabled,
             onClick = { onOpenDialog(PlaybackDialog.MPV_HARDWARE_DECODE_MODE) }
         )
+        SettingsActionRow(
+            title = stringResource(R.string.mpv_direct_decode_title),
+            subtitle = stringResource(R.string.mpv_direct_decode_subtitle),
+            value = mpvDirectDecodeModeLabel(settings.mpvDirectDecodeMode),
+            enabled = enabled,
+            onClick = { onOpenDialog(PlaybackDialog.MPV_DIRECT_DECODE_MODE) }
+        )
         SettingsToggleRow(
             title = stringResource(R.string.audio_mpv_hi10p_gnext_sw_title),
             subtitle = stringResource(R.string.audio_mpv_hi10p_gnext_sw_subtitle),
@@ -234,6 +252,18 @@ internal fun dv7ModeChoices(nativeFelUsable: Boolean?): List<Dv7HandlingMode> =
     Dv7HandlingMode.entries.filter { it != Dv7HandlingMode.NATIVE_FEL || nativeFelUsable == true }
 
 @Composable
+private fun rememberDvOutputRowShown(): Boolean {
+    val context = LocalContext.current
+    val available by produceState(initialValue = AmlDvOutput.availableCached()) {
+        if (value == null) value = withContext(Dispatchers.IO) { AmlDvOutput.isAvailable() }
+    }
+    val tvTakesDv by produceState<Boolean?>(initialValue = null, available) {
+        if (available == true) value = withContext(Dispatchers.IO) { AmlDvOutput.tvTakesDolbyVision(context) }
+    }
+    return AmlDvOutput.rowShown(available, tvTakesDv)
+}
+
+@Composable
 private fun rememberNativeFelUsable(): Boolean? {
     val usable by produceState(initialValue = AmlFelSupport.nativeFelUsableCached()) {
         if (value == null) value = withContext(Dispatchers.IO) { AmlFelSupport.nativeFelUsableOnce() }
@@ -265,6 +295,13 @@ private fun mpvHardwareDecodeModeLabel(mode: MpvHardwareDecodeMode): String = wh
     MpvHardwareDecodeMode.HARDWARE_COPY -> stringResource(R.string.audio_mpv_hwdec_hardware_copy)
     MpvHardwareDecodeMode.HARDWARE_DIRECT -> stringResource(R.string.audio_mpv_hwdec_hardware_direct)
     MpvHardwareDecodeMode.DISABLED -> stringResource(R.string.audio_mpv_hwdec_disabled)
+}
+
+@Composable
+private fun mpvDirectDecodeModeLabel(mode: MpvDirectDecodeMode): String = when (mode) {
+    MpvDirectDecodeMode.AUTOMATIC -> stringResource(R.string.mpv_direct_decode_automatic)
+    MpvDirectDecodeMode.ALWAYS -> stringResource(R.string.mpv_direct_decode_always)
+    MpvDirectDecodeMode.OFF -> stringResource(R.string.mpv_direct_decode_off)
 }
 
 @Composable
@@ -379,10 +416,26 @@ internal fun VideoSettingsDialogs(
             },
             onDismiss = onDismiss
         )
+        PlaybackDialog.DV_OUTPUT -> DvOutputDialog(
+            boxHdr10 = settings.dvOutputBoxHdr10,
+            onSelected = { box ->
+                onUpdate { setDvOutputBoxHdr10(box) }
+                onDismiss()
+            },
+            onDismiss = onDismiss
+        )
         PlaybackDialog.MPV_HARDWARE_DECODE_MODE -> MpvHardwareDecodeModeDialog(
             selectedMode = settings.mpvHardwareDecodeMode,
             onModeSelected = { mode ->
                 onUpdate { setMpvHardwareDecodeMode(mode) }
+                onDismiss()
+            },
+            onDismiss = onDismiss
+        )
+        PlaybackDialog.MPV_DIRECT_DECODE_MODE -> MpvDirectDecodeModeDialog(
+            selectedMode = settings.mpvDirectDecodeMode,
+            onModeSelected = { mode ->
+                onUpdate { setMpvDirectDecodeMode(mode) }
                 onDismiss()
             },
             onDismiss = onDismiss
@@ -511,6 +564,36 @@ private fun Dv7HandlingModeDialog(
 }
 
 @Composable
+private fun DvOutputDialog(
+    boxHdr10: Boolean,
+    onSelected: (Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options = listOf(
+        SettingsPickerOption(
+            false,
+            stringResource(R.string.dv_output_tv),
+            stringResource(R.string.dv_output_tv_desc)
+        ),
+        SettingsPickerOption(
+            true,
+            stringResource(R.string.dv_output_box),
+            stringResource(R.string.dv_output_box_desc),
+            warning = stringResource(R.string.dv_output_box_warning)
+        )
+    )
+    SettingsSingleChoiceDialog(
+        title = stringResource(R.string.dv_output_title),
+        options = options,
+        selectedValue = boxHdr10,
+        onOptionSelected = onSelected,
+        onDismiss = onDismiss,
+        width = 460.dp,
+        maxHeight = 360.dp
+    )
+}
+
+@Composable
 private fun MpvHardwareDecodeModeDialog(
     selectedMode: MpvHardwareDecodeMode,
     onModeSelected: (MpvHardwareDecodeMode) -> Unit,
@@ -547,6 +630,42 @@ private fun MpvHardwareDecodeModeDialog(
     SettingsSingleChoiceDialog(
         title = stringResource(R.string.audio_mpv_hwdec_title),
         subtitle = stringResource(R.string.audio_mpv_hwdec_dialog_subtitle),
+        options = options,
+        selectedValue = selectedMode,
+        onOptionSelected = onModeSelected,
+        onDismiss = onDismiss,
+        width = 460.dp,
+        maxHeight = 360.dp
+    )
+}
+
+@Composable
+private fun MpvDirectDecodeModeDialog(
+    selectedMode: MpvDirectDecodeMode,
+    onModeSelected: (MpvDirectDecodeMode) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options = listOf(
+        SettingsPickerOption(
+            MpvDirectDecodeMode.AUTOMATIC,
+            stringResource(R.string.mpv_direct_decode_automatic),
+            stringResource(R.string.mpv_direct_decode_automatic_desc)
+        ),
+        SettingsPickerOption(
+            MpvDirectDecodeMode.ALWAYS,
+            stringResource(R.string.mpv_direct_decode_always),
+            stringResource(R.string.mpv_direct_decode_always_desc)
+        ),
+        SettingsPickerOption(
+            MpvDirectDecodeMode.OFF,
+            stringResource(R.string.mpv_direct_decode_off),
+            stringResource(R.string.mpv_direct_decode_off_desc)
+        )
+    )
+
+    SettingsSingleChoiceDialog(
+        title = stringResource(R.string.mpv_direct_decode_title),
+        subtitle = stringResource(R.string.mpv_direct_decode_dialog_subtitle),
         options = options,
         selectedValue = selectedMode,
         onOptionSelected = onModeSelected,

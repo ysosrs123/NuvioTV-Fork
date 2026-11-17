@@ -18,9 +18,12 @@ val LocalSidebarPageLayout = staticCompositionLocalOf<SidebarPageLayout?> { null
 val LocalSidebarBackdropSource = staticCompositionLocalOf<dev.chrisbanes.haze.HazeState?> { null }
 
 @Composable
-fun Modifier.sidebarPageContent(): Modifier {
-    val layout = LocalSidebarPageLayout.current ?: return this
-    val direction = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1 else 1
+fun Modifier.sidebarPageContent(): Modifier =
+    sidebarPageContent(LocalSidebarPageLayout.current, LocalLayoutDirection.current)
+
+fun Modifier.sidebarPageContent(layout: SidebarPageLayout?, layoutDirection: LayoutDirection): Modifier {
+    if (layout == null) return this
+    val direction = if (layoutDirection == LayoutDirection.Rtl) -1 else 1
     return padding(start = layout.startInset).graphicsLayer {
         translationX = (layout.expandedWidth - layout.startInset).toPx() * layout.expansion() * direction
     }

@@ -96,6 +96,9 @@ class ProfileDataStoreFactory @Inject constructor(
     internal val historyGenerationChanges: kotlinx.coroutines.flow.StateFlow<Long> get() = historyGenerations
     private val generationOwnedFeatures = setOf("watched_items_preferences", WATCH_PROGRESS_METADATA_FEATURE, WATCH_PROGRESS_RECENT_FEATURE, WATCH_PROGRESS_ARCHIVE_FEATURE)
     private var resetting = false
+
+    /** Whole tracker histories: a damaged file is fetched again from the tracker, so no backup copy is kept. */
+    private val noShadowFeatures = setOf("mdblist_sync", "simkl_sync", "wetrakr_sync")
     private val retiringProfiles = mutableSetOf<Int>()
 
     /** Set of DataStore file names that were reset due to corruption during this session. */
@@ -235,10 +238,15 @@ class ProfileDataStoreFactory @Inject constructor(
             produceFile = { context.preferencesDataStoreFile(fileName) }
         )
 
-        // Wrap store to persist a shadow copy after each successful read.
-        // The shadow copy is written once on first data emission (app start),
-        // ensuring a consistent backup exists before any corruption can occur.
-        val wrappedStore = ShadowCopyDataStore(store, fileName, scope, this)
+        // Wrap store to persist a shadow copy: on the first read only when the copy is missing or older than the
+        // store, and after every edit that changed something.
+        val keepsShadow = noShadowFeatures.none { feature -> fileName == feature || fileName.startsWith("${feature}_p") }
+        val wrappedStore = if (keepsShadow) {
+            ShadowCopyDataStore(store, fileName, scope, this)
+        } else {
+            scope.launch { runCatching { File(dataStoreDir, "$fileName.preferences_pb.bak").delete() } }
+            store
+        }
 
         val owned = generationOwnedFeatures.any { feature -> fileName == feature || fileName.startsWith("${feature}_p") }
         val scoped = ScopedDataStore(if (owned) ProfileStoreLifetime(wrappedStore, historyGenerations) else wrappedStore, scope, job)
@@ -247,6 +255,13 @@ class ProfileDataStoreFactory @Inject constructor(
     }
 
     internal fun currentShadowGeneration(): Long = shadowGeneration
+
+    internal fun shadowCopyIsCurrent(fileName: String): Boolean {
+        val dataStoreDir = File(context.filesDir, "datastore")
+        val backupFile = File(dataStoreDir, "$fileName.preferences_pb.bak")
+        val storeFile = File(dataStoreDir, "$fileName.preferences_pb")
+        return backupFile.length() > 0L && backupFile.lastModified() > storeFile.lastModified()
+    }
 
     /** Writes [preferences] to the shadow copy without opening the live store file, which DataStore renames over. */
     internal suspend fun writeShadowCopy(fileName: String, preferences: Preferences, generation: Long) {
@@ -314,22 +329,36 @@ private class ShadowCopyDataStore(
     private var shadowWritten = false
     private val shadowMutex = Mutex()
 
+    @Volatile
+    private var firstReadChecked = false
+
     override val data: kotlinx.coroutines.flow.Flow<Preferences>
         get() = delegate.data.also {
-            if (!shadowWritten) launchShadowCopy()
+            if (!shadowWritten && !firstReadChecked) {
+                firstReadChecked = true
+                launchShadowCopy(onlyIfStale = true)
+            }
         }
 
     override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences {
-        val result = delegate.updateData(transform)
-        launchShadowCopy()
+        var before: Preferences? = null
+        val result = delegate.updateData { current ->
+            before = current
+            transform(current)
+        }
+        if (result !== before && result != before) launchShadowCopy()
         return result
     }
 
     // Each copy reads the newest data under the mutex, so a late copy never overwrites a newer one.
-    private fun launchShadowCopy() {
+    private fun launchShadowCopy(onlyIfStale: Boolean = false) {
         scope.launch(Dispatchers.IO) {
             try {
                 shadowMutex.withLock {
+                    if (onlyIfStale && (shadowWritten || factory.shadowCopyIsCurrent(fileName))) {
+                        shadowWritten = true
+                        return@withLock
+                    }
                     val generation = factory.currentShadowGeneration()
                     factory.writeShadowCopy(fileName, delegate.data.first(), generation)
                     shadowWritten = true

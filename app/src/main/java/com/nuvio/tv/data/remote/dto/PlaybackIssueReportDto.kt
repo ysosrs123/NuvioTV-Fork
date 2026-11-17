@@ -9,6 +9,7 @@ data class PlaybackIssueReportRequestDto(
     @Json(name = "createdAtMs") val createdAtMs: Long,
     @Json(name = "app") val app: PlaybackIssueAppDto,
     @Json(name = "device") val device: PlaybackIssueDeviceDto,
+    @Json(name = "display") val display: PlaybackIssueDisplayDto? = null,
     @Json(name = "content") val content: PlaybackIssueContentDto,
     @Json(name = "stream") val stream: PlaybackIssueStreamDto,
     @Json(name = "player") val player: PlaybackIssuePlayerDto,
@@ -21,13 +22,13 @@ data class PlaybackIssueReportRequestDto(
     @Json(name = "recorder") val recorder: PlaybackIssueRecorderDto? = null,
     @Json(name = "network") val network: PlaybackIssueNetworkDto? = null,
     @Json(name = "box") val box: PlaybackIssueBoxDto? = null,
-    @Json(name = "display") val display: PlaybackIssueDisplayDto? = null,
     @Json(name = "extra") val extra: Map<String, String>? = null
 )
 
 /** The screen mode while the report is built, and how the film's frame rate fits it. */
 @JsonClass(generateAdapter = true)
 data class PlaybackIssueDisplayDto(
+    @Json(name = "modeId") val modeId: Int? = null,
     @Json(name = "refreshHz") val refreshHz: Float?,
     @Json(name = "width") val width: Int?,
     @Json(name = "height") val height: Int?,
@@ -37,7 +38,21 @@ data class PlaybackIssueDisplayDto(
     @Json(name = "arcFrameRateMatching") val arcFrameRateMatching: String? = null,
     @Json(name = "filmFps") val filmFps: Float? = null,
     @Json(name = "measuredHz") val measuredHz: Float? = null,
-    @Json(name = "cadence") val cadence: String = "unknown"
+    @Json(name = "cadence") val cadence: String = "unknown",
+    @Json(name = "arcTarget") val arcTarget: PlaybackIssueAfrTargetDto? = null
+)
+
+/** The mode Arc's frame rate matching asked for, and whether the screen reports that mode now. */
+@JsonClass(generateAdapter = true)
+data class PlaybackIssueAfrTargetDto(
+    @Json(name = "modeId") val modeId: Int,
+    @Json(name = "refreshHz") val refreshHz: Float,
+    @Json(name = "width") val width: Int,
+    @Json(name = "height") val height: Int,
+    @Json(name = "videoFps") val videoFps: Float,
+    @Json(name = "fromModeId") val fromModeId: Int,
+    @Json(name = "result") val result: String,
+    @Json(name = "displayOnTarget") val displayOnTarget: Boolean?
 )
 
 @JsonClass(generateAdapter = true)
@@ -110,6 +125,11 @@ data class PlaybackIssueRecorderSamplesDto(
     @Json(name = "audioLatencyMs") val audioLatencyMs: List<Int?> = emptyList(),
     @Json(name = "audioClockSource") val audioClockSource: List<Int?> = emptyList(),
     @Json(name = "audioWriteStalls") val audioWriteStalls: List<Int?> = emptyList(),
+    @Json(name = "videoPath") val videoPath: List<Int?> = emptyList(),
+    @Json(name = "pictureHolds") val pictureHolds: List<Int?> = emptyList(),
+    @Json(name = "videoClockCorrections") val videoClockCorrections: List<Int?> = emptyList(),
+    @Json(name = "pictureOffsetMs") val pictureOffsetMs: List<Int?> = emptyList(),
+    /** One row per sample; an empty row is a sample whose frame times could not be measured. */
     @Json(name = "frameBuckets") val frameBuckets: List<List<Int>> = emptyList()
 )
 

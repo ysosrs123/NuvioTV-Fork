@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.translate
@@ -67,6 +68,20 @@ internal fun Modifier.glassFocusEdge(
         val glintStroke = Stroke(1.65.dp.toPx())
         val haloStroke = Stroke(4.dp.toPx())
         val radius = (size.minDimension * .27f).coerceIn(18.dp.toPx(), 52.dp.toPx())
+        val tint = lerp(Color.White, artworkColor?.value ?: Color(0xFFD6F0FF), .16f)
+        // Each glint's gradient is made once, around the origin, and moved into place by
+        // translating the canvas: a new gradient per frame is a new native shader per frame.
+        val glintBrushes = floatArrayOf(1f, .82f).map { strength ->
+            Brush.radialGradient(
+                0f to Color.White.copy(alpha = strength),
+                .16f to tint.copy(alpha = .95f * strength),
+                .5f to tint.copy(alpha = .35f * strength),
+                1f to Color.Transparent,
+                center = Offset.Zero, radius = radius
+            )
+        }
+        val outlinePath = outline.asGlassPath()
+        val glintPath = Path()
         onDrawWithContent {
             drawContent()
             val p = progress.value
@@ -78,32 +93,38 @@ internal fun Modifier.glassFocusEdge(
                 val light = variation.value
                 val phase = ((light.start + screen.x * .00037f + screen.y * .00053f +
                     (1f - arrival.value) * light.drift) % 1f + 1f) % 1f
-                val tint = lerp(Color.White, artworkColor?.value ?: Color(0xFFD6F0FF), .16f)
                 val first = perimeter.getPosition(perimeter.length * phase)
                 val second = perimeter.getPosition(perimeter.length * ((phase + light.separation) % 1f))
-                val glints = listOf(first to 1f, second to .82f).map { (point, strength) ->
-                    Brush.radialGradient(
-                        0f to Color.White.copy(alpha = strength),
-                        .16f to tint.copy(alpha = .95f * strength),
-                        .5f to tint.copy(alpha = .35f * strength),
-                        1f to Color.Transparent,
-                        center = point, radius = radius
-                    )
-                }
                 // Exclude the original shape even from the tiny halo: no inner bevel,
                 // fill, magnification, image replay, or dark seam over the artwork.
                 clipPath(contentPath, clipOp = ClipOp.Difference) {
                     translate(-outset, -outset) {
                         drawOutline(outline, tint, alpha = .62f * p, style = hairline)
-                        glints.forEach { brush ->
-                            drawOutline(outline, brush, alpha = .20f * p, style = haloStroke)
-                            drawOutline(outline, brush, alpha = p, style = glintStroke)
-                        }
+                        drawGlint(outlinePath, glintPath, first, glintBrushes[0], p, haloStroke, glintStroke)
+                        drawGlint(outlinePath, glintPath, second, glintBrushes[1], p, haloStroke, glintStroke)
                     }
                 }
             }
         }
     }.then(if (focused) Modifier.graphicsLayer() else Modifier)
+}
+
+/** Draws [outline] lit by [brush] centred on [point]; [scratch] is reused so nothing is allocated per frame. */
+private fun DrawScope.drawGlint(
+    outline: Path,
+    scratch: Path,
+    point: Offset,
+    brush: Brush,
+    progress: Float,
+    halo: Stroke,
+    glint: Stroke
+) {
+    scratch.reset()
+    scratch.addPath(outline, -point)
+    translate(point.x, point.y) {
+        drawPath(scratch, brush, alpha = .20f * progress, style = halo)
+        drawPath(scratch, brush, alpha = progress, style = glint)
+    }
 }
 
 private fun Outline.asGlassPath(): Path = Path().apply {

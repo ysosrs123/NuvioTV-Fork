@@ -88,6 +88,34 @@ internal object ExitRules {
 
     private const val REASON_CRASH = 4
 
+    /**
+     * A low-memory exit while Arc sat idle and small: Arc's snapshot from just before the exit says nothing was
+     * playing, Arc held under a fifth of the box's memory and under 350 MB, and its Java heap was well below its limit. The box ran short
+     * as a whole, which a report can't fix, so the prompt stays quiet; Settings still offers the exit. Anything missing
+     * or unreadable keeps the prompt.
+     */
+    fun boxShortWhileArcIdle(exit: UnexpectedExit, snapshot: ArcHeartbeat.Snapshot?, boxTotalMb: Long): Boolean {
+        if (exit.kind != UnexpectedExitKind.LowMemory || snapshot == null || boxTotalMb <= 0L) return false
+        if (exit.timestampMs - snapshot.writtenAtMs !in -SNAPSHOT_AFTER_EXIT_MS..SNAPSHOT_BEFORE_EXIT_MS) return false
+        val lines = snapshot.lines
+        if ("Playing: no" !in lines) return false
+        val heap = lines.firstNotNullOfOrNull { JAVA_HEAP.matchEntire(it) } ?: return false
+        val heapUsedMb = heap.groupValues[1].toLong()
+        val heapMaxMb = heap.groupValues[2].toLong()
+        if (heapMaxMb <= 0L || heapUsedMb * 100 >= heapMaxMb * IDLE_HEAP_MAX_PERCENT) return false
+        val detail = lines.firstOrNull { it.startsWith("Memory detail:") }?.let { ARC_TOTAL.find(it) } ?: return false
+        val arcMb = detail.groupValues[1].toLong() + detail.groupValues[2].toLong()
+        return arcMb < minOf(boxTotalMb * IDLE_ARC_MAX_PERCENT / 100, IDLE_ARC_MAX_MB)
+    }
+
+    const val SNAPSHOT_BEFORE_EXIT_MS = 120_000L
+    private const val SNAPSHOT_AFTER_EXIT_MS = 10_000L
+    const val IDLE_ARC_MAX_PERCENT = 20
+    const val IDLE_ARC_MAX_MB = 350L
+    const val IDLE_HEAP_MAX_PERCENT = 60
+    private val JAVA_HEAP = Regex("""Java heap: (\d+) of (\d+) MB""")
+    private val ARC_TOTAL = Regex("""\btotal (\d+) MB, swapped (\d+) MB""")
+
     fun forSettings(records: List<ExitRecord>, reportedMs: Long, nowMs: Long): UnexpectedExit? =
         records.sortedByDescending { it.timestampMs }
             .firstNotNullOfOrNull(::unexpected)
@@ -116,8 +144,21 @@ class ArcExitReports @Inject constructor(@ApplicationContext private val context
         if (!IssueReports.available || !prefs.getBoolean(KEY_PROMPT_ENABLED, true)) return@withContext null
         val handled = maxOf(prefs.getLong(KEY_OFFERED_MS, 0L), prefs.getLong(KEY_REPORTED_MS, 0L))
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return@withContext ExitRules.savedCrash(ArcCrashFile.savedAtMs(), handled)
-        ExitRules.forPrompt(exitInfos().map { it.toRecord() }, handled)?.withTraceFlag()
+        val exit = ExitRules.forPrompt(exitInfos().map { it.toRecord() }, handled) ?: return@withContext null
+        if (exit.kind == UnexpectedExitKind.LowMemory &&
+            ExitRules.boxShortWhileArcIdle(exit, ArcHeartbeat.snapshotFor(exit.timestampMs, exit.pid), boxTotalMb())
+        ) {
+            markOffered(exit)
+            return@withContext null
+        }
+        exit.withTraceFlag()
     }
+
+    private fun boxTotalMb(): Long = runCatching {
+        val info = ActivityManager.MemoryInfo()
+        context.getSystemService(ActivityManager::class.java)?.getMemoryInfo(info)
+        info.totalMem shr 20
+    }.getOrDefault(0L)
 
     suspend fun unreportedExit(): UnexpectedExit? = withContext(Dispatchers.IO) {
         if (!IssueReports.available) return@withContext null

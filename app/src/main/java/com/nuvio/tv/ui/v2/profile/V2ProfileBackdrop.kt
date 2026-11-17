@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.nuvio.tv.domain.model.VisualStyle
@@ -52,11 +53,13 @@ fun V2ProfileBackdrop(focusedColor: Color, profileId: Int?, snapshotVersion: Int
     val color = animateColorAsState(settledColor, tween(V2Motion.BackdropCrossfadeMs), label = "profileAmbience")
     val pureDark = LocalV2Appearance.current?.visualStyle == VisualStyle.PURE_LIQUID_DARK
     Box(Modifier.fillMaxSize().v2GlassSource().v2StaticBackdrop()) { ProfilePosterWallBackground(profilePosters = posters) }
-    Box(Modifier.fillMaxSize().drawWithCache {
-        onDrawBehind {
-            if (!pureDark) drawRect(Brush.radialGradient(
-                listOf(color.value.copy(alpha = 0.13f), Color.Transparent),
-                center = Offset(size.width / 2, size.height * 0.48f), radius = size.width * 0.55f))
-        }
+    if (!pureDark) Box(Modifier.fillMaxSize().drawWithCache {
+        val glow = profileAmbienceBrush(color.value, size)
+        onDrawBehind { drawRect(glow) }
     })
 }
+
+/** Read in the cache step so the gradient is rebuilt only when the colour or size changes, not on every redraw. */
+internal fun profileAmbienceBrush(color: Color, size: Size): Brush = Brush.radialGradient(
+    listOf(color.copy(alpha = 0.13f), Color.Transparent),
+    center = Offset(size.width / 2, size.height * 0.48f), radius = size.width * 0.55f)

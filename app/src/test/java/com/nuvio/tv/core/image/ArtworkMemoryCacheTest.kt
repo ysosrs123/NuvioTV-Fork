@@ -53,7 +53,7 @@ class ArtworkMemoryCacheTest {
     }
     @Test fun artFromOtherHostsLeavesMemoryAfterTheLimitSoTheNextLoadChecksAgain() {
         var now = 0L
-        val cache = ArtworkMemoryCache(16L * 1024 * 1024, undatedLimitMs = 1_000, now = { now })
+        val cache = ArtworkMemoryCache(16L * 1024 * 1024, undatedLimitMs = { 1_000 }, now = { now })
         val addon = MemoryCache.Key("https://top-today.example/p/tt1.jpg_300x450_v0")
         val tmdb = MemoryCache.Key("https://image.tmdb.org/t/p/w342/a.jpg_300x450_v0")
         val local = MemoryCache.Key("profile-background-sunset-v1")
@@ -78,7 +78,7 @@ class ArtworkMemoryCacheTest {
 
     @Test fun localPicturesStayInMemory() {
         var now = 0L
-        val cache = ArtworkMemoryCache(16L * 1024 * 1024, undatedLimitMs = 1_000, now = { now })
+        val cache = ArtworkMemoryCache(16L * 1024 * 1024, undatedLimitMs = { 1_000 }, now = { now })
         val key = MemoryCache.Key("content://media/external/images/7")
         cache[key] = image(200_000)
         now = 10_000
@@ -90,5 +90,20 @@ class ArtworkMemoryCacheTest {
         val key = MemoryCache.Key("https://addon.example/p.jpg")
         cache[key] = MemoryCache.Value(image(1_000).image, mapOf("coil#is_sampled" to true))
         assertEquals(true, cache[key]!!.extras["coil#is_sampled"])
+    }
+    @Test fun everyStartLooksAgainAtPicturesKeptFromBeforeTheStart() {
+        var now = 100L
+        var cutoff = Long.MIN_VALUE
+        val cache = ArtworkMemoryCache(16L * 1024 * 1024, now = { now }, storedBefore = { cutoff })
+        val addon = MemoryCache.Key("https://addon.example/p.jpg")
+        val tmdb = MemoryCache.Key("https://image.tmdb.org/t/p/w342/p.jpg")
+        cache[addon] = image(1_000)
+        cache[tmdb] = image(1_000)
+        now = 200
+        cutoff = 150
+        assertNull(cache[addon])
+        assertNotNull(cache[tmdb])
+        cache[addon] = image(1_000)
+        assertNotNull(cache[addon])
     }
 }

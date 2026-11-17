@@ -198,6 +198,13 @@ interface TraktApi {
         @Query("extended") extended: String = "full"
     ): Response<List<TraktCalendarShowDto>>
 
+    @GET("shows/{id}/seasons/{season}")
+    suspend fun getShowSeasonEpisodes(
+        @Path("id") id: String,
+        @Path("season") season: Int,
+        @Query("extended") extended: String = "full"
+    ): Response<List<TraktCalendarEpisodeDto>>
+
     @GET("shows/{id}/next_episode")
     suspend fun getShowNextEpisode(
         @Path("id") id: String,

@@ -17,6 +17,9 @@ import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.core.report.FRAME_BUCKET_EDGES_MS
 import com.nuvio.tv.core.report.RECORDER_UNKNOWN
 import com.nuvio.tv.core.report.RecorderSnapshot
+import com.nuvio.tv.core.player.AfrRequest
+import com.nuvio.tv.core.player.FrameRateUtils
+import com.nuvio.tv.data.remote.dto.PlaybackIssueAfrTargetDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueBoxDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueDisplayDto
 import com.nuvio.tv.data.remote.dto.PlaybackIssueMarkDto
@@ -80,9 +83,11 @@ internal fun RecorderSnapshot.toDto(
                 audioWriteStalls = it.audioWriteStalls.known(),
                 subtitleCues = it.subtitleCues.known(),
                 subtitlePictureCues = it.subtitlePictureCues.known(),
-                frameBuckets = it.frameBuckets?.let { flat ->
-                    List(it.count) { row -> List(FRAME_BUCKET_COUNT) { flat[row * FRAME_BUCKET_COUNT + it] } }
-                }.orEmpty()
+                videoPath = it.videoPath.known(),
+                pictureHolds = it.pictureHolds.known(),
+                videoClockCorrections = it.clockCorrections.known(),
+                pictureOffsetMs = it.pictureOffsetMs.known(),
+                frameBuckets = it.frameBuckets?.let { flat -> frameBucketRows(flat, it.count) }.orEmpty()
             )
         },
         eventLines = if (recorded) newestWithinBudget(lines, RECORDING_EVENT_LINES_MAX_CHARS) else newestWithinBudget(lines),
@@ -166,6 +171,8 @@ internal fun PlaybackIssueRecorderSamplesDto.dropOldest(count: Int): PlaybackIss
         subtitleCues = subtitleCues.rest(), subtitlePictureCues = subtitlePictureCues.rest(),
         audioHeadMs = audioHeadMs.rest(), audioLatencyMs = audioLatencyMs.rest(),
         audioClockSource = audioClockSource.rest(), audioWriteStalls = audioWriteStalls.rest(),
+        videoPath = videoPath.rest(), pictureHolds = pictureHolds.rest(),
+        videoClockCorrections = videoClockCorrections.rest(), pictureOffsetMs = pictureOffsetMs.rest(),
         frameBuckets = frameBuckets.rest()
     )
 }
@@ -198,6 +205,11 @@ internal fun fitRecorderToBudget(
         )
     }
     return current
+}
+
+internal fun frameBucketRows(flat: IntArray, count: Int): List<List<Int>> = List(count) { row ->
+    val start = row * FRAME_BUCKET_COUNT
+    if (flat[start] == RECORDER_UNKNOWN) emptyList() else List(FRAME_BUCKET_COUNT) { flat[start + it] }
 }
 
 private fun IntArray.known(): List<Int?> = map { value -> value.takeUnless { it == RECORDER_UNKNOWN } }
@@ -286,6 +298,26 @@ internal fun systemMatchLabel(value: Int?): String = when (value) {
     else -> "unknown"
 }
 
+/** Arc's frame rate request beside the mode the screen reports now. */
+internal fun afrTarget(request: AfrRequest?, currentModeId: Int?, currentHz: Float?): PlaybackIssueAfrTargetDto? {
+    request ?: return null
+    val onTarget = if (currentModeId == null || currentHz == null) {
+        null
+    } else {
+        FrameRateUtils.switchReported(currentModeId, currentHz, request.modeId, request.refreshHz, request.fromModeId)
+    }
+    return PlaybackIssueAfrTargetDto(
+        modeId = request.modeId,
+        refreshHz = request.refreshHz,
+        width = request.width,
+        height = request.height,
+        videoFps = request.videoFps,
+        fromModeId = request.fromModeId,
+        result = request.result,
+        displayOnTarget = onTarget
+    )
+}
+
 internal fun hdrTypeName(type: Int): String = when (type) {
     1 -> "DolbyVision"
     2 -> "HDR10"
@@ -348,7 +380,13 @@ internal object PlaybackReportFacts {
 
     /** The screen mode as Android has it now. [measuredHz] is the tick count after the last switch, when it can be trusted. */
     @Suppress("DEPRECATION")
-    fun display(context: Context, filmFps: Float?, arcMatching: String?, measuredHz: Float?): PlaybackIssueDisplayDto? = runCatching {
+    fun display(
+        context: Context,
+        filmFps: Float?,
+        arcMatching: String?,
+        measuredHz: Float?,
+        arcRequest: AfrRequest? = null
+    ): PlaybackIssueDisplayDto? = runCatching {
         val manager = context.getSystemService(Context.DISPLAY_SERVICE) as? DisplayManager
         val display = manager?.getDisplay(Display.DEFAULT_DISPLAY)
         val mode = display?.mode
@@ -367,6 +405,7 @@ internal object PlaybackReportFacts {
         val fps = filmFps?.takeIf { it > 0f }
         val screenHz = measuredHz ?: mode?.refreshRate
         PlaybackIssueDisplayDto(
+            modeId = mode?.modeId,
             refreshHz = mode?.refreshRate,
             width = mode?.physicalWidth,
             height = mode?.physicalHeight,
@@ -376,7 +415,8 @@ internal object PlaybackReportFacts {
             arcFrameRateMatching = arcMatching,
             filmFps = fps,
             measuredHz = measuredHz,
-            cadence = cadenceLabel(fps, screenHz)
+            cadence = cadenceLabel(fps, screenHz),
+            arcTarget = afrTarget(arcRequest, mode?.modeId, mode?.refreshRate)
         )
     }.getOrNull()
 

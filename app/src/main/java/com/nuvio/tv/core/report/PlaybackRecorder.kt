@@ -43,7 +43,11 @@ internal class SampleExtras(
     val audioHeadMs: Int = RECORDER_UNKNOWN,
     val audioLatencyMs: Int = RECORDER_UNKNOWN,
     val audioClockSource: Int = RECORDER_UNKNOWN,
-    val audioWriteStalls: Int = RECORDER_UNKNOWN
+    val audioWriteStalls: Int = RECORDER_UNKNOWN,
+    val videoPath: Int = RECORDER_UNKNOWN,
+    val pictureHolds: Int = RECORDER_UNKNOWN,
+    val clockCorrections: Int = RECORDER_UNKNOWN,
+    val pictureOffsetMs: Int = RECORDER_UNKNOWN
 )
 
 data class RecordingStatus(
@@ -75,6 +79,12 @@ private class RecordingRun(
 internal object PlaybackRecorder {
     const val ENGINE_EXO = 1
     const val ENGINE_MPV = 2
+
+    /** How the picture reached the screen, per sample; says which frame columns could be measured. */
+    const val VIDEO_PATH_DECODER = 1
+    const val VIDEO_PATH_TUNNEL = 2
+    const val VIDEO_PATH_NATIVE_FEL = 3
+    const val VIDEO_PATH_MPV = 4
 
     private const val MIN_SAMPLE_GAP_MS = 950L
     private const val LONGEST_CPU_INTERVAL_MS = 5_000L
@@ -110,6 +120,8 @@ internal object PlaybackRecorder {
     private var lastUnderruns = RECORDER_UNKNOWN
     private var lastClockSource = RECORDER_UNKNOWN
     private var lastWriteStalls = RECORDER_UNKNOWN
+    private var lastHolds = RECORDER_UNKNOWN
+    private var lastCorrections = RECORDER_UNKNOWN
     private var watchedMs = 0L
     private var lastWatchedAtMs = 0L
 
@@ -141,6 +153,7 @@ internal object PlaybackRecorder {
     private var pendingTunnelled = 0
     private var pendingPlaying = 0
     private var pendingExtras = NO_EXTRAS
+    private var pendingFramesTimed = true
     private var pendingWatchedMs = 0
     private var pendingCues = RECORDER_UNKNOWN
     private var pendingPictureCues = RECORDER_UNKNOWN
@@ -168,6 +181,8 @@ internal object PlaybackRecorder {
         lastUnderruns = RECORDER_UNKNOWN
         lastClockSource = RECORDER_UNKNOWN
         lastWriteStalls = RECORDER_UNKNOWN
+        lastHolds = RECORDER_UNKNOWN
+        lastCorrections = RECORDER_UNKNOWN
         watchedMs = 0L
         lastWatchedAtMs = 0L
         frameLead.reset()
@@ -297,7 +312,8 @@ internal object PlaybackRecorder {
         bufferCapBytes: Long,
         tunnelled: Boolean,
         playing: Boolean,
-        extras: SampleExtras = NO_EXTRAS
+        extras: SampleExtras = NO_EXTRAS,
+        framesTimed: Boolean = true
     ) {
         if (engine != lastEngine) {
             lastEngine = engine
@@ -321,6 +337,7 @@ internal object PlaybackRecorder {
         pendingTunnelled = if (tunnelled) 1 else 0
         pendingPlaying = if (playing) 1 else 0
         pendingExtras = extras
+        pendingFramesTimed = framesTimed
         pendingWatchedMs = watchedMs.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
         pendingCues = if (engine == ENGINE_EXO) cues.getAndSet(0) else RECORDER_UNKNOWN
         pendingPictureCues = if (engine == ENGINE_EXO) pictureCues.getAndSet(0) else RECORDER_UNKNOWN
@@ -354,6 +371,16 @@ internal object PlaybackRecorder {
             val added = underrunsAdded(lastWriteStalls, extras.audioWriteStalls)
             lastWriteStalls = extras.audioWriteStalls
             if (added > 0) event(RecorderEvent.WRITE_STALL, "count=$added total=${extras.audioWriteStalls}")
+        }
+        if (extras.pictureHolds >= 0) {
+            val added = underrunsAdded(lastHolds, extras.pictureHolds)
+            lastHolds = extras.pictureHolds
+            if (added > 0) event(RecorderEvent.PICTURE_HOLD, "count=$added total=${extras.pictureHolds}")
+        }
+        if (extras.clockCorrections >= 0) {
+            val added = underrunsAdded(lastCorrections, extras.clockCorrections)
+            lastCorrections = extras.clockCorrections
+            if (added > 0) event(RecorderEvent.CLOCK_CORRECTION, "count=$added total=${extras.clockCorrections}")
         }
         jumps.drain { sizeMs, wallMs, positionMs ->
             if (abs(sizeMs) >= CLOCK_JUMP_MIN_MS) eventAt(RecorderEvent.CLOCK_JUMP, "ms=$sizeMs", wallMs, positionMs)
@@ -580,7 +607,11 @@ internal object PlaybackRecorder {
                 audioHeadMs = extras.audioHeadMs,
                 audioLatencyMs = extras.audioLatencyMs,
                 audioClockSource = extras.audioClockSource,
-                audioWriteStalls = extras.audioWriteStalls
+                audioWriteStalls = extras.audioWriteStalls,
+                videoPath = extras.videoPath,
+                pictureHolds = extras.pictureHolds,
+                clockCorrections = extras.clockCorrections,
+                pictureOffsetMs = extras.pictureOffsetMs
             )
             recording?.let { current ->
                 frameBuckets.drainInto(bucketScratch)
@@ -620,7 +651,11 @@ internal object PlaybackRecorder {
                     audioLatencyMs = extras.audioLatencyMs,
                     audioClockSource = extras.audioClockSource,
                     audioWriteStalls = extras.audioWriteStalls,
-                    frameBuckets = bucketScratch
+                    videoPath = extras.videoPath,
+                    pictureHolds = extras.pictureHolds,
+                    clockCorrections = extras.clockCorrections,
+                    pictureOffsetMs = extras.pictureOffsetMs,
+                    frameBuckets = bucketScratch.takeIf { pendingFramesTimed }
                 )
             }
         }

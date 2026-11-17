@@ -53,8 +53,8 @@ class TvChannelRefreshJobService : JobService() {
         val syncService = entryPoint.channelSyncService()
         val manager = entryPoint.channelManager()
 
-        if (!manager.isSupported()) {
-            jobFinished(params, false)
+        if (!manager.isSupported() || syncService.isAppInForeground) {
+            Log.d(TAG, "Background job skipped: ${if (manager.isSupported()) "Arc is in front" else "no channels"}")
             return false
         }
 

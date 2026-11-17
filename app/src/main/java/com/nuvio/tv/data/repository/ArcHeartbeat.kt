@@ -64,7 +64,13 @@ object ArcHeartbeat {
      */
     fun linesFor(exitMs: Long, exitPid: Int = 0): List<String>? = linesFor(files, exitMs, exitPid)
 
-    internal fun linesFor(targets: List<File>, exitMs: Long, exitPid: Int = 0): List<String>? {
+    internal fun linesFor(targets: List<File>, exitMs: Long, exitPid: Int = 0): List<String>? =
+        snapshotFor(targets, exitMs, exitPid)?.let { listOf(HEADER) + it.lines }
+
+    /** The snapshot [linesFor] reads, with the time it was written. */
+    fun snapshotFor(exitMs: Long, exitPid: Int = 0): Snapshot? = snapshotFor(files, exitMs, exitPid)
+
+    internal fun snapshotFor(targets: List<File>, exitMs: Long, exitPid: Int = 0): Snapshot? {
         val read = targets.map { target -> runCatching { if (target.exists()) target.readLines() else null }.getOrNull() }
         val times = read.map { lines -> lines?.firstOrNull()?.removePrefix("time=")?.toLongOrNull() }
         val samePid = RunFiles.byPid(read.map { it?.let(RunFiles::pidOf) }, exitPid)
@@ -72,8 +78,11 @@ object ArcHeartbeat {
             ?: times.indexOfFirst { at -> at != null && (exitMs - at in 0..MATCH_BEFORE_MS || at - exitMs in 0..MATCH_AFTER_MS) }
         if (index < 0) return null
         val lines = read[index] ?: return null
-        return listOf(HEADER) + lines.drop(1).filterNot { it.startsWith(RunFiles.PID_PREFIX) }
+        val at = times[index] ?: return null
+        return Snapshot(at, lines.drop(1).filterNot { it.startsWith(RunFiles.PID_PREFIX) })
     }
+
+    data class Snapshot(val writtenAtMs: Long, val lines: List<String>)
 
     private fun noteTrim(level: Int) {
         val line = "${SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())} level=$level"

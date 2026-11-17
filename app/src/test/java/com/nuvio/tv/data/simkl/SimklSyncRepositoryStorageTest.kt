@@ -33,8 +33,12 @@ class SimklSyncRepositoryStorageTest {
         var saveSnapshotCalls = 0
         var savePlaybackCalls = 0
         var clearPlaybackCalls = 0
+        var loadCalls = 0
 
-        override suspend fun load(profileId: Int): String? = snapshots[profileId]
+        override suspend fun load(profileId: Int): String? {
+            loadCalls++
+            return snapshots[profileId]
+        }
 
         override suspend fun save(profileId: Int, payload: String) {
             saveSnapshotCalls++
@@ -388,5 +392,61 @@ class SimklSyncRepositoryStorageTest {
         } catch (_: IOException) {
             Unit
         }
+    }
+
+    @Test
+    fun `signed out, the saved Simkl history is not read, and it is once signed in`() = runTest {
+        val storage = FakeSimklSyncStorage()
+        storage.snapshots[1] = json.encodeToString(SimklSyncSnapshot(isInitialized = true, watermark = "w1"))
+        val activeProfile = MutableStateFlow(1)
+        val profileManager = mockk<ProfileManager> { every { activeProfileId } returns activeProfile }
+        val authState = MutableStateFlow(SimklAuthState(isAuthenticated = false))
+        val authStorage = mockk<SimklAuthStorage>(relaxed = true) {
+            every { state } returns authState
+            every { currentScope() } returns SimklAuthScope(profileId = 1, generation = 0L)
+        }
+        val repository = SimklSyncRepository(
+            engine = mockk(relaxed = true),
+            storage = storage,
+            authRepository = mockk(relaxed = true),
+            authStorage = authStorage,
+            profileManager = profileManager
+        )
+
+        repository.ensureLoaded()
+        assertEquals(0, storage.loadCalls)
+        assertEquals(null, repository.state.value.snapshot.watermark)
+
+        authState.value = SimklAuthState(isAuthenticated = true)
+        repository.ensureLoaded()
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            kotlinx.coroutines.withTimeout(5_000) {
+                while (repository.state.value.snapshot.watermark != "w1") kotlinx.coroutines.delay(10)
+            }
+        }
+        assertTrue(storage.loadCalls >= 1)
+    }
+
+    @Test
+    fun `before the sign-in state belongs to the profile the history is read as before`() = runTest {
+        val storage = FakeSimklSyncStorage()
+        storage.snapshots[2] = json.encodeToString(SimklSyncSnapshot(isInitialized = true, watermark = "w2"))
+        val activeProfile = MutableStateFlow(2)
+        val profileManager = mockk<ProfileManager> { every { activeProfileId } returns activeProfile }
+        val authStorage = mockk<SimklAuthStorage>(relaxed = true) {
+            every { state } returns MutableStateFlow(SimklAuthState(isAuthenticated = false))
+            every { currentScope() } returns SimklAuthScope(profileId = 1, generation = 0L)
+        }
+        val repository = SimklSyncRepository(
+            engine = mockk(relaxed = true),
+            storage = storage,
+            authRepository = mockk(relaxed = true),
+            authStorage = authStorage,
+            profileManager = profileManager
+        )
+
+        repository.ensureLoaded()
+
+        assertEquals("w2", repository.state.value.snapshot.watermark)
     }
 }

@@ -13,6 +13,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -50,7 +52,9 @@ class SimklSyncRepository @Inject constructor(
 
     init {
         scope.launch {
-            profileManager.activeProfileId.collect { profileId ->
+            combine(profileManager.activeProfileId, authStorage.state) { profileId, _ ->
+                profileId to isSignedOut(profileId)
+            }.distinctUntilChanged().collect { (profileId, _) ->
                 if (loadedProfileId != profileId) {
                     profileGeneration += 1L
                     loadedProfileId = null
@@ -198,8 +202,20 @@ class SimklSyncRepository @Inject constructor(
         }
     }
 
+    /** Only when the sign-in state already belongs to [profileId]; until then the saved snapshot is read as before. */
+    private fun isSignedOut(profileId: Int): Boolean = runCatching {
+        authStorage.currentScope().profileId == profileId && !authStorage.state.value.isAuthenticated
+    }.getOrDefault(false)
+
     private suspend fun loadProfile(profileId: Int) = loadMutex.withLock {
         if (loadedProfileId == profileId) return@withLock
+        if (isSignedOut(profileId)) {
+            if (profileId == profileManager.activeProfileId.value) {
+                _projection.value = SimklSnapshotProjection.Empty
+                _state.value = SimklSyncState(hasLoaded = true)
+            }
+            return@withLock
+        }
         val persistedSnapshot = storage.load(profileId)
             ?.trim()
             ?.takeIf(String::isNotEmpty)

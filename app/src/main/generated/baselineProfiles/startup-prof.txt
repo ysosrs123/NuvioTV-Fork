@@ -38935,6 +38935,7 @@ HSPLcom/nuvio/tv/ui/screens/home/PreparedHeroSceneKt;->rememberPreparedHeroScene
 HSPLcom/nuvio/tv/ui/screens/home/PreparedHeroSceneKt;->rememberPreparedHeroScene$lambda$8$0(Landroidx/compose/runtime/MutableState;)Lcom/nuvio/tv/ui/screens/home/ModernHeroSceneState;
 HSPLcom/nuvio/tv/ui/screens/home/PreparedHeroSceneKt;->rememberPreparedHeroScene$lambda$8$1(Landroidx/compose/runtime/State;)Landroidx/compose/runtime/State;
 HSPLcom/nuvio/tv/ui/screens/home/PreparedHeroSceneKt;->rememberPreparedHeroScene(Landroidx/compose/runtime/State;IILandroidx/compose/runtime/Composer;I)Landroidx/compose/runtime/State;
+HSPLcom/nuvio/tv/ui/screens/home/PreparedHeroSceneKt;->PreparedHeroSceneJobs(Landroidx/compose/runtime/State;IILandroidx/compose/runtime/MutableState;Landroidx/compose/runtime/Composer;I)V
 Lcom/nuvio/tv/ui/screens/home/ProgressSnapshot;
 HSPLcom/nuvio/tv/ui/screens/home/ProgressSnapshot;-><init>(Ljava/util/List;Ljava/util/List;Z)V
 HSPLcom/nuvio/tv/ui/screens/home/ProgressSnapshot;->component1()Ljava/util/List;

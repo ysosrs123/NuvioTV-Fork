@@ -36,6 +36,7 @@
     <string name="calendar_show_next_unknown">Next episode not dated yet</string>
     <string name="calendar_time_not_announced">Time not announced</string>
     <string name="calendar_streaming">Streaming</string>
+    <string name="calendar_time_about">About %1$s</string>
     <string name="calendar_unknown_title">Untitled</string>
 
     <string name="calendar_label_new_show">New show</string>

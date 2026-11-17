@@ -94,4 +94,34 @@ class RecorderEventsTest {
         val bytes = snapshot.count * (8 + 4 * 14 + 3 + 4 * 9 + 4 * FRAME_BUCKET_COUNT)
         assertTrue("$bytes bytes of columns", bytes < 400_000)
     }
+
+    @Test fun `a sample with no frame times keeps an unknown bucket row instead of zeros`() {
+        val ring = SampleRing(2, withFrameBuckets = true)
+        ring.add(
+            timeMs = 1_000L, readyAheadMs = 0, droppedFrames = RECORDER_UNKNOWN, audioUnderruns = 0, ownCpuTenths = 0,
+            rssKb = 0, javaHeapKb = 0, nativeHeapKb = 0, memAvailableKb = 0, bufferCapKb = 0, thermalStatus = 0,
+            loaderActive = 0, tunnelled = 0, playing = 1,
+            videoPath = 3, pictureHolds = 2, clockCorrections = 1, pictureOffsetMs = -12
+        )
+        ring.add(
+            timeMs = 2_000L, readyAheadMs = 0, droppedFrames = 0, audioUnderruns = 0, ownCpuTenths = 0, rssKb = 0,
+            javaHeapKb = 0, nativeHeapKb = 0, memAvailableKb = 0, bufferCapKb = 0, thermalStatus = 0, loaderActive = 0,
+            tunnelled = 0, playing = 1, videoPath = 1,
+            frameBuckets = IntArray(FRAME_BUCKET_COUNT) { 0 }
+        )
+        val snapshot = ring.snapshot(2_000L)
+        val flat = snapshot.frameBuckets!!
+        assertArrayEquals(IntArray(FRAME_BUCKET_COUNT) { RECORDER_UNKNOWN }, flat.copyOfRange(0, FRAME_BUCKET_COUNT))
+        assertArrayEquals(IntArray(FRAME_BUCKET_COUNT) { 0 }, flat.copyOfRange(FRAME_BUCKET_COUNT, flat.size))
+        assertArrayEquals(intArrayOf(3, 1), snapshot.videoPath)
+        assertArrayEquals(intArrayOf(2, RECORDER_UNKNOWN), snapshot.pictureHolds)
+        assertArrayEquals(intArrayOf(1, RECORDER_UNKNOWN), snapshot.clockCorrections)
+        assertArrayEquals(intArrayOf(-12, RECORDER_UNKNOWN), snapshot.pictureOffsetMs)
+    }
+
+    @Test fun `picture hold and clock correction lines have their own labels`() {
+        val labels = RecorderEvent.entries.map { it.label }
+        assertTrue("picture_hold" in labels)
+        assertTrue("video_clock_correction" in labels)
+    }
 }

@@ -47,7 +47,13 @@ interface TrackingProgressProvider {
     suspend fun refresh(intent: TrackingRefreshIntent)
     suspend fun removeProgress(contentId: String, season: Int?, episode: Int?)
     fun applyOptimisticProgress(progress: WatchProgress, quiet: Boolean)
+    fun applyOptimisticProgressBatch(progressList: List<WatchProgress>, quiet: Boolean) {
+        progressList.forEach { progress -> applyOptimisticProgress(progress, quiet) }
+    }
     fun applyOptimisticRemoval(contentId: String, season: Int?, episode: Int?)
+    fun applyOptimisticRemovalBatch(contentId: String, episodes: List<Pair<Int, Int>>) {
+        episodes.forEach { (season, episode) -> applyOptimisticRemoval(contentId, season, episode) }
+    }
     fun clearOptimistic()
     fun retainsLocalProgress(contentId: String): Boolean = false
     fun retainsLocalWatchedEpisode(item: WatchedItem): Boolean = false

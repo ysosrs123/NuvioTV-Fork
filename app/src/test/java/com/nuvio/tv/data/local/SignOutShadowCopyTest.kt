@@ -135,4 +135,55 @@ class SignOutShadowCopyTest {
 
         assertNull(readAfterCorruption(dir)[apiKey])
     }
+
+    @Test
+    fun `a start with an up-to-date shadow copy leaves it alone`() = runBlocking {
+        val dir = newDir()
+        factoryIn(dir).get(1, "debrid_settings").edit { it[apiKey] = "key" }
+        val shadow = File(dir, "datastore/debrid_settings.preferences_pb.bak")
+        awaitExists(shadow)
+        delay(300)
+        val restart = newDir()
+        File(dir, "datastore").copyRecursively(File(restart, "datastore"))
+        val now = System.currentTimeMillis()
+        File(restart, "datastore/debrid_settings.preferences_pb").setLastModified(now - 20_000)
+        val restartShadow = File(restart, "datastore/debrid_settings.preferences_pb.bak")
+        restartShadow.setLastModified(now - 10_000)
+        val writtenAt = restartShadow.lastModified()
+
+        assertEquals("key", factoryIn(restart).get(1, "debrid_settings").data.first()[apiKey])
+        delay(500)
+
+        assertEquals(writtenAt, restartShadow.lastModified())
+    }
+
+    @Test
+    fun `an edit that changes nothing writes no shadow copy`() = runBlocking {
+        val dir = newDir()
+        val store = factoryIn(dir).get(1, "debrid_settings")
+        store.edit { it[apiKey] = "key" }
+        val shadow = File(dir, "datastore/debrid_settings.preferences_pb.bak")
+        awaitExists(shadow)
+        delay(300)
+        val writtenAt = shadow.lastModified()
+
+        store.edit { it[apiKey] = "key" }
+        delay(500)
+
+        assertEquals(writtenAt, shadow.lastModified())
+    }
+
+    @Test
+    fun `tracker histories keep no shadow copy and an old one goes`() = runBlocking {
+        val dir = newDir()
+        val datastore = File(dir, "datastore").apply { mkdirs() }
+        val oldShadow = File(datastore, "mdblist_sync.preferences_pb.bak").apply { writeBytes(ByteArray(64) { 1 }) }
+        val snapshot = stringPreferencesKey("snapshot")
+
+        factoryIn(dir).get(1, "mdblist_sync").edit { it[snapshot] = "{}" }
+        withTimeout(10_000) { while (oldShadow.exists()) delay(10) }
+        delay(300)
+
+        assertFalse(oldShadow.exists())
+    }
 }

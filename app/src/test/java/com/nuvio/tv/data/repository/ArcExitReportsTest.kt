@@ -184,4 +184,71 @@ class ArcExitReportsTest {
         assertNull(ExitRules.savedCrash(9_000L, handledMs = 9_000L))
         assertNull(ExitRules.savedCrash(null, handledMs = 0L))
     }
+
+    private val exitAt = 100_000_000L
+
+    private fun lowMemoryExit(kind: UnexpectedExitKind = UnexpectedExitKind.LowMemory) =
+        UnexpectedExit(kind, ApplicationExitInfo.REASON_LOW_MEMORY, foreground, 0, null, exitAt)
+
+    private fun snapshot(
+        playing: Boolean = false,
+        heap: String = "Java heap: 71 of 512 MB",
+        totalMb: Int = 143,
+        swappedMb: Int = 73,
+        ageMs: Long = 14_000L
+    ) = ArcHeartbeat.Snapshot(
+        exitAt - ageMs,
+        listOf(
+            "Written: 07:43:12",
+            heap,
+            "Native heap: 19 MB",
+            "Box memory: 382 MB free, low-memory line 216 MB, low=false, swap free 39 of 895 MB",
+            "Memory detail: graphics 0 MB, native 19 MB, code 40 MB, total $totalMb MB, swapped $swappedMb MB, address space 2100 MB of 3072 MB",
+            "Playing: ${if (playing) "yes" else "no"}"
+        )
+    )
+
+    @Test fun `a low-memory exit while Arc was idle and small gets no prompt`() {
+        assertTrue(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(), boxTotalMb = 2_400L))
+    }
+
+    @Test fun `a low-memory exit while playing keeps the prompt`() {
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(playing = true), boxTotalMb = 2_400L))
+    }
+
+    @Test fun `a low-memory exit while Arc was big keeps the prompt`() {
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(totalMb = 400, swappedMb = 100), boxTotalMb = 2_400L))
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(heap = "Java heap: 330 of 512 MB"), boxTotalMb = 2_400L))
+    }
+
+    @Test fun `an old, missing or unreadable snapshot keeps the prompt`() {
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(ageMs = 5 * 60_000L), boxTotalMb = 2_400L))
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), null, boxTotalMb = 2_400L))
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(), boxTotalMb = 0L))
+        val noDetail = snapshot().let { it.copy(lines = it.lines.filterNot { line -> line.startsWith("Memory detail:") }) }
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), noDetail, boxTotalMb = 2_400L))
+    }
+
+    @Test fun `on a big box the idle limit stops at 350 MB`() {
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(totalMb = 400, swappedMb = 100), boxTotalMb = 4_096L))
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(totalMb = 300, swappedMb = 60), boxTotalMb = 4_096L))
+        assertTrue(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), snapshot(totalMb = 250, swappedMb = 50), boxTotalMb = 4_096L))
+    }
+
+    @Test fun `a value Android could not read keeps the prompt`() {
+        val unread = snapshot().let { s ->
+            s.copy(lines = s.lines.map { if (it.startsWith("Memory detail:")) it.replace("total 143 MB", "total ? MB") else it })
+        }
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), unread, boxTotalMb = 2_400L))
+        val unreadSwap = snapshot().let { s ->
+            s.copy(lines = s.lines.map { if (it.startsWith("Memory detail:")) it.replace("swapped 73 MB", "swapped ? MB") else it })
+        }
+        assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(), unreadSwap, boxTotalMb = 2_400L))
+    }
+
+    @Test fun `crashes and freezes always keep the prompt`() {
+        listOf(UnexpectedExitKind.Crash, UnexpectedExitKind.NativeCrash, UnexpectedExitKind.NotResponding).forEach {
+            assertFalse(ExitRules.boxShortWhileArcIdle(lowMemoryExit(it), snapshot(), boxTotalMb = 2_400L))
+        }
+    }
 }

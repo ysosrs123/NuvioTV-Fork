@@ -201,6 +201,32 @@ class FormatCheckLogicTest {
         clips.mapNotNull { it.question }.forEach { assertTrue(it.expected in it.options) }
     }
 
+    @Test
+    fun `every sound question offers Dolby Digital and it counts as converted`() {
+        val sound = FormatCheckCatalog.clips.flatMap { listOfNotNull(it.question, it.questionWhenDecoded) }
+            .filter { it.kind == QuestionKind.SOUND }
+        assertTrue(sound.isNotEmpty())
+        sound.forEach { assertTrue(FormatCheckAnswers.DOLBY_DIGITAL in it.options) }
+
+        val eac3 = FormatCheckCatalog.byId("fc36")!!.question!!
+        assertEquals(eac3.options.indexOf(FormatCheckAnswers.EAC3) + 1, eac3.options.indexOf(FormatCheckAnswers.DOLBY_DIGITAL))
+        assertEquals(FormatVerdict.NOT_AS_EXPECTED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, eac3, FormatCheckAnswers.DOLBY_DIGITAL))
+        assertEquals(FormatVerdict.FAILED, FormatCheckVerdicts.withAnswer(FormatVerdict.FAILED, eac3, FormatCheckAnswers.DOLBY_DIGITAL))
+        val truehd = FormatCheckCatalog.byId("fc35")!!.question!!
+        assertEquals(FormatVerdict.NOT_AS_EXPECTED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, truehd, FormatCheckAnswers.DOLBY_DIGITAL))
+        val dts = FormatCheckCatalog.byId("fc39")!!.question!!
+        assertEquals(FormatVerdict.NOT_AS_EXPECTED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, dts, FormatCheckAnswers.DOLBY_DIGITAL))
+    }
+
+    @Test
+    fun `a Dolby Digital answer to a Dolby Digital question is a match`() {
+        val question = FormatQuestion(
+            QuestionKind.SOUND, FormatCheckAnswers.DOLBY_DIGITAL,
+            listOf(FormatCheckAnswers.DOLBY_DIGITAL, FormatCheckAnswers.PCM), setOf(FormatCheckAnswers.PCM)
+        )
+        assertEquals(FormatVerdict.CONFIRMED, FormatCheckVerdicts.withAnswer(FormatVerdict.PLAYED, question, FormatCheckAnswers.DOLBY_DIGITAL))
+    }
+
     private val express = FormatCheckCatalog.byId("fc42")!!
 
     @Test

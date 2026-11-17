@@ -26,6 +26,7 @@ object FormatCheckAnswers {
     const val ATMOS = "atmos"
     const val TRUEHD = "truehd"
     const val EAC3 = "eac3"
+    const val DOLBY_DIGITAL = "dolby_digital"
     const val DTS_X = "dts_x"
     const val DTS_HD = "dts_hd"
     const val DTS_OTHER = "dts_other"
@@ -59,6 +60,7 @@ object FormatCheckCatalog {
 
     private fun sound(expected: String, vararg alternatives: String): FormatQuestion {
         val options = (listOf(expected) + alternatives + listOf(
+            FormatCheckAnswers.DOLBY_DIGITAL,
             FormatCheckAnswers.PCM,
             FormatCheckAnswers.SOMETHING_ELSE,
             FormatCheckAnswers.NO_PLAY,

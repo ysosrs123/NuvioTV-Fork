@@ -39,7 +39,9 @@ internal enum class RecorderEvent(val label: String) {
     AUDIO_CLOCK_GAP("audio_clock_gap"),
     DISPLAY_CHANGE("display_change"),
     HDMI_PLUG("hdmi_plug"),
-    AUDIO_OUTPUT("audio_output")
+    AUDIO_OUTPUT("audio_output"),
+    PICTURE_HOLD("picture_hold"),
+    CLOCK_CORRECTION("video_clock_correction")
 }
 
 /** Columns run oldest to newest. Every Int column uses [RECORDER_UNKNOWN] for a value that was not measured. */
@@ -81,7 +83,11 @@ class RecorderSamples internal constructor(
     val audioLatencyMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
     val audioClockSource: IntArray = IntArray(count) { RECORDER_UNKNOWN },
     val audioWriteStalls: IntArray = IntArray(count) { RECORDER_UNKNOWN },
-    /** [FRAME_BUCKET_COUNT] counts per sample, flat; null outside a recording. */
+    val videoPath: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val pictureHolds: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val clockCorrections: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    val pictureOffsetMs: IntArray = IntArray(count) { RECORDER_UNKNOWN },
+    /** [FRAME_BUCKET_COUNT] counts per sample, flat; null outside a recording. A row of [RECORDER_UNKNOWN] was not timed. */
     val frameBuckets: IntArray? = null
 ) {
     /** The length recorded no longer ago than [maxAgeMs]: gaps between samples are not counted. */
@@ -122,6 +128,10 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
     private val audioLatencyMs = IntArray(capacity)
     private val audioClockSource = IntArray(capacity)
     private val audioWriteStalls = IntArray(capacity)
+    private val videoPath = IntArray(capacity)
+    private val pictureHolds = IntArray(capacity)
+    private val clockCorrections = IntArray(capacity)
+    private val pictureOffsetMs = IntArray(capacity)
     private val frameBuckets = if (withFrameBuckets) IntArray(capacity * FRAME_BUCKET_COUNT) else null
     private val timeMs = LongArray(capacity)
     private val readyAheadMs = IntArray(capacity)
@@ -176,9 +186,17 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
         audioLatencyMs: Int = RECORDER_UNKNOWN,
         audioClockSource: Int = RECORDER_UNKNOWN,
         audioWriteStalls: Int = RECORDER_UNKNOWN,
+        videoPath: Int = RECORDER_UNKNOWN,
+        pictureHolds: Int = RECORDER_UNKNOWN,
+        clockCorrections: Int = RECORDER_UNKNOWN,
+        pictureOffsetMs: Int = RECORDER_UNKNOWN,
         frameBuckets: IntArray? = null
     ) {
         val slot = next
+        this.videoPath[slot] = videoPath
+        this.pictureHolds[slot] = pictureHolds
+        this.clockCorrections[slot] = clockCorrections
+        this.pictureOffsetMs[slot] = pictureOffsetMs
         this.audioHeadMs[slot] = audioHeadMs
         this.audioLatencyMs[slot] = audioLatencyMs
         this.audioClockSource[slot] = audioClockSource
@@ -202,7 +220,7 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
         this.subtitlePictureCues[slot] = subtitlePictureCues
         this.frameBuckets?.let { store ->
             for (i in 0 until FRAME_BUCKET_COUNT) {
-                store[slot * FRAME_BUCKET_COUNT + i] = frameBuckets?.getOrNull(i) ?: 0
+                store[slot * FRAME_BUCKET_COUNT + i] = frameBuckets?.getOrNull(i) ?: RECORDER_UNKNOWN
             }
         }
         this.timeMs[slot] = timeMs
@@ -271,6 +289,10 @@ internal class SampleRing(val capacity: Int = RECORDER_SAMPLE_CAPACITY, withFram
             audioLatencyMs = ints(audioLatencyMs),
             audioClockSource = ints(audioClockSource),
             audioWriteStalls = ints(audioWriteStalls),
+            videoPath = ints(videoPath),
+            pictureHolds = ints(pictureHolds),
+            clockCorrections = ints(clockCorrections),
+            pictureOffsetMs = ints(pictureOffsetMs),
             frameBuckets = frameBuckets?.let { store ->
                 IntArray(count * FRAME_BUCKET_COUNT) { store[((first + it / FRAME_BUCKET_COUNT) % capacity) * FRAME_BUCKET_COUNT + it % FRAME_BUCKET_COUNT] }
             }

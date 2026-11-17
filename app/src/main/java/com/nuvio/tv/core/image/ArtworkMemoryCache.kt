@@ -8,8 +8,9 @@ import com.nuvio.tv.data.repository.OpenFilesGuard
  */
 class ArtworkMemoryCache(
     bytes: Long,
-    private val undatedLimitMs: Long = IMAGE_FRESHNESS_FLOOR_MS,
+    private val undatedLimitMs: () -> Long = { posterMemoryLimitMs(PosterUpdates.interval) },
     private val now: () -> Long = { android.os.SystemClock.elapsedRealtime() },
+    private val storedBefore: () -> Long = { PosterUpdates.memoryStoredBefore() },
 ) : MemoryCache {
     private val lock = Any()
     private val small = MemoryCache.Builder().maxSizeBytes(bytes - largeBudget(bytes)).build()
@@ -28,7 +29,7 @@ class ArtworkMemoryCache(
     override fun get(key: MemoryCache.Key): MemoryCache.Value? = synchronized(lock) {
         val value = small[key] ?: large[key] ?: return@synchronized null
         val storedAt = value.extras[STORED_AT] as? Long
-        if (storedAt != null && now() - storedAt >= undatedLimitMs) {
+        if (storedAt != null && (now() - storedAt >= undatedLimitMs() || storedAt < storedBefore())) {
             small.remove(key)
             large.remove(key)
             null

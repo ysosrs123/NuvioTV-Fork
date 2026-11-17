@@ -475,27 +475,7 @@ class TraktProgressService @Inject constructor(
     }
 
     fun applyOptimisticProgress(progress: WatchProgress) {
-        val now = System.currentTimeMillis()
-        val derivedPercent = when {
-            progress.progressPercent != null -> progress.progressPercent
-            progress.duration > 0L -> ((progress.position.toFloat() / progress.duration.toFloat()) * 100f)
-            else -> null
-        }?.coerceIn(0f, 100f)
-
-        val optimistic = progress.copy(
-            progressPercent = derivedPercent,
-            source = WatchProgress.SOURCE_TRAKT_PLAYBACK
-        )
-
-        optimisticProgress.update { current ->
-            current.toMutableMap().apply {
-                this[progressKey(optimistic)] = OptimisticProgressEntry(
-                    progress = optimistic,
-                    expiresAtMs = now + optimisticTtlMs
-                )
-            }
-        }
-        requestFastSync()
+        applyOptimisticProgressBatch(listOf(progress), requestSync = true)
     }
 
     /**
@@ -505,27 +485,32 @@ class TraktProgressService @Inject constructor(
      * to force a full remote refresh cycle.
      */
     fun updateOptimisticProgressQuietly(progress: WatchProgress) {
-        val now = System.currentTimeMillis()
+        applyOptimisticProgressBatch(listOf(progress), requestSync = false)
+    }
+
+    fun applyOptimisticProgressBatch(progressList: List<WatchProgress>, requestSync: Boolean) {
+        if (progressList.isEmpty()) return
+        val expiresAtMs = System.currentTimeMillis() + optimisticTtlMs
+        val entries = progressList.map { progress ->
+            val optimistic = progress.toOptimisticTraktProgress()
+            progressKey(optimistic) to OptimisticProgressEntry(progress = optimistic, expiresAtMs = expiresAtMs)
+        }
+        optimisticProgress.update { current -> current + entries }
+        if (requestSync) requestFastSync()
+    }
+
+    private fun WatchProgress.toOptimisticTraktProgress(): WatchProgress {
         val derivedPercent = when {
-            progress.progressPercent != null -> progress.progressPercent
-            progress.duration > 0L -> ((progress.position.toFloat() / progress.duration.toFloat()) * 100f)
+            progressPercent != null -> progressPercent
+            duration > 0L -> ((position.toFloat() / duration.toFloat()) * 100f)
             else -> null
         }?.coerceIn(0f, 100f)
-
-        val optimistic = progress.copy(
-            progressPercent = derivedPercent,
-            source = WatchProgress.SOURCE_TRAKT_PLAYBACK
-        )
-
-        optimisticProgress.update { current ->
-            current.toMutableMap().apply {
-                this[progressKey(optimistic)] = OptimisticProgressEntry(
-                    progress = optimistic,
-                    expiresAtMs = now + optimisticTtlMs
-                )
-            }
-        }
+        return copy(progressPercent = derivedPercent, source = WatchProgress.SOURCE_TRAKT_PLAYBACK)
     }
+
+    @VisibleForTesting
+    internal fun optimisticProgressSnapshot(): Map<String, WatchProgress> =
+        optimisticProgress.value.mapValues { it.value.progress }
 
     fun applyOptimisticRemoval(contentId: String, season: Int?, episode: Int?) {
         val contentKeyPrefix = contentId.trim()
@@ -538,6 +523,14 @@ class TraktProgressService @Inject constructor(
                 }
             }
         }
+        requestFastSync()
+    }
+
+    fun applyOptimisticRemovalBatch(contentId: String, episodes: List<Pair<Int, Int>>) {
+        if (episodes.isEmpty()) return
+        val contentKeyPrefix = contentId.trim()
+        val removedKeys = episodes.mapTo(HashSet()) { (season, episode) -> "${contentKeyPrefix}_s${season}e${episode}" }
+        optimisticProgress.update { current -> current.filterKeys { key -> key !in removedKeys } }
         requestFastSync()
     }
 

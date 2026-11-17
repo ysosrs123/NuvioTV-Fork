@@ -141,6 +141,17 @@ class AddonEventDispatcherTest {
     }
 
     @Test
+    fun `items only Arc knows are never sent to addons`() {
+        assertTrue(isArcOnlyItem("movie", "srv1:abc:def"))
+        assertTrue(isArcOnlyItem("cloud", "premiumize-item:premiumize-file"))
+        assertTrue(isArcOnlyItem("movie", "file:12345"))
+        assertTrue(isArcOnlyItem("movie", "yt:dQw4w9WgXcQ"))
+        assertTrue(isArcOnlyItem("movie", "https://example.com/video.mkv"))
+        assertFalse(isArcOnlyItem("movie", "tt0111161"))
+        assertFalse(isArcOnlyItem("series", "kitsu:1:5"))
+    }
+
+    @Test
     fun `hasEnabledAddonFor only counts enabled addons declaring the resource`() = runBlocking {
         val dispatcher = AddonEventDispatcher(
             mockk(relaxed = true),

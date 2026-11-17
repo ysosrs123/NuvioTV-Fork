@@ -13,6 +13,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.tvprovider.media.tv.Channel
 import androidx.tvprovider.media.tv.PreviewProgram
 import androidx.tvprovider.media.tv.TvContractCompat
+import androidx.tvprovider.media.tv.TvContractCompat.PreviewPrograms as P
 import com.nuvio.tv.MainActivity
 import com.nuvio.tv.R
 import com.nuvio.tv.domain.model.WatchProgress
@@ -151,9 +152,9 @@ class AndroidTvChannelManager @Inject constructor(
             val existing = queryExistingPrograms(channelId)
             val desiredKeys = items.map { progressKey(it) }.toSet()
 
-            for ((key, rowIds) in existing) {
+            for ((key, rows) in existing) {
                 if (key !in desiredKeys) {
-                    rowIds.forEach { rowId ->
+                    rows.rowIds.forEach { rowId ->
                         context.contentResolver.delete(
                             TvContractCompat.buildPreviewProgramUri(rowId), null, null
                         )
@@ -165,7 +166,8 @@ class AndroidTvChannelManager @Inject constructor(
 
             items.forEachIndexed { index, progress ->
                 val key = progressKey(progress)
-                val rowIds = existing[key]
+                val existingRows = existing[key]
+                val rowIds = existingRows?.rowIds
 
                 val (imageUri, _) = when {
                     !progress.backdrop.isNullOrBlank() -> progress.backdrop to TvContractCompat.PreviewPrograms.ASPECT_RATIO_16_9
@@ -208,6 +210,13 @@ class AndroidTvChannelManager @Inject constructor(
                 }
 
                 val values = buildProgramValues(progress, channelId, index, key, newFingerprint.description)
+                if (existingRows != null && existingRows.rowIds.size == 1 &&
+                    storedProgramMatches(values.toMap(), existingRows.stored)
+                ) {
+                    // A fresh process has no fingerprints yet; the row the launcher holds already matches.
+                    syncedProgramFingerprints[key] = newFingerprint
+                    return@forEachIndexed
+                }
                 if (!rowIds.isNullOrEmpty()) {
                     val primaryRowId = rowIds.first()
                     // UPDATE the existing program row in place, keeping its row ID stable.
@@ -241,7 +250,7 @@ class AndroidTvChannelManager @Inject constructor(
             val channelId = prefs.getChannelId() ?: return@runCatching
             val rows = queryExistingPrograms(channelId)
             var deletedCount = 0
-            rows.values.flatten().forEach { rowId ->
+            rows.values.flatMap { it.rowIds }.forEach { rowId ->
                 context.contentResolver.delete(
                     TvContractCompat.buildPreviewProgramUri(rowId), null, null
                 )
@@ -254,13 +263,15 @@ class AndroidTvChannelManager @Inject constructor(
 
     // ---
 
-    private fun queryExistingPrograms(channelId: Long): Map<String, List<Long>> {
+    private class ExistingPrograms(val rowIds: MutableList<Long>, val stored: Map<String, String?>)
+
+    private fun queryExistingPrograms(channelId: Long): Map<String, ExistingPrograms> {
+        val result = mutableMapOf<String, ExistingPrograms>()
         val projection = arrayOf(
             TvContractCompat.PreviewPrograms._ID,
             TvContractCompat.PreviewPrograms.COLUMN_CHANNEL_ID,
             TvContractCompat.PreviewPrograms.COLUMN_INTERNAL_PROVIDER_ID
-        )
-        val result = mutableMapOf<String, MutableList<Long>>()
+        ) + COMPARED_COLUMNS
         // Fire OS rejects any selection clause on preview_program URIs with SecurityException;
         // the provider auto-scopes to the calling package, so we filter channelId in memory.
         context.contentResolver.query(
@@ -274,11 +285,25 @@ class AndroidTvChannelManager @Inject constructor(
             while (c.moveToNext()) {
                 if (c.getLong(channelIdx) != channelId) continue
                 val key = c.getString(keyIdx) ?: continue
-                result.getOrPut(key) { mutableListOf() }.add(c.getLong(idIdx))
+                val rowId = c.getLong(idIdx)
+                val known = result[key]
+                if (known != null) {
+                    known.rowIds.add(rowId)
+                } else {
+                    val stored = COMPARED_COLUMNS.associateWith { column ->
+                        val index = c.getColumnIndex(column)
+                        if (index < 0 || c.isNull(index)) null else runCatching { c.getString(index) }.getOrNull()
+                    }
+                    result[key] = ExistingPrograms(mutableListOf(rowId), stored)
+                }
             }
         }
         return result
     }
+
+    private fun ContentValues.toMap(): Map<String, Any?> =
+        (valueSet() ?: emptySet()).filter { it.key in COMPARED_COLUMNS }.associate { it.key to it.value } +
+            COMPARED_COLUMNS.filterNot { containsKey(it) }.associateWith { null }
 
     private fun buildProgramValues(
         progress: WatchProgress,
@@ -405,6 +430,48 @@ class AndroidTvChannelManager @Inject constructor(
             progress.contentId
 
     companion object {
+        private const val POSITION_COLUMN = TvContractCompat.PreviewPrograms.COLUMN_LAST_PLAYBACK_POSITION_MILLIS
+
+        /** Everything the channel writes that the launcher shows; the engagement time alone never forces a write. */
+        internal val COMPARED_COLUMNS = arrayOf(
+            P.COLUMN_TYPE,
+            P.COLUMN_TITLE,
+            P.COLUMN_INTENT_URI,
+            P.COLUMN_WEIGHT,
+            P.COLUMN_SHORT_DESCRIPTION,
+            P.COLUMN_POSTER_ART_URI,
+            P.COLUMN_POSTER_ART_ASPECT_RATIO,
+            P.COLUMN_LOGO_URI,
+            P.COLUMN_DURATION_MILLIS,
+            POSITION_COLUMN,
+            P.COLUMN_SEASON_DISPLAY_NUMBER,
+            P.COLUMN_EPISODE_DISPLAY_NUMBER,
+            P.COLUMN_EPISODE_TITLE
+        )
+
+        /**
+         * True when the row the launcher already holds carries every value about to be written, the position
+         * within 2 s, so a sync after a restart leaves it alone instead of rewriting it and waking the launcher.
+         */
+        internal fun storedProgramMatches(values: Map<String, Any?>, stored: Map<String, String?>): Boolean {
+            if (stored.isEmpty()) return false
+            return values.all { (column, value) ->
+                if (!stored.containsKey(column)) return@all false
+                val old = stored[column]
+                when {
+                    value == null -> old == null
+                    column == POSITION_COLUMN -> {
+                        val newPosition = value.toString().toLongOrNull()
+                        val oldPosition = old?.toLongOrNull()
+                        newPosition != null && oldPosition != null && abs(newPosition - oldPosition) < 2_000
+                    }
+                    value is ByteArray -> false
+                    value is Boolean -> old == (if (value) "1" else "0") || old.equals(value.toString(), ignoreCase = true)
+                    else -> old == value.toString()
+                }
+            }
+        }
+
         fun isSupported(context: Context): Boolean = try {
             val packageManager = context.packageManager
             launcherChannelsSupported(
