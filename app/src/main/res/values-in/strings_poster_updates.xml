@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Pembaruan poster</string>
+    <string name="advanced_poster_updates_subtitle">Seberapa sering poster dari add-on dan layanan rating diperiksa untuk gambar baru.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Poster tersimpan langsung tampil; gambar baru menggantikannya di latar belakang. TMDB dan situs gambar besar selalu disimpan setidaknya seminggu.</string>
+    <string name="advanced_poster_updates_every_start">Setiap kali Arc dimulai</string>
+    <string name="advanced_poster_updates_every_start_desc">Gambar baru tak lama setelah setiap kali dimulai. Untuk Beranda kecil dan add-on yang mengganti gambarnya.</string>
+    <string name="advanced_poster_updates_daily">Harian</string>
+    <string name="advanced_poster_updates_daily_desc">Setiap poster diperiksa paling banyak sekali sehari.</string>
+    <string name="advanced_poster_updates_weekly">Mingguan</string>
+    <string name="advanced_poster_updates_weekly_desc">Bawaan. Setiap poster diperiksa paling banyak sekali seminggu; paling lancar untuk Beranda besar.</string>
+    <string name="advanced_poster_updates_monthly">Bulanan</string>
+    <string name="advanced_poster_updates_monthly_desc">Pemeriksaan paling sedikit. Poster rating bisa berumur hingga sebulan.</string>
+</resources>

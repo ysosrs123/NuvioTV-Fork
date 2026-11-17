@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Posodobitve plakatov</string>
+    <string name="advanced_poster_updates_subtitle">Kako pogosto se pri plakatih iz dodatkov in storitev z ocenami preveri, ali je na voljo nova slika.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Shranjeni plakati se prikažejo takoj; nova slika jih zamenja v ozadju. TMDB in velika spletna mesta s slikami se vedno hranijo vsaj en teden.</string>
+    <string name="advanced_poster_updates_every_start">Ob vsakem zagonu Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Nove slike kmalu po vsakem zagonu. Za majhne začetne zaslone in dodatke, ki menjajo slike.</string>
+    <string name="advanced_poster_updates_daily">Dnevno</string>
+    <string name="advanced_poster_updates_daily_desc">Vsak plakat se preveri največ enkrat na dan.</string>
+    <string name="advanced_poster_updates_weekly">Tedensko</string>
+    <string name="advanced_poster_updates_weekly_desc">Privzeto. Vsak plakat se preveri največ enkrat na teden; najbolj tekoče pri velikih začetnih zaslonih.</string>
+    <string name="advanced_poster_updates_monthly">Mesečno</string>
+    <string name="advanced_poster_updates_monthly_desc">Najmanj preverjanj. Plakati z ocenami so lahko stari do en mesec.</string>
+</resources>

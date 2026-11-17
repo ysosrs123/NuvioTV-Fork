@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Plakatų atnaujinimas</string>
+    <string name="advanced_poster_updates_subtitle">Kaip dažnai tikrinama, ar priedų ir įvertinimų paslaugų plakatai turi naują vaizdą.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Išsaugoti plakatai rodomi iškart; naujas vaizdas juos pakeičia fone. TMDB ir didžiųjų vaizdų svetainių vaizdai visada laikomi bent savaitę.</string>
+    <string name="advanced_poster_updates_every_start">Kaskart paleidus Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Nauji vaizdai netrukus po kiekvieno paleidimo. Mažiems pradiniams ekranams ir priedams, kurie keičia vaizdus.</string>
+    <string name="advanced_poster_updates_daily">Kasdien</string>
+    <string name="advanced_poster_updates_daily_desc">Kiekvienas plakatas tikrinamas ne dažniau kaip kartą per dieną.</string>
+    <string name="advanced_poster_updates_weekly">Kas savaitę</string>
+    <string name="advanced_poster_updates_weekly_desc">Numatytasis. Kiekvienas plakatas tikrinamas ne dažniau kaip kartą per savaitę; sklandžiausia dideliems pradiniams ekranams.</string>
+    <string name="advanced_poster_updates_monthly">Kas mėnesį</string>
+    <string name="advanced_poster_updates_monthly_desc">Mažiausiai tikrinimų. Įvertinimų plakatai gali būti iki mėnesio senumo.</string>
+</resources>

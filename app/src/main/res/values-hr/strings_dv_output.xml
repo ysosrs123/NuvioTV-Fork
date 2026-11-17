@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision izlaz</string>
+    <string name="dv_output_sub">TV: tvoj televizor obrađuje Dolby Vision. Uređaj, kao HDR10: pretvara ga u HDR10, za televizore s boljim HDR10.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (preporučeno)</string>
+    <string name="dv_output_tv_desc">Tvoj televizor prima Dolby Vision i sam ga obrađuje. Najbolja slika na većini televizora s Dolby Visionom.</string>
+    <string name="dv_output_box">Uređaj, kao HDR10</string>
+    <string name="dv_output_box_desc">Ovaj uređaj pretvara Dolby Vision u HDR10 prije slanja. Za televizore na kojima Dolby Vision izgleda tamno ili pogrešno.</string>
+    <string name="dv_output_box_warning">Vrijedi od sljedećeg naslova. HDR10, HLG i SDR naslovi se ne mijenjaju.</string>
+</resources>

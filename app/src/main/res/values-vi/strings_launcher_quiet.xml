@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Mượt hơn với dịch vụ trình khởi chạy</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Khi dịch vụ hỗ trợ tiếp cận duy nhất trên thiết bị này thuộc về một trình khởi chạy như Projectivy, Arc ngừng mô tả màn hình của mình cho dịch vụ đó để cuộn mượt hơn. Trình đọc màn hình như TalkBack luôn nhận được toàn bộ màn hình.</string>
+</resources>

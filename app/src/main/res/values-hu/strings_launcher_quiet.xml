@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Gördülékenyebb launcher-szolgáltatásokkal</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Ha ezen az eszközön az egyetlen kisegítő szolgáltatás egy launcherhez, például a Projectivyhez tartozik, az Arc már nem írja le neki a képernyőjét, így a görgetés gördülékenyebb. A képernyőolvasók, például a TalkBack, mindig a teljes képernyőt kapják.</string>
+</resources>

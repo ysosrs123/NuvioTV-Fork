@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Output Dolby Vision</string>
+    <string name="dv_output_sub">TV: TV Anda menangani Dolby Vision. Perangkat, sebagai HDR10: mengubahnya ke HDR10, untuk TV yang lebih bagus dengan HDR10.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (disarankan)</string>
+    <string name="dv_output_tv_desc">TV Anda menerima Dolby Vision dan menanganinya sendiri. Gambar terbaik di sebagian besar TV Dolby Vision.</string>
+    <string name="dv_output_box">Perangkat, sebagai HDR10</string>
+    <string name="dv_output_box_desc">Perangkat ini mengubah Dolby Vision ke HDR10 sebelum mengirimnya. Untuk TV yang menampilkan Dolby Vision terlalu gelap atau salah warna.</string>
+    <string name="dv_output_box_warning">Berlaku mulai judul berikutnya. Judul HDR10, HLG, dan SDR tidak diubah.</string>
+</resources>

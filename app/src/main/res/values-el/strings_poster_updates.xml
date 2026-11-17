@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Ενημέρωση αφισών</string>
+    <string name="advanced_poster_updates_subtitle">Πόσο συχνά ελέγχονται οι αφίσες από πρόσθετα και υπηρεσίες βαθμολογιών για νέα εικόνα.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Οι αποθηκευμένες αφίσες εμφανίζονται αμέσως· μια νέα εικόνα τις αντικαθιστά στο παρασκήνιο. Το TMDB και οι μεγάλοι ιστότοποι εικόνων διατηρούνται πάντα για τουλάχιστον μία εβδομάδα.</string>
+    <string name="advanced_poster_updates_every_start">Σε κάθε εκκίνηση του Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Νέες εικόνες λίγο μετά από κάθε εκκίνηση. Για μικρές Αρχικές και πρόσθετα που αλλάζουν τις εικόνες τους.</string>
+    <string name="advanced_poster_updates_daily">Καθημερινά</string>
+    <string name="advanced_poster_updates_daily_desc">Κάθε αφίσα ελέγχεται το πολύ μία φορά την ημέρα.</string>
+    <string name="advanced_poster_updates_weekly">Εβδομαδιαία</string>
+    <string name="advanced_poster_updates_weekly_desc">Προεπιλογή. Κάθε αφίσα ελέγχεται το πολύ μία φορά την εβδομάδα· η πιο ομαλή επιλογή για μεγάλες Αρχικές.</string>
+    <string name="advanced_poster_updates_monthly">Μηνιαία</string>
+    <string name="advanced_poster_updates_monthly_desc">Οι λιγότεροι έλεγχοι. Οι αφίσες βαθμολογιών μπορεί να είναι έως έναν μήνα παλιές.</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">חלק יותר עם שירותי מסכי בית</string>
+    <string name="advanced_quiet_for_launchers_subtitle">כששירות הנגישות היחיד במכשיר הזה שייך למסך בית כמו Projectivy, Arc מפסיק לתאר לו את המסך שלו, כך שהגלילה חלקה יותר. קוראי מסך כמו TalkBack תמיד מקבלים את המסך המלא.</string>
+</resources>

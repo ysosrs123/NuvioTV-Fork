@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Обновяване на постерите</string>
+    <string name="advanced_poster_updates_subtitle">Колко често постерите от добавки и услуги за оценки се проверяват за ново изображение.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Запазените постери се показват веднага; новото изображение ги заменя във фонов режим. TMDB и големите сайтове с изображения винаги се пазят поне седмица.</string>
+    <string name="advanced_poster_updates_every_start">При всяко стартиране на Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Нови изображения скоро след всяко стартиране. За малки начални страници и добавки, които сменят изображенията си.</string>
+    <string name="advanced_poster_updates_daily">Ежедневно</string>
+    <string name="advanced_poster_updates_daily_desc">Всеки постер се проверява най-много веднъж на ден.</string>
+    <string name="advanced_poster_updates_weekly">Ежеседмично</string>
+    <string name="advanced_poster_updates_weekly_desc">По подразбиране. Всеки постер се проверява най-много веднъж седмично; най-плавно при големи начални страници.</string>
+    <string name="advanced_poster_updates_monthly">Ежемесечно</string>
+    <string name="advanced_poster_updates_monthly_desc">Най-малко проверки. Постерите с оценки може да са на до един месец.</string>
+</resources>

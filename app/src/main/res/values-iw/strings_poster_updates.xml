@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">עדכוני פוסטרים</string>
+    <string name="advanced_poster_updates_subtitle">באיזו תדירות נבדק אם יש תמונה חדשה לפוסטרים מתוספים ומשירותי דירוג.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">פוסטרים שמורים מוצגים מיד; תמונה חדשה מחליפה אותם ברקע. התמונות מ-TMDB ומאתרי התמונות הגדולים נשמרות תמיד לפחות שבוע.</string>
+    <string name="advanced_poster_updates_every_start">בכל הפעלה של Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">תמונות חדשות זמן קצר אחרי כל הפעלה. לדפי בית קטנים ולתוספים שמחליפים את התמונות שלהם.</string>
+    <string name="advanced_poster_updates_daily">יומי</string>
+    <string name="advanced_poster_updates_daily_desc">כל פוסטר נבדק לכל היותר פעם ביום.</string>
+    <string name="advanced_poster_updates_weekly">שבועי</string>
+    <string name="advanced_poster_updates_weekly_desc">ברירת המחדל. כל פוסטר נבדק לכל היותר פעם בשבוע; החלק ביותר לדפי בית גדולים.</string>
+    <string name="advanced_poster_updates_monthly">חודשי</string>
+    <string name="advanced_poster_updates_monthly_desc">הכי מעט בדיקות. פוסטרי דירוג יכולים להיות בני עד חודש.</string>
+</resources>

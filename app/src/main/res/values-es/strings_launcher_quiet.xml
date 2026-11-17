@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Más fluido con servicios de lanzador</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Cuando el único servicio de accesibilidad de este dispositivo pertenece a un lanzador como Projectivy, Arc deja de describirle su pantalla y el desplazamiento es más fluido. Los lectores de pantalla como TalkBack siempre reciben la pantalla completa.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">直接解码 (仅限 MPV)</string>
+    <string name="mpv_direct_decode_subtitle">在此设备允许时，跳过额外的复制步骤播放视频。更流畅，占用内存也更少。</string>
+    <string name="mpv_direct_decode_dialog_subtitle">MPV 如何将解码后的视频交给屏幕。</string>
+    <string name="mpv_direct_decode_automatic">自动</string>
+    <string name="mpv_direct_decode_automatic_desc">在此设备允许时将视频直接送到图形芯片，并检查是否成功。如果不成功，Arc 会使用上方的“硬件解码”设置并记住这一点。</string>
+    <string name="mpv_direct_decode_always">始终</string>
+    <string name="mpv_direct_decode_always_desc">始终将视频直接送到图形芯片。如果此设备拒绝，视频可能无法在 MPV 中播放。</string>
+    <string name="mpv_direct_decode_off">关闭</string>
+    <string name="mpv_direct_decode_off_desc">视频遵循上方的“硬件解码”设置，并使用复制步骤。在某些设备上可能卡顿。</string>
+</resources>

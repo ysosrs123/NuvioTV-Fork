@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Aktualizacja plakatów</string>
+    <string name="advanced_poster_updates_subtitle">Jak często plakaty z dodatków i serwisów z ocenami są sprawdzane pod kątem nowego obrazu.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Zapisane plakaty pojawiają się od razu; nowy obraz zastępuje je w tle. TMDB i duże serwisy z grafikami są zawsze przechowywane co najmniej tydzień.</string>
+    <string name="advanced_poster_updates_every_start">Przy każdym uruchomieniu Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Nowe obrazy wkrótce po każdym uruchomieniu. Dla małych stron głównych i dodatków, które zmieniają grafiki.</string>
+    <string name="advanced_poster_updates_daily">Codziennie</string>
+    <string name="advanced_poster_updates_daily_desc">Każdy plakat jest sprawdzany najwyżej raz dziennie.</string>
+    <string name="advanced_poster_updates_weekly">Co tydzień</string>
+    <string name="advanced_poster_updates_weekly_desc">Domyślnie. Każdy plakat jest sprawdzany najwyżej raz w tygodniu; najpłynniej przy dużych stronach głównych.</string>
+    <string name="advanced_poster_updates_monthly">Co miesiąc</string>
+    <string name="advanced_poster_updates_monthly_desc">Najmniej sprawdzeń. Plakaty z ocenami mogą mieć nawet miesiąc.</string>
+</resources>

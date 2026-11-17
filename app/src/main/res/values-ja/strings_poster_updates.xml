@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">ポスターの更新</string>
+    <string name="advanced_poster_updates_subtitle">アドオンや評価サービスのポスターに新しい画像があるか確認する頻度です。</string>
+    <string name="advanced_poster_updates_dialog_subtitle">保存済みのポスターはすぐに表示され、新しい画像はバックグラウンドで置き換わります。TMDB と大手画像サイトの画像は常に少なくとも 1 週間保持します。</string>
+    <string name="advanced_poster_updates_every_start">Arc の起動ごと</string>
+    <string name="advanced_poster_updates_every_start_desc">起動のたびに、まもなく新しい画像になります。小さなホームや画像を変えるアドオン向けです。</string>
+    <string name="advanced_poster_updates_daily">毎日</string>
+    <string name="advanced_poster_updates_daily_desc">各ポスターの確認は 1 日 1 回までです。</string>
+    <string name="advanced_poster_updates_weekly">毎週</string>
+    <string name="advanced_poster_updates_weekly_desc">デフォルト。各ポスターの確認は週 1 回までです。大きなホームで最もなめらかです。</string>
+    <string name="advanced_poster_updates_monthly">毎月</string>
+    <string name="advanced_poster_updates_monthly_desc">確認が最も少なくなります。評価ポスターが最大 1 か月古くなる場合があります。</string>
+</resources>

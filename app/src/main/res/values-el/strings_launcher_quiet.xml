@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Πιο ομαλά με υπηρεσίες launcher</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Όταν η μόνη υπηρεσία προσβασιμότητας σε αυτή τη συσκευή ανήκει σε ένα launcher όπως το Projectivy, το Arc σταματά να της περιγράφει την οθόνη του, ώστε η κύλιση να είναι πιο ομαλή. Οι αναγνώστες οθόνης όπως το TalkBack λαμβάνουν πάντα ολόκληρη την οθόνη.</string>
+</resources>

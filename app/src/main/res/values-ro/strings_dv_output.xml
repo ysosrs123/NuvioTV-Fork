@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Ieșire Dolby Vision</string>
+    <string name="dv_output_sub">TV: televizorul tău procesează Dolby Vision. Dispozitiv, în HDR10: îl convertește în HDR10, pentru TV-uri cu HDR10 mai bun.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (recomandat)</string>
+    <string name="dv_output_tv_desc">Televizorul tău primește Dolby Vision și îl procesează singur. Cea mai bună imagine pe majoritatea televizoarelor Dolby Vision.</string>
+    <string name="dv_output_box">Dispozitiv, în HDR10</string>
+    <string name="dv_output_box_desc">Acest dispozitiv convertește Dolby Vision în HDR10 înainte de trimitere. Pentru televizoarele pe care Dolby Vision arată întunecat sau greșit.</string>
+    <string name="dv_output_box_warning">Se aplică de la următorul titlu. Titlurile HDR10, HLG și SDR nu se schimbă.</string>
+</resources>

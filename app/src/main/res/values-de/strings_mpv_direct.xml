@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Direkte Dekodierung (nur MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Spielt Video ohne den zusätzlichen Kopierschritt, wenn diese Box es erlaubt. Flüssiger und braucht weniger Speicher.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Wie MPV das dekodierte Video an den Bildschirm übergibt.</string>
+    <string name="mpv_direct_decode_automatic">Automatisch</string>
+    <string name="mpv_direct_decode_automatic_desc">Schickt Video direkt an den Grafikchip, wenn diese Box es erlaubt, und prüft, ob es geklappt hat. Wenn nicht, nutzt Arc die Einstellung Hardware Decoding oben und merkt sich das.</string>
+    <string name="mpv_direct_decode_always">Immer</string>
+    <string name="mpv_direct_decode_always_desc">Schickt Video immer direkt an den Grafikchip. Lehnt diese Box das ab, spielen Videos in MPV eventuell nicht.</string>
+    <string name="mpv_direct_decode_off">Aus</string>
+    <string name="mpv_direct_decode_off_desc">Video folgt der Einstellung Hardware Decoding oben, mit Kopierschritt. Das kann auf manchen Boxen ruckeln.</string>
+</resources>

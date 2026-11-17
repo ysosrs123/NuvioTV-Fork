@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Neste episode har ingen dato ennå</string>
     <string name="calendar_time_not_announced">Tidspunkt ikke kunngjort</string>
     <string name="calendar_streaming">Strømming</string>
+    <string name="calendar_time_about">Rundt %1$s</string>
     <string name="calendar_unknown_title">Uten tittel</string>
     <string name="calendar_label_new_show">Ny serie</string>
     <string name="calendar_label_season_premiere">Sesongpremiere</string>

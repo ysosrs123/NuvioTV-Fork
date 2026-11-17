@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">次のエピソードは日付未定</string>
     <string name="calendar_time_not_announced">時刻未発表</string>
     <string name="calendar_streaming">配信</string>
+    <string name="calendar_time_about">%1$s頃</string>
     <string name="calendar_unknown_title">無題</string>
     <string name="calendar_label_new_show">新番組</string>
     <string name="calendar_label_season_premiere">シーズン初回</string>

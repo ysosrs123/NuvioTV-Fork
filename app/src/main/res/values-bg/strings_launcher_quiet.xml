@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">По-плавно с услуги на лаунчъри</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Когато единствената услуга за достъпност на това устройство принадлежи на лаунчър като Projectivy, Arc спира да му описва екрана си и превъртането е по-плавно. Екранни четци като TalkBack винаги получават целия екран.</string>
+</resources>

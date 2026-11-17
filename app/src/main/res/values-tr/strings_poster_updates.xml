@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Poster güncellemeleri</string>
+    <string name="advanced_poster_updates_subtitle">Eklentilerden ve puan hizmetlerinden gelen posterlerin yeni bir görsel için ne sıklıkla kontrol edileceği.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Kayıtlı posterler hemen görünür; yeni görsel arka planda onların yerini alır. TMDB ve büyük görsel sitelerinin görselleri her zaman en az bir hafta saklanır.</string>
+    <string name="advanced_poster_updates_every_start">Arc her başladığında</string>
+    <string name="advanced_poster_updates_every_start_desc">Her başlatmadan kısa süre sonra yeni görseller. Küçük Ana Sayfalar ve görsellerini değiştiren eklentiler için.</string>
+    <string name="advanced_poster_updates_daily">Günlük</string>
+    <string name="advanced_poster_updates_daily_desc">Her poster en fazla günde bir kez kontrol edilir.</string>
+    <string name="advanced_poster_updates_weekly">Haftalık</string>
+    <string name="advanced_poster_updates_weekly_desc">Varsayılan. Her poster en fazla haftada bir kez kontrol edilir; büyük Ana Sayfalar için en akıcısı.</string>
+    <string name="advanced_poster_updates_monthly">Aylık</string>
+    <string name="advanced_poster_updates_monthly_desc">En az kontrol. Puan posterleri bir aya kadar eski olabilir.</string>
+</resources>

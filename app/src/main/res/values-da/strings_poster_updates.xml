@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Opdatering af postere</string>
+    <string name="advanced_poster_updates_subtitle">Hvor ofte postere fra add-ons og bedømmelsestjenester tjekkes for et nyt billede.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Gemte postere vises med det samme; et nyt billede erstatter dem i baggrunden. TMDB og de store billedsider gemmes altid i mindst en uge.</string>
+    <string name="advanced_poster_updates_every_start">Hver gang Arc starter</string>
+    <string name="advanced_poster_updates_every_start_desc">Nye billeder kort efter hver start. Til små Hjem-sider og add-ons, der skifter deres billeder.</string>
+    <string name="advanced_poster_updates_daily">Dagligt</string>
+    <string name="advanced_poster_updates_daily_desc">Hver poster tjekkes højst én gang om dagen.</string>
+    <string name="advanced_poster_updates_weekly">Ugentligt</string>
+    <string name="advanced_poster_updates_weekly_desc">Standard. Hver poster tjekkes højst én gang om ugen; mest flydende for store Hjem-sider.</string>
+    <string name="advanced_poster_updates_monthly">Månedligt</string>
+    <string name="advanced_poster_updates_monthly_desc">Færrest tjek. Bedømmelsespostere kan være op til en måned gamle.</string>
+</resources>

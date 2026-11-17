@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Aggiornamento locandine</string>
+    <string name="advanced_poster_updates_subtitle">Ogni quanto si controlla se le locandine di add-on e servizi di valutazione hanno una nuova immagine.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Le locandine salvate appaiono subito; una nuova immagine le sostituisce in background. TMDB e i grandi siti di immagini vengono sempre conservati per almeno una settimana.</string>
+    <string name="advanced_poster_updates_every_start">A ogni avvio di Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Nuove immagini poco dopo ogni avvio. Per Home piccole e add-on che cambiano le loro immagini.</string>
+    <string name="advanced_poster_updates_daily">Ogni giorno</string>
+    <string name="advanced_poster_updates_daily_desc">Ogni locandina viene controllata al massimo una volta al giorno.</string>
+    <string name="advanced_poster_updates_weekly">Ogni settimana</string>
+    <string name="advanced_poster_updates_weekly_desc">Predefinito. Ogni locandina viene controllata al massimo una volta a settimana; il più fluido per Home grandi.</string>
+    <string name="advanced_poster_updates_monthly">Ogni mese</string>
+    <string name="advanced_poster_updates_monthly_desc">Meno controlli. Le locandine con valutazioni possono avere fino a un mese.</string>
+</resources>

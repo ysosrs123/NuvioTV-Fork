@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Přímé dekódování (pouze MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Přehrává video bez dalšího kroku kopírování, když to tento box dovolí. Plynulejší a s menší spotřebou paměti.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Jak MPV předává dekódované video na obrazovku.</string>
+    <string name="mpv_direct_decode_automatic">Automaticky</string>
+    <string name="mpv_direct_decode_automatic_desc">Posílá video přímo do grafického čipu, když to tento box dovolí, a ověří, že to fungovalo. Pokud ne, Arc použije Hardwarové dekódování výše a zapamatuje si to.</string>
+    <string name="mpv_direct_decode_always">Vždy</string>
+    <string name="mpv_direct_decode_always_desc">Vždy posílá video přímo do grafického čipu. Pokud to tento box odmítne, videa se v MPV nemusí přehrát.</string>
+    <string name="mpv_direct_decode_off">Vypnuto</string>
+    <string name="mpv_direct_decode_off_desc">Video se řídí nastavením Hardwarové dekódování výše, s krokem kopírování. Na některých boxech se může trhat.</string>
+</resources>

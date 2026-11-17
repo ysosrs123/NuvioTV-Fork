@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Директно декодирање (само за MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Репродукује видео без додатног корака копирања када овај уређај то дозвољава. Глаткије и троши мање меморије.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Како MPV предаје декодирани видео екрану.</string>
+    <string name="mpv_direct_decode_automatic">Аутоматски</string>
+    <string name="mpv_direct_decode_automatic_desc">Шаље видео директно графичком чипу када овај уређај то дозвољава и проверава да ли је успело. Ако није, Arc користи Hardware decoding изнад и памти то.</string>
+    <string name="mpv_direct_decode_always">Увек</string>
+    <string name="mpv_direct_decode_always_desc">Увек шаље видео директно графичком чипу. Ако овај уређај то одбије, видео записи се у MPV-у можда неће репродуковати.</string>
+    <string name="mpv_direct_decode_off">Искључено</string>
+    <string name="mpv_direct_decode_off_desc">Видео прати подешавање Hardware decoding изнад, са кораком копирања. На неким уређајима може да сецка.</string>
+</resources>

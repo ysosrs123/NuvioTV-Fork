@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Başlatıcı hizmetleriyle daha akıcı</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Bu cihazdaki tek erişilebilirlik hizmeti Projectivy gibi bir başlatıcıya aitse Arc ona ekranını tarif etmeyi bırakır, böylece kaydırma daha akıcı olur. TalkBack gibi ekran okuyucular her zaman ekranın tamamını alır.</string>
+</resources>

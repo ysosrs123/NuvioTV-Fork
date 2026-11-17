@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">डायरेक्ट डिकोडिंग (केवल MPV)</string>
+    <string name="mpv_direct_decode_subtitle">जब यह डिवाइस अनुमति देता है, तो वीडियो को अतिरिक्त कॉपी चरण के बिना चलाता है। ज़्यादा स्मूद, और कम मेमोरी लेता है।</string>
+    <string name="mpv_direct_decode_dialog_subtitle">MPV डिकोड किया गया वीडियो स्क्रीन तक कैसे पहुँचाता है।</string>
+    <string name="mpv_direct_decode_automatic">स्वचालित</string>
+    <string name="mpv_direct_decode_automatic_desc">जब यह डिवाइस अनुमति देता है, तो वीडियो को सीधे ग्राफ़िक्स चिप पर भेजता है और जाँचता है कि यह काम किया या नहीं। अगर नहीं, तो Arc ऊपर दी गई Hardware decoding सेटिंग का उपयोग करता है और इसे याद रखता है।</string>
+    <string name="mpv_direct_decode_always">हमेशा</string>
+    <string name="mpv_direct_decode_always_desc">वीडियो को हमेशा सीधे ग्राफ़िक्स चिप पर भेजता है। अगर यह डिवाइस इसे अस्वीकार करता है, तो वीडियो शायद MPV में न चलें।</string>
+    <string name="mpv_direct_decode_off">बंद</string>
+    <string name="mpv_direct_decode_off_desc">वीडियो ऊपर दी गई Hardware decoding सेटिंग का कॉपी चरण के साथ पालन करता है। कुछ डिवाइस पर यह अटक सकता है।</string>
+</resources>

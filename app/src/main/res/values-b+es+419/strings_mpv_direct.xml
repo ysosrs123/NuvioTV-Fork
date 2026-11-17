@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Decodificación directa (solo MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Reproduce el video sin el paso de copia adicional cuando este dispositivo lo permite. Más fluido y usa menos memoria.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Cómo entrega MPV el video decodificado a la pantalla.</string>
+    <string name="mpv_direct_decode_automatic">Automático</string>
+    <string name="mpv_direct_decode_automatic_desc">Envía el video directamente al chip gráfico cuando este dispositivo lo permite y comprueba que funcionó. Si no, Arc usa la Decodificación por hardware de arriba y lo recuerda.</string>
+    <string name="mpv_direct_decode_always">Siempre</string>
+    <string name="mpv_direct_decode_always_desc">Envía siempre el video directamente al chip gráfico. Si este dispositivo lo rechaza, es posible que los videos no se reproduzcan en MPV.</string>
+    <string name="mpv_direct_decode_off">Desactivado</string>
+    <string name="mpv_direct_decode_off_desc">El video sigue la Decodificación por hardware de arriba, con el paso de copia. Puede entrecortarse en algunos dispositivos.</string>
+</resources>

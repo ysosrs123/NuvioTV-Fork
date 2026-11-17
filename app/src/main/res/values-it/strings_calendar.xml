@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Prossimo episodio ancora senza data</string>
     <string name="calendar_time_not_announced">Orario non annunciato</string>
     <string name="calendar_streaming">Streaming</string>
+    <string name="calendar_time_about">Verso le %1$s</string>
     <string name="calendar_unknown_title">Senza titolo</string>
     <string name="calendar_label_new_show">Nuova serie</string>
     <string name="calendar_label_season_premiere">Prima di stagione</string>

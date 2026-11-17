@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision-uitvoer</string>
+    <string name="dv_output_sub">Tv: je tv verwerkt Dolby Vision. Apparaat, als HDR10: dit apparaat zet het om naar HDR10, voor tv\'s die HDR10 beter tonen.</string>
+    <string name="dv_output_tv_short">Tv</string>
+    <string name="dv_output_tv">Tv (aanbevolen)</string>
+    <string name="dv_output_tv_desc">Je tv ontvangt Dolby Vision en verwerkt het zelf. Het beste beeld op de meeste Dolby Vision-tv\'s.</string>
+    <string name="dv_output_box">Apparaat, als HDR10</string>
+    <string name="dv_output_box_desc">Dit apparaat zet Dolby Vision om naar HDR10 voordat het wordt verstuurd. Voor tv\'s waarop Dolby Vision te donker of verkeerd oogt.</string>
+    <string name="dv_output_box_warning">Geldt vanaf de volgende titel. HDR10-, HLG- en SDR-titels blijven ongewijzigd.</string>
+</resources>

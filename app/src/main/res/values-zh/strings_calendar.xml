@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">下一集日期待定</string>
     <string name="calendar_time_not_announced">时间未公布</string>
     <string name="calendar_streaming">流媒体</string>
+    <string name="calendar_time_about">约 %1$s</string>
     <string name="calendar_unknown_title">无标题</string>
     <string name="calendar_label_new_show">新节目</string>
     <string name="calendar_label_season_premiere">季首播</string>

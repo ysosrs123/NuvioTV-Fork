@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Оновлення постерів</string>
+    <string name="advanced_poster_updates_subtitle">Як часто перевіряти постери з адонів і сервісів рейтингів на нове зображення.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Збережені постери показуються одразу; нове зображення замінює їх у фоні. TMDB і великі сайти із зображеннями завжди зберігаються щонайменше тиждень.</string>
+    <string name="advanced_poster_updates_every_start">Під час кожного запуску Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Нові зображення невдовзі після кожного запуску. Для невеликої Головної та адонів, які змінюють свої зображення.</string>
+    <string name="advanced_poster_updates_daily">Щодня</string>
+    <string name="advanced_poster_updates_daily_desc">Кожен постер перевіряється не частіше ніж раз на день.</string>
+    <string name="advanced_poster_updates_weekly">Щотижня</string>
+    <string name="advanced_poster_updates_weekly_desc">За замовчуванням. Кожен постер перевіряється не частіше ніж раз на тиждень; найплавніше для великої Головної.</string>
+    <string name="advanced_poster_updates_monthly">Щомісяця</string>
+    <string name="advanced_poster_updates_monthly_desc">Найменше перевірок. Рейтингові постери можуть бути до місяця давності.</string>
+</resources>

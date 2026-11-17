@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Datum naslednje epizode še ni znan</string>
     <string name="calendar_time_not_announced">Čas še ni objavljen</string>
     <string name="calendar_streaming">Pretakanje</string>
+    <string name="calendar_time_about">Okoli %1$s</string>
     <string name="calendar_unknown_title">Brez naslova</string>
     <string name="calendar_label_new_show">Nova serija</string>
     <string name="calendar_label_season_premiere">Premiera sezone</string>

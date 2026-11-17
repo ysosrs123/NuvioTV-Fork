@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">ランチャーのサービス使用時に滑らかに</string>
+    <string name="advanced_quiet_for_launchers_subtitle">このデバイスのユーザー補助サービスがProjectivyなどのランチャーのものだけの場合、Arcは画面の内容をそのサービスに伝えなくなり、スクロールが滑らかになります。TalkBackなどのスクリーンリーダーには常に画面全体が伝わります。</string>
+</resources>

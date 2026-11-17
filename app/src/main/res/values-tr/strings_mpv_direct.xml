@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Doğrudan kod çözme (yalnızca MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Bu cihaz izin verdiğinde videoyu ek kopyalama adımı olmadan oynatır. Daha akıcıdır ve daha az bellek kullanır.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">MPV\'nin kodu çözülmüş videoyu ekrana nasıl verdiği.</string>
+    <string name="mpv_direct_decode_automatic">Otomatik</string>
+    <string name="mpv_direct_decode_automatic_desc">Bu cihaz izin verdiğinde videoyu doğrudan grafik çipine gönderir ve işe yarayıp yaramadığını kontrol eder. Yaramazsa Arc yukarıdaki Donanım Kod Çözme ayarını kullanır ve bunu hatırlar.</string>
+    <string name="mpv_direct_decode_always">Her zaman</string>
+    <string name="mpv_direct_decode_always_desc">Videoyu her zaman doğrudan grafik çipine gönderir. Bu cihaz reddederse videolar MPV\'de oynatılamayabilir.</string>
+    <string name="mpv_direct_decode_off">Kapalı</string>
+    <string name="mpv_direct_decode_off_desc">Video, yukarıdaki Donanım Kod Çözme ayarını kopyalama adımıyla izler. Bu, bazı cihazlarda takılmaya yol açabilir.</string>
+</resources>

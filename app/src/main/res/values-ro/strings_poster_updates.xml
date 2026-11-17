@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Actualizarea posterelor</string>
+    <string name="advanced_poster_updates_subtitle">Cât de des se verifică dacă posterele din extensii și servicii de evaluări au o imagine nouă.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Posterele salvate apar imediat; o imagine nouă le înlocuiește în fundal. TMDB și marile site-uri de imagini sunt păstrate mereu cel puțin o săptămână.</string>
+    <string name="advanced_poster_updates_every_start">La fiecare pornire a Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Imagini noi la scurt timp după fiecare pornire. Pentru ecrane Acasă mici și extensii care își schimbă imaginile.</string>
+    <string name="advanced_poster_updates_daily">Zilnic</string>
+    <string name="advanced_poster_updates_daily_desc">Fiecare poster este verificat cel mult o dată pe zi.</string>
+    <string name="advanced_poster_updates_weekly">Săptămânal</string>
+    <string name="advanced_poster_updates_weekly_desc">Implicit. Fiecare poster este verificat cel mult o dată pe săptămână; cel mai fluid pentru ecrane Acasă mari.</string>
+    <string name="advanced_poster_updates_monthly">Lunar</string>
+    <string name="advanced_poster_updates_monthly_desc">Cele mai puține verificări. Posterele cu evaluări pot avea o vechime de până la o lună.</string>
+</resources>

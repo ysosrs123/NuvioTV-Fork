@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision kimenet</string>
+    <string name="dv_output_sub">TV: a TV kezeli a Dolby Visiont. Eszköz, HDR10-ként: az eszköz HDR10-re alakítja, a HDR10-et jobban megjelenítő TV-khez.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (ajánlott)</string>
+    <string name="dv_output_tv_desc">A TV fogadja a Dolby Visiont, és maga kezeli. A legjobb kép a legtöbb Dolby Vision TV-n.</string>
+    <string name="dv_output_box">Eszköz, HDR10-ként</string>
+    <string name="dv_output_box_desc">Ez az eszköz küldés előtt HDR10-re alakítja a Dolby Visiont. Olyan TV-khez, amelyeken a Dolby Vision sötét vagy hibás.</string>
+    <string name="dv_output_box_warning">A következő címtől érvényes. A HDR10, HLG és SDR címek nem változnak.</string>
+</resources>

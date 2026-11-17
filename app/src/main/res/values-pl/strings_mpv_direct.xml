@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Dekodowanie bezpośrednie (tylko MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Odtwarza wideo bez dodatkowego kroku kopiowania, gdy to urządzenie na to pozwala. Płynniej i z mniejszym zużyciem pamięci.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Jak MPV przekazuje zdekodowane wideo na ekran.</string>
+    <string name="mpv_direct_decode_automatic">Automatycznie</string>
+    <string name="mpv_direct_decode_automatic_desc">Wysyła wideo prosto do układu graficznego, gdy to urządzenie na to pozwala, i sprawdza, czy to zadziałało. Jeśli nie, Arc używa ustawienia Dekodowanie sprzętowe powyżej i to zapamiętuje.</string>
+    <string name="mpv_direct_decode_always">Zawsze</string>
+    <string name="mpv_direct_decode_always_desc">Zawsze wysyła wideo prosto do układu graficznego. Jeśli to urządzenie tego odmówi, filmy mogą nie odtwarzać się w MPV.</string>
+    <string name="mpv_direct_decode_off">Wyłączone</string>
+    <string name="mpv_direct_decode_off_desc">Wideo korzysta z ustawienia Dekodowanie sprzętowe powyżej, z krokiem kopiowania. Na niektórych urządzeniach może się zacinać.</string>
+</resources>

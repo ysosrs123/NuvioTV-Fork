@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">تحديث الملصقات</string>
+    <string name="advanced_poster_updates_subtitle">عدد مرات التحقق من وجود صورة جديدة لملصقات الإضافات وخدمات التقييم.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">تظهر الملصقات المحفوظة فورًا، وتحل الصورة الجديدة محلها في الخلفية. تُحفظ صور TMDB ومواقع الصور الكبيرة أسبوعًا على الأقل دائمًا.</string>
+    <string name="advanced_poster_updates_every_start">عند كل تشغيل لـ Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">صور جديدة بعد كل تشغيل بقليل. للصفحات الرئيسية الصغيرة والإضافات التي تغيّر صورها.</string>
+    <string name="advanced_poster_updates_daily">يوميًا</string>
+    <string name="advanced_poster_updates_daily_desc">يتم التحقق من كل ملصق مرة واحدة في اليوم على الأكثر.</string>
+    <string name="advanced_poster_updates_weekly">أسبوعيًا</string>
+    <string name="advanced_poster_updates_weekly_desc">الإعداد الافتراضي. يتم التحقق من كل ملصق مرة في الأسبوع على الأكثر؛ الأكثر سلاسة للصفحات الرئيسية الكبيرة.</string>
+    <string name="advanced_poster_updates_monthly">شهريًا</string>
+    <string name="advanced_poster_updates_monthly_desc">أقل عدد من عمليات التحقق. قد يصل عمر ملصقات التقييم إلى شهر.</string>
+</resources>

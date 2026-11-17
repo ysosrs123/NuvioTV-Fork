@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Следећа епизода још нема датум</string>
     <string name="calendar_time_not_announced">Време није најављено</string>
     <string name="calendar_streaming">Стриминг</string>
+    <string name="calendar_time_about">Око %1$s</string>
     <string name="calendar_unknown_title">Неименовано</string>
     <string name="calendar_label_new_show">Нова серија</string>
     <string name="calendar_label_season_premiere">Премијера сезоне</string>

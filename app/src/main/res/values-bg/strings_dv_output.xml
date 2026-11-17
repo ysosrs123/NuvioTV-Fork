@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Изход Dolby Vision</string>
+    <string name="dv_output_sub">Телевизор: телевизорът обработва Dolby Vision. Устройство, в HDR10: преобразува го в HDR10 за телевизори с по-добър HDR10.</string>
+    <string name="dv_output_tv_short">Телевизор</string>
+    <string name="dv_output_tv">Телевизор (препоръчително)</string>
+    <string name="dv_output_tv_desc">Телевизорът получава Dolby Vision и го обработва сам. Най-добрата картина на повечето телевизори с Dolby Vision.</string>
+    <string name="dv_output_box">Устройство, в HDR10</string>
+    <string name="dv_output_box_desc">Това устройство преобразува Dolby Vision в HDR10 преди изпращане. За телевизори, на които Dolby Vision изглежда тъмно или грешно.</string>
+    <string name="dv_output_box_warning">Важи от следващото заглавие. Заглавията в HDR10, HLG и SDR не се променят.</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">पोस्टर अपडेट</string>
+    <string name="advanced_poster_updates_subtitle">ऐडऑन और रेटिंग सेवाओं के पोस्टर में नई इमेज कितनी बार जाँची जाए।</string>
+    <string name="advanced_poster_updates_dialog_subtitle">सेव किए पोस्टर तुरंत दिखते हैं; नई इमेज बैकग्राउंड में उनकी जगह ले लेती है। TMDB और बड़ी आर्टवर्क साइटों की इमेज हमेशा कम से कम एक हफ़्ता रखी जाती हैं।</string>
+    <string name="advanced_poster_updates_every_start">हर बार Arc शुरू होने पर</string>
+    <string name="advanced_poster_updates_every_start_desc">हर शुरुआत के कुछ देर बाद नई इमेज। छोटे होम पेज और अपना आर्टवर्क बदलने वाले ऐडऑन के लिए।</string>
+    <string name="advanced_poster_updates_daily">रोज़</string>
+    <string name="advanced_poster_updates_daily_desc">हर पोस्टर दिन में ज़्यादा से ज़्यादा एक बार जाँचा जाता है।</string>
+    <string name="advanced_poster_updates_weekly">हर हफ़्ते</string>
+    <string name="advanced_poster_updates_weekly_desc">डिफ़ॉल्ट। हर पोस्टर हफ़्ते में ज़्यादा से ज़्यादा एक बार जाँचा जाता है; बड़े होम पेज के लिए सबसे स्मूथ।</string>
+    <string name="advanced_poster_updates_monthly">हर महीने</string>
+    <string name="advanced_poster_updates_monthly_desc">सबसे कम जाँच। रेटिंग पोस्टर एक महीने तक पुराने हो सकते हैं।</string>
+</resources>

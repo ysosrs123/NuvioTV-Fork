@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">فك التشفير المباشر (MPV فقط)</string>
+    <string name="mpv_direct_decode_subtitle">يشغّل الفيديو دون خطوة النسخ الإضافية عندما يسمح هذا الجهاز بذلك. تشغيل أكثر سلاسة واستهلاك أقل للذاكرة.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">كيف يسلّم MPV الفيديو المفكوك إلى الشاشة.</string>
+    <string name="mpv_direct_decode_automatic">تلقائي</string>
+    <string name="mpv_direct_decode_automatic_desc">يرسل الفيديو مباشرة إلى شريحة الرسوميات عندما يسمح هذا الجهاز بذلك، ويتحقق من نجاح ذلك. وإن لم ينجح، يستخدم Arc إعداد فك التشفير العتادي أعلاه ويتذكر ذلك.</string>
+    <string name="mpv_direct_decode_always">دائمًا</string>
+    <string name="mpv_direct_decode_always_desc">يرسل الفيديو دائمًا مباشرة إلى شريحة الرسوميات. إذا رفض هذا الجهاز ذلك، فقد لا تعمل مقاطع الفيديو في MPV.</string>
+    <string name="mpv_direct_decode_off">متوقف</string>
+    <string name="mpv_direct_decode_off_desc">يتبع الفيديو إعداد فك التشفير العتادي أعلاه مع خطوة النسخ. قد يتقطع ذلك على بعض الأجهزة.</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Глађе уз услуге покретача</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Када једина услуга приступачности на овом уређају припада покретачу, нпр. Projectivy, Arc престаје да му описује свој екран па је скроловање глађе. Читачи екрана, нпр. TalkBack, увек добијају цео екран.</string>
+</resources>

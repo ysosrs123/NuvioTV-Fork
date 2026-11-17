@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">海報更新</string>
+    <string name="advanced_poster_updates_subtitle">檢查擴充套件和評分服務的海報是否有新圖片的頻率。</string>
+    <string name="advanced_poster_updates_dialog_subtitle">已儲存的海報會立即顯示，新圖片會在背景替換。TMDB 和大型圖片網站的圖片一律至少保留一週。</string>
+    <string name="advanced_poster_updates_every_start">每次啟動 Arc 時</string>
+    <string name="advanced_poster_updates_every_start_desc">每次啟動後不久即換上新圖片。適合較小的首頁和會更換圖片的擴充套件。</string>
+    <string name="advanced_poster_updates_daily">每天</string>
+    <string name="advanced_poster_updates_daily_desc">每張海報每天最多檢查一次。</string>
+    <string name="advanced_poster_updates_weekly">每週</string>
+    <string name="advanced_poster_updates_weekly_desc">預設。每張海報每週最多檢查一次；大型首頁最流暢。</string>
+    <string name="advanced_poster_updates_monthly">每月</string>
+    <string name="advanced_poster_updates_monthly_desc">檢查次數最少。評分海報最多可能一個月未更新。</string>
+</resources>

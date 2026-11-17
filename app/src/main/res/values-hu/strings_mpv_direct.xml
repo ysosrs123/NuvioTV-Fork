@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Közvetlen dekódolás (csak MPV)</string>
+    <string name="mpv_direct_decode_subtitle">A videót a további másolási lépés nélkül játssza le, ha ez az eszköz engedi. Simább, és kevesebb memóriát használ.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Hogyan adja át az MPV a dekódolt videót a képernyőnek.</string>
+    <string name="mpv_direct_decode_automatic">Automatikus</string>
+    <string name="mpv_direct_decode_automatic_desc">A videót közvetlenül a grafikus chipnek küldi, ha ez az eszköz engedi, és ellenőrzi, hogy működött-e. Ha nem, az Arc a fenti Hardveres dekódolást használja, és ezt megjegyzi.</string>
+    <string name="mpv_direct_decode_always">Mindig</string>
+    <string name="mpv_direct_decode_always_desc">A videót mindig közvetlenül a grafikus chipnek küldi. Ha ez az eszköz elutasítja, előfordulhat, hogy a videók nem játszhatók le az MPV-ben.</string>
+    <string name="mpv_direct_decode_off">Ki</string>
+    <string name="mpv_direct_decode_off_desc">A videó a fenti Hardveres dekódolás beállítást követi, másolási lépéssel. Ez egyes eszközökön akadozhat.</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Poszterfrissítés</string>
+    <string name="advanced_poster_updates_subtitle">Milyen gyakran ellenőrizze az Arc, hogy a bővítmények és értékelési szolgáltatások posztereihez van-e új kép.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">A mentett poszterek azonnal megjelennek; az új kép a háttérben cseréli le őket. A TMDB és a nagy képoldalak képeit az Arc mindig legalább egy hétig megtartja.</string>
+    <string name="advanced_poster_updates_every_start">Az Arc minden indításakor</string>
+    <string name="advanced_poster_updates_every_start_desc">Új képek nem sokkal minden indítás után. Kis Kezdőlapokhoz és a képeiket cserélő bővítményekhez.</string>
+    <string name="advanced_poster_updates_daily">Naponta</string>
+    <string name="advanced_poster_updates_daily_desc">Minden posztert legfeljebb naponta egyszer ellenőriz.</string>
+    <string name="advanced_poster_updates_weekly">Hetente</string>
+    <string name="advanced_poster_updates_weekly_desc">Alapértelmezett. Minden posztert legfeljebb hetente egyszer ellenőriz; nagy Kezdőlapon ez a legsimább.</string>
+    <string name="advanced_poster_updates_monthly">Havonta</string>
+    <string name="advanced_poster_updates_monthly_desc">A legkevesebb ellenőrzés. Az értékelési poszterek akár egy hónaposak is lehetnek.</string>
+</resources>

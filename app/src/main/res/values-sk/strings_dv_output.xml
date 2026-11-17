@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Výstup Dolby Vision</string>
+    <string name="dv_output_sub">TV: váš televízor spracuje Dolby Vision. Zariadenie, ako HDR10: prevedie ho na HDR10, pre TV, ktoré lepšie zobrazia HDR10.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (odporúčané)</string>
+    <string name="dv_output_tv_desc">Váš televízor prijíma Dolby Vision a spracuje ho sám. Najlepší obraz na väčšine televízorov s Dolby Vision.</string>
+    <string name="dv_output_box">Zariadenie, ako HDR10</string>
+    <string name="dv_output_box_desc">Toto zariadenie pred odoslaním prevedie Dolby Vision na HDR10. Pre televízory, kde Dolby Vision vyzerá tmavo alebo zle.</string>
+    <string name="dv_output_box_warning">Platí od ďalšieho titulu. Tituly HDR10, HLG a SDR sa nemenia.</string>
+</resources>

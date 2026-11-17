@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Plus fluide avec les services de launcher</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Quand le seul service d\'accessibilité de ce boîtier appartient à un launcher comme Projectivy, Arc cesse de lui décrire son écran pour un défilement plus fluide. Les lecteurs d\'écran comme TalkBack reçoivent toujours l\'écran complet.</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision-output</string>
+    <string name="dv_output_sub">TV: dit TV håndterer Dolby Vision. Enhed, som HDR10: enheden konverterer til HDR10, til TV, der viser HDR10 bedre.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (anbefalet)</string>
+    <string name="dv_output_tv_desc">Dit TV modtager Dolby Vision og håndterer det selv. Det bedste billede på de fleste Dolby Vision-TV.</string>
+    <string name="dv_output_box">Enhed, som HDR10</string>
+    <string name="dv_output_box_desc">Denne enhed konverterer Dolby Vision til HDR10, før det sendes. Til TV, hvor Dolby Vision ser mørkt eller forkert ud.</string>
+    <string name="dv_output_box_warning">Gælder fra næste titel. HDR10-, HLG- og SDR-titler ændres ikke.</string>
+</resources>

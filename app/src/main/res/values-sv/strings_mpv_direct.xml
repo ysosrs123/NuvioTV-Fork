@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Direkt avkodning (endast MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Spelar upp video utan det extra kopieringssteget när den här boxen tillåter det. Jämnare och använder mindre minne.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Hur MPV lämnar den avkodade videon till skärmen.</string>
+    <string name="mpv_direct_decode_automatic">Automatiskt</string>
+    <string name="mpv_direct_decode_automatic_desc">Skickar video direkt till grafikkretsen när den här boxen tillåter det och kontrollerar att det fungerade. Om inte använder Arc Hårdvaruavkodning ovan och kommer ihåg det.</string>
+    <string name="mpv_direct_decode_always">Alltid</string>
+    <string name="mpv_direct_decode_always_desc">Skickar alltid video direkt till grafikkretsen. Om den här boxen nekar det kanske videor inte spelas upp i MPV.</string>
+    <string name="mpv_direct_decode_off">Av</string>
+    <string name="mpv_direct_decode_off_desc">Video följer Hårdvaruavkodning ovan, med kopieringssteget. Det kan hacka på vissa boxar.</string>
+</resources>

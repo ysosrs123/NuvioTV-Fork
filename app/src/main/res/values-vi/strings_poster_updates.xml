@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Cập nhật poster</string>
+    <string name="advanced_poster_updates_subtitle">Tần suất kiểm tra ảnh mới cho poster từ tiện ích và dịch vụ đánh giá.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Poster đã lưu hiện ngay; ảnh mới sẽ thay thế ở chế độ nền. Ảnh từ TMDB và các trang ảnh lớn luôn được giữ ít nhất một tuần.</string>
+    <string name="advanced_poster_updates_every_start">Mỗi lần Arc khởi động</string>
+    <string name="advanced_poster_updates_every_start_desc">Ảnh mới ngay sau mỗi lần khởi động. Cho Trang chủ nhỏ và tiện ích hay đổi ảnh.</string>
+    <string name="advanced_poster_updates_daily">Hằng ngày</string>
+    <string name="advanced_poster_updates_daily_desc">Mỗi poster được kiểm tra tối đa một lần mỗi ngày.</string>
+    <string name="advanced_poster_updates_weekly">Hằng tuần</string>
+    <string name="advanced_poster_updates_weekly_desc">Mặc định. Mỗi poster được kiểm tra tối đa một lần mỗi tuần; mượt nhất cho Trang chủ lớn.</string>
+    <string name="advanced_poster_updates_monthly">Hằng tháng</string>
+    <string name="advanced_poster_updates_monthly_desc">Ít lần kiểm tra nhất. Poster đánh giá có thể cũ tới một tháng.</string>
+</resources>

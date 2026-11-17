@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Плавнее со службами лаунчеров</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Если единственная служба специальных возможностей на этой приставке принадлежит лаунчеру, например Projectivy, Arc перестаёт описывать ей свой экран, и прокрутка становится плавнее. Программы чтения с экрана, например TalkBack, всегда получают весь экран.</string>
+</resources>

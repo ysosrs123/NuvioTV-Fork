@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Poster-Aktualisierung</string>
+    <string name="advanced_poster_updates_subtitle">Wie oft Poster von Add-ons und Bewertungsdiensten auf ein neues Bild geprüft werden.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Gespeicherte Poster erscheinen sofort; ein neues Bild ersetzt sie im Hintergrund. TMDB und die großen Bilderdienste werden immer mindestens eine Woche behalten.</string>
+    <string name="advanced_poster_updates_every_start">Bei jedem Start von Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Neue Bilder kurz nach jedem Start. Für kleine Startseiten und Add-ons, die ihre Bilder wechseln.</string>
+    <string name="advanced_poster_updates_daily">Täglich</string>
+    <string name="advanced_poster_updates_daily_desc">Jedes Poster wird höchstens einmal am Tag geprüft.</string>
+    <string name="advanced_poster_updates_weekly">Wöchentlich</string>
+    <string name="advanced_poster_updates_weekly_desc">Standard. Jedes Poster wird höchstens einmal pro Woche geprüft; am flüssigsten bei großen Startseiten.</string>
+    <string name="advanced_poster_updates_monthly">Monatlich</string>
+    <string name="advanced_poster_updates_monthly_desc">Die wenigsten Prüfungen. Bewertungsposter können bis zu einem Monat alt sein.</string>
+</resources>

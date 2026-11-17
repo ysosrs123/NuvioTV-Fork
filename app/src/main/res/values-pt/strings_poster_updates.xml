@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Atualização de cartazes</string>
+    <string name="advanced_poster_updates_subtitle">Com que frequência se verifica se os cartazes de addons e serviços de classificações têm uma imagem nova.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Os cartazes guardados aparecem logo; uma imagem nova substitui-os em segundo plano. O TMDB e os grandes sites de imagens são sempre guardados durante pelo menos uma semana.</string>
+    <string name="advanced_poster_updates_every_start">Sempre que o Arc inicia</string>
+    <string name="advanced_poster_updates_every_start_desc">Imagens novas pouco depois de cada início. Para páginas iniciais pequenas e addons que mudam as suas imagens.</string>
+    <string name="advanced_poster_updates_daily">Diariamente</string>
+    <string name="advanced_poster_updates_daily_desc">Cada cartaz é verificado no máximo uma vez por dia.</string>
+    <string name="advanced_poster_updates_weekly">Semanalmente</string>
+    <string name="advanced_poster_updates_weekly_desc">Predefinição. Cada cartaz é verificado no máximo uma vez por semana; o mais fluido para páginas iniciais grandes.</string>
+    <string name="advanced_poster_updates_monthly">Mensalmente</string>
+    <string name="advanced_poster_updates_monthly_desc">Menos verificações. Os cartazes de classificações podem ter até um mês.</string>
+</resources>

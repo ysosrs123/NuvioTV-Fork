@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Giải mã trực tiếp (chỉ cho MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Phát video không cần bước sao chép thêm khi thiết bị này cho phép. Mượt hơn và dùng ít bộ nhớ hơn.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Cách MPV đưa video đã giải mã lên màn hình.</string>
+    <string name="mpv_direct_decode_automatic">Tự động</string>
+    <string name="mpv_direct_decode_automatic_desc">Gửi video thẳng tới chip đồ họa khi thiết bị này cho phép và kiểm tra xem có hoạt động không. Nếu không, Arc dùng Giải mã phần cứng ở trên và ghi nhớ điều đó.</string>
+    <string name="mpv_direct_decode_always">Luôn luôn</string>
+    <string name="mpv_direct_decode_always_desc">Luôn gửi video thẳng tới chip đồ họa. Nếu thiết bị này từ chối, video có thể không phát được trong MPV.</string>
+    <string name="mpv_direct_decode_off">Tắt</string>
+    <string name="mpv_direct_decode_off_desc">Video theo cài đặt Giải mã phần cứng ở trên, có bước sao chép. Có thể bị giật trên một số thiết bị.</string>
+</resources>

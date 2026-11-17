@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Posterupdates</string>
+    <string name="advanced_poster_updates_subtitle">Hoe vaak posters van add-ons en beoordelingsdiensten worden gecontroleerd op een nieuwe afbeelding.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Opgeslagen posters verschijnen meteen; een nieuwe afbeelding vervangt ze op de achtergrond. TMDB en de grote afbeeldingssites worden altijd minstens een week bewaard.</string>
+    <string name="advanced_poster_updates_every_start">Elke keer dat Arc start</string>
+    <string name="advanced_poster_updates_every_start_desc">Nieuwe afbeeldingen kort na elke start. Voor kleine Home-pagina\'s en add-ons die hun afbeeldingen wisselen.</string>
+    <string name="advanced_poster_updates_daily">Dagelijks</string>
+    <string name="advanced_poster_updates_daily_desc">Elke poster wordt hoogstens één keer per dag gecontroleerd.</string>
+    <string name="advanced_poster_updates_weekly">Wekelijks</string>
+    <string name="advanced_poster_updates_weekly_desc">Standaard. Elke poster wordt hoogstens één keer per week gecontroleerd; het soepelst voor grote Home-pagina\'s.</string>
+    <string name="advanced_poster_updates_monthly">Maandelijks</string>
+    <string name="advanced_poster_updates_monthly_desc">De minste controles. Beoordelingsposters kunnen tot een maand oud zijn.</string>
+</resources>

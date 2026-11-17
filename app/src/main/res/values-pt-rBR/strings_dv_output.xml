@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Saída Dolby Vision</string>
+    <string name="dv_output_sub">TV: sua TV processa o Dolby Vision. Aparelho, em HDR10: converte para HDR10, para TVs que mostram melhor o HDR10.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (Recomendada)</string>
+    <string name="dv_output_tv_desc">Sua TV recebe o Dolby Vision e o processa sozinha. A melhor imagem na maioria das TVs com Dolby Vision.</string>
+    <string name="dv_output_box">Aparelho, em HDR10</string>
+    <string name="dv_output_box_desc">Este aparelho converte o Dolby Vision para HDR10 antes de enviar. Para TVs em que o Dolby Vision fica escuro ou errado.</string>
+    <string name="dv_output_box_warning">Vale a partir do próximo título. Títulos HDR10, HLG e SDR não mudam.</string>
+</resources>

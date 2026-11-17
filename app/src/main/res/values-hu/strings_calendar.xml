@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Következő epizód: még nincs dátum</string>
     <string name="calendar_time_not_announced">Időpont még nem ismert</string>
     <string name="calendar_streaming">Streaming</string>
+    <string name="calendar_time_about">Kb. %1$s</string>
     <string name="calendar_unknown_title">Cím nélkül</string>
     <string name="calendar_label_new_show">Új sorozat</string>
     <string name="calendar_label_season_premiere">Évadpremier</string>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Ažuriranje postera</string>
+    <string name="advanced_poster_updates_subtitle">Koliko često se proverava da li posteri iz dodataka i servisa za ocene imaju novu sliku.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Sačuvani posteri se prikazuju odmah; nova slika ih zamenjuje u pozadini. TMDB i veliki sajtovi sa slikama uvek se čuvaju najmanje nedelju dana.</string>
+    <string name="advanced_poster_updates_every_start">Pri svakom pokretanju aplikacije Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Nove slike ubrzo posle svakog pokretanja. Za male Početne i dodatke koji menjaju slike.</string>
+    <string name="advanced_poster_updates_daily">Dnevno</string>
+    <string name="advanced_poster_updates_daily_desc">Svaki poster se proverava najviše jednom dnevno.</string>
+    <string name="advanced_poster_updates_weekly">Nedeljno</string>
+    <string name="advanced_poster_updates_weekly_desc">Podrazumevano. Svaki poster se proverava najviše jednom nedeljno; najglađe za velike Početne.</string>
+    <string name="advanced_poster_updates_monthly">Mesečno</string>
+    <string name="advanced_poster_updates_monthly_desc">Najmanje provera. Posteri sa ocenama mogu biti stari do mesec dana.</string>
+</resources>

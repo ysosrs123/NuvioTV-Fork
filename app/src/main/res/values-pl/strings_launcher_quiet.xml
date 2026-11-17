@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Płynniej z usługami launcherów</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Gdy jedyna usługa ułatwień dostępu na tym urządzeniu należy do launchera, np. Projectivy, Arc przestaje jej opisywać swój ekran, więc przewijanie jest płynniejsze. Czytniki ekranu, np. TalkBack, zawsze otrzymują pełny ekran.</string>
+</resources>

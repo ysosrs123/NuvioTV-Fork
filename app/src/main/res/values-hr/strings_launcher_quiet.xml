@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Glađe uz usluge pokretača</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Kada jedina usluga pristupačnosti na ovom uređaju pripada pokretaču, npr. Projectivy, Arc mu prestaje opisivati svoj zaslon pa je pomicanje glađe. Čitači zaslona, npr. TalkBack, uvijek dobivaju cijeli zaslon.</string>
+</resources>

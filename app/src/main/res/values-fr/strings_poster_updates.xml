@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Mise à jour des affiches</string>
+    <string name="advanced_poster_updates_subtitle">Fréquence à laquelle les affiches des addons et des services de notes sont vérifiées pour une nouvelle image.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Les affiches enregistrées s\'affichent tout de suite ; une nouvelle image les remplace en arrière-plan. TMDB et les grands sites d\'illustrations sont toujours conservés au moins une semaine.</string>
+    <string name="advanced_poster_updates_every_start">À chaque démarrage d\'Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Nouvelles images peu après chaque démarrage. Pour les petites pages d\'accueil et les addons qui changent leurs illustrations.</string>
+    <string name="advanced_poster_updates_daily">Chaque jour</string>
+    <string name="advanced_poster_updates_daily_desc">Chaque affiche est vérifiée au plus une fois par jour.</string>
+    <string name="advanced_poster_updates_weekly">Chaque semaine</string>
+    <string name="advanced_poster_updates_weekly_desc">Par défaut. Chaque affiche est vérifiée au plus une fois par semaine ; le plus fluide pour les grandes pages d\'accueil.</string>
+    <string name="advanced_poster_updates_monthly">Chaque mois</string>
+    <string name="advanced_poster_updates_monthly_desc">Le moins de vérifications. Les affiches de notes peuvent dater d\'un mois.</string>
+</resources>

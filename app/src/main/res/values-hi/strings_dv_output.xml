@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision आउटपुट</string>
+    <string name="dv_output_sub">टीवी: आपका टीवी Dolby Vision संभालता है। डिवाइस, HDR10 में: इसे HDR10 में बदलता है, उन टीवी के लिए जिन पर HDR10 बेहतर दिखता है।</string>
+    <string name="dv_output_tv_short">टीवी</string>
+    <string name="dv_output_tv">टीवी (अनुशंसित)</string>
+    <string name="dv_output_tv_desc">आपका टीवी Dolby Vision पाता है और उसे खुद संभालता है। ज़्यादातर Dolby Vision टीवी पर सबसे अच्छी तस्वीर।</string>
+    <string name="dv_output_box">डिवाइस, HDR10 में</string>
+    <string name="dv_output_box_desc">यह डिवाइस भेजने से पहले Dolby Vision को HDR10 में बदलता है। उन टीवी के लिए जिन पर Dolby Vision फीका या गलत दिखता है।</string>
+    <string name="dv_output_box_warning">अगले टाइटल से लागू होगा। HDR10, HLG और SDR टाइटल नहीं बदलते।</string>
+</resources>

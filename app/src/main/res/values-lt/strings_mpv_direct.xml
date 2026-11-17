@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Tiesioginis dekodavimas (tik MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Leidžia vaizdo įrašus be papildomo kopijavimo žingsnio, kai šis įrenginys leidžia. Sklandžiau ir naudoja mažiau atminties.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Kaip MPV perduoda dekoduotą vaizdą į ekraną.</string>
+    <string name="mpv_direct_decode_automatic">Automatiškai</string>
+    <string name="mpv_direct_decode_automatic_desc">Siunčia vaizdą tiesiai į grafikos lustą, kai šis įrenginys leidžia, ir patikrina, ar pavyko. Jei ne, Arc naudoja aukščiau esantį nustatymą Aparatinis dekodavimas ir tai įsimena.</string>
+    <string name="mpv_direct_decode_always">Visada</string>
+    <string name="mpv_direct_decode_always_desc">Visada siunčia vaizdą tiesiai į grafikos lustą. Jei šis įrenginys atsisako, vaizdo įrašai MPV gali nepasileisti.</string>
+    <string name="mpv_direct_decode_off">Išjungta</string>
+    <string name="mpv_direct_decode_off_desc">Vaizdas vadovaujasi aukščiau esančiu nustatymu Aparatinis dekodavimas, su kopijavimo žingsniu. Kai kuriuose įrenginiuose gali strigti.</string>
+</resources>

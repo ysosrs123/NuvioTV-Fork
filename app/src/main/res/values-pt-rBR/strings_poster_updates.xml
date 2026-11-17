@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Atualização de pôsteres</string>
+    <string name="advanced_poster_updates_subtitle">Com que frequência os pôsteres de addons e serviços de avaliação são verificados em busca de uma imagem nova.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Os pôsteres salvos aparecem na hora; uma imagem nova os substitui em segundo plano. O TMDB e os grandes sites de imagens são sempre mantidos por pelo menos uma semana.</string>
+    <string name="advanced_poster_updates_every_start">Toda vez que o Arc inicia</string>
+    <string name="advanced_poster_updates_every_start_desc">Imagens novas logo após cada início. Para telas iniciais pequenas e addons que trocam suas imagens.</string>
+    <string name="advanced_poster_updates_daily">Diariamente</string>
+    <string name="advanced_poster_updates_daily_desc">Cada pôster é verificado no máximo uma vez por dia.</string>
+    <string name="advanced_poster_updates_weekly">Semanalmente</string>
+    <string name="advanced_poster_updates_weekly_desc">Padrão. Cada pôster é verificado no máximo uma vez por semana; o mais fluido para telas iniciais grandes.</string>
+    <string name="advanced_poster_updates_monthly">Mensalmente</string>
+    <string name="advanced_poster_updates_monthly_desc">Menos verificações. Pôsteres de avaliação podem ter até um mês.</string>
+</resources>

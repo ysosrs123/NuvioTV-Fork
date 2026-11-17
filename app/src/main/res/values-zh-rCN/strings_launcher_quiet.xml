@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">配合启动器服务更流畅</string>
+    <string name="advanced_quiet_for_launchers_subtitle">当此设备上唯一的无障碍服务属于 Projectivy 等启动器时，Arc 不再向其描述自身屏幕内容，滚动更流畅。TalkBack 等屏幕阅读器始终获得完整屏幕内容。</string>
+</resources>

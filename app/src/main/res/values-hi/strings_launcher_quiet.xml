@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">लॉन्चर सेवाओं के साथ ज़्यादा स्मूद</string>
+    <string name="advanced_quiet_for_launchers_subtitle">जब इस डिवाइस पर अकेली सुलभता सेवा Projectivy जैसे किसी लॉन्चर की हो, तो Arc उसे अपनी स्क्रीन का ब्योरा देना बंद कर देता है, जिससे स्क्रॉलिंग ज़्यादा स्मूद होती है। TalkBack जैसे स्क्रीन रीडर को हमेशा पूरी स्क्रीन मिलती है।</string>
+</resources>

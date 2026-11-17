@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">ダイレクトデコード (MPVのみ)</string>
+    <string name="mpv_direct_decode_subtitle">この端末が対応していれば、余分なコピー処理なしで映像を再生します。より滑らかで、メモリの使用も少なくなります。</string>
+    <string name="mpv_direct_decode_dialog_subtitle">MPVがデコードした映像を画面へ渡す方法。</string>
+    <string name="mpv_direct_decode_automatic">自動</string>
+    <string name="mpv_direct_decode_automatic_desc">この端末が対応していれば映像をグラフィックチップへ直接送り、うまくいったか確認します。うまくいかない場合、Arcは上のハードウェアデコードの設定を使い、それを記憶します。</string>
+    <string name="mpv_direct_decode_always">常に</string>
+    <string name="mpv_direct_decode_always_desc">映像を常にグラフィックチップへ直接送ります。この端末が拒否すると、MPVで映像が再生できないことがあります。</string>
+    <string name="mpv_direct_decode_off">オフ</string>
+    <string name="mpv_direct_decode_off_desc">映像は上のハードウェアデコードの設定に従い、コピー処理を行います。一部の端末でカクつくことがあります。</string>
+</resources>

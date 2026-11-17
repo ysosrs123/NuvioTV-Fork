@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Aktualizácia plagátov</string>
+    <string name="advanced_poster_updates_subtitle">Ako často sa pri plagátoch z doplnkov a služieb s hodnoteniami kontroluje nový obrázok.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Uložené plagáty sa zobrazia hneď; nový obrázok ich nahradí na pozadí. TMDB a veľké weby s obrázkami sa vždy uchovávajú aspoň týždeň.</string>
+    <string name="advanced_poster_updates_every_start">Pri každom spustení Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Nové obrázky krátko po každom spustení. Pre malé domovské stránky a doplnky, ktoré menia obrázky.</string>
+    <string name="advanced_poster_updates_daily">Denne</string>
+    <string name="advanced_poster_updates_daily_desc">Každý plagát sa kontroluje najviac raz denne.</string>
+    <string name="advanced_poster_updates_weekly">Týždenne</string>
+    <string name="advanced_poster_updates_weekly_desc">Predvolené. Každý plagát sa kontroluje najviac raz týždenne; najplynulejšie pre veľké domovské stránky.</string>
+    <string name="advanced_poster_updates_monthly">Mesačne</string>
+    <string name="advanced_poster_updates_monthly_desc">Najmenej kontrol. Plagáty s hodnoteniami môžu byť staré až mesiac.</string>
+</resources>

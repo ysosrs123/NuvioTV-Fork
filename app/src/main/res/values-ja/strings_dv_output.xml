@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision出力</string>
+    <string name="dv_output_sub">TV：TVがDolby Visionを処理。本体(HDR10)：本体がHDR10に変換。HDR10の方がきれいなTV向け。</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV(推奨)</string>
+    <string name="dv_output_tv_desc">TVがDolby Visionを受け取り、TV自身で処理します。ほとんどのDolby Vision対応TVで最良の画質です。</string>
+    <string name="dv_output_box">本体(HDR10)</string>
+    <string name="dv_output_box_desc">本体がDolby VisionをHDR10に変換してから送信します。Dolby Visionが暗い、または色がおかしいTV向けです。</string>
+    <string name="dv_output_box_warning">次のタイトルから適用されます。HDR10、HLG、SDRのタイトルは変わりません。</string>
+</resources>

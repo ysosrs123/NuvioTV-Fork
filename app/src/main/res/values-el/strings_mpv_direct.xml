@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Άμεση αποκωδικοποίηση (μόνο MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Αναπαράγει βίντεο χωρίς το επιπλέον βήμα αντιγραφής όταν το επιτρέπει αυτή η συσκευή. Πιο ομαλά και με λιγότερη μνήμη.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Πώς το MPV παραδίδει το αποκωδικοποιημένο βίντεο στην οθόνη.</string>
+    <string name="mpv_direct_decode_automatic">Αυτόματα</string>
+    <string name="mpv_direct_decode_automatic_desc">Στέλνει το βίντεο απευθείας στο τσιπ γραφικών όταν το επιτρέπει αυτή η συσκευή και ελέγχει ότι λειτούργησε. Αν όχι, το Arc χρησιμοποιεί την Αποκωδικοποίηση υλικού παραπάνω και το θυμάται.</string>
+    <string name="mpv_direct_decode_always">Πάντα</string>
+    <string name="mpv_direct_decode_always_desc">Στέλνει πάντα το βίντεο απευθείας στο τσιπ γραφικών. Αν αυτή η συσκευή το αρνηθεί, τα βίντεο μπορεί να μην παίζουν στο MPV.</string>
+    <string name="mpv_direct_decode_off">Ανενεργό</string>
+    <string name="mpv_direct_decode_off_desc">Το βίντεο ακολουθεί την Αποκωδικοποίηση υλικού παραπάνω, με το βήμα αντιγραφής. Μπορεί να κολλάει σε ορισμένες συσκευές.</string>
+</resources>

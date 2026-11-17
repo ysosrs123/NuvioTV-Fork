@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Sklandžiau su paleidiklių paslaugomis</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Kai vienintelė pritaikymo neįgaliesiems paslauga šiame įrenginyje priklauso paleidikliui, pvz., Projectivy, Arc nustoja jai aprašinėti savo ekraną, todėl slinkimas sklandesnis. Ekrano skaitytuvai, pvz., TalkBack, visada gauna visą ekraną.</string>
+</resources>

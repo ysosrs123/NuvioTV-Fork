@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Decodare directă (doar MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Redă video fără pasul suplimentar de copiere când acest dispozitiv permite. Mai fluid și folosește mai puțină memorie.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Cum transmite MPV videoclipul decodat către ecran.</string>
+    <string name="mpv_direct_decode_automatic">Automat</string>
+    <string name="mpv_direct_decode_automatic_desc">Trimite video direct la cipul grafic când acest dispozitiv permite și verifică dacă a funcționat. Dacă nu, Arc folosește setarea Hardware decoding de mai sus și reține acest lucru.</string>
+    <string name="mpv_direct_decode_always">Întotdeauna</string>
+    <string name="mpv_direct_decode_always_desc">Trimite întotdeauna video direct la cipul grafic. Dacă acest dispozitiv refuză, este posibil ca videoclipurile să nu ruleze în MPV.</string>
+    <string name="mpv_direct_decode_off">Dezactivat</string>
+    <string name="mpv_direct_decode_off_desc">Video urmează setarea Hardware decoding de mai sus, cu pasul de copiere. Poate sacada pe unele dispozitive.</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Vloeiender met launcherservices</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Als de enige toegankelijkheidsservice op dit apparaat bij een launcher zoals Projectivy hoort, beschrijft Arc zijn scherm niet meer aan die service, zodat scrollen vloeiender gaat. Schermlezers zoals TalkBack krijgen altijd het volledige scherm.</string>
+</resources>

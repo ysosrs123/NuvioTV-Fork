@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Mais fluido com serviços de launcher</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Quando o único serviço de acessibilidade neste aparelho pertence a um launcher como o Projectivy, o Arc deixa de descrever a tela para ele e a rolagem fica mais fluida. Leitores de tela como o TalkBack sempre recebem a tela completa.</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Ажурирање постера</string>
+    <string name="advanced_poster_updates_subtitle">Колико често се проверава да ли постери из додатака и сервиса за оцене имају нову слику.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Сачувани постери се приказују одмах; нова слика их замењује у позадини. TMDB и велики сајтови са сликама увек се чувају најмање недељу дана.</string>
+    <string name="advanced_poster_updates_every_start">При сваком покретању апликације Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Нове слике убрзо после сваког покретања. За мале Почетне и додатке који мењају слике.</string>
+    <string name="advanced_poster_updates_daily">Дневно</string>
+    <string name="advanced_poster_updates_daily_desc">Сваки постер се проверава највише једном дневно.</string>
+    <string name="advanced_poster_updates_weekly">Недељно</string>
+    <string name="advanced_poster_updates_weekly_desc">Подразумевано. Сваки постер се проверава највише једном недељно; најглађе за велике Почетне.</string>
+    <string name="advanced_poster_updates_monthly">Месечно</string>
+    <string name="advanced_poster_updates_monthly_desc">Најмање провера. Постери са оценама могу бити стари до месец дана.</string>
+</resources>

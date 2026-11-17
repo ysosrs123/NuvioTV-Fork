@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Smidigare med launchertjänster</string>
+    <string name="advanced_quiet_for_launchers_subtitle">När den enda tillgänglighetstjänsten på den här boxen tillhör en launcher som Projectivy slutar Arc beskriva sin skärm för den, så att rullningen blir smidigare. Skärmläsare som TalkBack får alltid hela skärmen.</string>
+</resources>

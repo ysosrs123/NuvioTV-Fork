@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">أكثر سلاسة مع خدمات الشاشة الرئيسية</string>
+    <string name="advanced_quiet_for_launchers_subtitle">عندما تكون خدمة إمكانية الوصول الوحيدة على هذا الجهاز تابعة لتطبيق شاشة رئيسية مثل Projectivy، يتوقف Arc عن وصف شاشته لها، فيصبح التمرير أكثر سلاسة. أما قارئات الشاشة مثل TalkBack فتحصل دائمًا على الشاشة كاملة.</string>
+</resources>

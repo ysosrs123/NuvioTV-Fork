@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Plakatoppdateringer</string>
+    <string name="advanced_poster_updates_subtitle">Hvor ofte plakater fra tillegg og vurderingstjenester sjekkes for et nytt bilde.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Lagrede plakater vises med en gang; et nytt bilde erstatter dem i bakgrunnen. TMDB og de store bildesidene beholdes alltid i minst en uke.</string>
+    <string name="advanced_poster_updates_every_start">Hver gang Arc starter</string>
+    <string name="advanced_poster_updates_every_start_desc">Nye bilder kort etter hver oppstart. For små Hjem-sider og tillegg som bytter bildene sine.</string>
+    <string name="advanced_poster_updates_daily">Daglig</string>
+    <string name="advanced_poster_updates_daily_desc">Hver plakat sjekkes høyst én gang om dagen.</string>
+    <string name="advanced_poster_updates_weekly">Ukentlig</string>
+    <string name="advanced_poster_updates_weekly_desc">Standard. Hver plakat sjekkes høyst én gang i uken; jevnest for store Hjem-sider.</string>
+    <string name="advanced_poster_updates_monthly">Månedlig</string>
+    <string name="advanced_poster_updates_monthly_desc">Færrest sjekker. Vurderingsplakater kan være opptil en måned gamle.</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">إخراج Dolby Vision</string>
+    <string name="dv_output_sub">التلفاز: يعالج تلفازك Dolby Vision. الجهاز بصيغة HDR10: يحوّله الجهاز إلى HDR10 لأجهزة التلفاز التي تعرض HDR10 بشكل أفضل.</string>
+    <string name="dv_output_tv_short">التلفاز</string>
+    <string name="dv_output_tv">التلفاز (موصى به)</string>
+    <string name="dv_output_tv_desc">يستقبل تلفازك Dolby Vision ويعالجه بنفسه. أفضل صورة على معظم أجهزة التلفاز الداعمة لـ Dolby Vision.</string>
+    <string name="dv_output_box">الجهاز بصيغة HDR10</string>
+    <string name="dv_output_box_desc">يحوّل هذا الجهاز Dolby Vision إلى HDR10 قبل إرساله. لأجهزة التلفاز التي تبدو فيها صورة Dolby Vision داكنة أو بألوان خاطئة.</string>
+    <string name="dv_output_box_warning">يبدأ من العنوان التالي. لا تتغير عناوين HDR10 وHLG وSDR.</string>
+</resources>

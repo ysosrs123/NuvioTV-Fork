@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Actualización de pósteres</string>
+    <string name="advanced_poster_updates_subtitle">Cada cuánto se comprueba si los pósteres de complementos y servicios de valoraciones tienen una imagen nueva.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Los pósteres guardados aparecen al instante; una imagen nueva los sustituye en segundo plano. TMDB y los grandes sitios de imágenes se conservan siempre al menos una semana.</string>
+    <string name="advanced_poster_updates_every_start">Cada vez que se inicia Arc</string>
+    <string name="advanced_poster_updates_every_start_desc">Imágenes nuevas poco después de cada inicio. Para pantallas de Inicio pequeñas y complementos que cambian sus imágenes.</string>
+    <string name="advanced_poster_updates_daily">Diariamente</string>
+    <string name="advanced_poster_updates_daily_desc">Cada póster se comprueba como máximo una vez al día.</string>
+    <string name="advanced_poster_updates_weekly">Semanalmente</string>
+    <string name="advanced_poster_updates_weekly_desc">Predeterminado. Cada póster se comprueba como máximo una vez por semana; lo más fluido para pantallas de Inicio grandes.</string>
+    <string name="advanced_poster_updates_monthly">Mensualmente</string>
+    <string name="advanced_poster_updates_monthly_desc">Menos comprobaciones. Los pósteres de valoraciones pueden tener hasta un mes de antigüedad.</string>
+</resources>

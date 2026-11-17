@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Plynulejší se službami spouštěčů</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Pokud jediná služba usnadnění přístupu v tomto zařízení patří spouštěči, např. Projectivy, Arc jí přestane popisovat svou obrazovku a posouvání je plynulejší. Čtečky obrazovky, např. TalkBack, vždy dostanou celou obrazovku.</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Flüssiger mit Launcher-Diensten</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Gehört der einzige Dienst für Bedienungshilfen auf diesem Gerät zu einem Launcher wie Projectivy, beschreibt Arc ihm seinen Bildschirm nicht mehr, damit das Scrollen flüssiger läuft. Screenreader wie TalkBack erhalten immer den vollen Bildschirm.</string>
+</resources>

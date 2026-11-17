@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Mere flydende med launcher-tjenester</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Når den eneste hjælpefunktionstjeneste på denne boks tilhører en launcher som Projectivy, holder Arc op med at beskrive sin skærm for den, så rulning bliver mere flydende. Skærmlæsere som TalkBack får altid hele skærmen.</string>
+</resources>

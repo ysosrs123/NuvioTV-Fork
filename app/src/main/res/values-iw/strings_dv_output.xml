@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">פלט Dolby Vision</string>
+    <string name="dv_output_sub">טלוויזיה: הטלוויזיה מטפלת ב-Dolby Vision. מכשיר, כ-HDR10: המכשיר ממיר ל-HDR10, לטלוויזיות שמציגות HDR10 טוב יותר.</string>
+    <string name="dv_output_tv_short">טלוויזיה</string>
+    <string name="dv_output_tv">טלוויזיה (מומלצת)</string>
+    <string name="dv_output_tv_desc">הטלוויזיה מקבלת Dolby Vision ומטפלת בו בעצמה. התמונה הטובה ביותר ברוב הטלוויזיות עם Dolby Vision.</string>
+    <string name="dv_output_box">מכשיר, כ-HDR10</string>
+    <string name="dv_output_box_desc">המכשיר הזה ממיר Dolby Vision ל-HDR10 לפני השליחה. לטלוויזיות שבהן Dolby Vision נראה כהה או שגוי.</string>
+    <string name="dv_output_box_warning">חל מהכותר הבא. כותרים ב-HDR10, HLG ו-SDR לא משתנים.</string>
+</resources>

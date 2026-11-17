@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Прямое декодирование (только MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Воспроизводит видео без дополнительного шага копирования, если это устройство позволяет. Плавнее и требует меньше памяти.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Как MPV передаёт декодированное видео на экран.</string>
+    <string name="mpv_direct_decode_automatic">Автоматически</string>
+    <string name="mpv_direct_decode_automatic_desc">Отправляет видео напрямую в графический чип, если это устройство позволяет, и проверяет, что это сработало. Если нет, Arc использует «Аппаратное декодирование» выше и запоминает это.</string>
+    <string name="mpv_direct_decode_always">Всегда</string>
+    <string name="mpv_direct_decode_always_desc">Всегда отправляет видео напрямую в графический чип. Если это устройство откажет, видео может не воспроизводиться в MPV.</string>
+    <string name="mpv_direct_decode_off">Выключено</string>
+    <string name="mpv_direct_decode_off_desc">Видео следует настройке «Аппаратное декодирование» выше, с шагом копирования. На некоторых устройствах возможны подтормаживания.</string>
+</resources>

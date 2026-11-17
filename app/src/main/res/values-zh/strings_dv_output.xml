@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision 输出</string>
+    <string name="dv_output_sub">电视：由电视处理 Dolby Vision。设备，转为 HDR10：由本设备转换为 HDR10，适合 HDR10 显示更好的电视。</string>
+    <string name="dv_output_tv_short">电视</string>
+    <string name="dv_output_tv">电视 (推荐)</string>
+    <string name="dv_output_tv_desc">电视接收 Dolby Vision 并自行处理。在大多数 Dolby Vision 电视上画面最佳。</string>
+    <string name="dv_output_box">设备，转为 HDR10</string>
+    <string name="dv_output_box_desc">本设备先将 Dolby Vision 转换为 HDR10 再发送。适合 Dolby Vision 画面偏暗或色彩不对的电视。</string>
+    <string name="dv_output_box_warning">从下一部影片开始生效。HDR10、HLG 和 SDR 影片不受影响。</string>
+</resources>

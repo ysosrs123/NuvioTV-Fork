@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision išvestis</string>
+    <string name="dv_output_sub">TV: Dolby Vision apdoroja televizorius. Įrenginys, kaip HDR10: paverčia į HDR10 televizoriams, kurie geriau rodo HDR10.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (rekomenduojama)</string>
+    <string name="dv_output_tv_desc">Televizorius gauna Dolby Vision ir pats jį apdoroja. Geriausias vaizdas daugumoje Dolby Vision televizorių.</string>
+    <string name="dv_output_box">Įrenginys, kaip HDR10</string>
+    <string name="dv_output_box_desc">Šis įrenginys prieš siųsdamas paverčia Dolby Vision į HDR10. Televizoriams, kuriuose Dolby Vision atrodo per tamsiai ar netinkamai.</string>
+    <string name="dv_output_box_warning">Įsigalioja nuo kito įrašo. HDR10, HLG ir SDR įrašai nekeičiami.</string>
+</resources>

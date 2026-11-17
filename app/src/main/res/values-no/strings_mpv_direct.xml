@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Direkte dekoding (kun MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Spiller av video uten det ekstra kopieringstrinnet når denne boksen tillater det. Jevnere, og bruker mindre minne.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Hvordan MPV gir den dekodede videoen videre til skjermen.</string>
+    <string name="mpv_direct_decode_automatic">Automatisk</string>
+    <string name="mpv_direct_decode_automatic_desc">Sender video rett til grafikkbrikken når denne boksen tillater det, og sjekker at det virket. Hvis ikke, bruker Arc Hardware decoding ovenfor og husker det.</string>
+    <string name="mpv_direct_decode_always">Alltid</string>
+    <string name="mpv_direct_decode_always_desc">Sender alltid video rett til grafikkbrikken. Hvis denne boksen avviser det, kan det hende videoer ikke spilles av i MPV.</string>
+    <string name="mpv_direct_decode_off">Av</string>
+    <string name="mpv_direct_decode_off_desc">Video følger Hardware decoding ovenfor, med kopieringstrinnet. Det kan hakke på noen bokser.</string>
+</resources>

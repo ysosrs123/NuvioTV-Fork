@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">Dekode langsung (Hanya MPV)</string>
+    <string name="mpv_direct_decode_subtitle">Memutar video tanpa langkah salin tambahan bila perangkat ini mengizinkan. Lebih lancar dan memakai lebih sedikit memori.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">Cara MPV menyerahkan video hasil dekode ke layar.</string>
+    <string name="mpv_direct_decode_automatic">Otomatis</string>
+    <string name="mpv_direct_decode_automatic_desc">Mengirim video langsung ke chip grafis bila perangkat ini mengizinkan, lalu memeriksa apakah berhasil. Jika tidak, Arc memakai Dekoding Hardware di atas dan mengingatnya.</string>
+    <string name="mpv_direct_decode_always">Selalu</string>
+    <string name="mpv_direct_decode_always_desc">Selalu mengirim video langsung ke chip grafis. Jika perangkat ini menolaknya, video mungkin tidak bisa diputar di MPV.</string>
+    <string name="mpv_direct_decode_off">Mati</string>
+    <string name="mpv_direct_decode_off_desc">Video mengikuti Dekoding Hardware di atas, dengan langkah salin. Ini bisa tersendat di beberapa perangkat.</string>
+</resources>

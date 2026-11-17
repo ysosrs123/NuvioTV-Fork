@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_quiet_for_launchers">Bolj tekoče s storitvami zaganjalnikov</string>
+    <string name="advanced_quiet_for_launchers_subtitle">Ko edina storitev za dostopnost v tej napravi pripada zaganjalniku, npr. Projectivy, ji Arc preneha opisovati svoj zaslon, zato je drsenje bolj tekoče. Bralniki zaslona, npr. TalkBack, vedno dobijo celoten zaslon.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mpv_direct_decode_title">פענוח ישיר (MPV בלבד)</string>
+    <string name="mpv_direct_decode_subtitle">מנגן וידאו בלי שלב ההעתקה הנוסף כשהמכשיר הזה מאפשר זאת. חלק יותר ודורש פחות זיכרון.</string>
+    <string name="mpv_direct_decode_dialog_subtitle">איך MPV מעביר את הווידאו המפוענח למסך.</string>
+    <string name="mpv_direct_decode_automatic">אוטומטי</string>
+    <string name="mpv_direct_decode_automatic_desc">שולח את הווידאו ישירות לשבב הגרפי כשהמכשיר הזה מאפשר זאת, ובודק שזה עבד. אם לא, Arc משתמש בהגדרת פענוח חומרה שלמעלה וזוכר זאת.</string>
+    <string name="mpv_direct_decode_always">תמיד</string>
+    <string name="mpv_direct_decode_always_desc">תמיד שולח את הווידאו ישירות לשבב הגרפי. אם המכשיר הזה מסרב, ייתכן שסרטונים לא יתנגנו ב-MPV.</string>
+    <string name="mpv_direct_decode_off">כבוי</string>
+    <string name="mpv_direct_decode_off_desc">הווידאו פועל לפי הגדרת פענוח חומרה שלמעלה, עם שלב ההעתקה. בחלק מהמכשירים זה עלול לגמגם.</string>
+</resources>

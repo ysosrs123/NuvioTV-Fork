@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_poster_updates">Affischuppdateringar</string>
+    <string name="advanced_poster_updates_subtitle">Hur ofta affischer från tillägg och betygstjänster kontrolleras efter en ny bild.</string>
+    <string name="advanced_poster_updates_dialog_subtitle">Sparade affischer visas direkt; en ny bild ersätter dem i bakgrunden. TMDB och de stora bildsajterna sparas alltid i minst en vecka.</string>
+    <string name="advanced_poster_updates_every_start">Varje gång Arc startar</string>
+    <string name="advanced_poster_updates_every_start_desc">Nya bilder strax efter varje start. För små Hem-sidor och tillägg som byter bilder.</string>
+    <string name="advanced_poster_updates_daily">Dagligen</string>
+    <string name="advanced_poster_updates_daily_desc">Varje affisch kontrolleras högst en gång per dag.</string>
+    <string name="advanced_poster_updates_weekly">Varje vecka</string>
+    <string name="advanced_poster_updates_weekly_desc">Standard. Varje affisch kontrolleras högst en gång per vecka; smidigast för stora Hem-sidor.</string>
+    <string name="advanced_poster_updates_monthly">Varje månad</string>
+    <string name="advanced_poster_updates_monthly_desc">Färst kontroller. Betygsaffischer kan vara upp till en månad gamla.</string>
+</resources>

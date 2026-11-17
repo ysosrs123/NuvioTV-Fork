@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Đầu ra Dolby Vision</string>
+    <string name="dv_output_sub">TV: TV của bạn xử lý Dolby Vision. Thiết bị, dạng HDR10: thiết bị chuyển sang HDR10, cho TV hiển thị HDR10 tốt hơn.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (khuyến nghị)</string>
+    <string name="dv_output_tv_desc">TV của bạn nhận Dolby Vision và tự xử lý. Hình ảnh tốt nhất trên hầu hết TV Dolby Vision.</string>
+    <string name="dv_output_box">Thiết bị, dạng HDR10</string>
+    <string name="dv_output_box_desc">Thiết bị này chuyển Dolby Vision sang HDR10 trước khi gửi. Dành cho TV hiển thị Dolby Vision bị tối hoặc sai màu.</string>
+    <string name="dv_output_box_warning">Áp dụng từ nội dung tiếp theo. Nội dung HDR10, HLG và SDR không bị thay đổi.</string>
+</resources>

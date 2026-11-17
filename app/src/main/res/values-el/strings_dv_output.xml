@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Έξοδος Dolby Vision</string>
+    <string name="dv_output_sub">TV: η τηλεόρασή σας χειρίζεται το Dolby Vision. Συσκευή, ως HDR10: το μετατρέπει σε HDR10, για τηλεοράσεις με καλύτερο HDR10.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (προτείνεται)</string>
+    <string name="dv_output_tv_desc">Η τηλεόρασή σας λαμβάνει το Dolby Vision και το χειρίζεται μόνη της. Η καλύτερη εικόνα στις περισσότερες τηλεοράσεις Dolby Vision.</string>
+    <string name="dv_output_box">Συσκευή, ως HDR10</string>
+    <string name="dv_output_box_desc">Αυτή η συσκευή μετατρέπει το Dolby Vision σε HDR10 πριν το στείλει. Για τηλεοράσεις όπου το Dolby Vision φαίνεται σκοτεινό ή λάθος.</string>
+    <string name="dv_output_box_warning">Ισχύει από τον επόμενο τίτλο. Οι τίτλοι HDR10, HLG και SDR δεν αλλάζουν.</string>
+</resources>

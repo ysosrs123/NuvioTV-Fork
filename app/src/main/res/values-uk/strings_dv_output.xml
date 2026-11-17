@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Вивід Dolby Vision</string>
+    <string name="dv_output_sub">ТВ: Dolby Vision обробляє телевізор. Пристрій, у HDR10: перетворює його на HDR10 для телевізорів, де HDR10 краще.</string>
+    <string name="dv_output_tv_short">ТВ</string>
+    <string name="dv_output_tv">ТВ (рекомендується)</string>
+    <string name="dv_output_tv_desc">Телевізор отримує Dolby Vision і обробляє його сам. Найкраще зображення на більшості телевізорів із Dolby Vision.</string>
+    <string name="dv_output_box">Пристрій, у HDR10</string>
+    <string name="dv_output_box_desc">Цей пристрій перетворює Dolby Vision на HDR10 перед надсиланням. Для телевізорів, де Dolby Vision виглядає темним або неправильним.</string>
+    <string name="dv_output_box_warning">Діє з наступного відео. Відео в HDR10, HLG і SDR не змінюються.</string>
+</resources>

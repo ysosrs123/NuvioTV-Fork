@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dv_output_title">Dolby Vision çıkışı</string>
+    <string name="dv_output_sub">TV: Dolby Vision\'ı TV\'niz işler. Cihaz, HDR10 olarak: cihaz onu HDR10\'a çevirir, HDR10\'u daha iyi gösteren TV\'ler için.</string>
+    <string name="dv_output_tv_short">TV</string>
+    <string name="dv_output_tv">TV (önerilen)</string>
+    <string name="dv_output_tv_desc">TV\'niz Dolby Vision\'ı alır ve kendisi işler. Çoğu Dolby Vision TV\'de en iyi görüntü.</string>
+    <string name="dv_output_box">Cihaz, HDR10 olarak</string>
+    <string name="dv_output_box_desc">Bu cihaz Dolby Vision\'ı göndermeden önce HDR10\'a çevirir. Dolby Vision\'ın karanlık veya hatalı göründüğü TV\'ler için.</string>
+    <string name="dv_output_box_warning">Sonraki içerikten itibaren geçerli. HDR10, HLG ve SDR içerikleri değişmez.</string>
+</resources>

@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Další epizoda zatím bez data</string>
     <string name="calendar_time_not_announced">Čas nebyl oznámen</string>
     <string name="calendar_streaming">Streamování</string>
+    <string name="calendar_time_about">Kolem %1$s</string>
     <string name="calendar_unknown_title">Bez názvu</string>
     <string name="calendar_label_new_show">Nový seriál</string>
     <string name="calendar_label_season_premiere">Premiéra sezóny</string>

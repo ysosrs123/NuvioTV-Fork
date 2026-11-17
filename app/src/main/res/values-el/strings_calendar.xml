@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Επόμενο επεισόδιο χωρίς ημερομηνία</string>
     <string name="calendar_time_not_announced">Η ώρα δεν έχει ανακοινωθεί</string>
     <string name="calendar_streaming">Streaming</string>
+    <string name="calendar_time_about">Περίπου %1$s</string>
     <string name="calendar_unknown_title">Χωρίς τίτλο</string>
     <string name="calendar_label_new_show">Νέα σειρά</string>
     <string name="calendar_label_season_premiere">Πρεμιέρα σεζόν</string>

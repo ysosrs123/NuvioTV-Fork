@@ -35,6 +35,7 @@
     <string name="calendar_show_next_unknown">Tập tiếp theo chưa có ngày</string>
     <string name="calendar_time_not_announced">Chưa công bố giờ</string>
     <string name="calendar_streaming">Phát trực tuyến</string>
+    <string name="calendar_time_about">Khoảng %1$s</string>
     <string name="calendar_unknown_title">Không có tiêu đề</string>
     <string name="calendar_label_new_show">Chương trình mới</string>
     <string name="calendar_label_season_premiere">Mở màn mùa</string>
