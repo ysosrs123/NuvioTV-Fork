@@ -114,6 +114,16 @@ class ScoutCatalogProviderTest {
     }
 
     @Test
+    fun `the Scout page offers no tile for a left out language`() {
+        val provider = provider()
+        val japanese = ScoutSlices.byId("language_ja")!!
+        assertTrue(provider.offered(japanese))
+        provider.addonsFor(fullPool, ScoutProfile(settings = ScoutSettings(leaveOutLanguages = setOf("ja"))))
+        assertFalse(provider.offered(japanese))
+        assertTrue(provider.offered(ScoutSlices.byId("language_ko")!!))
+    }
+
+    @Test
     fun `tile pages ask without the left out genres`() {
         val provider = provider()
         provider.addonsFor(fullPool, ScoutProfile(settings = ScoutSettings(leaveOutGenres = setOf(16))))

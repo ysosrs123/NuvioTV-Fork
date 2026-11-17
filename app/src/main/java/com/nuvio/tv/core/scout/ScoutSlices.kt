@@ -77,6 +77,12 @@ fun scoutAwardTitles(choice: ScoutAwardChoice, lists: Map<String, ScoutAwardList
     return ScoutAwardTitles(side({ it.wonMovies }, { it.nominatedMovies }), side({ it.wonSeries }, { it.nominatedSeries }))
 }
 
+/** Takes one title from each list in turn; a title already taken (one film winning several categories) is kept once. */
+fun <T, K> interleavedOnce(lists: List<List<T>>, key: (T) -> K): List<T> =
+    (0 until (lists.maxOfOrNull { it.size } ?: 0))
+        .flatMap { i -> lists.mapNotNull { it.getOrNull(i) } }
+        .distinctBy(key)
+
 /** The categories of an award page, each with the titles it shows. A category with too few titles is left out. */
 fun scoutAwardTabs(choice: ScoutAwardChoice, lists: Map<String, ScoutAwardLists>): List<ScoutAwardTabTitles> =
     choice.tabs.mapNotNull { tab ->

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -147,16 +148,22 @@ fun scoutRatingLabelRes(rating: ScoutRating): Int = rating.labelRes()
 @Composable
 fun ScoutPosterRateLine(
     title: com.nuvio.tv.domain.model.ScoutTitle,
+    addonBaseUrl: String? = null,
+    aliasId: String? = null,
     onDone: () -> Unit = {},
     viewModel: ScoutRatingViewModel = androidx.hilt.navigation.compose.hiltViewModel()
 ) {
     if (!com.nuvio.tv.domain.model.ScoutFeature.available) return
     val profile = viewModel.profile.collectAsStateWithLifecycle().value
     if (!profile.settings.ratingsEnabled) return
+    val saved by androidx.compose.runtime.produceState(title, title, addonBaseUrl) {
+        value = viewModel.savedTitle(title, addonBaseUrl)
+    }
+    val aliases = setOfNotNull(title.id, aliasId?.takeIf(String::isNotBlank)) - saved.id
     ScoutRateRow(
-        current = profile.rating(title.id),
+        current = profile.rating(saved.id) ?: aliases.firstNotNullOfOrNull(profile::rating),
         onRate = {
-            viewModel.setRating(title, it)
+            viewModel.setRatingMerging(saved, aliases, it)
             onDone()
         }
     )

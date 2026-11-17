@@ -152,7 +152,11 @@ internal fun ScoutWord(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.titleSmall,
-                    color = if (on || focused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary,
+                    color = when {
+                        !v2 && focused -> NuvioTheme.colors.OnSecondary
+                        on || focused -> NuvioTheme.colors.TextPrimary
+                        else -> NuvioTheme.colors.TextSecondary
+                    },
                     maxLines = 1
                 )
             }

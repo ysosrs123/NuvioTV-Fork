@@ -10,6 +10,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Test
 
@@ -18,10 +19,10 @@ class ScoutLimitFitTest {
     private val limit = ScoutLimit(gate, RatingLimit.entries.first())
 
     private fun gateAllows(allowed: (String) -> Boolean) {
-        coEvery { gate.keepFitting(any(), any<List<Any>>(), any()) } answers {
+        coEvery { gate.keepFitting(any(), any<List<Any>>(), any(), any()) } answers {
             @Suppress("UNCHECKED_CAST")
             val items = secondArg<List<Any>>()
-            val idOf = thirdArg<(Any) -> Pair<String, String>>()
+            val idOf = arg<(Any) -> Pair<String, String>>(3)
             items.filter { allowed(idOf(it).first) }
         }
     }
@@ -44,7 +45,7 @@ class ScoutLimitFitTest {
         val items = (1..60).map { "t$it" }
         val kept = scoutKeepFitting(limit, items, enough = 15) { it to "series" }
         assertEquals(items.take(20), kept)
-        coVerify(exactly = 1) { gate.keepFitting(any(), any<List<Any>>(), any()) }
+        coVerify(exactly = 1) { gate.keepFitting(any(), any<List<Any>>(), any(), any()) }
     }
 
     @Test
@@ -53,6 +54,52 @@ class ScoutLimitFitTest {
         val mix = ScoutMix("m", "Mix", listOf(ScoutMixShow("tt1", "One"), ScoutMixShow("tt2", "Two")))
         assertEquals(listOf("tt1"), mix.fittingLimit(limit).shows.map { it.id })
         assertSame(mix, mix.fittingLimit(null))
+    }
+
+    @Test
+    fun `the family check passes on that a title with no US rating may stay`() = runBlocking {
+        coEvery { gate.keepFitting(any(), any<List<Any>>(), true, any()) } answers { secondArg() }
+        val family = ScoutLimit(gate, RatingLimit.PG, keepUnknown = true)
+        assertEquals(listOf("a"), scoutKeepFitting(family, listOf("a")) { it to "series" })
+        coVerify { gate.keepFitting(RatingLimit.PG, any<List<Any>>(), true, any()) }
+    }
+
+    private fun gateRanks(ranks: Map<String, Int?>) {
+        coEvery { gate.keepFitting(any(), any<List<Any>>(), any(), any()) } answers {
+            val rule = firstArg<RatingLimit>()
+            val keepUnknown = thirdArg<Boolean>()
+            val idOf = arg<(Any) -> Pair<String, String>>(3)
+            secondArg<List<Any>>().filter { item ->
+                val rank = ranks[idOf(item).first]
+                if (rank == null) keepUnknown else rule.allows(rank)
+            }
+        }
+    }
+
+    @Test
+    fun `a family mix with no limit leaves out shows rated above TV-PG and keeps unrated ones`() = runBlocking {
+        gateRanks(mapOf("pg" to 2, "teen" to 3))
+        val check = scoutFamilyLimit(null, gate)
+        assertEquals(listOf("pg", "none"), scoutKeepFitting(check, listOf("pg", "teen", "none")) { it to "series" })
+    }
+
+    @Test
+    fun `a strict limit on a family mix is the only check, unrated shows stay out`() {
+        val young = ScoutLimit(gate, RatingLimit.YOUNG)
+        assertSame(young, scoutFamilyLimit(young, gate))
+        val teen = scoutFamilyLimit(ScoutLimit(gate, RatingLimit.TEEN), gate)!!
+        assertEquals(RatingLimit.PG, teen.limit)
+        assertFalse(teen.keepUnknown)
+        assertNull(scoutFamilyLimit(null, null))
+    }
+
+    @Test
+    fun `a kids family mix scans the whole list in one pass until enough fit both rules`() = runBlocking {
+        val items = (1..60).map { "t$it" }
+        gateRanks(items.associateWith { if (it.removePrefix("t").toInt() > 40) 1 else 2 })
+        val check = scoutFamilyLimit(ScoutLimit(gate, RatingLimit.YOUNG), gate)
+        val kept = scoutKeepFitting(check, items, enough = 17) { it to "series" }
+        assertEquals(items.drop(40), kept)
     }
 
     @Test

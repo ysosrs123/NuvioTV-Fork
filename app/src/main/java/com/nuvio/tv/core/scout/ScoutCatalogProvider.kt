@@ -294,8 +294,15 @@ class ScoutCatalogProvider @Inject constructor(
 
     private fun titlesOf(slice: ScoutSlice) = slice.award?.let { scoutAwardTitles(it, awardLists) }
 
-    /** An award with too few titles would be a nearly empty page, so it gets no tile. */
-    fun offered(slice: ScoutSlice): Boolean = titlesOf(slice)?.let { it.count >= SCOUT_AWARD_MIN_TITLES } ?: true
+    /**
+     * An award with too few titles would be a nearly empty page, so it gets no tile; nor does a tile whose language
+     * or genre is left out, such as Japanese with Japanese left out.
+     */
+    fun offered(slice: ScoutSlice, leftOut: ScoutLeaveOut? = null): Boolean =
+        !(leftOut ?: leaveOut).covers(slice) && (titlesOf(slice)?.let { it.count >= SCOUT_AWARD_MIN_TITLES } ?: true)
+
+    /** Leave out genres and languages as set now, for pages that must not wait for Home to rebuild. */
+    val leaveOutNow: Flow<ScoutLeaveOut> get() = store.profile.map { ScoutLeaveOut.of(it.settings) }.distinctUntilChanged()
 
     private fun awardSource(titleRes: Int, type: TmdbCollectionMediaType, ids: List<Int>) = ids.takeIf { it.isNotEmpty() }?.let {
         TmdbCollectionSource(
@@ -397,7 +404,7 @@ class ScoutCatalogProvider @Inject constructor(
             val result = resolver.resolve(source).first { it !is com.nuvio.tv.core.network.NetworkResult.Loading }
             (result as? com.nuvio.tv.core.network.NetworkResult.Success)?.data?.items.orEmpty()
         }
-        val all = (0 until (lists.maxOfOrNull { it.size } ?: 0)).flatMap { i -> lists.mapNotNull { it.getOrNull(i) } }
+        val all = interleavedOnce(lists) { it.id to it.apiType }
         val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(appContext)
         val mixed = ratingLimits?.activeLimit()?.let { limit -> ratingLimits.keepFitting(limit, all) { it.id to it.apiType } } ?: all
         return CatalogRow(

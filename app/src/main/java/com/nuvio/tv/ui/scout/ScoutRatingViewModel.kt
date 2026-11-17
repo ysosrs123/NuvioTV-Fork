@@ -25,7 +25,8 @@ class ScoutRatingViewModel @Inject constructor(
     private val store: ScoutStore,
     private val resolver: com.nuvio.tv.core.tmdb.TmdbCollectionSourceResolver,
     private val mixSession: com.nuvio.tv.core.player.ScoutMixSession = com.nuvio.tv.core.player.ScoutMixSession(),
-    private val trackers: TrackingProviderRegistry
+    private val trackers: TrackingProviderRegistry,
+    private val titleIdentity: com.nuvio.tv.ui.components.posteroptions.PosterTitleIdentity
 ) : ViewModel() {
     val profile: StateFlow<ScoutProfile> = store.profile
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ScoutProfile())
@@ -40,6 +41,30 @@ class ScoutRatingViewModel @Inject constructor(
 
     fun setRating(title: ScoutTitle, rating: ScoutRating?) {
         viewModelScope.launch { store.setRating(title, rating) }
+    }
+
+    /** The title a poster's thumb is saved under: the one its details page rates. */
+    suspend fun savedTitle(title: ScoutTitle, addonBaseUrl: String?): ScoutTitle {
+        val preview = com.nuvio.tv.domain.model.MetaPreview(
+            id = title.id,
+            type = com.nuvio.tv.domain.model.ContentType.fromString(title.type),
+            rawType = title.type,
+            name = title.name,
+            poster = title.poster,
+            posterShape = com.nuvio.tv.domain.model.PosterShape.POSTER,
+            background = null,
+            logo = null,
+            description = null,
+            releaseInfo = null,
+            imdbRating = null,
+            genres = emptyList()
+        )
+        val saved = runCatching { titleIdentity.resolve(preview, addonBaseUrl) }.getOrDefault(preview)
+        return if (saved.id == title.id && saved.apiType == title.type) title else title.copy(id = saved.id, type = saved.apiType)
+    }
+
+    fun setRatingMerging(saved: ScoutTitle, aliases: Set<String>, rating: ScoutRating?) {
+        viewModelScope.launch { store.setRating(saved, rating, aliases = aliases) }
     }
 
     fun updateSettings(transform: (ScoutSettings) -> ScoutSettings) {

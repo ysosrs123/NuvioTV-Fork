@@ -68,6 +68,19 @@ class RatingLimitGateTest {
     }
 
     @Test
+    fun `a list another country has rated keeps titles with no US rating`() = runBlocking {
+        val gate = gate(MutableStateFlow(0L), emptyMap())
+        val items = listOf("tt0000001", "tt0000002")
+        assertEquals(items, gate.keepFitting(RatingLimit.PG, items, keepUnknown = true) { it to "series" })
+    }
+
+    @Test
+    fun `by default titles with no US rating are dropped`() = runBlocking {
+        val gate = gate(MutableStateFlow(0L), emptyMap())
+        assertTrue(gate.keepFitting(RatingLimit.TEEN, listOf("tt0000001", "tt0000002")) { it to "series" }.isEmpty())
+    }
+
+    @Test
     fun `the gate is left out only when the app is not a Hilt app, never because a look-up failed`() {
         val plain = mockk<Context> { every { applicationContext } returns mockk<android.app.Application>() }
         assertNull(ratingLimitGateOrNull(plain))

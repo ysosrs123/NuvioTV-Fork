@@ -151,4 +151,22 @@ class ScoutSlicesTest {
         assertEquals(null, ScoutSlices.byId("length_90")!!.tv)
         assertEquals(null, ScoutSlices.byId("length_quick_episode")!!.movie)
     }
+
+    @Test
+    fun `a film that won several categories shows once in a mixed row`() {
+        val picture = listOf("anora", "oppenheimer", "eeaao")
+        val director = listOf("anora", "oppenheimer", "eeaao")
+        val actress = listOf("anora", "poor things", "eeaao")
+        assertEquals(
+            listOf("anora", "oppenheimer", "poor things", "eeaao"),
+            interleavedOnce(listOf(picture, director, actress)) { it }
+        )
+    }
+
+    @Test
+    fun `a film and a series with the same id both stay`() {
+        val films = listOf(1 to "movie", 2 to "movie")
+        val series = listOf(1 to "series")
+        assertEquals(listOf(1 to "movie", 1 to "series", 2 to "movie"), interleavedOnce(listOf(films, series)) { it })
+    }
 }

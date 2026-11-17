@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -265,7 +266,10 @@ fun ScoutMixOwnScreen(
                 }
             }
             Spacer(Modifier.height(NuvioTheme.spacing.xs))
+            val strip = rememberLazyListState()
+            LaunchedEffect(picks.map { it.key }) { strip.scrollToItem(0) }
             LazyRow(
+                state = strip,
                 contentPadding = PaddingValues(horizontal = ScoutFocusRoom),
                 horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
                 userScrollEnabled = false

@@ -7,6 +7,7 @@ import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.scout.SCOUT_PINNED_ART
 import com.nuvio.tv.core.scout.ScoutCatalogProvider
 import com.nuvio.tv.core.scout.ScoutEngine
+import com.nuvio.tv.core.scout.ScoutLeaveOut
 import com.nuvio.tv.core.scout.ScoutSlice
 import com.nuvio.tv.core.scout.ScoutSliceGroup
 import com.nuvio.tv.core.scout.ScoutSlices
@@ -51,8 +52,17 @@ class ScoutPickerViewModel @Inject constructor(
     /** The tile that was opened, so Back lands on it again. */
     var openedTile: String? = null
     private val gate = Semaphore(COVER_REQUESTS_AT_ONCE)
+    private var leftOut: ScoutLeaveOut? = null
+
     init {
-        show(ScoutSliceGroup.MOOD)
+        viewModelScope.launch {
+            provider.leaveOutNow.collect { now ->
+                if (now != leftOut) {
+                    leftOut = now
+                    show(_state.value.group)
+                }
+            }
+        }
     }
 
     fun select(group: ScoutSliceGroup) {
@@ -60,7 +70,8 @@ class ScoutPickerViewModel @Inject constructor(
     }
 
     private fun show(group: ScoutSliceGroup) {
-        val slices = ScoutSlices.inGroup(group).filter(provider::offered)
+        val slices = ScoutSlices.inGroup(group).filter { provider.offered(it, leftOut) }
+        if (openedTile != null && slices.none { it.id == openedTile }) openedTile = null
         _state.value = ScoutPickerState(group, slices.map(::tile))
         coverJob?.cancel()
         coverJob = viewModelScope.launch {

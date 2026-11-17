@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.scout
 
 import android.content.Context
+import com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull
 import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.core.util.withAppLocale
 import com.nuvio.tv.data.local.ScoutMixStore
@@ -29,7 +30,7 @@ internal const val SCOUT_READY_SHOWS = 15
 internal const val SCOUT_READY_FEWEST = 8
 internal const val SCOUT_READY_TOO_FEW = 4
 /** Raise when the way mixes are filled changes, so kept mixes are filled again at once rather than on Monday. */
-internal const val SCOUT_READY_RULES = 3
+internal const val SCOUT_READY_RULES = 4
 /** An occasion needs this many good episodes before its tile shows. */
 internal const val SCOUT_OCCASION_FEWEST = 15
 private const val PAGES = 3
@@ -158,15 +159,19 @@ class ScoutReadyMixBuilder @Inject constructor(
             if (strict.size >= SCOUT_READY_FEWEST || (kind.looseKeywords == null && kind.keywords == null)) strict
             else (strict + search(recipe, years, widen, votes, pages, today, strict = false)).distinctBy { it.key }
         }
-        val limit = scoutLimit(context)
-        val exclusions = runCatching { finder.exclusions() }.getOrNull()
-            ?: return scoutKeepFitting(limit, found, SCOUT_READY_SHOWS + LIMIT_SPARE) { "tmdb:${it.tmdbId}" to "series" }
+        val exclusions = runCatching { finder.exclusions() }.getOrNull() ?: return fitting(recipe, found)
         val seed = scoutReadyWeekSeed(today)
         val ordered = withContext(Dispatchers.Default) {
             val byTaste = scoutOrderPicks(found, finder.pool(), exclusions, seed)
             scoutBlendOrder(found, byTaste, recipe.blend, seed)
         }
-        return scoutKeepFitting(limit, ordered, SCOUT_READY_SHOWS + LIMIT_SPARE) { "tmdb:${it.tmdbId}" to "series" }
+        return fitting(recipe, ordered)
+    }
+
+    private suspend fun fitting(recipe: ScoutMixRecipe, picks: List<ScoutPick>): List<ScoutPick> {
+        val limit = scoutLimit(context)
+        val check = if (recipe.family) scoutFamilyLimit(limit, ratingLimitGateOrNull(context)) else limit
+        return scoutKeepFitting(check, picks, SCOUT_READY_SHOWS + LIMIT_SPARE) { "tmdb:${it.tmdbId}" to "series" }
     }
 
     /** The best known of each kind where any episode works on its own, most votes first. */

@@ -82,11 +82,23 @@ class ScoutStore @Inject constructor(
         }
     }
 
-    /** A thumb pressed in Arc. With sending on, the same write queues it for the trackers. */
-    suspend fun setRating(title: ScoutTitle, rating: ScoutRating?, now: Long = System.currentTimeMillis()) {
+    /**
+     * A thumb pressed in Arc. With sending on, the same write queues it for the trackers. [aliases]
+     * are other ids the same title was rated under before; their thumbs fold into this one.
+     */
+    suspend fun setRating(
+        title: ScoutTitle,
+        rating: ScoutRating?,
+        now: Long = System.currentTimeMillis(),
+        aliases: Set<String> = emptySet()
+    ) {
         if (title.id.isBlank()) return
         val key = stringPreferencesKey(RATING_PREFIX + title.id)
         factory.get(profileManager.activeProfileId.value, FEATURE).edit {
+            (aliases - title.id).filter(String::isNotBlank).forEach { alias ->
+                it.remove(stringPreferencesKey(RATING_PREFIX + alias))
+                it.remove(stringPreferencesKey(OUT_PREFIX + alias))
+            }
             if (rating == null) {
                 it.remove(key)
                 it[dismissed] = (it[dismissed] ?: emptySet()) + title.id

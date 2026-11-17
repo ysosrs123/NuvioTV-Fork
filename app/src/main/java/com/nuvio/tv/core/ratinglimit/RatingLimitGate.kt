@@ -124,14 +124,25 @@ class RatingLimitGate @Inject constructor(
         synchronized(unlocked) { unlockedTitles(profileId) += ratingTitleKey(contentId, contentType) }
     }
 
-    /** The items whose rating fits the limit; ratings are looked up a few at a time and kept. */
-    suspend fun <T> keepFitting(limit: RatingLimit, items: List<T>, idOf: (T) -> Pair<String, String>): List<T> {
+    /**
+     * The items whose rating fits the limit; ratings are looked up a few at a time and kept. With [keepUnknown] a
+     * title with no US rating stays, for lists another country's rating has already checked.
+     */
+    suspend fun <T> keepFitting(
+        limit: RatingLimit,
+        items: List<T>,
+        keepUnknown: Boolean = false,
+        idOf: (T) -> Pair<String, String>
+    ): List<T> {
         val gate = kotlinx.coroutines.sync.Semaphore(LOOKUPS_AT_ONCE)
         val fits = kotlinx.coroutines.coroutineScope {
             items.map { item ->
                 async {
                     val (id, type) = idOf(item)
-                    gate.withPermit { limit.allows(rating(id, type, save = false).rank) }
+                    gate.withPermit {
+                        val rank = rating(id, type, save = false).rank
+                        if (rank == null) keepUnknown else limit.allows(rank)
+                    }
                 }
             }.awaitAll()
         }
