@@ -57,13 +57,18 @@ internal fun modernHeroTextMaxHeight(screenHeight: Dp, rowsViewportHeight: Dp): 
     (screenHeight - rowsViewportHeight - NuvioSpacing.tokens.lg - NuvioSpacing.tokens.xs).coerceAtLeast(0.dp)
 internal const val MODERN_CONTINUE_WATCHING_ROW_KEY = "continue_watching"
 internal const val MODERN_UPCOMING_ROW_KEY = "upcoming_section"
+internal const val MODERN_LANDSCAPE_LOGO_SHADE_START = 0.58f
+internal val MODERN_LANDSCAPE_LOGO_SHADE_END = Color.Black.copy(alpha = 0.75f)
 internal val MODERN_LANDSCAPE_LOGO_GRADIENT = Brush.verticalGradient(
     colorStops = arrayOf(
         0.0f to Color.Transparent,
-        0.58f to Color.Transparent,
-        1.0f to Color.Black.copy(alpha = 0.75f)
+        MODERN_LANDSCAPE_LOGO_SHADE_START to Color.Transparent,
+        1.0f to MODERN_LANDSCAPE_LOGO_SHADE_END
     )
 )
+
+/** The same shade drawn only over the card's lower part, where it is not fully transparent. */
+internal fun modernLandscapeLogoShadeTop(height: Float): Float = height * MODERN_LANDSCAPE_LOGO_SHADE_START
 
 @Immutable
 data class HeroPreview(

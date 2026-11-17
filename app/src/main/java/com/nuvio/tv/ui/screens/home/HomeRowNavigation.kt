@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.home
 
+import androidx.compose.runtime.mutableStateOf
 import kotlin.math.abs
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -95,6 +96,55 @@ internal fun focusReportApplies(cardStillFocused: Boolean): Boolean = cardStillF
 /** Returns once the Home rows are not scrolling, at once when they already stand still. */
 internal suspend fun awaitRowsStill(scrolling: Flow<Boolean>) {
     scrolling.first { !it }
+}
+
+/**
+ * Waits for the rows to stand still, then says whether the card still has focus. Focus can move on in the frame the
+ * rows stop, before the card's job is cancelled.
+ */
+internal suspend fun stillFocusedOnceRowsStill(scrolling: Flow<Boolean>, cardStillFocused: () -> Boolean): Boolean {
+    awaitRowsStill(scrolling)
+    return cardStillFocused()
+}
+
+/**
+ * An Up or Down press counts as moving the rows from the key until its focus job ends. The rows can stand still for a
+ * few frames in between, and the card being left must not take that for the end of a move.
+ */
+internal class VerticalMoveInFlight {
+    private var latest = 0
+    val active = mutableStateOf(false)
+
+    fun begin(): Int {
+        latest += 1
+        active.value = true
+        return latest
+    }
+
+    /** Only the latest press ends it: a job cancelled by the next press finishes after that press began. */
+    fun end(token: Int) {
+        if (token == latest) active.value = false
+    }
+
+    fun clear() {
+        latest += 1
+        active.value = false
+    }
+}
+
+/** The rows count as moving while they scroll or while an Up or Down press is still on its way. */
+internal fun homeRowsMoving(listScrolling: Boolean, move: VerticalMoveInFlight): Boolean =
+    listScrolling || move.active.value
+
+/**
+ * How far the rows scroll to put the focused card's top [insetPx] below the top of the rows. Within [tolerancePx] the
+ * card counts as in place, and the first row is never pulled down past its start.
+ */
+internal fun verticalRowScrollDistance(offset: Float, insetPx: Float, canScrollBackward: Boolean, tolerancePx: Float = 1f): Float {
+    val distance = offset - insetPx
+    if (abs(distance) < tolerancePx) return 0f
+    if (distance < 0f && !canScrollBackward) return 0f
+    return distance
 }
 
 /** The card focus was sent to in a row, once a card of [focusedRowKey] has taken focus: done with as soon as any card in its row has it. */

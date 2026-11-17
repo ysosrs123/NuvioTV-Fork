@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.runtime.SideEffect
 import androidx.compose.animation.core.LinearEasing
 import android.os.SystemClock
@@ -26,6 +25,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import com.nuvio.tv.ui.components.OwnFocusEdge
+import com.nuvio.tv.ui.components.focusZIndex
 import com.nuvio.tv.ui.v2.components.nuvioV2Focus
 import com.nuvio.tv.ui.theme.NuvioTheme
 
@@ -70,6 +71,8 @@ import androidx.compose.foundation.lazy.layout.NestedPrefetchScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -79,14 +82,18 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.IntState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -111,6 +118,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
@@ -331,7 +339,8 @@ internal class RowFocusGlide {
     var showing by mutableStateOf(false)
         private set
     var ringSize by mutableStateOf(IntSize.Zero)
-    var ringShape by mutableStateOf<Shape>(RectangleShape)
+    // Null until the focused card reports its shape, so the ring never shows square corners first.
+    var ringShape by mutableStateOf<Shape?>(null)
     private var listState: LazyListState? = null
     private var focusedIndex = -1
     // The focused card by key too: its index changes when items are added or moved in front of it.
@@ -453,10 +462,69 @@ internal fun Modifier.rowFocusRing(focused: Boolean, shape: Shape): Modifier {
     return onSizeChanged(reportSize)
 }
 
+/**
+ * As [rowFocusRing], with focus never read in composition: the card reports its shape and size to the
+ * row when it gains focus. Where the card draws its own V2 edge, [rowOwnFocusEdge] gives it to the card.
+ */
+@Composable
+internal fun Modifier.rowFocusRing(focused: State<Boolean>, shape: Shape): Modifier {
+    val glide = LocalRowFocusGlide.current
+    if (glide == null || v2FocusDrawsOwnEdge()) return this
+    val report = remember(glide) { RowRingReport(glide) }
+    report.shape = shape
+    SideEffect { if (report.focused) glide.ringShape = shape }
+    return then(report.modifier)
+}
+
+/** The V2 edge a card draws on itself: outside a row, or when the look is the clear glass edge. */
+@Composable
+internal fun rowOwnFocusEdge(focused: State<Boolean>, shape: Shape): OwnFocusEdge? {
+    if (LocalV2Appearance.current == null) return null
+    if (LocalRowFocusGlide.current != null && !v2FocusDrawsOwnEdge()) return null
+    return remember(shape, focused) { OwnFocusEdge(shape, focused) }
+}
+
+private class RowRingReport(private val glide: RowFocusGlide) {
+    var shape: Shape? = null
+    var focused = false
+        private set
+    // The card's own coordinates: their size is the size it was last measured at, also in a reused slot.
+    private var coordinates: LayoutCoordinates? = null
+
+    val modifier: Modifier = Modifier
+        .onPlaced { coordinates = it }
+        .onSizeChanged { if (focused) glide.ringSize = it }
+        .onFocusChanged {
+            focused = it.isFocused
+            if (focused) {
+                shape?.let { ringShape -> glide.ringShape = ringShape }
+                coordinates?.takeIf { coords -> coords.isAttached }?.size
+                    ?.takeIf { size -> size != IntSize.Zero }
+                    ?.let { size -> glide.ringSize = size }
+            }
+        }
+}
+
+/**
+ * Runs [work] once each time the card gains focus ([eventId] goes up) while it stays focused, as a
+ * LaunchedEffect keyed on the event and [key]. Focus is read in this scope, not in the caller's.
+ */
+@Composable
+internal fun FocusedCardWork(
+    focused: State<Boolean>,
+    eventId: IntState,
+    key: Any?,
+    work: suspend CoroutineScope.() -> Unit
+) {
+    val id = eventId.intValue
+    if (focused.value && id != 0) LaunchedEffect(id, key) { work() }
+}
+
 /** The row's focus ring, over all of its cards. */
 @Composable
 private fun RowFocusRing(glide: RowFocusGlide, startPaddingPx: Int) {
     if (!glide.showing || v2FocusDrawsOwnEdge()) return
+    val shape = glide.ringShape ?: return
     Box(
         Modifier
             .offset { IntOffset(startPaddingPx + glide.ringPosition().roundToInt(), 0) }
@@ -466,7 +534,7 @@ private fun RowFocusRing(glide: RowFocusGlide, startPaddingPx: Int) {
                 val placeable = measurable.measure(Constraints.fixed(size.width, size.height))
                 layout(size.width, size.height) { if (size != IntSize.Zero) placeable.place(0, 0) }
             }
-            .nuvioV2Focus(focused = true, shape = glide.ringShape, stationary = true)
+            .nuvioV2Focus(focused = true, shape = shape, stationary = true)
     )
 }
 
@@ -492,15 +560,21 @@ private fun ModernContinueWatchingRowItem(
     val item = payload.item
     val onClick = remember(item) { { onContinueWatchingClick(item) } }
     val onLongPress = remember(item) { { onShowOptions(item) } }
-    var focusEventId by remember { mutableIntStateOf(0) }
-    var isCardFocused by remember { mutableStateOf(false) }
+    val focusEventIdState = remember { mutableIntStateOf(0) }
+    var focusEventId by focusEventIdState
+    val isCardFocusedState = remember { mutableStateOf(false) }
+    var isCardFocused by isCardFocusedState
     val latestOnFocused by rememberUpdatedState(onFocused)
+    val verticalRowsScrolling = LocalVerticalRowsScrolling.current
+    val bringIntoView = remember { BringIntoViewRequester() }
 
     // Only the focused card runs this, so cards scrolled past start no job of their own.
-    if (isCardFocused && focusEventId != 0) {
-        LaunchedEffect(focusEventId) {
-            if (!focusReportApplies(cardStillFocused = isCardFocused)) return@LaunchedEffect
-            latestOnFocused()
+    FocusedCardWork(isCardFocusedState, focusEventIdState, Unit) {
+        if (!focusReportApplies(cardStillFocused = isCardFocused)) return@FocusedCardWork
+        latestOnFocused()
+        delay(MODERN_HORIZONTAL_FOCUS_DEBOUNCE_MS)
+        if (stillFocusedOnceRowsStill(snapshotFlow { verticalRowsScrolling.value }) { isCardFocused }) {
+            bringIntoView.bringIntoView()
         }
     }
 
@@ -520,10 +594,11 @@ private fun ModernContinueWatchingRowItem(
         useEpisodeThumbnails = useEpisodeThumbnails,
         cardStyle = continueWatchingCardStyle,
         cornerRadius = continueWatchingCornerRadius,
-        isFocused = isCardFocused,
+        isFocused = isCardFocusedState,
         modifier = modifier
             // The focused card draws last, so its gliding ring passes over its neighbours.
-            .zIndex(if (isCardFocused) 1f else 0f)
+            .focusZIndex(isCardFocusedState, 1f)
+            .bringIntoViewRequester(bringIntoView)
             .focusRequester(requester)
             .onFocusChanged {
                 isCardFocused = it.isFocused
@@ -589,13 +664,16 @@ private fun ModernCatalogRowItem(
     val enrichedLogoUrl = enrichedMeta?.logo
     val enrichedBackdropUrl = enrichedMeta?.backdropUrl
 
-    var focusEventId by remember { mutableIntStateOf(0) }
-    var isCardFocused by remember { mutableStateOf(false) }
+    val focusEventIdState = remember { mutableIntStateOf(0) }
+    var focusEventId by focusEventIdState
+    val isCardFocusedState = remember { mutableStateOf(false) }
+    var isCardFocused by isCardFocusedState
     val latestOnFocused by rememberUpdatedState(onFocused)
     val latestOnItemFocus by rememberUpdatedState(onItemFocus)
     val latestOnPreloadAdjacentItem by rememberUpdatedState(onPreloadAdjacentItem)
     val latestOnCatalogSelectionFocused by rememberUpdatedState(onCatalogSelectionFocused)
     val verticalRowsScrolling = LocalVerticalRowsScrolling.current
+    val bringIntoView = remember { BringIntoViewRequester() }
 
     // Bump focusEventId to re-trigger selection reporting.
     //LaunchedEffect(focusKey, isTargetItem) {
@@ -605,17 +683,27 @@ private fun ModernCatalogRowItem(
     //}
 
     // Only the focused poster runs this, so posters scrolled past start no job of their own.
-    if (isCardFocused && focusEventId != 0) LaunchedEffect(focusEventId, focusKey) {
-        if (!focusReportApplies(cardStillFocused = isCardFocused)) return@LaunchedEffect
+    // Focus is read in that small scope, so a focus change does not recompose this item.
+    FocusedCardWork(isCardFocusedState, focusEventIdState, focusKey) {
+        if (!focusReportApplies(cardStillFocused = isCardFocused)) return@FocusedCardWork
         latestOnFocused()
 
         delay(MODERN_HORIZONTAL_FOCUS_DEBOUNCE_MS)
         // Started mid-slide this work costs the rows a few frames; the top area waits for them to stop anyway.
-        awaitRowsStill(snapshotFlow { verticalRowsScrolling.value })
+        if (!stillFocusedOnceRowsStill(snapshotFlow { verticalRowsScrolling.value }) { isCardFocused }) {
+            return@FocusedCardWork
+        }
+        // A fast burst or a restored scroll position can leave the focused row off screen. In place, this does nothing.
+        launch(start = CoroutineStart.UNDISPATCHED) { bringIntoView.bringIntoView() }
 
-        // Heavy "settled" work (trailers, enrichment) remains debounced.
+        // Heavy "settled" work (trailers, enrichment) remains debounced, one part per frame so no single frame takes it all.
+        // A frame wait resumes before recomposition cancels this job, so focus is checked again after each.
         item.metaPreview?.let { latestOnItemFocus(it) }
+        withFrameNanos { }
+        if (!isCardFocused) return@FocusedCardWork
         latestOnPreloadAdjacentItem()
+        withFrameNanos { }
+        if (!isCardFocused) return@FocusedCardWork
         when (payload) {
             is ModernPayload.Catalog -> {
                 if (!payload.itemId.startsWith("__placeholder_")) {
@@ -656,9 +744,9 @@ private fun ModernCatalogRowItem(
     }
 
     // Read by the one card that could play, so opening the menu does not rebuild every poster.
+    // The expanded state already holds only while the card is focused.
     val mayPlayTrailerInExpandedCard =
         effectiveAutoplayEnabled &&
-            isCardFocused &&
             trailerPlaybackTarget == FocusedPosterTrailerPlaybackTarget.EXPANDED_CARD &&
             effectiveBackdropExpanded
     val playTrailerInExpandedCard = mayPlayTrailerInExpandedCard && !LocalSidebarExpanded.current
@@ -695,7 +783,7 @@ private fun ModernCatalogRowItem(
         cardCornerRadius = posterCardCornerRadius,
         cardWidth = cardMetrics.width,
         cardHeight = cardMetrics.height,
-        modifier = modifier,
+        modifier = modifier.bringIntoViewRequester(bringIntoView),
         focusedPosterBackdropExpandEnabled = effectiveExpandEnabled,
         isBackdropExpanded = effectiveBackdropExpanded,
         playTrailerInExpandedCard = playTrailerInExpandedCard,
@@ -1344,7 +1432,9 @@ internal fun ModernRowSection(
                         {
                             val pending = if (pendingRowFocusKey.value == row.key) pendingRowFocusIndex.value ?: 0 else null
                             val hasFocus = rowHasFocus.value
-                            Log.d(ROW_FOCUS_TAG, "claim row=${row.key} index=$index pending=$pending rowHasFocus=$hasFocus")
+                            if (Log.isLoggable(ROW_FOCUS_TAG, Log.DEBUG)) {
+                                Log.d(ROW_FOCUS_TAG, "claim row=${row.key} index=$index pending=$pending rowHasFocus=$hasFocus")
+                            }
                             shouldClaimFocus(
                                 isTarget = true,
                                 cardFocused = false,
@@ -1624,7 +1714,8 @@ private fun ModernCarouselCard(
         landscape = useLandscapeOverlayTreatment
     )
     val effectiveBackdropUrl = frozenBackdropUrl.value?.takeIf { !it.isPlaceholder() }
-    var isFocused by remember { mutableStateOf(false) }
+    // Read only in placement, drawing, animations and small child scopes: a focus change does not recompose the card.
+    val focusedState = remember { mutableStateOf(false) }
     val payload = item.payload as? ModernPayload.CollectionFolder
     val isCollectionFolder = item.payload is ModernPayload.CollectionFolder
     val effectiveIgnoreLandscapePoster = alwaysShowLandscapeClearlogo
@@ -1654,12 +1745,7 @@ private fun ModernCarouselCard(
         else -> baseImageUrl
     }
     // GIF overlay: shown on top of the base image only when focused and loaded
-    val focusGifUrl = when {
-        payload == null -> null
-        !payload.focusGifEnabled -> null
-        isFocused -> payload.focusGifUrl
-        else -> null
-    }
+    val focusGifUrl = payload?.takeIf { it.focusGifEnabled }?.focusGifUrl?.takeIf { it.isNotBlank() }
     var cropFolderCover by remember(imageUrl) { mutableStateOf(false) }
     val imageContentScale = when (item.payload) {
         is ModernPayload.CollectionFolder -> if (cropFolderCover) ContentScale.Crop else ContentScale.FillBounds
@@ -1785,19 +1871,10 @@ private fun ModernCarouselCard(
     // card the drag passes over would break that illusion. The chrome reappears the
     // moment the user releases the key, when requestFocus lands focus on whichever
     // card is visible at the leading edge.
+    // Only the focused card shows the chrome, and the card reads the flag only while drawing it.
     val isFastScrollingState = LocalFastScrollActive.current
-    // Only the focused card shows the chrome, so only it follows the fast-scroll flag.
-    val isFastScrolling = isFocused && isFastScrollingState.value
-    val effectiveFocusedBorder = if (isFastScrolling && !isV2) {
-        remember(cardShape) {
-            Border(
-                border = BorderStroke(NuvioTheme.spacing.none, Color.Transparent),
-                shape = cardShape
-            )
-        }
-    } else {
-        focusedBorder
-    }
+    val focusChromeHidden = remember(isFastScrollingState) { { isFastScrollingState.value } }
+    val ownFocusEdge = rowOwnFocusEdge(focusedState, cardShape)
     val cardFocusGlow = when {
         isV2 -> Glow.None
         payload != null -> rememberArtworkBackedFocusGlow(
@@ -1807,7 +1884,6 @@ private fun ModernCarouselCard(
         )
         else -> Glow.None
     }
-    val effectiveFocusGlow = if (isFastScrolling) Glow.None else cardFocusGlow
     val titleStyle = remember(titleMedium) {
         titleMedium.copy(fontWeight = FontWeight.Medium)
     }
@@ -1817,15 +1893,16 @@ private fun ModernCarouselCard(
 
     Column(
         modifier = modifier
-            // The focused card draws last, so its gliding ring passes over its neighbours.
-            .zIndex(if (isFocused) 1f else 0f)
             .layout { measurable, constraints ->
                 // Width still remeasures the row, but does not rebuild the card, artwork
                 // requests, focus effects and trailer subtree on every animation frame.
                 val width = animatedCardWidthState.value.roundToPx()
                     .coerceIn(constraints.minWidth, constraints.maxWidth)
                 val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
-                layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+                layout(placeable.width, placeable.height) {
+                    // The focused card draws last, so its gliding ring passes over its neighbours.
+                    placeable.placeRelative(0, 0, zIndex = if (focusedState.value) 1f else 0f)
+                }
             }
             .recompositionHighlighter(),
         verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
@@ -1845,10 +1922,10 @@ private fun ModernCarouselCard(
                 .height(cardHeight)
                 // One description per card: the artwork, badges and overlays inside are not read one by one.
                 .semantics { contentDescription = cardDescription }
-                .rowFocusRing(isFocused, cardShape)
+                .rowFocusRing(focusedState, cardShape)
                 .focusRequester(focusRequester)
                 .onFocusChanged {
-                    isFocused = it.isFocused
+                    focusedState.value = it.isFocused
                     onFocusStateChanged(it.isFocused)
                     if (it.isFocused) {
                         onFocused()
@@ -1894,8 +1971,10 @@ private fun ModernCarouselCard(
             // need the solid backing (grey), matching the official app;
             // emoji / no-image cards likewise keep the solid colour.
             containerColor = if (hasImage && !isCollectionFolder) Color.Transparent else backgroundCardColor,
-            focusedBorder = if (isV2) Border.None else effectiveFocusedBorder,
-            focusedGlow = effectiveFocusGlow
+            focusedBorder = focusedBorder,
+            focusedGlow = cardFocusGlow,
+            focusChromeHidden = focusChromeHidden,
+            ownFocusEdge = ownFocusEdge
         ) {
             Box(
                 modifier = Modifier
@@ -1912,9 +1991,16 @@ private fun ModernCarouselCard(
                         Modifier
                             .fillMaxSize()
                             .drawWithCache {
+                                val top = modernLandscapeLogoShadeTop(size.height)
+                                val shade = Brush.verticalGradient(
+                                    colors = listOf(Color.Transparent, MODERN_LANDSCAPE_LOGO_SHADE_END),
+                                    startY = top,
+                                    endY = size.height
+                                )
+                                val shadeSize = Size(size.width, size.height - top)
                                 onDrawWithContent {
                                     drawContent()
-                                    drawRect(brush = MODERN_LANDSCAPE_LOGO_GRADIENT, size = size)
+                                    drawRect(brush = shade, topLeft = Offset(0f, top), size = shadeSize)
                                 }
                             }
                     } else {
@@ -1943,7 +2029,7 @@ private fun ModernCarouselCard(
                             requestHeightPx = requestHeightPx
                         )
                     } else if (hasImage && !posterFailed) {
-                        val watchedDim = watchedPosterDim(isWatched, isFocused)
+                        val watchedDim = watchedPosterDim(isWatched, focusedState)
                         WatchedPosterTint(watchedDim) { watchedFilter ->
                             AsyncImage(
                                 model = imageModel,
@@ -2005,29 +2091,8 @@ private fun ModernCarouselCard(
                     }
 
                     // GIF overlay: renders on top of image or emoji, visible only once loaded
-                    if (!focusGifUrl.isNullOrBlank()) {
-                        val gifModel = remember(context, focusGifUrl, requestWidthPx, requestHeightPx) {
-                            ImageRequest.Builder(context)
-                                .data(focusGifUrl)
-                                .memoryCacheKey("${focusGifUrl}_${requestWidthPx}x${requestHeightPx}")
-                                .size(width = requestWidthPx, height = requestHeightPx)
-                                .build()
-                        }
-                        var gifLoaded by remember(focusGifUrl) { mutableStateOf(false) }
-                        val gifAlpha by animateFloatAsState(
-                            targetValue = if (gifLoaded) 1f else 0f,
-                            animationSpec = tween(durationMillis = 200),
-                            label = "gifFadeIn"
-                        )
-                        AsyncImage(
-                            model = gifModel,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .graphicsLayer { alpha = gifAlpha },
-                            contentScale = imageContentScale,
-                            onSuccess = { gifLoaded = true }
-                        )
+                    if (focusGifUrl != null) {
+                        FocusGifOverlay(focusedState, focusGifUrl, requestWidthPx, requestHeightPx, imageContentScale)
                     }
 
                     if (shouldPlayTrailerInCard) {
@@ -2118,7 +2183,7 @@ private fun ModernCarouselCard(
 
                 if (isWatched && LocalDimWatchedPosters.current) {
                     WatchedPosterVeil(
-                        focused = isFocused,
+                        focused = focusedState,
                         modifier = Modifier
                             .fillMaxSize()
                             .zIndex(1.9f)
@@ -2167,6 +2232,41 @@ private fun ModernCarouselCard(
     }
 }
 
+
+/** A collection folder's GIF over its cover while the card is focused; focus is read in this scope only. */
+@Composable
+private fun FocusGifOverlay(
+    focused: State<Boolean>,
+    focusGifUrl: String,
+    requestWidthPx: Int,
+    requestHeightPx: Int,
+    contentScale: ContentScale
+) {
+    if (!focused.value) return
+    val context = LocalContext.current
+    val gifModel = remember(context, focusGifUrl, requestWidthPx, requestHeightPx) {
+        ImageRequest.Builder(context)
+            .data(focusGifUrl)
+            .memoryCacheKey("${focusGifUrl}_${requestWidthPx}x${requestHeightPx}")
+            .size(width = requestWidthPx, height = requestHeightPx)
+            .build()
+    }
+    var gifLoaded by remember(focusGifUrl) { mutableStateOf(false) }
+    val gifAlpha by animateFloatAsState(
+        targetValue = if (gifLoaded) 1f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "gifFadeIn"
+    )
+    AsyncImage(
+        model = gifModel,
+        contentDescription = null,
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer { alpha = gifAlpha },
+        contentScale = contentScale,
+        onSuccess = { gifLoaded = true }
+    )
+}
 
 /** A mix card's name and size, on a fade of the page colour that leaves the dealt posters clear. */
 @Composable

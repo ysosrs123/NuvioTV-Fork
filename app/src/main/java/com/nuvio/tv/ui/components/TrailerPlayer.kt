@@ -136,7 +136,8 @@ fun TrailerPlayer(
                     playbackGeneration++
                 }
             },
-            pause = { resolvedPool?.stop(playerOwner) }
+            pause = { resolvedPool?.stop(playerOwner) },
+            dispose = { resolvedPool?.stopWhenIdle(playerOwner) }
         )
         onDispose { binding.close() }
     }

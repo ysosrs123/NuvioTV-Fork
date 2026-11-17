@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -60,8 +60,8 @@ import kotlinx.coroutines.launch
  * background, clip) and handles D-pad select, focus and semantics the same way. The difference is
  * where the focus animation is read: tv-material reads its animated z-index during composition,
  * so every focus change recomposes the old and the new card on each frame of that animation.
- * Here the same spring is only read while placing the card, so a focus change recomposes this
- * composable once.
+ * Here focus and press are only read while placing and drawing the card, so a focus change
+ * recomposes nothing. [focusChromeHidden] hides the border and glow of a focused card while it is true.
  */
 @Composable
 fun LightweightCard(
@@ -71,19 +71,20 @@ fun LightweightCard(
     modifier: Modifier = Modifier,
     focusedBorder: Border = Border.None,
     focusedGlow: Glow = Glow.None,
+    focusChromeHidden: () -> Boolean = FocusChromeShown,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val focused by interactionSource.collectIsFocusedAsState()
-    val pressed by interactionSource.collectIsPressedAsState()
-    val border = if (focused || pressed) focusedBorder else Border.None
-    val glow = if (focused && !pressed) focusedGlow else Glow.None
-    val glowColor = if (glow.elevationColor == MaterialTheme.colorScheme.surface) {
-        MaterialTheme.colorScheme.surfaceColorAtElevation(glow.elevation)
+    val focusedState = interactionSource.collectIsFocusedAsState()
+    val pressedState = interactionSource.collectIsPressedAsState()
+    val chrome = remember(focusedState, pressedState) { CardFocusChrome(focusedState, pressedState) }
+    chrome.hidden = focusChromeHidden
+    val glowColor = if (focusedGlow.elevationColor == MaterialTheme.colorScheme.surface) {
+        MaterialTheme.colorScheme.surfaceColorAtElevation(focusedGlow.elevation)
     } else {
-        glow.elevationColor
+        focusedGlow.elevationColor
     }
-    val glowBlurRadiusPx = with(LocalDensity.current) { glow.elevation.toPx() }
+    val glowBlurRadiusPx = with(LocalDensity.current) { focusedGlow.elevation.toPx() }
     val coroutineScope = rememberCoroutineScope()
     val pressInteraction = remember { PressInteraction.Press(Offset.Zero) }
 
@@ -91,7 +92,7 @@ fun LightweightCard(
         Box(
             modifier = modifier
                 .onFocusChanged {
-                    if (!it.isFocused && pressed) {
+                    if (!it.isFocused && pressedState.value) {
                         coroutineScope.launch {
                             interactionSource.emit(PressInteraction.Release(pressInteraction))
                         }
@@ -124,7 +125,7 @@ fun LightweightCard(
                 .graphicsLayer(scaleX = 1f, scaleY = 1f)
                 .then(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        CardGlowElement(shape, glowBlurRadiusPx, glowColor)
+                        CardGlowElement(shape, glowBlurRadiusPx, glowColor, chrome)
                     } else {
                         Modifier
                     }
@@ -132,10 +133,10 @@ fun LightweightCard(
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(constraints)
                     layout(placeable.width, placeable.height) {
-                        placeable.place(0, 0, zIndex = if (focused) FOCUSED_Z_INDEX else NON_FOCUSED_Z_INDEX)
+                        placeable.place(0, 0, zIndex = if (focusedState.value) FOCUSED_Z_INDEX else NON_FOCUSED_Z_INDEX)
                     }
                 }
-                .then(if (border != Border.None) CardBorderElement(shape, border) else Modifier)
+                .then(if (focusedBorder != Border.None) CardBorderElement(shape, focusedBorder, chrome) else Modifier)
                 .background(containerColor, shape)
                 .graphicsLayer {
                     this.shape = shape
@@ -149,6 +150,22 @@ fun LightweightCard(
         }
     }
 }
+
+private val FocusChromeShown: () -> Boolean = { false }
+
+/** Which focus layers a card shows, read only while drawing. */
+internal class CardFocusChrome(private val focused: State<Boolean>, private val pressed: State<Boolean>) {
+    var hidden: () -> Boolean = FocusChromeShown
+
+    val showsBorder: Boolean get() = cardFocusBorderShows(focused.value, pressed.value, hidden())
+    val showsGlow: Boolean get() = cardFocusGlowShows(focused.value, pressed.value, hidden())
+}
+
+internal fun cardFocusBorderShows(focused: Boolean, pressed: Boolean, hidden: Boolean): Boolean =
+    (focused || pressed) && !(focused && hidden)
+
+internal fun cardFocusGlowShows(focused: Boolean, pressed: Boolean, hidden: Boolean): Boolean =
+    focused && !pressed && !hidden
 
 private const val FOCUSED_Z_INDEX = 0.5f
 private const val NON_FOCUSED_Z_INDEX = 0f
@@ -187,11 +204,13 @@ private class OutlineCache {
 private data class CardGlowElement(
     val shape: Shape,
     val glowBlurRadiusPx: Float,
-    val color: Color
+    val color: Color,
+    val chrome: CardFocusChrome
 ) : ModifierNodeElement<CardGlowNode>() {
-    override fun create() = CardGlowNode(shape, glowBlurRadiusPx, color)
+    override fun create() = CardGlowNode(shape, glowBlurRadiusPx, color, chrome)
 
     override fun update(node: CardGlowNode) {
+        node.chrome = chrome
         node.update(shape, glowBlurRadiusPx, color)
     }
 }
@@ -199,7 +218,8 @@ private data class CardGlowElement(
 private class CardGlowNode(
     private var shape: Shape,
     private var glowBlurRadiusPx: Float,
-    private var color: Color
+    private var color: Color,
+    var chrome: CardFocusChrome
 ) : DrawModifierNode, Modifier.Node() {
     private val paint = Paint()
     private val outlineCache = OutlineCache()
@@ -222,6 +242,10 @@ private class CardGlowNode(
     }
 
     override fun ContentDrawScope.draw() {
+        if (!chrome.showsGlow) {
+            drawContent()
+            return
+        }
         drawIntoCanvas { canvas ->
             when (val outline = outlineCache.get(shape, size, layoutDirection, this)) {
                 is Outline.Rectangle -> canvas.drawRect(outline.rect, paint)
@@ -243,25 +267,29 @@ private class CardGlowNode(
 
 private data class CardBorderElement(
     val shape: Shape,
-    val border: Border
+    val border: Border,
+    val chrome: CardFocusChrome
 ) : ModifierNodeElement<CardBorderNode>() {
-    override fun create() = CardBorderNode(shape, border)
+    override fun create() = CardBorderNode(shape, border, chrome)
 
     override fun update(node: CardBorderNode) {
         node.shape = shape
         node.border = border
+        node.chrome = chrome
     }
 }
 
 private class CardBorderNode(
     var shape: Shape,
-    var border: Border
+    var border: Border,
+    var chrome: CardFocusChrome
 ) : DrawModifierNode, Modifier.Node() {
     private val outlineCache = OutlineCache()
     private var stroke: Stroke? = null
 
     override fun ContentDrawScope.draw() {
         drawContent()
+        if (!chrome.showsBorder) return
         val borderShape = if (border.shape == DefaultBorderShape) shape else border.shape
         val strokeWidthPx = border.border.width.toPx()
         val outlineStroke = stroke?.takeIf { it.width == strokeWidthPx }

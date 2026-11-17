@@ -64,7 +64,6 @@ import coil3.request.CachePolicy
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import kotlin.math.abs
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
@@ -280,6 +279,8 @@ fun ModernHomeContent(
     val isVerticalRowsScrollingState = remember(verticalRowListState) {
         derivedStateOf { verticalRowListState.isScrollInProgress }
     }
+    val verticalMoveInFlight = remember { VerticalMoveInFlight() }
+    DisposableEffect(verticalMoveInFlight) { onDispose { verticalMoveInFlight.clear() } }
 
     val rowListStates = remember { mutableStateMapOf<String, LazyListState>() }
     val loadMoreRequestedTotals = remember { mutableStateMapOf<String, Int>() }
@@ -667,7 +668,7 @@ fun ModernHomeContent(
                 activeRowState.value?.heroSelectionAt(clampedActiveItemIndexState.value),
                 heroFocusSettleDelayMs.longValue
             )
-        }.settledModernHeroSelections(snapshotFlow { verticalRowListState.isScrollInProgress })
+        }.settledModernHeroSelections(snapshotFlow { homeRowsMoving(verticalRowListState.isScrollInProgress, verticalMoveInFlight) })
             .collect { selection ->
                 // Publish artwork/text and request enrichment from the same settled identity.
                 settledHeroSelection.value = selection
@@ -1047,13 +1048,8 @@ fun ModernHomeContent(
                 @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
                 object : BringIntoViewSpec {
                     override val scrollAnimationSpec: AnimationSpec<Float> = defaultBringIntoViewSpec.scrollAnimationSpec
-                    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
-                        val currentLeadingEdge = offset
-                        if (abs(currentLeadingEdge - topInsetPx) < 1f) return 0f
-                        val distance = currentLeadingEdge - topInsetPx
-                        if (distance < 0f && !verticalRowListState.canScrollBackward) return 0f
-                        return distance
-                    }
+                    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float =
+                        verticalRowScrollDistance(offset, topInsetPx, verticalRowListState.canScrollBackward)
                 }
             }
             val contentFocusRequester = LocalContentFocusRequester.current
@@ -1112,7 +1108,11 @@ fun ModernHomeContent(
             val shouldPlayTrailerLambda = remember { { shouldPlayCatalogHeroTrailerUpdated || shouldPlayCollectionHeroVideoUpdated } }
             val heroTrailerRenderedLambda = remember { { heroTrailerFirstFrameRenderedUpdated } }
 
-            val foregroundModifier = Modifier.sidebarPageContent()
+            val sidebarPageLayout = com.nuvio.tv.ui.v2.components.LocalSidebarPageLayout.current
+            val heroLayoutDirection = androidx.compose.ui.platform.LocalLayoutDirection.current
+            val foregroundModifier = remember(sidebarPageLayout, heroLayoutDirection) {
+                Modifier.sidebarPageContent(sidebarPageLayout, heroLayoutDirection)
+            }
             val heroMetadataModifier = remember(rowHorizontalPadding, rowsViewportHeight, screenHeight, foregroundModifier) {
                 foregroundModifier
                     .align(Alignment.BottomStart)
@@ -1285,6 +1285,7 @@ fun ModernHomeContent(
                 onExpansionInteractionNonceChange = onExpansionInteractionNonceChangeLambda,
                 blockLeftOnFirstExpandedItem = blockLeftOnFirstExpandedItem,
                 isVerticalRowsScrollingState = isVerticalRowsScrollingState,
+                verticalMoveInFlight = verticalMoveInFlight,
                 modifier = Modifier.sidebarPageContent()
                     .menuOpenRowEdge(rowHorizontalPadding)
                     .align(Alignment.BottomStart)
@@ -1413,8 +1414,8 @@ private fun ModernHomeHero(
     HeroTitleBlock(
         previewProvider = { heroSceneState().preview },
         enrichmentActive = { false },
-        preparedLogo = heroSceneState().preparedLogo,
-        logoPending = heroSceneState().logoPending,
+        preparedLogo = { heroSceneState().preparedLogo },
+        logoPending = { heroSceneState().logoPending },
         portraitMode = portraitMode,
         showImdbRatings = showImdbRatings,
         mdbListShowOnHero = mdbListShowOnHero,

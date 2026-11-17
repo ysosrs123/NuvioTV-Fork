@@ -67,6 +67,25 @@ class ModernHeroSelectionTest {
         assertEquals(listOf(ModernHeroSelection("catalogue", "a")), selected)
     }
 
+    @Test fun `a press on its way keeps the card being left out of the hero while the rows stand still`() = runTest {
+        val focus = MutableStateFlow(candidate("old", "old-row"))
+        val rowsMovingOrPressPending = MutableStateFlow(false)
+        val selected = mutableListOf<ModernHeroSelection>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            focus.settledModernHeroSelections(rowsMovingOrPressPending).collect { selected += it }
+        }
+        advanceTimeBy(300)
+        rowsMovingOrPressPending.value = true
+        advanceTimeBy(200)
+        runCurrent()
+        assertTrue(selected.isEmpty())
+        focus.value = candidate("new", "new-row")
+        rowsMovingOrPressPending.value = false
+        advanceTimeBy(450)
+        runCurrent()
+        assertEquals(listOf(ModernHeroSelection("new-row", "new")), selected)
+    }
+
     @Test fun `losing the focused item cancels pending hero work`() = runTest {
         val focus = MutableStateFlow(candidate("a"))
         val selected = mutableListOf<ModernHeroSelection>()

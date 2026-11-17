@@ -517,6 +517,12 @@ class HomeViewModel @Inject constructor(
     internal var lastSeriesWatchedItemKeys: Set<String> = emptySet()
     internal var libraryTabsObserverJob: Job? = null
     internal var activePosterListPickerInput: LibraryEntryInput? = null
+    internal var activePosterListPickerStatusKey: String? = null
+    internal val posterTitleIdentity by lazy {
+        com.nuvio.tv.ui.components.posteroptions.PosterTitleIdentity(metaRepository, tmdbService) {
+            layoutPreferenceDataStore.preferExternalMetaAddonDetail.value
+        }
+    }
     internal var pendingPosterListPickerChanges: ListMembershipChanges? = null
     @Volatile
     internal var externalMetaPrefetchEnabled: Boolean = false

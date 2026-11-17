@@ -1,6 +1,12 @@
 package com.nuvio.tv.ui.components
 
 import com.nuvio.tv.ui.screens.home.rowFocusRing
+import com.nuvio.tv.ui.screens.home.rowOwnFocusEdge
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -261,7 +267,8 @@ fun ContinueWatchingSection(
                 val stableOnLongPress = remember(progress, onLongPress) {
                     { if (onLongPress != null) onLongPress(progress) else { optionsItem = progress } }
                 }
-                var isCardFocused by remember { mutableStateOf(false) }
+                val isCardFocusedState = remember { mutableStateOf(false) }
+                var isCardFocused by isCardFocusedState
 
                     ContinueWatchingCard(
                     item = progress,
@@ -273,7 +280,7 @@ fun ContinueWatchingSection(
                     imageHeight = imageHeight,
                     cardStyle = cardStyle,
                     cornerRadius = cornerRadius,
-                    isFocused = isCardFocused,
+                    isFocused = isCardFocusedState,
                     posterTitleOverride = posterTitleOverride,
                     modifier = Modifier
                         .onFocusChanged { focusState ->
@@ -450,7 +457,7 @@ fun ContinueWatchingCard(
     blurUnwatchedEpisodes: Boolean = false,
     useEpisodeThumbnails: Boolean = true,
     cardStyle: ContinueWatchingCardStyle = ContinueWatchingCardStyle.CARD,
-    isFocused: Boolean = false,
+    isFocused: State<Boolean> = NotFocused,
     cornerRadius: Dp = NuvioTheme.radii.md,
     posterTitleOverride: TextStyle? = null
 ) {
@@ -596,12 +603,11 @@ fun ContinueWatchingCard(
     }
 
     // Hold the title still until focus has settled, then let it scroll if it overflows.
-    var titleMarqueeActive by remember(isFocused, titleText) { mutableStateOf(false) }
-    if (isFocused) {
-        LaunchedEffect(titleText) {
-            delay(TITLE_MARQUEE_DELAY_MS)
-            titleMarqueeActive = true
-        }
+    // Focus is read by the small scopes below, so a focus change does not recompose the card.
+    val titleSettled = remember(titleText) { mutableStateOf(false) }
+    TitleSettleWork(isFocused, titleText, titleSettled)
+    val titleMarqueeActive = remember(isFocused, titleSettled) {
+        derivedStateOf { isFocused.value && titleSettled.value }
     }
     val homeImagePriority = com.nuvio.tv.core.image.LocalHomePosterPriority.current
     val imageRequest = remember(effectiveImageModel, requestWidthPx, requestHeightPx, shouldBlur, homeImagePriority) {
@@ -650,7 +656,7 @@ fun ContinueWatchingCard(
         shape = cwCardShape,
         light = isV2,
         modifier = modifier
-            .then(if (isV2) Modifier.zIndex(if (isFocused) 0.5f else 0f) else Modifier)
+            .then(if (isV2) Modifier.focusZIndex(isFocused, 0.5f) else Modifier)
             .width(cardWidth)
             // One description per card: the artwork, texts and badge inside are not read one by one.
             .semantics { contentDescription = cardDescription }
@@ -690,7 +696,8 @@ fun ContinueWatchingCard(
         } else {
             val ring = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs)
             remember(ring, cwCardShape) { Border(border = ring, shape = cwCardShape) }
-        }
+        },
+        ownFocusEdge = rowOwnFocusEdge(isFocused, cwCardShape)
     ) {
         if (isWideStyle) {
             WideCardContent(
@@ -755,16 +762,6 @@ fun ContinueWatchingCard(
                         }
                     )
                     .clip(cwClipShape)
-                    .then(
-                        if (!isV2 && textBelowArtwork && isFocused) {
-                            Modifier.border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                shape = cwClipShape
-                            )
-                        } else {
-                            Modifier
-                        }
-                    )
             ) {
                 // Background image with size hints for efficient decoding
                 if (effectiveImageModel.isNullOrBlank()) {
@@ -896,6 +893,10 @@ fun ContinueWatchingCard(
                         }
                     }
                 }
+                // Drawn over everything in the artwork, as the focused artwork's own border was.
+                if (!isV2 && textBelowArtwork) {
+                    ArtworkFocusBorder(isFocused, cwClipShape, Modifier.matchParentSize().zIndex(ARTWORK_BORDER_Z))
+                }
             }
 
             if (textBelowArtwork) {
@@ -955,7 +956,7 @@ private fun WideCardContent(
     cardDepthStyle: CardDepthStyle,
     titleText: String,
     titleStyle: TextStyle,
-    titleMarqueeActive: Boolean,
+    titleMarqueeActive: State<Boolean>,
     episodeStr: String?,
     episodeTitle: String?,
     badgeText: String,
@@ -1029,9 +1030,9 @@ private fun WideCardContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(modifier = Modifier.weight(1f)) {
-                        FocusMarqueeText(
+                        CardMarqueeText(
                             text = titleText,
-                            focused = titleMarqueeActive,
+                            active = titleMarqueeActive,
                             style = titleStyle,
                             color = NuvioTheme.colors.TextPrimary
                         )
@@ -1065,9 +1066,9 @@ private fun WideCardContent(
                     overflow = TextOverflow.Ellipsis
                 )
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    FocusMarqueeText(
+                    CardMarqueeText(
                         text = episodeTitle.orEmpty(),
-                        focused = titleMarqueeActive,
+                        active = titleMarqueeActive,
                         style = MaterialTheme.typography.bodySmall,
                         color = NuvioTheme.extendedColors.textSecondary
                     )
@@ -1146,13 +1147,39 @@ private fun EpisodesLeftBadge(text: String, background: Color, modifier: Modifie
     }
 }
 
+private val NotFocused: State<Boolean> = mutableStateOf(false)
+private const val ARTWORK_BORDER_Z = 10f
+
+/** Sets [settled] once the card has held focus for the marquee delay; focus is read in this scope. */
+@Composable
+private fun TitleSettleWork(focused: State<Boolean>, titleText: String, settled: MutableState<Boolean>) {
+    if (!focused.value) return
+    DisposableEffect(titleText) { onDispose { settled.value = false } }
+    LaunchedEffect(titleText) {
+        delay(TITLE_MARQUEE_DELAY_MS)
+        settled.value = true
+    }
+}
+
+@Composable
+private fun CardMarqueeText(text: String, active: State<Boolean>, style: TextStyle, color: Color) {
+    FocusMarqueeText(text = text, focused = active.value, style = style, color = color)
+}
+
+/** The focus ring an Original poster card draws on its artwork, shown while [focused]. */
+@Composable
+private fun ArtworkFocusBorder(focused: State<Boolean>, shape: Shape, modifier: Modifier) {
+    if (!focused.value) return
+    Box(modifier.border(border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs), shape = shape))
+}
+
 // Title block drawn on top of the artwork by the landscape card.
 @Composable
 private fun ContinueWatchingCardText(
     episodeStr: String?,
     titleText: String,
     titleStyle: TextStyle,
-    titleMarqueeActive: Boolean,
+    titleMarqueeActive: State<Boolean>,
     episodeTitle: String?
 ) {
     if (episodeStr != null) {
@@ -1163,9 +1190,9 @@ private fun ContinueWatchingCardText(
         )
     }
 
-    FocusMarqueeText(
+    CardMarqueeText(
         text = titleText,
-        focused = titleMarqueeActive,
+        active = titleMarqueeActive,
         style = titleStyle,
         color = NuvioTheme.colors.TextPrimary
     )

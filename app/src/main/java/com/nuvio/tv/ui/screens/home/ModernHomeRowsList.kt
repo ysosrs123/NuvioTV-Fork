@@ -99,6 +99,7 @@ internal fun verticalPosterPrefetchInFlightLimit(scrolling: Boolean): Int =
 @Composable
 internal fun ModernHomeRowsList(
     isVerticalRowsScrollingState: State<Boolean>,
+    verticalMoveInFlight: VerticalMoveInFlight,
     carouselRows: StableList<HeroCarouselRow>,
     verticalRowListState: LazyListState,
     focusedItemByRow: StableRef<MutableMap<String, Int>>,
@@ -188,6 +189,9 @@ internal fun ModernHomeRowsList(
     var verticalFocusJob by remember { mutableStateOf<Job?>(null) }
     val stableItemFocusRequestersByRow = remember { mutableMapOf<String, StableRef<MutableMap<Int, FocusRequester>>>() }
     val verticalHeading = remember { VerticalHeading() }
+    val rowsMovingState = remember(isVerticalRowsScrollingState) {
+        derivedStateOf { homeRowsMoving(isVerticalRowsScrollingState.value, verticalMoveInFlight) }
+    }
     // Up and Down keep the column, in the item coordinates every Home row shares.
     fun focusedCardCenter(): Int? {
         val rowKey = activeRowKey.value ?: return null
@@ -237,10 +241,12 @@ internal fun ModernHomeRowsList(
         return (focusedItemByRowMap[row.key] ?: 0).coerceIn(0, last) to "remembered"
     }
     fun logColumnMove(from: String?, centerPx: Int?, to: String, index: Int, reason: String) {
+        if (!android.util.Log.isLoggable("HomeColumn", android.util.Log.DEBUG)) return
         android.util.Log.d("HomeColumn", "move from=$from col=${centerPx ?: "none"}px to=$to index=$index reason=$reason")
     }
 
     val density = LocalDensity.current
+    val rowRestInsetPx = with(density) { MODERN_ROW_HEADER_FOCUS_INSET.roundToPx() }
     val context = LocalContext.current
     val layoutDirection = LocalLayoutDirection.current
     val verticalPrefetchImageLoader = context.imageLoader
@@ -492,7 +498,7 @@ internal fun ModernHomeRowsList(
     CompositionLocalProvider(
         LocalBringIntoViewSpec provides verticalRowBringIntoViewSpec,
         LocalFastScrollActive provides isFastScrolling,
-        LocalVerticalRowsScrolling provides isVerticalRowsScrollingState
+        LocalVerticalRowsScrolling provides rowsMovingState
     ) {
         LazyColumn(
             state = verticalRowListState,
@@ -526,32 +532,38 @@ internal fun ModernHomeRowsList(
                             verticalHeading.rowKey = target.key
                             verticalHeading.column = column
                             verticalHeading.atMs = android.os.SystemClock.uptimeMillis()
+                            val moveToken = verticalMoveInFlight.begin()
                             verticalFocusJob?.cancel()
                             verticalFocusJob = navigationScope.launch {
-                                val attached = verticalRowListState.layoutInfo.visibleItemsInfo.any { it.index == targetIndex }
-                                if (!attached) {
-                                    verticalRowListState.scrollToItem(targetIndex)
-                                    withFrameNanos { }
+                                try {
+                                    val attached = verticalRowListState.layoutInfo.visibleItemsInfo.any { it.index == targetIndex }
+                                    if (!attached) {
+                                        // Glide to where the row rests rather than jumping it to the top edge.
+                                        verticalRowListState.animateScrollToItem(targetIndex, -rowRestInsetPx)
+                                        withFrameNanos { }
+                                    }
+                                    // Wait for the row to be laid out, so its own scroll decides which card is in the spot.
+                                    for (frame in 0 until 6) {
+                                        if (rowListStatesMap[target.key]?.layoutInfo?.visibleItemsInfo?.isNotEmpty() == true) break
+                                        withFrameNanos { }
+                                    }
+                                    val (saved, reason) = columnTarget(target, column)
+                                    // The row remembers this card too, so nothing that restores a row's card takes focus elsewhere.
+                                    focusedItemByRowMap[target.key] = saved
+                                    var itemTarget = stableItemFocusRequestersByRow[target.key]?.value?.get(saved)
+                                    if (itemTarget == null || rowListStatesMap[target.key]?.layoutInfo?.visibleItemsInfo?.none { it.index == saved } == true) {
+                                        // Off screen: bring it in under the column rather than to the row's start.
+                                        val start = column?.let { it - (rowCardWidthPx(target) ?: 0) / 2 }?.coerceAtLeast(0) ?: 0
+                                        rowListStatesMap[target.key]?.requestScrollToItem(saved, -start)
+                                        repeat(2) { withFrameNanos { } }
+                                        itemTarget = stableItemFocusRequestersByRow[target.key]?.value?.get(saved)
+                                    }
+                                    val moved = runCatching { itemTarget?.requestFocus() == true }.getOrDefault(false)
+                                    logColumnMove(fromRow, column, target.key, saved, if (moved) reason else "$reason+row")
+                                    if (!moved) runCatching { rowFocusRequesters[target.key]?.requestFocus() }
+                                } finally {
+                                    verticalMoveInFlight.end(moveToken)
                                 }
-                                // Wait for the row to be laid out, so its own scroll decides which card is in the spot.
-                                for (frame in 0 until 6) {
-                                    if (rowListStatesMap[target.key]?.layoutInfo?.visibleItemsInfo?.isNotEmpty() == true) break
-                                    withFrameNanos { }
-                                }
-                                val (saved, reason) = columnTarget(target, column)
-                                // The row remembers this card too, so nothing that restores a row's card takes focus elsewhere.
-                                focusedItemByRowMap[target.key] = saved
-                                var itemTarget = stableItemFocusRequestersByRow[target.key]?.value?.get(saved)
-                                if (itemTarget == null || rowListStatesMap[target.key]?.layoutInfo?.visibleItemsInfo?.none { it.index == saved } == true) {
-                                    // Off screen: bring it in under the column rather than to the row's start.
-                                    val start = column?.let { it - (rowCardWidthPx(target) ?: 0) / 2 }?.coerceAtLeast(0) ?: 0
-                                    rowListStatesMap[target.key]?.scrollToItem(saved, -start)
-                                    repeat(2) { withFrameNanos { } }
-                                    itemTarget = stableItemFocusRequestersByRow[target.key]?.value?.get(saved)
-                                }
-                                val moved = runCatching { itemTarget?.requestFocus() == true }.getOrDefault(false)
-                                logColumnMove(fromRow, column, target.key, saved, if (moved) reason else "$reason+row")
-                                if (!moved) runCatching { rowFocusRequesters[target.key]?.requestFocus() }
                             }
                             return@onPreviewKeyEvent true
                         }

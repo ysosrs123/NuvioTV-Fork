@@ -109,13 +109,14 @@ class PosterOptionsControllerWatchedTest {
         val watchedSeriesStateHolder = mockk<WatchedSeriesStateHolder>(relaxed = true) {
             every { fullyWatchedSeriesIds } returns MutableStateFlow(emptySet())
         }
+        val metaRepository = mockk<MetaRepository>(relaxed = true)
         return PosterOptionsController(
             appContext = mockk<Context>(relaxed = true),
             libraryRepository = libraryRepository,
             watchProgressRepository = watchProgressRepository,
-            metaRepository = mockk<MetaRepository>(relaxed = true),
+            metaRepository = metaRepository,
             watchedSeriesStateHolder = watchedSeriesStateHolder,
-            tmdbService = mockk<TmdbService>(relaxed = true)
+            titleIdentity = PosterTitleIdentity(metaRepository, mockk<TmdbService>(relaxed = true)) { false }
         )
     }
 

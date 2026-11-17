@@ -148,7 +148,8 @@ fun GridContinueWatchingSection(
                 val stableOnLongPress = remember(progress, onLongPress) {
                     { if (onLongPress != null) onLongPress(progress) else { optionsItem = progress } }
                 }
-                var isCardFocused by remember { mutableStateOf(false) }
+                val isCardFocusedState = remember { mutableStateOf(false) }
+                var isCardFocused by isCardFocusedState
 
                 ContinueWatchingCard(
                     item = progress,
@@ -158,7 +159,7 @@ fun GridContinueWatchingSection(
                     useEpisodeThumbnails = useEpisodeThumbnails,
                     cardStyle = cardStyle,
                     cornerRadius = cornerRadius,
-                    isFocused = isCardFocused,
+                    isFocused = isCardFocusedState,
                     modifier = focusModifier
                         .onFocusChanged { focusState ->
                             isCardFocused = focusState.isFocused

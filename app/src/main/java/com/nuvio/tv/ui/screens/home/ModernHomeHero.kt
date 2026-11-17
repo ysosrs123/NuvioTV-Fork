@@ -55,6 +55,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.structuralEqualityPolicy
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,7 +82,6 @@ import kotlinx.coroutines.delay
 import com.nuvio.tv.ui.components.ImdbRatingSourceLabel
 import com.nuvio.tv.ui.components.TrailerPlayer
 import com.nuvio.tv.ui.components.AutoScrollingText
-import androidx.compose.ui.res.stringResource
 
 private data class ModernHeroSecondaryMeta(
     val highlightText: String?,
@@ -387,8 +388,8 @@ internal fun ModernHeroGradientLayer(
 internal fun HeroTitleBlock(
     previewProvider: () -> HeroPreview?,
     enrichmentActive: () -> Boolean = { false },
-    preparedLogo: coil3.Image? = null,
-    logoPending: Boolean = false,
+    preparedLogo: () -> coil3.Image? = { null },
+    logoPending: () -> Boolean = { false },
     portraitMode: Boolean,
     descriptionMaxLines: Int,
     showImdbRatings: Boolean,
@@ -400,10 +401,16 @@ internal fun HeroTitleBlock(
 ) {
     // The providers read hero state that is rewritten on every focus move, often with an equal
     // value. Deriving the pair recomposes this block only when what it shows actually changes.
+    // An equal result keeps the instance the content already has, so the content can skip.
     val latestPreviewProvider = rememberUpdatedState(previewProvider)
     val latestEnrichmentActive = rememberUpdatedState(enrichmentActive)
     val displayInputs by remember {
-        derivedStateOf { latestPreviewProvider.value() to latestEnrichmentActive.value() }
+        derivedStateOf(structuralEqualityPolicy()) { latestPreviewProvider.value() to latestEnrichmentActive.value() }
+    }
+    val latestPreparedLogo = rememberUpdatedState(preparedLogo)
+    val latestLogoPending = rememberUpdatedState(logoPending)
+    val logo by remember {
+        derivedStateOf(structuralEqualityPolicy()) { latestPreparedLogo.value() to latestLogoPending.value() }
     }
     val currentPreview = displayInputs.first
     val isEnriching = displayInputs.second
@@ -411,7 +418,7 @@ internal fun HeroTitleBlock(
     var stablePreview by remember { mutableStateOf<HeroPreview?>(null) }
 
     LaunchedEffect(Unit) {
-        snapshotFlow { Pair(previewProvider(), enrichmentActive()) }.collect { (p, e) ->
+        snapshotFlow { Pair(latestPreviewProvider.value(), latestEnrichmentActive.value()) }.collect { (p, e) ->
             if (!e && p != null) {
                 if (stablePreview != p) stablePreview = p
             } else if (e) {
@@ -429,9 +436,9 @@ internal fun HeroTitleBlock(
         contentAlignment = Alignment.BottomStart
     ) {
         HeroTitleContent(
-            previewProvider = { displayPreview },
-            preparedLogo = preparedLogo,
-            logoPending = logoPending,
+            preview = displayPreview,
+            preparedLogo = logo.first,
+            logoPending = logo.second,
             portraitMode = portraitMode,
             descriptionMaxLines = descriptionMaxLines,
             showImdbRatings = showImdbRatings,
@@ -445,7 +452,7 @@ internal fun HeroTitleBlock(
 
 @Composable
 private fun HeroTitleContent(
-    previewProvider: () -> HeroPreview?,
+    preview: HeroPreview,
     preparedLogo: coil3.Image?,
     logoPending: Boolean,
     portraitMode: Boolean,
@@ -456,7 +463,6 @@ private fun HeroTitleContent(
     trailerPlaying: () -> Boolean = { false },
     descriptionAutoScrollEnabled: Boolean = false
 ) {
-    val preview = previewProvider() ?: return
     val highlighterEnabled = LocalRecompositionHighlighterEnabled.current
     val descriptionScale = if (portraitMode) 0.90f else 1f
     val titleScale = if (portraitMode) 0.92f else 1f
@@ -530,36 +536,21 @@ private fun HeroTitleContent(
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(titleSpacing)) {
-        val strStatusEnded = stringResource(if (preview.isSeries) R.string.series_status_ended else R.string.movie_status_ended)
-        val strStatusContinuing = stringResource(if (preview.isSeries) R.string.series_status_continuing else R.string.movie_status_continuing)
-        val strStatusCurrent = stringResource(if (preview.isSeries) R.string.series_status_current else R.string.movie_status_current)
-        val strStatusCancelled = stringResource(if (preview.isSeries) R.string.series_status_cancelled else R.string.movie_status_cancelled)
-        val strStatusReleased = stringResource(if (preview.isSeries) R.string.series_status_released else R.string.movie_status_released)
-        val strStatusPlanned = stringResource(if (preview.isSeries) R.string.series_status_planned else R.string.movie_status_planned)
-        val strStatusRumored = stringResource(if (preview.isSeries) R.string.series_status_rumored else R.string.movie_status_rumored)
-        val strStatusInProduction = stringResource(if (preview.isSeries) R.string.series_status_in_production else R.string.movie_status_in_production)
-        val strStatusPostProduction = stringResource(if (preview.isSeries) R.string.series_status_post_production else R.string.movie_status_post_production)
+        // Read with the configuration as a key, so a language change still shows the new words.
+        val configuration = LocalConfiguration.current
         val secondaryMeta = remember(
             preview.secondaryHighlightText,
             preview.ageRatingText,
             preview.statusText,
-            preview.languageText
+            preview.languageText,
+            preview.isSeries,
+            configuration,
+            context
         ) {
             ModernHeroSecondaryMeta(
                 highlightText = preview.secondaryHighlightText?.trim()?.takeIf { it.isNotBlank() },
                 ageRating = preview.ageRatingText?.trim()?.takeIf { it.isNotBlank() },
-                status = when (preview.statusText?.trim()?.lowercase()) {
-                    "ended" -> strStatusEnded.uppercase()
-                    "continuing", "returning series" -> strStatusContinuing.uppercase()
-                    "current" -> strStatusCurrent.uppercase()
-                    "cancelled", "canceled" -> strStatusCancelled.uppercase()
-                    "released" -> strStatusReleased.uppercase()
-                    "planned" -> strStatusPlanned.uppercase()
-                    "rumored" -> strStatusRumored.uppercase()
-                    "in production" -> strStatusInProduction.uppercase()
-                    "post production" -> strStatusPostProduction.uppercase()
-                    else -> preview.statusText?.trim()?.takeIf { it.isNotBlank() }?.uppercase()
-                },
+                status = heroStatusLabel(preview.statusText, preview.isSeries) { context.resources.getString(it) },
                 details = buildList {
                     preview.languageText?.trim()?.takeIf { it.isNotBlank() }?.let(::add)
                 }
@@ -779,6 +770,23 @@ private fun HeroTitleContent(
             )
         }
     }
+}
+
+/** The hero's status badge: a known status in the app's words for a series or a film, anything else as given. */
+internal fun heroStatusLabel(statusText: String?, isSeries: Boolean, string: (Int) -> String): String? {
+    val id = when (statusText?.trim()?.lowercase()) {
+        "ended" -> if (isSeries) R.string.series_status_ended else R.string.movie_status_ended
+        "continuing", "returning series" -> if (isSeries) R.string.series_status_continuing else R.string.movie_status_continuing
+        "current" -> if (isSeries) R.string.series_status_current else R.string.movie_status_current
+        "cancelled", "canceled" -> if (isSeries) R.string.series_status_cancelled else R.string.movie_status_cancelled
+        "released" -> if (isSeries) R.string.series_status_released else R.string.movie_status_released
+        "planned" -> if (isSeries) R.string.series_status_planned else R.string.movie_status_planned
+        "rumored" -> if (isSeries) R.string.series_status_rumored else R.string.movie_status_rumored
+        "in production" -> if (isSeries) R.string.series_status_in_production else R.string.movie_status_in_production
+        "post production" -> if (isSeries) R.string.series_status_post_production else R.string.movie_status_post_production
+        else -> return statusText?.trim()?.takeIf { it.isNotBlank() }?.uppercase()
+    }
+    return string(id).uppercase()
 }
 
 /** The shows behind a hero that stands for several, by their own logos. */

@@ -22,10 +22,28 @@ import kotlin.coroutines.coroutineContext
 internal fun rememberPreparedHeroScene(
     requested: State<ModernHeroSceneState>, width: Int, height: Int
 ): State<ModernHeroSceneState> {
+    val presentation = remember { mutableStateOf(HeroScenePresentation<ModernHeroSceneState>()) }
+    val latestRequested = rememberUpdatedState(requested)
+    // The jobs read the title, its logo and every presentation step in a scope of their own, so
+    // those steps do not rebuild the hero that calls this.
+    PreparedHeroSceneJobs(requested, width, height, presentation)
+    return remember { preparedHeroSceneState({ presentation.value.displayed }, { latestRequested.value }) }
+}
+
+@Composable
+private fun PreparedHeroSceneJobs(
+    requested: State<ModernHeroSceneState>, width: Int, height: Int,
+    presentationState: MutableState<HeroScenePresentation<ModernHeroSceneState>>
+) {
     val context = LocalContext.current
-    val latest by rememberUpdatedState(requested.value)
-    var presentation by remember { mutableStateOf(HeroScenePresentation<ModernHeroSceneState>()) }
-    val owner = latest.artwork.ownerKey
+    // The request changes with every trailer, mute and enrichment step. Composition reads only the
+    // title and its logo, so the other steps do not rebuild this; the jobs below read the rest.
+    val latestRequested = rememberUpdatedState(requested)
+    val latestState = remember { derivedStateOf { latestRequested.value.value } }
+    val latest by latestState
+    var presentation by presentationState
+    val ownerState = remember { derivedStateOf { latestRequested.value.value.artwork.ownerKey } }
+    val owner = ownerState.value
     val identity = owner?.let { "$it:${width}x$height" }
     SideEffect { HeroImageRequests.width = width; HeroImageRequests.height = height }
 
@@ -103,7 +121,8 @@ internal fun rememberPreparedHeroScene(
                 }
             }
     }
-    val logoUrl = latest.preview?.logo
+    val logoUrlState = remember { derivedStateOf { latestRequested.value.value.preview?.logo } }
+    val logoUrl = logoUrlState.value
     val displayed = presentation.displayed
     LaunchedEffect(identity, logoUrl, displayed?.preparedImage, displayed?.artwork?.ownerKey, displayed?.preparedLogo == null) {
         val ticket = presentation.ticket
@@ -122,8 +141,6 @@ internal fun rememberPreparedHeroScene(
             else scene.copy(preparedLogo = image, logoPending = false, preview = scene.preview?.copy(logo = logoUrl))
         }
     }
-    val latestRequested = rememberUpdatedState(requested)
-    return remember { preparedHeroSceneState({ presentation.displayed }, { latestRequested.value }) }
 }
 
 /**

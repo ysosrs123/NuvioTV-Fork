@@ -11,6 +11,8 @@ data class PosterOptionsState(
     val target: MetaPreview? = null,
     /** The original item ID before canonicalization (e.g. "tmdb:123"). Used for optimistic badge updates. */
     val originalItemId: String? = null,
+    /** The poster's own id and type when they differ from [target]'s; older menus saved under these. */
+    val libraryAlias: TitleAlias? = null,
     val addonBaseUrl: String = "",
     val isInLibrary: Boolean = false,
     val isWatched: Boolean = false,

@@ -51,6 +51,8 @@ fun PosterOptionsDialog(
     onManageLists: () -> Unit,
     onToggleWatched: () -> Unit,
     scoutTitle: com.nuvio.tv.domain.model.ScoutTitle? = null,
+    scoutAddonBaseUrl: String? = null,
+    scoutAliasId: String? = null,
     onMoreLike: (() -> Unit)? = null,
     mixItem: com.nuvio.tv.domain.model.MetaPreview? = null
 ) {
@@ -103,7 +105,9 @@ fun PosterOptionsDialog(
             PanelActionRow(label = stringResource(R.string.scout_pick_more_like), onClick = onMoreLike)
         }
 
-        scoutTitle?.let { com.nuvio.tv.ui.scout.ScoutPosterRateLine(it, onDone = onDismiss) }
+        scoutTitle?.let {
+            com.nuvio.tv.ui.scout.ScoutPosterRateLine(it, addonBaseUrl = scoutAddonBaseUrl, aliasId = scoutAliasId, onDone = onDismiss)
+        }
         mixItem?.let { com.nuvio.tv.ui.screens.scout.ScoutAddToMixLine(it, onDone = onDismiss) }
     }
 }
@@ -188,6 +192,8 @@ fun PosterOptionsHost(
             isWatched = state.isWatched,
             isWatchedPending = state.isWatchedPending,
             scoutTitle = com.nuvio.tv.domain.model.ScoutTitle(target.id, target.apiType, target.name, target.poster),
+            scoutAddonBaseUrl = state.addonBaseUrl.takeIf { it.isNotBlank() },
+            scoutAliasId = state.originalItemId,
             mixItem = target,
             onMoreLike = onMoreLike?.let { more -> { more(target); controller.dismiss() } },
             onDismiss = { controller.dismiss() },

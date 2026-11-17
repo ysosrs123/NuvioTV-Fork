@@ -131,7 +131,7 @@ class PosterOptionsControllerShowTest {
             watchProgressRepository = watchProgressRepository,
             metaRepository = metaRepository,
             watchedSeriesStateHolder = watchedSeriesStateHolder,
-            tmdbService = tmdbService
+            titleIdentity = PosterTitleIdentity(metaRepository, tmdbService) { false }
         )
         val bindScope = CoroutineScope(coroutineContext + Job())
         controller.bind(bindScope)
@@ -175,7 +175,7 @@ class PosterOptionsControllerShowTest {
             watchProgressRepository = watchProgressRepository,
             metaRepository = metaRepository,
             watchedSeriesStateHolder = watchedSeriesStateHolder,
-            tmdbService = tmdbService
+            titleIdentity = PosterTitleIdentity(metaRepository, tmdbService) { false }
         )
         val bindScope = CoroutineScope(coroutineContext + Job())
         controller.bind(bindScope)
@@ -211,7 +211,7 @@ class PosterOptionsControllerShowTest {
             watchProgressRepository = watchProgressRepository,
             metaRepository = metaRepository,
             watchedSeriesStateHolder = watchedSeriesStateHolder,
-            tmdbService = tmdbService
+            titleIdentity = PosterTitleIdentity(metaRepository, tmdbService) { false }
         )
     }
 

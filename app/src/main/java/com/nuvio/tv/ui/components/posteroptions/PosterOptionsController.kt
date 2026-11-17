@@ -2,7 +2,6 @@ package com.nuvio.tv.ui.components.posteroptions
 
 import android.util.Log
 import com.nuvio.tv.core.network.NetworkResult
-import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.core.tracking.TrackingMembershipRemovalConfirmation
 import com.nuvio.tv.core.tracking.mergeTrackingMembershipWithTabs
 import com.nuvio.tv.core.tracking.toggleTrackingMembershipSelection
@@ -47,12 +46,12 @@ class PosterOptionsController @Inject constructor(
     private val watchProgressRepository: WatchProgressRepository,
     private val metaRepository: MetaRepository,
     private val watchedSeriesStateHolder: WatchedSeriesStateHolder,
-    private val tmdbService: TmdbService
+    private val titleIdentity: PosterTitleIdentity
 ) {
     private val _state = MutableStateFlow(PosterOptionsState())
     val state: StateFlow<PosterOptionsState> = _state.asStateFlow()
 
-    private val targetFlow = MutableStateFlow<MetaPreview?>(null)
+    private val targetFlow = MutableStateFlow<Pair<MetaPreview, TitleAlias?>?>(null)
 
     private var scope: CoroutineScope? = null
     private var bound = false
@@ -103,21 +102,22 @@ class PosterOptionsController @Inject constructor(
             .launchIn(scope)
 
         targetFlow
-            .flatMapLatest { item ->
-                if (item == null) {
+            .flatMapLatest { shown ->
+                if (shown == null) {
                     flowOf(false to false)
                 } else {
+                    val (item, alias) = shown
                     val isSeries = item.apiType.equals("series", ignoreCase = true) ||
                         item.apiType.equals("tv", ignoreCase = true) ||
                         item.apiType.equals("anime", ignoreCase = true)
                     if (isSeries) {
                         combine(
-                            libraryRepository.isInLibrary(item.id, item.apiType),
+                            libraryRepository.isInLibraryOrAlias(item.id, item.apiType, alias),
                             watchedSeriesStateHolder.fullyWatchedSeriesIds
                         ) { lib, watchedIds -> lib to (item.id in watchedIds) }
                     } else {
                         combine(
-                            libraryRepository.isInLibrary(item.id, item.apiType),
+                            libraryRepository.isInLibraryOrAlias(item.id, item.apiType, alias),
                             watchProgressRepository.isWatched(item.id, videoId = item.imdbId)
                         ) { lib, watched -> lib to watched }
                     }
@@ -138,66 +138,69 @@ class PosterOptionsController @Inject constructor(
         val launchScope = this.scope ?: return
         showJob?.cancel()
         showJob = launchScope.launch {
-            val canonical = canonicalize(item)
-            val isSeries = canonical.apiType.equals("series", ignoreCase = true) ||
-                canonical.apiType.equals("tv", ignoreCase = true) ||
-                canonical.apiType.equals("anime", ignoreCase = true)
-            val initialIsInLibrary = runCatching {
-                libraryRepository.isInLibrary(canonical.id, canonical.apiType).first()
-            }.getOrDefault(false)
-            val initialIsWatched = if (isSeries) {
-                canonical.id in watchedSeriesStateHolder.fullyWatchedSeriesIds.value
-            } else {
-                runCatching {
-                    watchProgressRepository.isWatched(canonical.id, videoId = canonical.imdbId).first()
-                }.getOrDefault(false)
-            }
-
-            _state.update { current ->
-                current.copy(
-                    target = canonical,
-                    originalItemId = item.id,
-                    addonBaseUrl = addonBaseUrl.orEmpty(),
-                    isInLibrary = initialIsInLibrary,
-                    isWatched = initialIsWatched,
-                    isLibraryPending = false,
-                    isWatchedPending = false
-                )
-            }
-            targetFlow.value = canonical
+            publishTarget(item, shown = item, addonBaseUrl = addonBaseUrl)
+            val saved = titleIdentity.resolve(item, addonBaseUrl)
+            if (saved != item) publishTarget(saved, shown = item, addonBaseUrl = addonBaseUrl)
         }
     }
 
+    private suspend fun publishTarget(target: MetaPreview, shown: MetaPreview, addonBaseUrl: String?) {
+        val alias = TitleAlias.between(target, shown)
+        val isSeries = target.apiType.equals("series", ignoreCase = true) ||
+            target.apiType.equals("tv", ignoreCase = true) ||
+            target.apiType.equals("anime", ignoreCase = true)
+        val initialIsInLibrary = runCatching {
+            libraryRepository.isInLibraryOrAlias(target.id, target.apiType, alias).first()
+        }.getOrDefault(false)
+        val initialIsWatched = if (isSeries) {
+            target.id in watchedSeriesStateHolder.fullyWatchedSeriesIds.value
+        } else {
+            runCatching {
+                watchProgressRepository.isWatched(target.id, videoId = target.imdbId).first()
+            }.getOrDefault(false)
+        }
+
+        _state.update { current ->
+            current.copy(
+                target = target,
+                originalItemId = shown.id,
+                libraryAlias = alias,
+                addonBaseUrl = addonBaseUrl.orEmpty(),
+                isInLibrary = initialIsInLibrary,
+                isWatched = initialIsWatched,
+                isLibraryPending = false,
+                isWatchedPending = false
+            )
+        }
+        targetFlow.value = target to alias
+    }
+
     suspend fun isInLibrary(item: MetaPreview): Boolean {
-        val canonical = canonicalize(item)
-        return runCatching { libraryRepository.isInLibrary(canonical.id, canonical.apiType).first() }.getOrDefault(false)
+        val saved = titleIdentity.resolve(item, null)
+        return runCatching {
+            libraryRepository.isInLibraryOrAlias(saved.id, saved.apiType, TitleAlias.between(saved, item)).first()
+        }.getOrDefault(false)
     }
 
     /** For a page with its own library button. Returns whether the title is in the library afterwards. */
     suspend fun toggleLibraryOf(item: MetaPreview): Boolean {
-        val canonical = canonicalize(item)
-        runCatching { libraryRepository.toggleDefault(canonical.toLibraryEntryInput(null)) }
-            .onFailure { Log.w(TAG, "Failed to toggle library for ${canonical.id}: ${it.message}") }
-        return runCatching { libraryRepository.isInLibrary(canonical.id, canonical.apiType).first() }.getOrDefault(false)
-    }
-
-    private suspend fun canonicalize(item: MetaPreview): MetaPreview {
-        if (item.id.startsWith("tt", ignoreCase = false)) return item
-        val tmdbNumber = parseContentIds(item.id).tmdb ?: item.id.toIntOrNull() ?: return item
-        val mediaType = if (item.apiType.equals("series", ignoreCase = true) ||
-            item.apiType.equals("tv", ignoreCase = true) ||
-            item.apiType.equals("anime", ignoreCase = true)
-        ) "tv" else "movie"
-        val imdb = runCatching { tmdbService.tmdbToImdb(tmdbNumber, mediaType) }.getOrNull()
-        return if (!imdb.isNullOrBlank()) item.copy(id = imdb) else item
+        val saved = titleIdentity.resolve(item, null)
+        val alias = TitleAlias.between(saved, item)
+        runCatching { libraryRepository.toggleDefaultMerging(saved.toLibraryEntryInput(null), alias) }
+            .onFailure { Log.w(TAG, "Failed to toggle library for ${saved.id}: ${it.message}") }
+        return runCatching {
+            libraryRepository.isInLibraryOrAlias(saved.id, saved.apiType, alias).first()
+        }.getOrDefault(false)
     }
 
     private suspend fun ensureCanonical(): MetaPreview? {
-        val current = _state.value.target ?: return null
-        val canonical = canonicalize(current)
+        val state = _state.value
+        val current = state.target ?: return null
+        val canonical = titleIdentity.resolve(current, state.addonBaseUrl.takeIf { it.isNotBlank() })
         if (canonical.id != current.id && _state.value.target?.id == current.id) {
-            _state.update { it.copy(target = canonical) }
-            targetFlow.value = canonical
+            val alias = TitleAlias.between(canonical, current) ?: state.libraryAlias
+            _state.update { it.copy(target = canonical, libraryAlias = alias) }
+            targetFlow.value = canonical to alias
         }
         return canonical
     }
@@ -219,8 +222,9 @@ class PosterOptionsController @Inject constructor(
         scope.launch {
             val canonical = ensureCanonical() ?: return@launch
             runCatching {
-                libraryRepository.toggleDefault(
-                    canonical.toLibraryEntryInput(state.addonBaseUrl.takeIf { it.isNotBlank() })
+                libraryRepository.toggleDefaultMerging(
+                    canonical.toLibraryEntryInput(state.addonBaseUrl.takeIf { it.isNotBlank() }),
+                    _state.value.libraryAlias
                 )
             }.onFailure { error ->
                 Log.w(TAG, "Failed to toggle library for ${canonical.id}: ${error.message}")
@@ -256,7 +260,7 @@ class PosterOptionsController @Inject constructor(
         targetFlow.value = null
 
         scope.launch {
-            val canonical = canonicalize(item)
+            val canonical = titleIdentity.resolve(item, state.addonBaseUrl.takeIf { it.isNotBlank() })
             val input = canonical.toLibraryEntryInput(state.addonBaseUrl.takeIf { it.isNotBlank() })
             activeListPickerInput = input
             runCatching {
