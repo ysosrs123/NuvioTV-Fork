@@ -15,6 +15,8 @@ interface CalendarRemoteSources {
     suspend fun tvMazeShow(id: Int, now: Instant): CalendarShowDates
     /** Null when Trakt does not know the show or cannot be reached. */
     suspend fun traktNextEpisode(ids: CalendarIds): CalendarShowDates?
+    /** Null when Trakt does not know the season; throws when Trakt cannot be reached. */
+    suspend fun traktSeason(ids: CalendarIds, season: Int): CalendarShowDates? = null
     suspend fun tmdbFind(imdb: String, type: CalendarTitleType): Long?
     suspend fun tmdbShow(tmdbId: Long): CalendarShowDates
     suspend fun tmdbSeason(tmdbId: Long, season: Int): List<CalendarEntry>
@@ -33,6 +35,7 @@ class DefaultCalendarRemoteSources @Inject constructor(
     override suspend fun tvMazeLookup(ids: CalendarIds) = tvMaze.lookup(ids)
     override suspend fun tvMazeShow(id: Int, now: Instant) = tvMaze.show(id, now)
     override suspend fun traktNextEpisode(ids: CalendarIds) = trakt.nextEpisode(ids)
+    override suspend fun traktSeason(ids: CalendarIds, season: Int) = trakt.seasonEpisodes(ids, season)
     override suspend fun tmdbFind(imdb: String, type: CalendarTitleType) = tmdb.findTmdbId(imdb, type)
     override suspend fun tmdbShow(tmdbId: Long) = tmdb.show(tmdbId)
     override suspend fun tmdbSeason(tmdbId: Long, season: Int) = tmdb.season(tmdbId, season)
@@ -165,26 +168,36 @@ class CalendarTitleFetcher(
         return if (timed.isEmpty()) record.withoutSources(CalendarSource.TVDB) else record.withSource(CalendarSource.TVDB, timed, now)
     }
 
-    /** Trakt's answer is kept for [TRAKT_TIME_RECHECK]; a failed ask keeps the old one. */
+    /**
+     * Trakt's times for every coming episode TVmaze only dates, from the season lists (at most two seasons, no specials);
+     * Trakt's next episode when the season lists give the first one no time. Asked once per [TRAKT_TIME_RECHECK], also
+     * when Trakt had nothing; a failed ask keeps the old answer.
+     */
     private suspend fun withTraktTime(record: CalendarTitleRecord, now: Instant): CalendarTitleRecord {
-        val next = record.sources[CalendarSource.TVMAZE].orEmpty()
-            .filter { it.kind == CalendarEntryKind.EPISODE && !it.isOut(now) }
-            .minByOrNull { it.sortInstant() ?: Instant.MAX }
-        if (next == null || next.timeKnown || next.airDate == null) return record.withoutSources(CalendarSource.TRAKT_NEXT)
-        val askedAt = record.sourceFetchedAtMs[CalendarSource.TRAKT_NEXT]
-        val kept = record.sources[CalendarSource.TRAKT_NEXT].orEmpty()
-        if (askedAt != null && now.toEpochMilli() - askedAt < TRAKT_TIME_RECHECK.toMillis() && kept.any { it.slot == next.slot }) {
-            return record
-        }
-        val trakt = try {
-            remote.traktNextEpisode(record.ids)
+        val dateOnly = record.sources[CalendarSource.TVMAZE].orEmpty()
+            .filter { it.kind == CalendarEntryKind.EPISODE && !it.isOut(now) && !it.timeKnown && it.airDate != null }
+            .sortedBy { it.sortInstant() ?: Instant.MAX }
+        if (dateOnly.isEmpty()) return record.withoutSources(CalendarSource.TRAKT_NEXT)
+        val askedAt = record.traktTimesAskedAtMs ?: record.sourceFetchedAtMs[CalendarSource.TRAKT_NEXT]
+        if (askedAt != null && now.toEpochMilli() - askedAt < TRAKT_TIME_RECHECK.toMillis()) return record
+        val first = dateOnly.first()
+        val timed = try {
+            val seasons = dateOnly.mapNotNull { it.season }.filter { it > 0 }.distinct().take(TRAKT_SEASONS_PER_ASK)
+            val listed = seasons.mapNotNull { remote.traktSeason(record.ids, it) }.flatMap { it.entries }
+            val fromSeasons = dateOnly.mapNotNull { calendarTraktTimeFor(it, listed) }
+            if (fromSeasons.any { it.slot == first.slot }) {
+                fromSeasons
+            } else {
+                val next = remote.traktNextEpisode(record.ids)?.entries.orEmpty()
+                listOfNotNull(calendarTraktTimeFor(first, next)) + fromSeasons
+            }
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Exception) {
             return record
         }
-        val timed = trakt?.entries?.let { calendarTraktTimeFor(next, it) } ?: return record.withoutSources(CalendarSource.TRAKT_NEXT)
-        return record.withSource(CalendarSource.TRAKT_NEXT, listOf(timed), now)
+        val asked = record.copy(traktTimesAskedAtMs = now.toEpochMilli())
+        return if (timed.isEmpty()) asked.withoutSources(CalendarSource.TRAKT_NEXT) else asked.withSource(CalendarSource.TRAKT_NEXT, timed, now)
     }
 
     /** One TMDB season call marks the finales of the season with the next release, when that is within 60 days. */
@@ -251,6 +264,7 @@ class CalendarTitleFetcher(
         val NOT_FOUND_RECHECK: Duration = Duration.ofDays(30)
         val FINALE_LOOKAHEAD: Duration = Duration.ofDays(60)
         val TRAKT_TIME_RECHECK: Duration = Duration.ofHours(6)
+        const val TRAKT_SEASONS_PER_ASK = 2
         val TVMAZE_FOR_TRAKT_RECHECK: Duration = Duration.ofHours(24)
     }
 }

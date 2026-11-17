@@ -11,6 +11,7 @@ import com.nuvio.tv.core.calendar.CalendarShowStatus
 import com.nuvio.tv.core.calendar.CalendarTitleRecord
 import com.nuvio.tv.core.calendar.CalendarTitleType
 import com.nuvio.tv.core.calendar.CalendarWatchedIndex
+import com.nuvio.tv.core.calendar.calendarUsualStreamingTime
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -50,7 +51,9 @@ data class CalendarRow(
     val logo: String? = null,
     val rating: Double? = null,
     val genre: String? = null,
-    val streaming: Boolean = false
+    val streaming: Boolean = false,
+    /** The service's usual release hour when no source gives one; shown as an estimate. */
+    val usualTime: LocalTime? = null
 ) {
     val dimmed: Boolean get() = status == CalendarRowStatus.WATCHED
     val isFilm: Boolean get() = type == CalendarTitleType.MOVIE
@@ -133,9 +136,14 @@ fun calendarRow(
     now: Instant,
     today: LocalDate,
     bells: Set<String>,
-    watched: CalendarWatchedIndex?
+    watched: CalendarWatchedIndex?,
+    zone: ZoneId? = null
 ): CalendarRow {
     val kind = rowKind(title, entry)
+    val airDay = entry?.takeIf { !it.timeKnown }?.airDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    val usualTime = if (time == null && kind == CalendarRowKind.EPISODE && title.tvmazeStreaming &&
+        airDay != null && airDay == date && zone != null
+    ) calendarUsualStreamingTime(title.network, airDay, zone) else null
     return CalendarRow(
         key = "${title.key}|${entry?.slot ?: "next"}",
         titleKey = title.key,
@@ -158,7 +166,8 @@ fun calendarRow(
         logo = title.logo?.takeIf(String::isNotBlank),
         rating = title.rating,
         genre = title.genre,
-        streaming = title.tvmazeStreaming
+        streaming = title.tvmazeStreaming,
+        usualTime = usualTime
     )
 }
 
@@ -179,7 +188,7 @@ fun buildCalendarList(
         if (section.items.isEmpty()) return@forEach
         entries += CalendarHeaderEntry(section.kind, section.date)
         section.items.forEach { item ->
-            val base = calendarRow(item.title, item.entry, item.date, item.time, section.kind, now, today, bells, watched)
+            val base = calendarRow(item.title, item.entry, item.date, item.time, section.kind, now, today, bells, watched, zone)
             var key = base.key
             var n = 1
             while (!used.add(key)) key = "${base.key}#${n++}"
@@ -207,7 +216,7 @@ fun buildCalendarDays(
             val date = entry.localDate(zone) ?: return@forEach
             val time = entry.airInstantMs?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalTime() }
             byDay.getOrPut(date) { mutableListOf() } +=
-                calendarRow(title, entry, date, time, CalendarSectionKind.DAY, now, today, bells, watched)
+                calendarRow(title, entry, date, time, CalendarSectionKind.DAY, now, today, bells, watched, zone)
         }
     }
     return byDay.mapValues { (_, rows) ->

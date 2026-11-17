@@ -18,6 +18,7 @@ class CalendarTitleFetcherTest {
         var lookup: TvMazeLookup = TvMazeLookup.NotFound
         var tvMazeShow = CalendarShowDates()
         var traktNext: CalendarShowDates? = null
+        var traktSeasons = emptyMap<Int, CalendarShowDates>()
         var tmdbId: Long? = null
         var tmdbShow = CalendarShowDates()
         var tmdbSeason = emptyList<CalendarEntry>()
@@ -35,6 +36,7 @@ class CalendarTitleFetcherTest {
         override suspend fun tvMazeLookup(ids: CalendarIds) = lookup.also { call("lookup") }
         override suspend fun tvMazeShow(id: Int, now: Instant) = tvMazeShow.also { call("tvmaze:$id") }
         override suspend fun traktNextEpisode(ids: CalendarIds) = traktNext.also { call("trakt") }
+        override suspend fun traktSeason(ids: CalendarIds, season: Int) = traktSeasons[season]?.also { call("traktSeason:$season") }
         override suspend fun tmdbFind(imdb: String, type: CalendarTitleType) = tmdbId.also { call("find:$imdb") }
         override suspend fun tmdbShow(tmdbId: Long) = tmdbShow.also { call("tmdbShow:$tmdbId") }
         override suspend fun tmdbSeason(tmdbId: Long, season: Int) = tmdbSeason.also { call("tmdbSeason:$tmdbId/$season") }
@@ -281,6 +283,72 @@ class CalendarTitleFetcherTest {
         val entry = outcome.record.entries.single()
         assertEquals(traktAt, entry.airInstantMs)
         assertEquals("S1E4", entry.slot)
+    }
+
+    @Test fun everyDateOnlyEpisodeTakesItsTimeFromTraktsSeasonList() = runBlocking {
+        val remote = FakeRemote().apply {
+            tvMazeShow = CalendarShowDates(
+                entries = (4..6).map { n ->
+                    CalendarEntry(season = 1, episode = n, airDate = "2026-10-%02d".format(9 + (n - 4) * 7), source = CalendarSource.TVMAZE)
+                }
+            )
+            traktSeasons = mapOf(1 to CalendarShowDates(entries = (4..6).map { n ->
+                CalendarEntry(
+                    season = 1,
+                    episode = n,
+                    airInstantMs = Instant.parse("2026-10-%02dT08:00:00Z".format(9 + (n - 4) * 7)).toEpochMilli(),
+                    source = CalendarSource.TRAKT_NEXT
+                )
+            }))
+            traktNext = CalendarShowDates(entries = listOf(CalendarEntry(season = 1, episode = 4, airInstantMs = traktAt, source = CalendarSource.TRAKT_NEXT)))
+        }
+        val outcome = CalendarTitleFetcher(remote, "AU").refresh(show.copy(tvmazeId = 9), emptyMap(), false, now)
+        assertEquals(listOf("tvmaze:9", "traktSeason:1"), remote.calls)
+        assertEquals(
+            listOf("2026-10-09T08:00:00Z", "2026-10-16T08:00:00Z", "2026-10-23T08:00:00Z"),
+            outcome.record.entries.map { Instant.ofEpochMilli(it.airInstantMs!!).toString() }
+        )
+    }
+
+    @Test fun nextEpisodeIsAskedWhenTheSeasonListGivesTheFirstEpisodeNoTime() = runBlocking {
+        val remote = FakeRemote().apply {
+            tvMazeShow = dateOnlyShow
+            traktSeasons = mapOf(1 to CalendarShowDates(entries = listOf(
+                CalendarEntry(season = 1, episode = 4, airInstantMs = Instant.parse("2026-10-20T08:00:00Z").toEpochMilli(), source = CalendarSource.TRAKT_NEXT)
+            )))
+            traktNext = CalendarShowDates(entries = listOf(CalendarEntry(season = 3, episode = 12, airInstantMs = traktAt, source = CalendarSource.TRAKT_NEXT)))
+        }
+        val outcome = CalendarTitleFetcher(remote, "AU").refresh(show.copy(tvmazeId = 9), emptyMap(), false, now)
+        assertEquals(listOf("tvmaze:9", "traktSeason:1", "trakt"), remote.calls)
+        assertEquals(traktAt, outcome.record.entries.single().airInstantMs)
+        assertEquals("S1E4", outcome.record.entries.single().slot)
+    }
+
+    @Test fun anEmptyTraktAnswerIsKeptForSixHoursAndSpecialsAreNotAsked() = runBlocking {
+        val withSpecial = CalendarShowDates(entries = dateOnlyShow.entries +
+            CalendarEntry(season = 0, episode = 1, airDate = "2026-10-10", source = CalendarSource.TVMAZE))
+        val remote = FakeRemote().apply {
+            tvMazeShow = withSpecial
+            traktSeasons = mapOf(1 to CalendarShowDates(), 0 to CalendarShowDates())
+        }
+        val first = CalendarTitleFetcher(remote, "AU").refresh(show.copy(tvmazeId = 9), emptyMap(), false, now).record
+        assertEquals(listOf("tvmaze:9", "traktSeason:1", "trakt"), remote.calls)
+        assertEquals(now.toEpochMilli(), first.traktTimesAskedAtMs)
+        val soon = FakeRemote().apply { tvMazeShow = withSpecial; traktSeasons = mapOf(1 to CalendarShowDates()) }
+        CalendarTitleFetcher(soon, "AU").refresh(first, emptyMap(), false, now.plus(Duration.ofHours(2)))
+        assertEquals(listOf("tvmaze:9"), soon.calls)
+    }
+
+    @Test fun aTraktTimeDaysAwayFromTheStreamingDateIsNotUsed() = runBlocking {
+        val remote = FakeRemote().apply {
+            tvMazeShow = dateOnlyShow
+            traktSeasons = mapOf(1 to CalendarShowDates(entries = listOf(
+                CalendarEntry(season = 1, episode = 4, airInstantMs = Instant.parse("2026-10-12T00:00:00Z").toEpochMilli(), source = CalendarSource.TRAKT_NEXT)
+            )))
+        }
+        val outcome = CalendarTitleFetcher(remote, "AU").refresh(show.copy(tvmazeId = 9), emptyMap(), false, now)
+        assertNull(outcome.record.entries.single().airInstantMs)
+        assertTrue(CalendarSource.TRAKT_NEXT !in outcome.record.sources)
     }
 
     @Test fun traktsTimeIsKeptForSixHoursWithoutAskingAgain() = runBlocking {

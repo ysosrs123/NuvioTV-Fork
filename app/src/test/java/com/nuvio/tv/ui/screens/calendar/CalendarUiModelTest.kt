@@ -15,6 +15,7 @@ import com.nuvio.tv.core.calendar.buildCalendarSections
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneId
 import org.junit.Assert.assertEquals
@@ -55,6 +56,31 @@ class CalendarUiModelTest {
         val title = show("tt1", at("2026-10-06T09:30:00Z")).copy(network = "Life Style.")
         val row = calendarRow(title, title.entries.first(), today, null, CalendarSectionKind.TODAY, now, today, emptySet(), null)
         assertEquals("Life Style", row.network)
+    }
+
+    @Test fun aDateOnlyStreamingEpisodeGetsItsServicesUsualHour() {
+        val date = LocalDate.of(2026, 10, 9)
+        val title = show("tt1", CalendarEntry(season = 2, episode = 5, airDate = "2026-10-09"))
+            .copy(network = "Paramount+", tvmazeStreaming = true)
+        val row = calendarRow(title, title.entries.first(), date, null, CalendarSectionKind.DAY, now, today, emptySet(), null, sydney)
+        assertEquals(LocalTime.of(18, 0), row.usualTime)
+
+        val otherService = title.copy(network = "Netflix")
+        assertNull(calendarRow(otherService, otherService.entries.first(), date, null, CalendarSectionKind.DAY, now, today, emptySet(), null, sydney).usualTime)
+        val onTv = title.copy(tvmazeStreaming = false)
+        assertNull(calendarRow(onTv, onTv.entries.first(), date, null, CalendarSectionKind.DAY, now, today, emptySet(), null, sydney).usualTime)
+        val timed = show("tt1", at("2026-10-09T08:00:00Z", season = 2, episode = 5)).copy(network = "Paramount+", tvmazeStreaming = true)
+        assertNull(calendarRow(timed, timed.entries.first(), date, LocalTime.of(19, 0), CalendarSectionKind.DAY, now, today, emptySet(), null, sydney).usualTime)
+    }
+
+    @Test fun noEstimateWhenTheRowSitsOnAnotherDayThanItsAirDate() {
+        val placed = CalendarEntry(
+            season = 2, episode = 5, airDate = "2026-10-09", source = CalendarSource.ADDON,
+            placeAtMs = Instant.parse("2026-10-10T00:00:00Z").toEpochMilli()
+        )
+        val title = show("tt1", placed).copy(network = "Paramount+", tvmazeStreaming = true)
+        val shown = LocalDate.of(2026, 10, 10)
+        assertNull(calendarRow(title, placed, shown, null, CalendarSectionKind.DAY, now, today, emptySet(), null, sydney).usualTime)
     }
 
     @Test fun upcomingEpisodesShowTheBellOnlyWhenItIsOnForTheShow() {

@@ -211,6 +211,8 @@ data class CalendarTitleRecord(
     val networkZone: String? = null,
     @SerialName("tvs") val tvmazeStreaming: Boolean = false,
     @SerialName("tva") val tvmazeAnime: Boolean = false,
+    /** When Trakt was last asked for streaming times, also when it had none. */
+    @SerialName("tta") val traktTimesAskedAtMs: Long? = null,
     val sources: Map<CalendarSource, List<CalendarEntry>> = emptyMap(),
     val sourceFetchedAtMs: Map<CalendarSource, Long> = emptyMap(),
     val fetchedAtMs: Long = 0L,

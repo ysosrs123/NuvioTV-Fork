@@ -442,7 +442,7 @@ private fun CalendarDayPanelItem(
     val cardModifier = Modifier
         .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
         .calendarOptionsKeys(press) { onOptions(row) }
-    val details = listOfNotNull(row.time?.let(formats::time), row.network)
+    val details = listOfNotNull(calendarTimeText(row, formats), row.network)
     if (big) {
         Column {
             CalendarFocusCard(

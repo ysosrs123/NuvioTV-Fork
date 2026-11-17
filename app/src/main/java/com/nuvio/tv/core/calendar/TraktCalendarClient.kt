@@ -50,6 +50,18 @@ class TraktCalendarClient @Inject constructor(
             entries = listOfNotNull(response.body()?.let { traktEpisodeEntry(it, null, CalendarSource.TRAKT_NEXT) })
         )
     }
+
+    /** A season's episodes with Trakt's times; null when Trakt does not know it, throws when Trakt cannot be reached. */
+    suspend fun seasonEpisodes(ids: CalendarIds, season: Int): CalendarShowDates? {
+        val id = ids.trakt?.toString() ?: ids.imdb ?: return null
+        val response = traktAuthService.executePublicRequest { traktApi.getShowSeasonEpisodes(id, season) }
+            ?: throw TraktUnreachable("no answer")
+        if (response.code() == 404) return null
+        if (!response.isSuccessful) throw TraktUnreachable("HTTP ${response.code()}")
+        return CalendarShowDates(
+            entries = response.body().orEmpty().mapNotNull { traktEpisodeEntry(it, null, CalendarSource.TRAKT_NEXT) }
+        )
+    }
 }
 
 class TraktUnreachable(why: String) : Exception("Trakt could not be reached: $why")

@@ -628,6 +628,8 @@ internal fun CalendarRowItem(
     val contentAlpha = if (row.dimmed) 0.6f else 1f
     val notAnnounced = stringResource(calendarNoTimeLabel(row))
     val (timePrimary, timeSecondary) = calendarTimeTexts(row, formats, showDate = !compact)
+    val estimate = if (row.time == null) calendarTimeText(row, formats) else null
+    val quietTime = timePrimary == notAnnounced || (estimate != null && timePrimary == estimate)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -707,7 +709,7 @@ internal fun CalendarRowItem(
                         }
                     }
                     if (compact && timePrimary != null) {
-                        val quiet = timePrimary == notAnnounced
+                        val quiet = quietTime
                         Text(
                             text = timePrimary,
                             style = MaterialTheme.typography.bodySmall,
@@ -718,7 +720,7 @@ internal fun CalendarRowItem(
                         )
                     }
                 }
-                if (!compact) CalendarTimeColumn(timePrimary, timeSecondary, notAnnounced, metrics.timeColumn)
+                if (!compact) CalendarTimeColumn(timePrimary, timeSecondary, quietTime, metrics.timeColumn)
             }
         }
         Box(
@@ -736,10 +738,15 @@ internal fun CalendarRowItem(
 internal fun calendarNoTimeLabel(row: CalendarRow): Int =
     if (row.streaming) R.string.calendar_streaming else R.string.calendar_time_not_announced
 
+/** The announced time, else the service's usual hour as an estimate ("About 7:00 PM"). */
+@Composable
+internal fun calendarTimeText(row: CalendarRow, formats: CalendarFormats): String? =
+    row.time?.let(formats::time) ?: row.usualTime?.let { stringResource(R.string.calendar_time_about, formats.time(it)) }
+
 /** The time and, where it helps, the date for the right of a row; nothing for shows without a date. */
 @Composable
 internal fun calendarTimeTexts(row: CalendarRow, formats: CalendarFormats, showDate: Boolean): Pair<String?, String?> {
-    val timeText = row.time?.let(formats::time)
+    val timeText = calendarTimeText(row, formats)
     val notAnnounced = stringResource(calendarNoTimeLabel(row))
     return when {
         row.kind == CalendarRowKind.SHOW -> null to null
@@ -752,10 +759,9 @@ internal fun calendarTimeTexts(row: CalendarRow, formats: CalendarFormats, showD
 }
 
 @Composable
-private fun CalendarTimeColumn(primary: String?, secondary: String?, notAnnounced: String, width: Dp) {
+private fun CalendarTimeColumn(primary: String?, secondary: String?, quiet: Boolean, width: Dp) {
     Column(Modifier.width(width).padding(start = NuvioTheme.spacing.sm), horizontalAlignment = Alignment.End) {
         primary?.let {
-            val quiet = it == notAnnounced
             Text(
                 text = it,
                 style = if (quiet) MaterialTheme.typography.bodySmall else MaterialTheme.typography.titleSmall,
@@ -903,7 +909,7 @@ internal fun calendarWhenLine(row: CalendarRow, formats: CalendarFormats, today:
         else -> if (today != null && date.year != today.year) formats.yearDate(date) else formats.longDate(date)
     }
     val aired = row.status == CalendarRowStatus.WATCHED || row.status == CalendarRowStatus.NOT_WATCHED
-    val withTime = row.time?.let { stringResource(R.string.calendar_line_join, day, formats.time(it)) } ?: day
+    val withTime = calendarTimeText(row, formats)?.let { stringResource(R.string.calendar_line_join, day, it) } ?: day
     return when {
         aired && date != today -> stringResource(if (row.isFilm) R.string.calendar_out_on else R.string.calendar_aired_on, withTime)
         else -> withTime

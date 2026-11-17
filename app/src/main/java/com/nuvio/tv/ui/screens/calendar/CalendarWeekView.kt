@@ -561,6 +561,7 @@ private fun CalendarDayShelf(
                 itemsIndexed(day.cards, key = { _, card -> card.key }) { index, card ->
                     CalendarShelfCard(
                         card = card,
+                        formats = formats,
                         width = cardWidth,
                         performance = performance,
                         focusRequester = if (index == 0) firstRequester else null,
@@ -578,6 +579,7 @@ private fun CalendarDayShelf(
 @Composable
 private fun CalendarShelfCard(
     card: CalendarCard,
+    formats: CalendarFormats,
     width: Dp,
     performance: Boolean,
     focusRequester: FocusRequester?,
@@ -619,8 +621,8 @@ private fun CalendarShelfCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        val notAnnounced = stringResource(calendarNoTimeLabel(row))
-        listOfNotNull(notAnnounced.takeIf { row.time == null && !row.isFilm }, row.network)
+        val noTime = calendarTimeText(row, formats) ?: stringResource(calendarNoTimeLabel(row))
+        listOfNotNull(noTime.takeIf { row.time == null && !row.isFilm }, row.network)
             .joinToString(" · ").takeIf { it.isNotEmpty() }?.let {
             Spacer(Modifier.height(3.dp))
             Text(
