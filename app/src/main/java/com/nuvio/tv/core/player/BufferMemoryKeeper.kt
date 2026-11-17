@@ -26,6 +26,9 @@ class BufferMemoryKeeper(
     private val swapFreeMb: () -> Long = { -1L },
     /** MB of address space the process uses on a 32-bit box ([BufferSizing.addressSpaceUsedMbOn32Bit]); null on 64-bit. */
     private val addressSpaceUsedMb: () -> Long? = { null },
+    private val addressSpaceCeilingMb: () -> Long = { BufferSizing.addressSpaceCeiling32BitMb },
+    private val addressSpaceLimitMb: () -> Long = { addressSpaceCeilingMb() + BufferSizing.ADDRESS_SPACE_SPARE_32BIT_MB },
+    private val addressMemo: AddressSpaceMemo = AddressSpaceMemo(),
     /** The least a pressure cut or the lending leaves; [BufferSizing.sizedFloorMb]. */
     floorBytes: Long = BufferSizing.MIN_SIZED_BUFFER_MB * MB,
     /** A 1 GB box ([BufferSizing.isOneGbBox]): Android's last warning always counts. */
@@ -305,23 +308,27 @@ class BufferMemoryKeeper(
     }
 
     /**
-     * A 32-bit process has 4 GB of address space for everything; the buffer may only take what is left under
-     * [BufferSizing.ADDRESS_SPACE_CEILING_32BIT_MB], whatever the box's RAM.
+     * A 32-bit process has 3 or 4 GB of address space for everything; the buffer may only take what is left under
+     * [BufferSizing.addressSpaceCeiling32BitMb], whatever the box's RAM, plus what it gave back and can fill again.
      */
     internal fun tendAddressSpace() {
         if (detached) return
         val usedMb = addressSpaceUsedMb() ?: return
+        val ceilingMb = addressSpaceCeilingMb()
         val budget = control.uncappedBudgetBytes.coerceAtLeast(0L)
         val held = control.bufferAllocator.totalBytesAllocated.toLong()
-        val roomMb = BufferSizing.ADDRESS_SPACE_CEILING_32BIT_MB - usedMb
-        val cap = (held + roomMb * MB).coerceIn(minOf(budget, floorBytes), budget)
+        val reusable = addressMemo.reusableBytes(held, usedMb)
+        val roomMb = ceilingMb - usedMb
+        val hardRoomMb = addressSpaceLimitMb() - ADDRESS_SPACE_HARD_SPARE_MB - usedMb
+        val cap = minOf(held + reusable + roomMb * MB, held + hardRoomMb * MB)
+            .coerceIn(minOf(budget, floorBytes), budget)
         val next = if (cap >= budget) -1L else cap
         if (next == roomCapBytes) return
         if (next >= 0L && roomCapBytes >= 0L && kotlin.math.abs(next - roomCapBytes) < ROOM_STEP_BYTES) return
         roomCapBytes = next
         applyTarget()
         val freed = if (next >= 0L && held > next) trimIdle(null) else 0L
-        Log.i(TAG, "BUFFER_MEMORY: address space usedMb=$usedMb ceilingMb=${BufferSizing.ADDRESS_SPACE_CEILING_32BIT_MB} " +
+        Log.i(TAG, "BUFFER_MEMORY: address space usedMb=$usedMb ceilingMb=$ceilingMb reusableMb=${reusable / MB} " +
             "roomCapMb=${if (next < 0L) "none" else (next / MB).toString()} budgetMb=${budget / MB} freedMb=${freed / MB}")
     }
 
@@ -519,5 +526,39 @@ class BufferMemoryKeeper(
         /** 256 allocations of 64 KB per step. */
         const val TRIM_STEP_BYTES = 16 * 1024 * 1024
         private const val MAX_TRIM_STEPS = 256
+        /** Thread stacks and decoders always keep this much under the real limit, whatever the buffer gave back. */
+        internal const val ADDRESS_SPACE_HARD_SPARE_MB = 300L
+    }
+}
+
+/**
+ * Buffer memory given back to the allocator may keep its address range, so the address space does not shrink after a
+ * seek. Remembers, for one player, the most the buffer held and the address space used then: what the buffer gave back
+ * since is room it can fill again without the address space growing. Whatever the address space dropped by since the
+ * peak was really returned, so it is never counted, and growth elsewhere after the peak cannot pass as kept room.
+ */
+class AddressSpaceMemo {
+    private var peakHeldBytes = 0L
+    private var usedAtPeakMb = 0L
+    private var lowestUsedSincePeakMb = 0L
+
+    @Synchronized
+    fun reusableBytes(heldBytes: Long, usedMb: Long): Long {
+        if (heldBytes >= peakHeldBytes) {
+            peakHeldBytes = heldBytes
+            usedAtPeakMb = usedMb
+            lowestUsedSincePeakMb = usedMb
+            return 0L
+        }
+        lowestUsedSincePeakMb = minOf(lowestUsedSincePeakMb, usedMb)
+        val otherAtPeakMb = usedAtPeakMb - peakHeldBytes / MB
+        val keptMb = usedMb - otherAtPeakMb - heldBytes / MB
+        val returnedMb = usedAtPeakMb - lowestUsedSincePeakMb
+        val stillKeptMb = (peakHeldBytes - heldBytes) / MB - returnedMb
+        return (minOf(keptMb, stillKeptMb) * MB).coerceIn(0L, peakHeldBytes - heldBytes)
+    }
+
+    private companion object {
+        const val MB = 1024L * 1024L
     }
 }

@@ -51,6 +51,7 @@ import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.core.report.recordingClock
 import com.nuvio.tv.data.repository.PlaybackIssueViewerChoices
 import com.nuvio.tv.ui.components.NuvioDialog
+import com.nuvio.tv.ui.screens.ambient.LocalAmbientIdleController
 import com.nuvio.tv.ui.components.NuvioScrollDefaults
 import com.nuvio.tv.ui.screens.account.InputField
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
@@ -507,14 +508,22 @@ internal fun ReportNoteDialog(current: String, onSave: (String) -> Unit, onDismi
     var text by remember { mutableStateOf(current) }
     val saveButton = remember { FocusRequester() }
     val field = remember { FocusRequester() }
+    val idle = LocalAmbientIdleController.current
     LaunchedEffect(Unit) {
         withFrameNanos { }
         runCatching { field.requestFocus() }
     }
-    NuvioDialog(onDismiss = onDismiss, title = stringResource(R.string.report_item_note), width = 640.dp, solidWithoutBlur = true) {
+    val closeKeepingText = {
+        val kept = noteKeptOnClose(text, current)
+        if (kept != null) onSave(kept) else onDismiss()
+    }
+    NuvioDialog(onDismiss = closeKeepingText, title = stringResource(R.string.report_item_note), width = 640.dp, solidWithoutBlur = true) {
         InputField(
             value = text,
-            onValueChange = { if (it.length <= REPORT_NOTE_MAX) text = it },
+            onValueChange = {
+                idle?.onInteraction()
+                if (it.length <= REPORT_NOTE_MAX) text = it
+            },
             placeholder = stringResource(R.string.report_note_placeholder),
             imeAction = ImeAction.Done,
             onImeAction = { onSave(text.trim()) },
@@ -594,6 +603,9 @@ internal fun ReportSentDialog(code: String?, followUrl: String?, started: Boolea
         }
     }
 }
+
+internal fun noteKeptOnClose(typed: String, current: String): String? =
+    typed.trim().takeIf { it.isNotEmpty() && it != current.trim() }
 
 private const val REPORT_NOTE_MAX = 1000
 private const val REPORT_CHECK_DETAIL_LINES = 7

@@ -20,9 +20,13 @@ internal enum class PlaybackVideoPresentation {
             // Applied configuration remains reportable even when output counters are unavailable.
             if (appliedTunneling) return if (mediaCodec && hasCounters) TUNNELLED else TUNNELLED_UNSUPPORTED
             if (decoderName.isNullOrBlank()) return UNCONFIGURED
-            if (decoderName == "amstream_dves_hevc" || decoderName == "amstream_dves_hevc.sideband") return NATIVE
+            if (isNativeFelDecoder(decoderName)) return NATIVE
             if (!mediaCodec) return UNSUPPORTED
             return if (hasCounters) MEDIA_CODEC else UNCONFIGURED
         }
     }
 }
+
+/** The AM9 native FEL renderer's names (transparent-hole and sideband modes). */
+internal fun isNativeFelDecoder(decoderName: String?): Boolean =
+    decoderName == "amstream_dves_hevc" || decoderName == "amstream_dves_hevc.sideband"

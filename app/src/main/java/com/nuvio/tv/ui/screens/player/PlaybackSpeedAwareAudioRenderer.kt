@@ -114,7 +114,9 @@ internal class PlaybackSpeedAwareAudioRenderer(
         // strand the track: AudioPassthroughPolicy only denies the five formats the
         // bundled FFmpeg decoder handles, and only while softwareDecodersAvailable is
         // true, which already requires the FFmpeg renderer to be in the renderer list.
-        if (playbackSpeedAwareAudioSink.isPolicyDeniedPassthrough(format)) {
+        if (playbackSpeedAwareAudioSink.isPolicyDeniedPassthrough(format) ||
+            playbackSpeedAwareAudioSink.isSurroundAacTranscodedToAc3(format)
+        ) {
             return emptyList()
         }
         val decoderInfos = if (!playbackSpeedAwareAudioSink.shouldForcePcmForFormat(format) && playbackSpeedAwareAudioSink.supportsFormat(format)) {

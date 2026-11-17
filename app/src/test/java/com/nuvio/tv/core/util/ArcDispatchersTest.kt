@@ -6,8 +6,12 @@ import org.junit.Test
 class ArcDispatchersTest {
 
     @Test
-    fun `a 32-bit process gets the small budget whatever the memory`() {
-        assertEquals(ThreadBudget(24, 8), ArcDispatchers.budgetFor(is64Bit = false, totalMb = 4_096))
+    fun `a 32-bit process keeps IO and the lanes within 24 threads whatever the memory`() {
+        listOf(0L, 1_900L, 4_096L).forEach { mb ->
+            val budget = ArcDispatchers.budgetFor(is64Bit = false, totalMb = mb, lowRam = mb == 1_900L)
+            assertEquals(ThreadBudget(16, 8), budget)
+            assertEquals(24, budget.ioParallelism!! + budget.backgroundLanes)
+        }
     }
 
     @Test

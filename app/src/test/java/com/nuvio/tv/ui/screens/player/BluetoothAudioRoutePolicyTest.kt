@@ -262,6 +262,31 @@ class BluetoothAudioRoutePolicyTest {
         assertFalse(shouldKeepPlaying)
     }
 
+    @Test
+    fun `surround AAC steps away from MediaCodec only while it is converted to Dolby Digital`() {
+        val sink = PlaybackSpeedAwareAudioSink(
+            sink = AlwaysSupportedDelegateSink(),
+            initialForcePcm = false,
+            forcePcmForBluetooth = false
+        )
+        val surroundAac = mime(MimeTypes.AUDIO_AAC).buildUpon()
+            .setCodecs("mp4a.40.2")
+            .setInitializationData(listOf(byteArrayOf(0x11, 0xB0.toByte())))
+            .build()
+        val stereoAac = surroundAac.buildUpon().setChannelCount(2).build()
+        assertFalse(sink.isSurroundAacTranscodedToAc3(surroundAac))
+        sink.setAc3TranscodeMimes(setOf(MimeTypes.AUDIO_AAC))
+        assertTrue(sink.isSurroundAacTranscodedToAc3(surroundAac))
+        assertFalse(sink.isSurroundAacTranscodedToAc3(stereoAac))
+        assertFalse(sink.isSurroundAacTranscodedToAc3(surroundAac.buildUpon().setChannelCount(Format.NO_VALUE).build()))
+        assertFalse(sink.isSurroundAacTranscodedToAc3(surroundAac.buildUpon().setCryptoType(C.CRYPTO_TYPE_FRAMEWORK).build()))
+        assertFalse(sink.isSurroundAacTranscodedToAc3(surroundAac.buildUpon().setCodecs("mp4a.40.42").build()))
+        assertFalse(sink.isSurroundAacTranscodedToAc3(surroundAac.buildUpon().setInitializationData(emptyList()).build()))
+        assertFalse(sink.isSurroundAacTranscodedToAc3(mime(MimeTypes.AUDIO_E_AC3)))
+        sink.setAc3TranscodeMimes(emptySet())
+        assertFalse(sink.isSurroundAacTranscodedToAc3(surroundAac))
+    }
+
     private fun mime(sampleMimeType: String): Format {
         return Format.Builder()
             .setSampleMimeType(sampleMimeType)

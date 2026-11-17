@@ -16,13 +16,13 @@ class WatchProgressTest {
     }
 
     @Test
-    fun `resolveResumePosition clamps position to actualDuration`() {
+    fun `resolveResumePosition starts from the beginning when the position is past the end`() {
         val wp = watchProgress(
             position = 300000,
             duration = 180000
         )
         val result = wp.resolveResumePosition(actualDuration = 200000)
-        assertEquals(200000, result)
+        assertEquals(0, result)
     }
 
     @Test

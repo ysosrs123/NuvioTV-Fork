@@ -526,6 +526,10 @@ internal fun PlayerRuntimeController.observeSubtitleSettings() {
             if (isUsingMpvEngine() && previousMpvHardwareDecodeMode != mpvHardwareDecodeModeSetting) {
                 mpvView?.applyHardwareDecodeMode(mpvHardwareDecodeModeSetting)
             }
+            if (mpvDirectDecodeModeSetting != settings.mpvDirectDecodeMode) {
+                mpvDirectDecodeModeSetting = settings.mpvDirectDecodeMode
+                mpvView?.let { applyMpvDirectDecodeMode(it) }
+            }
 
             val resolvedAudioLanguages = resolvePreferredAudioLanguages(
                 preferredAudioLanguage = settings.preferredAudioLanguage,
@@ -1012,6 +1016,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
         while (isActive) {
             delay(PlayerRuntimeController.STARTUP_WATCHDOG_TIMEOUT_MS)
             if (hasRenderedFirstFrame) return@launch
+            if (_uiState.value.errorCardBeforeSources != null) return@launch
             // The film waits on purpose while thumbnails are made before play; time it from when that screen closes.
             // A film let go for the screen opens again from scratch, so it gets the slow-server allowance.
             if (SeekThumbnails.prepareUi.value !is SeekThumbnails.PrepareUi.Hidden) {
@@ -1140,7 +1145,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
             )
             com.nuvio.tv.core.util.TtffTrace.mark("startup_watchdog_fired")
             _uiState.update {
-                if (it.error == null) {
+                if (it.startupWatchdogMayWrite()) {
                     it.copy(
                         error = fireMessage,
                         errorCard = fireCard,
@@ -1154,6 +1159,14 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
         }
     }
 }
+
+/** The general texts the start-up watchdog writes when it has no card for the cause. */
+internal fun startupWatchdogMessages(context: android.content.Context): Set<String> = setOf(
+    context.getString(com.nuvio.tv.R.string.player_error_startup_timeout),
+    context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unsupported),
+    context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unreadable),
+    context.getString(com.nuvio.tv.R.string.player_error_startup_no_stream_data),
+)
 
 /** False when the player's own thread is stuck, as it is while a decoder never finishes opening. */
 private suspend fun playbackThreadAnswers(looper: android.os.Looper): Boolean {
@@ -1183,18 +1196,12 @@ internal fun startupNoDataMessage(context: android.content.Context, httpStatus: 
  * failure racing the frame) is left untouched.
  */
 internal fun PlayerRuntimeController.retractStartupTimeoutErrorAfterFirstFrame() {
-    // The watchdog can surface three different messages; a late
-    // first frame disproves all of them equally, so retract whichever fired.
-    val startupWatchdogMessages = setOf(
-        context.getString(com.nuvio.tv.R.string.player_error_startup_timeout),
-        context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unsupported),
-        context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unreadable),
-        context.getString(com.nuvio.tv.R.string.player_error_startup_no_stream_data),
-    )
+    // A late first frame disproves every watchdog message equally, so retract whichever fired.
+    val watchdogMessages = startupWatchdogMessages(context)
     var retracted = false
     _uiState.update {
         val watchdogCard = it.errorCard.matching(it.error)?.takeIf { card -> card.fromWatchdog }
-        if (it.error != null && (it.error in startupWatchdogMessages || watchdogCard != null)) {
+        if (it.error != null && (it.error in watchdogMessages || watchdogCard != null)) {
             retracted = true
             it.copy(error = null, errorCard = null)
         } else {

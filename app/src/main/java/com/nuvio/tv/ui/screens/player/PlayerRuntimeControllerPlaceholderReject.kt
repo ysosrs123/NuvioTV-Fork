@@ -27,6 +27,7 @@ internal fun PlayerRuntimeController.rejectPlaceholderStream(
             "host=${currentStreamUrl.safeHost()}"
     )
     placeholderRejectedForCurrentStream = true
+    cancelStartupWatchdog()
     SeekThumbnails.stopSession(handBackPlayer = false)
     runCatching { _exoPlayer?.stop() }
     cancelNextEpisodeAutoPlayOnFatalError()

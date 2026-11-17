@@ -45,12 +45,14 @@ internal class SeekSettle {
         const val TAP_SETTLE_MS = 800L
         /** After a hold there was a run of thumbnails to look at. */
         const val HOLD_SETTLE_MS = 2_000L
-        /** Confirm with OK: a run left this long is dropped, so playback never stays held on a forgotten target. */
+        /** Confirm with OK, paused: a run left this long is dropped. */
         const val CONFIRM_IDLE_MS = 15_000L
+        /** Confirm with OK while the film plays on: a forgotten marker goes away sooner. */
+        const val CONFIRM_PLAYING_IDLE_MS = 5_000L
 
-        fun waitMs(afterHold: Boolean, mode: SeekingMode = SeekingMode.BALANCED): Long = when {
+        fun waitMs(afterHold: Boolean, mode: SeekingMode = SeekingMode.BALANCED, playing: Boolean = false): Long = when {
             mode == SeekingMode.FAST -> 0L
-            mode == SeekingMode.CONFIRM -> CONFIRM_IDLE_MS
+            mode == SeekingMode.CONFIRM -> if (playing) CONFIRM_PLAYING_IDLE_MS else CONFIRM_IDLE_MS
             afterHold || mode == SeekingMode.GENTLE -> HOLD_SETTLE_MS
             else -> TAP_SETTLE_MS
         }
@@ -67,6 +69,12 @@ internal class SeekSettle {
             SeekingMode.CONFIRM -> !inParty
             else -> !userPaused && !inParty && playing && thumbnails
         }
+
+        /**
+         * Whether playback holds on the target while a run waits. On Confirm with OK the film plays on while the
+         * marker moves, so one tap never leaves a frozen picture; OK jumps, Back cancels.
+         */
+        fun holdsDuringWait(mode: SeekingMode): Boolean = mode != SeekingMode.CONFIRM
 
         /** Whether a run that waits out [waitMs] ends with the seek; on Confirm with OK only OK seeks. */
         fun seeksAfterWait(mode: SeekingMode): Boolean = mode != SeekingMode.CONFIRM

@@ -110,8 +110,6 @@ internal object MemoryGovernor {
      */
     private const val STRONG_MIN_AVAIL_MB = 600L
     private const val STRONG_MIN_SWAP_FREE_MB = 2 * SWAP_FLOOR_MB
-    /** 32-bit only: ceiling for VmSize plus the decode's cost, keeps about 700 MB of the 4 GB address space spare. */
-    private const val VA_CEILING_32BIT_MB = 3_300L
 
     @Volatile private var lowRam = true
     @Volatile private var is64Bit = false
@@ -311,8 +309,9 @@ internal object MemoryGovernor {
         // When 4K may decode is the scheduler's rule, this only checks that it is affordable.
         if (addressSpace && !is64Bit && !decoderWarm) {
             val vm = readVmSizeMb()
-            if (vm != null && vm + tier.addressSpaceMb > VA_CEILING_32BIT_MB) {
-                return GovernorVerdict(false, "32-bit address space ${vm} MB + ${tier.addressSpaceMb} > $VA_CEILING_32BIT_MB")
+            val ceiling = com.nuvio.tv.core.player.BufferSizing.addressSpaceCeiling32BitMb
+            if (vm != null && vm + tier.addressSpaceMb > ceiling) {
+                return GovernorVerdict(false, "32-bit address space ${vm} MB + ${tier.addressSpaceMb} > $ceiling")
             }
         }
         val mem = readMeminfo() ?: return GovernorVerdict(true, "meminfo unavailable")

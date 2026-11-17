@@ -15,12 +15,14 @@ object DeniedTranscodePlanner {
     fun effectiveTranscodeMimes(
         policy: AudioPassthroughPolicy,
         transcodeDeniedToAc3: Boolean,
-        forcePassthroughActive: Boolean
+        forcePassthroughActive: Boolean,
+        surroundAacToAc3: Boolean = false
     ): Set<String> {
-        if (!transcodeDeniedToAc3) return emptySet()
+        if (!transcodeDeniedToAc3 && !surroundAacToAc3) return emptySet()
         if (forcePassthroughActive) return emptySet()
         if (!policy.softwareDecodersAvailable) return emptySet()
         if (policy.deniesPassthrough(MimeTypes.AUDIO_AC3)) return emptySet()
-        return candidateMimeTypes.filter { policy.deniesPassthrough(it) }.toSet()
+        val denied = if (transcodeDeniedToAc3) candidateMimeTypes.filter { policy.deniesPassthrough(it) } else emptyList()
+        return if (surroundAacToAc3) (denied + MimeTypes.AUDIO_AAC).toSet() else denied.toSet()
     }
 }

@@ -22,7 +22,8 @@ object SurroundFormatResolver {
     data class Resolution(
         val policy: AudioPassthroughPolicy,
         val transcodePreferred: Boolean,
-        val inferredChannelTarget: Int?
+        val inferredChannelTarget: Int?,
+        val surroundAacToAc3: Boolean = false
     ) {
         companion object {
             val INERT = Resolution(AudioPassthroughPolicy.ALLOW_ALL, false, null)
@@ -36,6 +37,8 @@ object SurroundFormatResolver {
         MimeTypes.AUDIO_DTS,
         MimeTypes.AUDIO_DTS_HD
     )
+
+    private const val SURROUND_AAC_ON_ANY_STEREO_OUTPUT = false
 
     fun resolve(
         manualMode: Boolean,
@@ -121,6 +124,18 @@ object SurroundFormatResolver {
             else -> null
         }
 
-        return Resolution(policy, transcodePreferred, inferredChannelTarget)
+        // Decoded surround AAC would reach the soundbar as stereo; Dolby Digital 5.1 keeps the channels.
+        val stereoOnlyOutput = if (manualMode) {
+            manualTranscodePreferred && maxPcmChannels == 2
+        } else {
+            arcSoundbar || (SURROUND_AAC_ON_ANY_STEREO_OUTPUT && maxPcmChannels == 2)
+        }
+        val surroundAacToAc3 = softwareDecodersAvailable &&
+            manualChannelTargetChannels == null &&
+            stereoOnlyOutput &&
+            !policy.deniesPassthrough(MimeTypes.AUDIO_AC3) &&
+            (direct?.ac3 ?: arcSoundbar)
+
+        return Resolution(policy, transcodePreferred, inferredChannelTarget, surroundAacToAc3)
     }
 }

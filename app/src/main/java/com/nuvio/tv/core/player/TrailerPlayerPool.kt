@@ -94,6 +94,7 @@ class TrailerPlayerPool @Inject constructor(
             // Reclaim was not called yet but someone wants the player — rebuild.
             reclaim()
         }
+        deferredStop.cancel()
         return (_player ?: createPlayer().also { _player = it }).also { this.owner = owner }
     }
 
@@ -108,6 +109,27 @@ class TrailerPlayerPool @Inject constructor(
         if (!isOwner(owner)) return
         this.owner = null
         stop()
+    }
+
+    private val deferredStop by lazy {
+        val handler = android.os.Handler(android.os.Looper.getMainLooper())
+        DeferredStop(
+            whenIdle = { run -> android.os.Looper.myQueue().addIdleHandler { run.run(); false } },
+            after = { delayMs, run -> handler.postDelayed(run, delayMs) }
+        )
+    }
+
+    /**
+     * Pauses at once, so the trailer stops on screen in the same frame. Stopping and clearing the
+     * player waits on its playback thread, so that part runs when the main thread is next idle
+     * (or after a short cap), not inside the first frame of the move. A new [acquire] cancels it.
+     */
+    fun stopWhenIdle(owner: Any) {
+        if (!isOwner(owner)) return
+        this.owner = null
+        _player?.let { player -> runCatching { player.playWhenReady = false } }
+        _isTrailerPlaying.value = false
+        deferredStop.schedule { if (this.owner == null) stop() }
     }
 
     /**

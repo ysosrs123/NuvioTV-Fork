@@ -33,4 +33,13 @@ class PlayerStartPositionTest {
         assertFalse(PlayerStartPosition.percentResumeDue(0L, 0f, 7_200_000L, seekable = true, firstFrameShown = false))
         assertFalse(PlayerStartPosition.percentResumeDue(0L, 42f, 7_200_000L, seekable = true, firstFrameShown = true))
     }
+
+    @Test
+    fun `a resume point at or past the real end is caught`() {
+        assertTrue(PlayerStartPosition.pastTheEnd(128_759_440L, 2_548_966L))
+        assertTrue(PlayerStartPosition.pastTheEnd(2_546_000L, 2_548_966L))
+        assertFalse(PlayerStartPosition.pastTheEnd(1_200_000L, 2_548_966L))
+        assertFalse(PlayerStartPosition.pastTheEnd(0L, 2_548_966L))
+        assertFalse(PlayerStartPosition.pastTheEnd(128_759_440L, 0L))
+    }
 }

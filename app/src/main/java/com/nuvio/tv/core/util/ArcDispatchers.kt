@@ -17,9 +17,11 @@ object ArcDispatchers {
 
     val background: CoroutineDispatcher by lazy { Dispatchers.IO.limitedParallelism(lanes) }
 
-    fun budgetFor(is64Bit: Boolean, totalMb: Long, lowRam: Boolean = false): ThreadBudget {
-        val small = !is64Bit || lowRam || totalMb in 1..SMALL_BOX_MB
-        return if (small) ThreadBudget(ioParallelism = 24, backgroundLanes = 8) else ThreadBudget(null, 16)
+    /** Views of Dispatchers.IO get their own threads on top of the IO limit, so on 32-bit IO plus the lanes stay within 24. */
+    fun budgetFor(is64Bit: Boolean, totalMb: Long, lowRam: Boolean = false): ThreadBudget = when {
+        !is64Bit -> ThreadBudget(ioParallelism = 16, backgroundLanes = 8)
+        lowRam || totalMb in 1..SMALL_BOX_MB -> ThreadBudget(ioParallelism = 24, backgroundLanes = 8)
+        else -> ThreadBudget(null, 16)
     }
 
     /** Must run before anything touches Dispatchers.IO: the IO pool reads its size once. */

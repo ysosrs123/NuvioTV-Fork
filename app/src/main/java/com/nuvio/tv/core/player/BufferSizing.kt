@@ -40,8 +40,13 @@ object BufferSizing {
     const val FOUR_K_BITRATE_BPS = 50_000_000L
     /** About 5 s of a 4K remux at 80 Mbit/s. */
     const val MIN_SIZED_BUFFER_MB = 50
-    /** 32-bit process: the buffer stops growing once the process uses this much of its 4 GB address space. */
-    const val ADDRESS_SPACE_CEILING_32BIT_MB = 3_300L
+    /** What a 32-bit process keeps spare under its address-space limit: 3300 MB of 4 GB, 2276 MB of 3 GB. */
+    const val ADDRESS_SPACE_SPARE_32BIT_MB = 796L
+    const val ADDRESS_SPACE_4GB_MB = 4_096L
+
+    /** 32-bit process: the buffer stops growing once the process uses this much of its address space. */
+    val addressSpaceCeiling32BitMb: Long get() = addressSpaceLimit32BitMb - ADDRESS_SPACE_SPARE_32BIT_MB
+    val addressSpaceLimit32BitMb: Long by lazy { addressSpaceLimitMb() }
 
     /**
      * 1 GB boxes: under the same 1.15 GB edge as [BUFFER_1GB_BOX_MB]. Only these get [oneGbFloorMb]; every bigger box
@@ -76,6 +81,18 @@ object BufferSizing {
         return runCatching {
             com.nuvio.tv.core.player.thumbnail.MemoryGovernor.parseVmSizeMb(java.io.File("/proc/self/status").readText())
         }.getOrNull()
+    }
+
+    /** 4 GB on a 64-bit kernel, 3 GB (or 2) on a 32-bit one; read once from where the main stack ends. */
+    fun addressSpaceLimitMb(): Long = runCatching {
+        java.io.File("/proc/self/maps").useLines { limitFromMaps(it) }
+    }.getOrNull() ?: ADDRESS_SPACE_4GB_MB
+
+    internal fun limitFromMaps(lines: Sequence<String>): Long? {
+        val stack = lines.firstOrNull { it.trimEnd().endsWith("[stack]") } ?: return null
+        val end = stack.substringBefore(' ').substringAfter('-').toLongOrNull(16) ?: return null
+        val gbs = (end + GB - 1) / GB
+        return (gbs * 1024).coerceIn(1024L, ADDRESS_SPACE_4GB_MB)
     }
 
     fun isSmallBox(totalMem: Long): Boolean = totalMem <= 0L || totalMem < SMALL_BOX_RAM_BYTES

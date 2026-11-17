@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -114,6 +115,45 @@ class StreamSearchSessionCacheTest {
             "A",
             cache.peek(mediaKey(searchMode = "", priorityBingeGroup = "local-plugin-a"))?.single()?.addonName
         )
+    }
+
+    @Test
+    fun `cancelling the plugin continuation stops it, keeps nothing and leaves the full search alone`() = runTest {
+        val cache = StreamSearchSessionCache()
+        val pluginCancelled = CompletableDeferred<Unit>()
+        val pluginStarted = CompletableDeferred<Unit>()
+        val continuation = mediaKey(searchMode = "continuePluginOnly", priorityBingeGroup = "local-plugin-a")
+        val full = mediaKey(searchMode = "", priorityBingeGroup = "")
+
+        cache.observe(full, forceRefresh = false) {
+            flow { emit(NetworkResult.Success(listOf(AddonStreams("Full", null, emptyList())))) }
+        }.first { it is NetworkResult.Success }
+        val collector = launch {
+            cache.observe(continuation, forceRefresh = false) {
+                flow {
+                    emit(NetworkResult.Success(listOf(AddonStreams("Partial", null, emptyList()))))
+                    pluginStarted.complete(Unit)
+                    try {
+                        CompletableDeferred<Unit>().await()
+                    } catch (error: CancellationException) {
+                        pluginCancelled.complete(Unit)
+                        throw error
+                    }
+                }
+            }.collect { }
+        }
+        pluginStarted.await()
+
+        cache.cancelSearchMode("continuePluginOnly")
+
+        withContext(Dispatchers.IO) { withTimeout(2_000) { pluginCancelled.await() } }
+        withContext(Dispatchers.IO) { withTimeout(2_000) { collector.join() } }
+        assertEquals("Full", cache.peek(full)?.single()?.addonName)
+
+        val producers = AtomicInteger()
+        cache.observe(continuation, forceRefresh = false) { countedResult(producers, "Fresh") }
+            .first { it is NetworkResult.Success }
+        assertEquals(1, producers.get())
     }
 
     private fun mediaKey(searchMode: String, priorityBingeGroup: String) = StreamSearchRequestKey(

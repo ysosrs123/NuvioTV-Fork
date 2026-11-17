@@ -244,6 +244,51 @@ class PlayerMediaSourceFactoryTest {
     }
 
     @Test
+    fun `disk cache is used for remote http streams only`() {
+        assertTrue(PlayerMediaSourceFactory.shouldUseVodCache("https://debrid.example.com/stream/movie.mkv"))
+        assertTrue(PlayerMediaSourceFactory.shouldUseVodCache("http://192.168.1.100:8091/stream?link=123"))
+        assertFalse(PlayerMediaSourceFactory.shouldUseVodCache("http://127.0.0.1:41733/clip-hevc-main10.mkv"))
+        assertFalse(PlayerMediaSourceFactory.shouldUseVodCache("http://localhost:8080/stream/video.mkv"))
+        assertFalse(PlayerMediaSourceFactory.shouldUseVodCache("http://[::1]:51234/stream/movie.mkv"))
+        assertFalse(PlayerMediaSourceFactory.shouldUseVodCache("file:///sdcard/movie.mkv"))
+        assertFalse(PlayerMediaSourceFactory.shouldUseVodCache(""))
+    }
+
+    @Test
+    fun `disk cache is used only once it was opened in the background for this stream`() {
+        val url = "https://debrid.example.com/stream/movie.mkv"
+        assertTrue(PlayerMediaSourceFactory.usesPreparedVodCache(true, false, url, url))
+        assertFalse(PlayerMediaSourceFactory.usesPreparedVodCache(true, false, null, url))
+        assertFalse(
+            PlayerMediaSourceFactory.usesPreparedVodCache(true, false, "https://debrid.example.com/stream/other.mkv", url)
+        )
+        assertFalse(PlayerMediaSourceFactory.usesPreparedVodCache(false, false, url, url))
+        assertFalse(PlayerMediaSourceFactory.usesPreparedVodCache(true, true, url, url))
+    }
+
+    @Test
+    fun `starts that will not use the disk cache do not wait for it`() {
+        val url = "https://debrid.example.com/stream/movie.mkv"
+        assertTrue(PlayerMediaSourceFactory.shouldPrepareVodCache(true, false, false, false, url))
+        assertFalse(PlayerMediaSourceFactory.shouldPrepareVodCache(false, false, false, false, url))
+        assertFalse(PlayerMediaSourceFactory.shouldPrepareVodCache(true, true, false, false, url))
+        assertFalse(PlayerMediaSourceFactory.shouldPrepareVodCache(true, false, true, false, url))
+        assertFalse(PlayerMediaSourceFactory.shouldPrepareVodCache(true, false, false, true, url))
+        assertFalse(
+            PlayerMediaSourceFactory.shouldPrepareVodCache(true, false, false, false, "http://127.0.0.1:41733/clip.mkv")
+        )
+    }
+
+    @Test
+    fun `a slow cache open gives up after the timeout and a quick one is used`() = kotlinx.coroutines.runBlocking {
+        val stalled = kotlinx.coroutines.CompletableDeferred<Boolean>()
+        assertNull(PlayerMediaSourceFactory.awaitOrNull(50L, stalled))
+        assertFalse(stalled.isCancelled)
+        val ready = kotlinx.coroutines.CompletableDeferred(true)
+        assertEquals(true, PlayerMediaSourceFactory.awaitOrNull(50L, ready))
+    }
+
+    @Test
     fun `chunk downloads give up on an unreachable server sooner but keep the read wait`() {
         val base = okhttp3.OkHttpClient.Builder()
             .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)

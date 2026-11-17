@@ -27,13 +27,16 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
@@ -214,6 +217,44 @@ class StreamRepositoryPluginIsolationTest {
         val groups = (results.last() as NetworkResult.Success).data
         assertEquals(listOf("Plugin"), groups.map { it.addonName })
         coVerify(exactly = 0) { harness.api.getStreams(any()) }
+    }
+
+    @Test
+    fun `stopping next-episode plugin searches cancels a running continuation`() = runBlocking {
+        val scraper = compatibleScraper()
+        val harness = newHarness(listOf(scraper))
+        coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
+        val started = CompletableDeferred<Unit>()
+        val cancelled = CompletableDeferred<Unit>()
+        every {
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, "local-plugin-plugin", true, any())
+        } returns flow {
+            started.complete(Unit)
+            try {
+                CompletableDeferred<Unit>().await()
+            } catch (error: CancellationException) {
+                cancelled.complete(Unit)
+                throw error
+            }
+        }
+
+        val collector = launch(Dispatchers.IO) {
+            harness.repository.getStreamsFromAllAddons(
+                type = "movie",
+                videoId = "tt1341338",
+                season = null,
+                episode = null,
+                priorityBingeGroup = "local-plugin-plugin",
+                preferredPluginOnly = true,
+                continuePluginOnly = true
+            ).collect { }
+        }
+        withTimeout(5_000) { started.await() }
+
+        harness.repository.stopNextEpisodePluginSearches()
+
+        withTimeout(5_000) { cancelled.await() }
+        withTimeout(5_000) { collector.join() }
     }
 
     @Test

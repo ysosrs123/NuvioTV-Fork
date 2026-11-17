@@ -168,4 +168,32 @@ class SeekSettleTest {
             assertTrue(SeekSettle.seeksAfterWait(mode))
         }
     }
+
+    @Test
+    fun confirm_aForgottenRunWhilePlayingEndsSooner() {
+        assertEquals(SeekSettle.CONFIRM_PLAYING_IDLE_MS, SeekSettle.waitMs(afterHold = false, mode = SeekingMode.CONFIRM, playing = true))
+        assertEquals(SeekSettle.CONFIRM_PLAYING_IDLE_MS, SeekSettle.waitMs(afterHold = true, mode = SeekingMode.CONFIRM, playing = true))
+        assertEquals(SeekSettle.CONFIRM_IDLE_MS, SeekSettle.waitMs(afterHold = false, mode = SeekingMode.CONFIRM, playing = false))
+        assertEquals(5_000L, SeekSettle.CONFIRM_PLAYING_IDLE_MS)
+    }
+
+    @Test
+    fun otherModesWaitTheSameWhetherPlayingOrNot() {
+        for (mode in listOf(SeekingMode.GENTLE, SeekingMode.BALANCED, SeekingMode.FAST)) {
+            for (afterHold in listOf(false, true)) {
+                assertEquals(
+                    SeekSettle.waitMs(afterHold, mode, playing = false),
+                    SeekSettle.waitMs(afterHold, mode, playing = true)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun confirm_keepsTheFilmPlayingWhileTheMarkerMoves() {
+        assertFalse(SeekSettle.holdsDuringWait(SeekingMode.CONFIRM))
+        for (mode in listOf(SeekingMode.GENTLE, SeekingMode.BALANCED, SeekingMode.FAST)) {
+            assertTrue(SeekSettle.holdsDuringWait(mode))
+        }
+    }
 }

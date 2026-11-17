@@ -78,9 +78,10 @@ class TorrentService @Inject constructor(
         infoHash: String,
         fileIdx: Int?,
         filename: String? = null,
-        trackers: List<String> = emptyList()
+        trackers: List<String> = emptyList(),
+        freshTorrent: Boolean = false
     ): String = withContext(Dispatchers.IO) {
-        startMutex.withLock { startStreamLocked(infoHash, fileIdx, filename, trackers) }
+        startMutex.withLock { startStreamLocked(infoHash, fileIdx, filename, trackers, freshTorrent) }
     }
 
     suspend fun clearCache(): TorrentCacheClearResult = withContext(Dispatchers.IO) {
@@ -120,7 +121,8 @@ class TorrentService @Inject constructor(
         infoHash: String,
         fileIdx: Int?,
         filename: String?,
-        trackers: List<String>
+        trackers: List<String>,
+        freshTorrent: Boolean
     ): String {
         val startedAtMs = SystemClock.elapsedRealtime()
         val phase = AtomicReference("stop_previous")
@@ -147,6 +149,10 @@ class TorrentService @Inject constructor(
 
             phase.set("add_magnet")
             val canonicalHash = canonicalInfoHash(infoHash)
+            if (freshTorrent && knownTorrentIds.remove(canonicalHash)) {
+                removeTorrentQuietly(resolvedEngine, canonicalHash)
+                ensureCurrentGeneration(generation)
+            }
             val reusedTorrent = canonicalHash in knownTorrentIds
             val torrentId = if (reusedTorrent) {
                 canonicalHash
@@ -301,6 +307,17 @@ class TorrentService @Inject constructor(
             throw cancellation
         } catch (error: Exception) {
             Log.w(TAG, "Error stopping Nuvio Engine stream route", error)
+        }
+    }
+
+    private suspend fun removeTorrentQuietly(activeEngine: NuvioEngine, torrentId: String) {
+        try {
+            activeEngine.removeTorrent(torrentId)
+            Log.i(TorrentDiagnosticTag, "start phase=remove_torrent torrent=${diagnosticId(torrentId)}")
+        } catch (cancellation: CancellationException) {
+            throw cancellation
+        } catch (error: Exception) {
+            Log.w(TAG, "Error removing torrent before adding it again", error)
         }
     }
 

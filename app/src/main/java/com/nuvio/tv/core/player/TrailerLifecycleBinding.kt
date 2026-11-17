@@ -7,7 +7,8 @@ import androidx.lifecycle.LifecycleEventObserver
 internal class TrailerLifecycleBinding(
     private val lifecycle: Lifecycle,
     private val resume: () -> Unit,
-    private val pause: () -> Unit
+    private val pause: () -> Unit,
+    private val dispose: () -> Unit = pause
 ) : AutoCloseable {
     private var active = false
     private val observer = LifecycleEventObserver { _, event ->
@@ -32,6 +33,9 @@ internal class TrailerLifecycleBinding(
 
     override fun close() {
         lifecycle.removeObserver(observer)
-        stop()
+        if (active) {
+            active = false
+            dispose()
+        }
     }
 }

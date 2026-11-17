@@ -111,7 +111,7 @@ class WatchProgressHydrationSchedulingTest {
             val repository=WatchProgressRepositoryImpl(prefs,settings,mockk<LayoutPreferenceDataStore>(relaxed=true),sync,
                 mockk<WatchedItemsPreferences>(relaxed=true),mockk<WatchedItemsSyncService>(relaxed=true),auth,meta,
                 tmdb,manager,TrackingProgressProviderRegistry(if(provider) setOf(tracking) else emptySet()),
-                TrackingHistoryWriterRegistry(emptySet()),mutations,mockk(relaxed=true))
+                TrackingHistoryWriterRegistry(emptySet()),mutations,mockk(relaxed=true),mockk(relaxed=true))
             val rows=Channel<List<WatchProgress>>(Channel.UNLIMITED)
             val f=Fixture(repository,prefs,active,selections,generations,source,requests,allRequests,rows,sync,writes,connected,tmdb,mutations,sourceReady,providerRows)
             try { block(f) } finally {

@@ -304,4 +304,17 @@ class BufferSizingTest {
             BufferSizing.backBufferMsForTarget(12_000, 150 * mb, BufferSizing.backBufferBytesPerSecond(0L))
         )
     }
+
+    @Test
+    fun `the address-space limit follows where the main stack ends`() {
+        fun limit(stack: String) = BufferSizing.limitFromMaps(sequenceOf(
+            "12c00000-2ac00000 rw-p 00000000 00:05 10                                 /dev/ashmem/dalvik-main space (region space)",
+            stack,
+            "ffff0000-ffff1000 r-xp 00000000 00:00 0                                  [vectors]",
+        ))
+        assertEquals(3_072L, limit("be8d2000-be8f3000 rw-p 00000000 00:00 0                                  [stack]"))
+        assertEquals(4_096L, limit("ff8cf000-ff8f0000 rw-p 00000000 00:00 0                                  [stack]"))
+        assertEquals(2_048L, limit("7e9f0000-7ea11000 rw-p 00000000 00:00 0                                  [stack]"))
+        assertEquals(null, BufferSizing.limitFromMaps(sequenceOf("ffff0000-ffff1000 r-xp 00000000 00:00 0 [vectors]")))
+    }
 }

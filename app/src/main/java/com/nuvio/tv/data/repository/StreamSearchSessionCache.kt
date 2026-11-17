@@ -103,6 +103,18 @@ internal class StreamSearchSessionCache(
             ?: ordered.firstNotNullOfOrNull { snapshotData(it.value) }
     }
 
+    /** Cancels every search started in [searchMode]; nothing they found so far is kept for reuse. */
+    suspend fun cancelSearchMode(searchMode: String) = mutex.withLock {
+        val iterator = sessions.entries.iterator()
+        while (iterator.hasNext()) {
+            val (key, session) = iterator.next()
+            if (key.searchMode == searchMode) {
+                iterator.remove()
+                session.cancelAndComplete()
+            }
+        }
+    }
+
     private suspend fun acquireSession(
         key: StreamSearchRequestKey,
         forceRefresh: Boolean,

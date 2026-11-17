@@ -88,6 +88,8 @@ class BufferMemoryKeeperTest {
         control, { free }, { now }, worker, budgetManaged, ceilingMb * mb,
         swapFreeMb = { swapFree },
         addressSpaceUsedMb = { addressSpaceMb },
+        addressSpaceCeilingMb = { ceilingMb32 },
+        addressMemo = AddressSpaceMemo(),
         floorBytes = floorMb * mb,
         oneGbBox = oneGbBox,
         onLastWarning = { lastWarnings++ },
@@ -95,6 +97,7 @@ class BufferMemoryKeeperTest {
     )
 
     private var addressSpaceMb: Long? = null
+    private var ceilingMb32 = 3_300L
 
     private fun take(megabytes: Long): List<Allocation> =
         List((megabytes * mb / segment).toInt()) { allocator.allocate() }
@@ -142,6 +145,86 @@ class BufferMemoryKeeperTest {
         k.tendAddressSpace()
         assertEquals(-1L, k.roomCapBytes)
         assertEquals(-1L, k.effectiveCapBytes())
+    }
+
+    @Test
+    fun `after a seek the buffer may fill again the space it gave back`() {
+        addressSpaceMb = 3_280L
+        val lc = customControl(budgetMb = 300)
+        val held = take(100)
+        val k = keeper(lc)
+        k.tendAddressSpace()
+        assertEquals(120 * mb, k.roomCapBytes)
+        giveBack(held)
+        k.tendAddressSpace()
+        assertEquals(120 * mb, k.roomCapBytes)
+    }
+
+    @Test
+    fun `space the allocator really returned is not counted twice`() {
+        addressSpaceMb = 3_280L
+        val lc = customControl(budgetMb = 300)
+        val held = take(100)
+        val k = keeper(lc)
+        k.tendAddressSpace()
+        giveBack(held)
+        addressSpaceMb = 3_180L
+        k.tendAddressSpace()
+        assertEquals(120 * mb, k.roomCapBytes)
+    }
+
+    @Test
+    fun `the next film does not count what the last one held as its own room`() {
+        addressSpaceMb = 3_280L
+        val held = take(100)
+        keeper(customControl(budgetMb = 300)).tendAddressSpace()
+        giveBack(held)
+        val next = keeper(customControl(budgetMb = 300))
+        next.attach()
+        assertEquals(maxOf(20L, BufferSizing.MIN_SIZED_BUFFER_MB.toLong()) * mb, next.roomCapBytes)
+        next.detach()
+    }
+
+    @Test
+    fun `growth elsewhere after the buffer gave its range back is not counted as buffer room`() {
+        ceilingMb32 = 3_300L
+        addressSpaceMb = 3_000L
+        val lc = customControl(budgetMb = 1_200)
+        val held = take(1_000)
+        val k = keeper(lc)
+        k.tendAddressSpace()
+        giveBack(held.drop(held.size / 10))
+        addressSpaceMb = 2_100L
+        k.tendAddressSpace()
+        addressSpaceMb = 2_700L
+        k.tendAddressSpace()
+        assertEquals(700 * mb, k.roomCapBytes)
+    }
+
+    @Test
+    fun `the buffer never grows into the last 300 MB under the limit`() {
+        ceilingMb32 = 3_300L
+        addressSpaceMb = 3_000L
+        val lc = customControl(budgetMb = 1_200)
+        val held = take(1_000)
+        val k = keeper(lc)
+        k.tendAddressSpace()
+        giveBack(held.drop(held.size / 10))
+        addressSpaceMb = 2_700L
+        k.tendAddressSpace()
+        val limitMb = 3_300L + BufferSizing.ADDRESS_SPACE_SPARE_32BIT_MB
+        val growthMb = k.roomCapBytes / mb - 100L
+        assertTrue(2_700L + growthMb <= limitMb - BufferMemoryKeeper.ADDRESS_SPACE_HARD_SPARE_MB)
+    }
+
+    @Test
+    fun `a box with 3 GB of address space keeps its spare below 3 GB`() {
+        ceilingMb32 = BufferSizing.ADDRESS_SPACE_4GB_MB - 1_024L - BufferSizing.ADDRESS_SPACE_SPARE_32BIT_MB
+        addressSpaceMb = 2_914L
+        val k = keeper(customControl(budgetMb = 1_000))
+        k.attach()
+        assertEquals(BufferSizing.MIN_SIZED_BUFFER_MB * mb, k.roomCapBytes)
+        k.detach()
     }
 
     @Test

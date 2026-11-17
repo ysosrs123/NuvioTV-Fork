@@ -8,7 +8,6 @@ import com.nuvio.tv.core.torrent.torrentInitialLoadingProgress
 import com.nuvio.tv.domain.model.Stream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -18,11 +17,14 @@ internal suspend fun PlayerRuntimeController.startTorrentStream(
     infoHash: String,
     fileIdx: Int?,
     filename: String? = null,
-    trackers: List<String> = emptyList()
+    trackers: List<String> = emptyList(),
+    freshTorrent: Boolean = false
 ): String {
     isTorrentStream = true
+    if (torrentErrorRecoveryHash != infoHash) torrentErrorRecoveryHash = null
     currentInfoHash = infoHash
     currentFileIdx = fileIdx
+    lastTorrentRetryTarget = TorrentRetryTarget(infoHash, fileIdx)
 
     setLoadingStatus(
         phase = "torrent_starting_engine",
@@ -39,7 +41,7 @@ internal suspend fun PlayerRuntimeController.startTorrentStream(
     }
 
     val effectiveFilename = filename ?: currentFilename
-    return torrentService.startStream(infoHash, fileIdx, effectiveFilename, trackers)
+    return torrentService.startStream(infoHash, fileIdx, effectiveFilename, trackers, freshTorrent)
 }
 
 internal fun PlayerRuntimeController.stopTorrentStream() {
@@ -62,23 +64,89 @@ internal fun PlayerRuntimeController.stopTorrentStream() {
 internal fun PlayerRuntimeController.observeTorrentState() {
     torrentStateObserverJob?.cancel()
     torrentStateObserverJob = scope.launch {
-        torrentService.state.collectLatest { torrentState ->
+        collectTorrentStates(torrentService.state, torrentRecoveryStartGuard) { torrentState ->
             when (torrentState) {
                 is TorrentState.Idle -> Unit
                 is TorrentState.Connecting -> onTorrentConnecting(torrentState)
                 is TorrentState.Streaming -> onTorrentStreaming(torrentState)
-                is TorrentState.Error -> {
-                    Log.e(TAG, "Torrent error: ${torrentState.message}")
-                    _uiState.update {
-                        it.copy(
-                            error = context.getString(R.string.player_error_torrent, torrentState.message),
-                            showLoadingOverlay = false,
-                            torrentBufferingMessage = null
-                        )
-                    }
-                }
+                is TorrentState.Error -> onTorrentError(torrentState.message)
             }
         }
+    }
+}
+
+private fun PlayerRuntimeController.onTorrentError(errorMessage: String) {
+    val infoHash = currentInfoHash
+    val action = TorrentErrorRecovery.decide(
+        firstFrameRendered = hasRenderedFirstFrame,
+        recoveryUsed = infoHash != null && torrentErrorRecoveryHash == infoHash,
+        canRecover = infoHash != null
+    )
+    Log.e(TAG, "Torrent error: $errorMessage action=$action")
+    when (action) {
+        TorrentErrorRecovery.Action.Recover -> recoverTorrentAfterError(infoHash!!, errorMessage)
+        TorrentErrorRecovery.Action.NextSource -> moveOnAfterTorrentError(errorMessage)
+        TorrentErrorRecovery.Action.ShowError -> _uiState.update {
+            it.copy(
+                error = context.getString(R.string.player_error_torrent, errorMessage),
+                showLoadingOverlay = false,
+                torrentBufferingMessage = null
+            )
+        }
+    }
+}
+
+private fun PlayerRuntimeController.recoverTorrentAfterError(infoHash: String, errorMessage: String) {
+    torrentErrorRecoveryHash = infoHash
+    val positionMs = currentPlaybackPositionMs()?.takeIf { it > 0L } ?: 0L
+    val stream = Stream(
+        name = _uiState.value.currentStreamName,
+        title = null,
+        description = null,
+        url = null,
+        ytId = null,
+        infoHash = infoHash,
+        fileIdx = currentFileIdx,
+        externalUrl = null,
+        behaviorHints = null,
+        addonName = currentAddonName ?: "",
+        addonLogo = currentAddonLogo,
+        sources = currentTorrentSources
+    )
+    Log.w(
+        TAG,
+        "TORRENT_RECOVER hash=${infoHash.take(8)} positionMs=$positionMs error=$errorMessage; " +
+            "removing the torrent and adding it again"
+    )
+    releasePlayer()
+    resetLoadingOverlayForNewStream()
+    _uiState.update {
+        it.copy(
+            error = null,
+            showLoadingOverlay = it.loadingOverlayEnabled,
+            torrentBufferingMessage = null,
+            pendingSeekPosition = if (positionMs > 0L) positionMs else it.pendingSeekPosition
+        )
+    }
+    launchTorrentSourceStream(stream, infoHash, loadSavedProgress = true, recovering = true)
+}
+
+private fun PlayerRuntimeController.moveOnAfterTorrentError(
+    errorMessage: String,
+    cancelStart: Boolean = true
+) {
+    if (cancelStart) {
+        torrentStreamJob?.cancel()
+        torrentStreamJob = null
+    }
+    torrentErrorRecoveryHash = null
+    val positionMs = currentPlaybackPositionMs()?.takeIf { it > 0L } ?: 0L
+    Log.w(TAG, "TORRENT_RECOVER failed positionMs=$positionMs error=$errorMessage; moving on")
+    val message = context.getString(R.string.player_error_torrent, errorMessage)
+    releasePlayer()
+    if (positionMs > 0L) _uiState.update { it.copy(pendingSeekPosition = positionMs) }
+    if (!advanceToNextLiveSource(message)) {
+        surfaceSourceFailoverError(message)
     }
 }
 
@@ -221,9 +289,11 @@ private fun PlayerRuntimeController.onTorrentStreaming(torrentState: TorrentStat
 internal fun PlayerRuntimeController.launchTorrentSourceStream(
     stream: Stream,
     infoHash: String,
-    loadSavedProgress: Boolean
+    loadSavedProgress: Boolean,
+    recovering: Boolean = false
 ) {
     torrentStreamJob?.cancel()
+    val recoveryToken = if (recovering) torrentRecoveryStartGuard.begin() else 0L
     torrentStreamJob = scope.launch {
         try {
             observeTorrentState()
@@ -238,7 +308,8 @@ internal fun PlayerRuntimeController.launchTorrentSourceStream(
                 infoHash = infoHash,
                 fileIdx = stream.getEffectiveFileIdx(),
                 filename = stream.behaviorHints?.filename,
-                trackers = trackers
+                trackers = trackers,
+                freshTorrent = recovering
             )
 
             currentStreamUrl = localUrl
@@ -254,10 +325,24 @@ internal fun PlayerRuntimeController.launchTorrentSourceStream(
                 headers = emptyMap(),
                 loadSavedProgress = loadSavedProgress
             )
+            if (recovering) {
+                torrentRecoveryStartGuard.end(recoveryToken)
+                val state = torrentService.state.value
+                if (currentInfoHash == infoHash && state is TorrentState.Error) onTorrentError(state.message)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start torrent stream", e)
+            if (recovering) {
+                if (currentInfoHash == infoHash) {
+                    moveOnAfterTorrentError(
+                        e.message ?: context.getString(R.string.error_unknown),
+                        cancelStart = false
+                    )
+                }
+                return@launch
+            }
             _uiState.update {
                 it.copy(
                     error = context.getString(
@@ -268,6 +353,8 @@ internal fun PlayerRuntimeController.launchTorrentSourceStream(
                     loadingProgress = null
                 )
             }
+        } finally {
+            if (recovering) torrentRecoveryStartGuard.end(recoveryToken)
         }
     }
 }

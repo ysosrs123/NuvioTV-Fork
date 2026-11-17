@@ -58,7 +58,7 @@ class StartupWatchdogDecisionTest {
         assertEquals(Step.Fire("no_data_buffered"), step(openRequestAgeMs = 12_000L, loadErrorSeen = true))
         assertEquals(Step.Fire("no_data_buffered"), step(openRequestAgeMs = 16_000L))
         assertEquals(Step.Fire("no_data_buffered"), step(openRequestAgeMs = null))
-        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 41_000L, ceilingMs = 60_000L, openRequestAgeMs = 12_000L))
+        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 60_000L, ceilingMs = 60_000L, openRequestAgeMs = 12_000L))
         // A stuck player thread is not a slow server.
         assertEquals(Step.Fire("decoder_unresponsive"), step(openRequestAgeMs = 12_000L, playbackThreadAnswers = false))
     }
@@ -68,7 +68,15 @@ class StartupWatchdogDecisionTest {
         // Headers read, resume point at 282 s still on its way from the NAS.
         assertEquals(Step.WaitForData, step(slowStart = true, ceilingMs = 80_000L, positionMs = 282_049L, lastPositionMs = 282_049L))
         // Past the ceiling it gives up, and says the stream did not deliver.
-        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 61_000L, slowStart = true, ceilingMs = 80_000L))
+        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 80_000L, slowStart = true, ceilingMs = 80_000L))
+    }
+
+    @Test
+    fun aCheckThatLandsLateStillGetsTheLastWait() {
+        assertEquals(Step.WaitForData, step(elapsedMs = 60_050L, slowStart = true, ceilingMs = 80_000L))
+        assertEquals(Step.Extend, step(elapsedMs = 40_050L, ceilingMs = 60_000L, bufferedAheadMs = 9_000L, lastBufferedAheadMs = 4_000L))
+        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 80_100L, slowStart = true, ceilingMs = 80_000L))
+        assertEquals(Step.Fire("no_data_buffered"), step(elapsedMs = 79_900L, slowStart = true, ceilingMs = 80_000L))
     }
 
     @Test

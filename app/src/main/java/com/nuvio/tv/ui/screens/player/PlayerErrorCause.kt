@@ -76,6 +76,30 @@ internal class OutsideFailureStreak {
     }
 }
 
+internal fun PlayerErrorCard.applySendRule(sourceKey: String?, streak: OutsideFailureStreak): PlayerErrorCard =
+    if (!OutsideFailureStreak.blocksSend(cause)) this else copy(sendAllowed = streak.record(cause, sourceKey))
+
+/**
+ * The card a player error would have shown, held while Arc looks for another source. The error screen that search
+ * ends on shows it only when it is still about the same link and the same error.
+ */
+internal data class HeldFailoverCard(val sourceKey: String, val detail: String, val card: PlayerErrorCard) {
+    fun forEnd(sourceKey: String, detail: String, streak: OutsideFailureStreak): PlayerErrorCard? =
+        if (sourceKey != this.sourceKey || detail != this.detail) null else card.applySendRule(sourceKey, streak)
+
+    /** The same card under the text the screen will show instead, as long as it is still about [from]. */
+    fun shownAs(from: String, to: String): HeldFailoverCard? =
+        takeIf { it.detail == from }?.copy(detail = to, card = card.copy(message = to))
+
+    companion object {
+        /** Each source that fails on the way counts towards bringing Send back, not only the last one. */
+        fun hold(sourceKey: String, detail: String, card: PlayerErrorCard, streak: OutsideFailureStreak): HeldFailoverCard {
+            if (OutsideFailureStreak.blocksSend(card.cause)) streak.record(card.cause, sourceKey)
+            return HeldFailoverCard(sourceKey, detail, card)
+        }
+    }
+}
+
 internal fun PlayerErrorCard?.matching(error: String?): PlayerErrorCard? = this?.takeIf { error != null && it.message == error }
 
 internal object PlayerErrorCauses {

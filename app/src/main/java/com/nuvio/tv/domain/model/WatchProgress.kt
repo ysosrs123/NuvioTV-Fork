@@ -91,14 +91,14 @@ data class WatchProgress(
         // Position is the most precise resume indicator. Prefer it over
         // progressPercent even when saved duration is 0 (e.g. progress was
         // saved while paused and getEffectiveDuration returned 0).
-        if (position > 0) {
-            return position.coerceIn(0L, actualDuration)
+        if (position > 0 && position < actualDuration) {
+            return position
         }
         progressPercent?.let { explicitPercent ->
             val fraction = (explicitPercent / 100f).coerceIn(0f, 1f)
             return (actualDuration * fraction).toLong()
         }
-        return position.coerceAtLeast(0L)
+        return 0L
     }
 }
 

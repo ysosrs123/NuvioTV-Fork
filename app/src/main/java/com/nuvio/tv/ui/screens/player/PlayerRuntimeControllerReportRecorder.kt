@@ -5,6 +5,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.video.VideoFrameMetadataListener
 import com.nuvio.tv.core.player.BufferBudgetControl
+import com.nuvio.tv.core.player.amlfel.AmlFelPresentationStats
 import com.nuvio.tv.core.report.PlaybackRecorder
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import com.nuvio.tv.core.report.RECORDER_UNKNOWN
@@ -26,7 +27,10 @@ internal fun PlayerRuntimeController.recordExoSample(player: ExoPlayer, position
         return
     }
     val tunnelled = player.isTunnelingEnabled
-    val counters = if (tunnelled) null else player.videoDecoderCounters?.also { it.ensureUpdated() }
+    // The native FEL renderer hands frames straight to the video layer: its counters stay at zero, which is not a
+    // measurement. Its own picture clock readings stand in for them.
+    val nativeFel = !tunnelled && nativeVideoSelection.isSelected
+    val counters = if (tunnelled || nativeFel) null else player.videoDecoderCounters?.also { it.ensureUpdated() }
     val dropped = counters?.droppedBufferCount ?: RECORDER_UNKNOWN
     val sink = playbackSpeedAwareAudioSink
     val jitter = sink?.audioClockJitter()
@@ -56,10 +60,29 @@ internal fun PlayerRuntimeController.recordExoSample(player: ExoPlayer, position
             audioHeadMs = clock?.headMs ?: RECORDER_UNKNOWN,
             audioLatencyMs = clock?.latencyMs ?: RECORDER_UNKNOWN,
             audioClockSource = clock?.source ?: RECORDER_UNKNOWN,
-            audioWriteStalls = clock?.writeStalls ?: RECORDER_UNKNOWN
-        )
+            audioWriteStalls = clock?.writeStalls ?: RECORDER_UNKNOWN,
+            videoPath = when {
+                tunnelled -> PlaybackRecorder.VIDEO_PATH_TUNNEL
+                nativeFel -> PlaybackRecorder.VIDEO_PATH_NATIVE_FEL
+                else -> PlaybackRecorder.VIDEO_PATH_DECODER
+            },
+            pictureHolds = if (nativeFel) AmlFelPresentationStats.holds else RECORDER_UNKNOWN,
+            clockCorrections = if (nativeFel) AmlFelPresentationStats.clockCorrections else RECORDER_UNKNOWN,
+            pictureOffsetMs = if (nativeFel) felPictureOffsetMs() else RECORDER_UNKNOWN
+        ),
+        framesTimed = counters != null
     )
     reportRecordingEnded(PlaybackRecorder.takeAutoStop())
+}
+
+/** The recorder keeps -1 for "not measured", so a real -1 ms is written as 0. */
+private fun felPictureOffsetMs(): Int {
+    val offset = AmlFelPresentationStats.pictureOffsetMs
+    return when (offset) {
+        AmlFelPresentationStats.NO_OFFSET -> RECORDER_UNKNOWN
+        RECORDER_UNKNOWN -> 0
+        else -> offset
+    }
 }
 
 @OptIn(UnstableApi::class)
@@ -76,7 +99,13 @@ internal fun PlayerRuntimeController.detachFrameListener() {
     runCatching { player.clearVideoFrameMetadataListener(recordedFrameListener) }
 }
 
-internal fun PlayerRuntimeController.recordMpvSample(positionMs: Long, cacheAheadMs: Long, playing: Boolean, stalled: Boolean) {
+internal fun PlayerRuntimeController.recordMpvSample(
+    positionMs: Long,
+    cacheAheadMs: Long,
+    playing: Boolean,
+    stalled: Boolean,
+    frameDrops: () -> MpvFrameDrops? = { null }
+) {
     PlaybackRecorder.notePosition(positionMs)
     PlaybackRecorder.noteMpvState(playing, stalled)
     if (!PlaybackRecorder.isSampleDue(currentPlayerSettingsForReport.reportRecorderEnabled)) return
@@ -85,15 +114,24 @@ internal fun PlayerRuntimeController.recordMpvSample(positionMs: Long, cacheAhea
         reportRecordingEnded(PlaybackRecorder.takeAutoStop())
         return
     }
+    val mpvFrameDrops = frameDrops()
     PlaybackRecorder.sample(
         engine = PlaybackRecorder.ENGINE_MPV,
         readyAheadMs = cacheAheadMs,
         loaderActive = RECORDER_UNKNOWN,
-        droppedFrames = RECORDER_UNKNOWN,
+        droppedFrames = mpvFrameDrops?.outputDropped ?: RECORDER_UNKNOWN,
         audioUnderruns = RECORDER_UNKNOWN,
         bufferCapBytes = -1L,
         tunnelled = false,
-        playing = playing && !stalled
+        playing = playing && !stalled,
+        extras = SampleExtras(
+            skippedFrames = mpvFrameDrops?.decoderDropped ?: RECORDER_UNKNOWN,
+            videoPath = PlaybackRecorder.VIDEO_PATH_MPV
+        ),
+        framesTimed = false
     )
     reportRecordingEnded(PlaybackRecorder.takeAutoStop())
 }
+
+/** Frames MPV threw away: [outputDropped] at the screen (late), [decoderDropped] before decoding to catch up. */
+internal data class MpvFrameDrops(val outputDropped: Int?, val decoderDropped: Int?)

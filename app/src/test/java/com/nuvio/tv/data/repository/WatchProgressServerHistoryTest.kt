@@ -91,7 +91,8 @@ class WatchProgressServerHistoryTest {
             trackingProgressProviders = TrackingProgressProviderRegistry(setOf(trakt)),
             trackingHistoryWriters = TrackingHistoryWriterRegistry(setOf(writer)),
             mutationStore = mutationStore,
-            serverWatched = serverWatched
+            serverWatched = serverWatched,
+            addonEventDispatcher = mockk(relaxed = true)
         )
     }
 

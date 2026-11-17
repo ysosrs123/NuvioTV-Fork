@@ -146,6 +146,9 @@ internal class ParallelRangeDataSource(
         private const val MAX_CONSECUTIVE_ZERO_READS = 3
         /** readOnce: the chunk was freed before it could be copied, read again. */
         private const val LEASE_LOST = Int.MIN_VALUE
+        private const val MAX_MISSING_PIECE_RETRIES = 3
+
+        internal fun reportsEndOfInput(bytesRemaining: Long): Boolean = bytesRemaining <= 0L
         // Reader-blocked chunk escalation. Fire once the
         // reader has waited this long on a chunk whose in-flight watermark has
         // not moved (a hung request, invisible to the body-rate watchdog);
@@ -1318,6 +1321,7 @@ internal class ParallelRangeDataSource(
     // demonstrated sequential consumption, so side-cursor opens (tiny reads,
     // then reopen) never trigger the connections+1 chunk prefetch fan-out.
     private var bytesServedThisOpen: Long = 0L
+    private var missingPieceRetries = 0
     private var inFlightServeLogged: Boolean = false
     // Memory-tiered chunk cap: low-RAM devices keep a ceiling of
     // connections + 2; high-RAM gets two extra chunks of LRU headroom.
@@ -1720,12 +1724,13 @@ internal class ParallelRangeDataSource(
 
         // Load the chunk for the current position
         if (currentChunkIndex != chunkIndex || currentChunk == null) {
-            val activeSession = session ?: return C.RESULT_END_OF_INPUT
+            val activeSession = session ?: return endedEarly("no session")
             ensureChunkScheduled(chunkIndex)
             // Speed-up downloads start with the piece they follow, not when it completes: a reader waiting on
             // that piece would otherwise only ever have one download running.
             if (depthLimit != null) scheduleChunks()
-            val future = activeSession.futures[chunkIndex] ?: return C.RESULT_END_OF_INPUT
+            val future = activeSession.futures[chunkIndex] ?: return missingPiece(chunkIndex)
+            missingPieceRetries = 0
             activeSession.noteRead(chunkIndex)
             // Progressive reads: blocking on chunk 0's LAST byte would hold
             // read() back while the bytes it needs have long been on the
@@ -1752,7 +1757,7 @@ internal class ParallelRangeDataSource(
                         "waitMs=${SystemClock.elapsedRealtime() - blockT0} preDone=$preDone"
                 )
             } catch (e: Exception) {
-                if (closed.get()) return C.RESULT_END_OF_INPUT
+                if (closed.get()) return endedEarly("closed")
                 // A failed download is not retryable by waiting: drop
                 // the future so the next attempt schedules a fresh one.
                 // Cancel before dropping: an orphaned in-flight
@@ -1780,7 +1785,7 @@ internal class ParallelRangeDataSource(
             scheduleChunks()
         }
 
-        val chunk = currentChunk ?: return C.RESULT_END_OF_INPUT
+        val chunk = currentChunk ?: return endedEarly("no piece")
         val available = chunk.size - currentChunkReadOffset
         if (available <= 0) {
             val wasBootstrap = chunk === bootstrapChunk
@@ -1789,7 +1794,7 @@ internal class ParallelRangeDataSource(
                 bootstrapStartPosition = C.TIME_UNSET
             }
             currentChunk = null
-            if (!wasBootstrap && position / chunkSize == currentChunkIndex) return C.RESULT_END_OF_INPUT
+            if (!wasBootstrap && position / chunkSize == currentChunkIndex) return endedEarly("piece ran out")
             return read(buffer, offset, length)
         }
 
@@ -2875,6 +2880,18 @@ internal class ParallelRangeDataSource(
         resources.releaseSessionBuffer(buffer, chunkSize, poolCap)
     }
 
+    // An early end of input on a file of known length would be stored by the disk cache as the file's length.
+    private fun endedEarly(reason: String): Int {
+        if (reportsEndOfInput(bytesRemaining)) return C.RESULT_END_OF_INPUT
+        throw IOException("Range source ended early at $position of $totalFileLength ($reason)")
+    }
+
+    private fun missingPiece(chunkIndex: Long): Int {
+        if (++missingPieceRetries <= MAX_MISSING_PIECE_RETRIES) return LEASE_LOST
+        missingPieceRetries = 0
+        return endedEarly("piece $chunkIndex not scheduled")
+    }
+
     /**
      * Detach instance-local read state. Session chunks (and in-flight
      * downloads) are untouched: they belong to the shared session and their
@@ -3002,12 +3019,13 @@ internal class ParallelRangeDataSource(
         }
 
         if (currentChunkIndex != chunkIndex || currentChunk == null) {
-            val activeSession = session ?: return C.RESULT_END_OF_INPUT
+            val activeSession = session ?: return endedEarly("no session")
             ensureChunkScheduled(chunkIndex)
             // Speed-up downloads start with the piece they follow, not when it completes: a reader waiting on
             // that piece would otherwise only ever have one download running.
             if (depthLimit != null) scheduleChunks()
-            val future = activeSession.futures[chunkIndex] ?: return C.RESULT_END_OF_INPUT
+            val future = activeSession.futures[chunkIndex] ?: return missingPiece(chunkIndex)
+            missingPieceRetries = 0
             activeSession.noteRead(chunkIndex)
             try {
                 // RS_CHUNK_WAIT: read() blocks on the WHOLE chunk future, so
@@ -3025,7 +3043,7 @@ internal class ParallelRangeDataSource(
                         "waitMs=${SystemClock.elapsedRealtime() - blockT0} preDone=$preDone"
                 )
             } catch (e: Exception) {
-                if (closed.get()) return C.RESULT_END_OF_INPUT
+                if (closed.get()) return endedEarly("closed")
                 // Mirror of the byte[] path: cancel before dropping,
                 // ownership-gated release if the download won the race.
                 if (activeSession.futures.remove(chunkIndex, future)) {
@@ -3045,7 +3063,7 @@ internal class ParallelRangeDataSource(
             scheduleChunks()
         }
 
-        val chunk = currentChunk ?: return C.RESULT_END_OF_INPUT
+        val chunk = currentChunk ?: return endedEarly("no piece")
         val available = chunk.size - currentChunkReadOffset
         if (available <= 0) {
             val wasBootstrap = chunk === bootstrapChunk
@@ -3054,7 +3072,7 @@ internal class ParallelRangeDataSource(
                 bootstrapStartPosition = C.TIME_UNSET
             }
             currentChunk = null
-            if (!wasBootstrap && position / chunkSize == currentChunkIndex) return C.RESULT_END_OF_INPUT
+            if (!wasBootstrap && position / chunkSize == currentChunkIndex) return endedEarly("piece ran out")
             return read(buffer, length)
         }
 

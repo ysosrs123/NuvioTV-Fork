@@ -18,7 +18,8 @@ internal data class SurroundResolveInputs(
     val softwareDecodersAvailable: Boolean,
     val forceOpticalActive: Boolean,
     val effectiveDownmixEnabled: Boolean,
-    val effectiveAudioOutputChannels: AudioOutputChannels
+    val effectiveAudioOutputChannels: AudioOutputChannels,
+    val surroundAacToAc3Allowed: Boolean = false
 )
 
 internal data class SurroundResolveResult(
@@ -81,7 +82,8 @@ internal fun resolveSurroundForRoute(
     val deniedTranscodeMimes = DeniedTranscodePlanner.effectiveTranscodeMimes(
         policy = surroundResolution.policy,
         transcodeDeniedToAc3 = surroundResolution.transcodePreferred,
-        forcePassthroughActive = inputs.forceOpticalActive
+        forcePassthroughActive = inputs.forceOpticalActive,
+        surroundAacToAc3 = surroundResolution.surroundAacToAc3 && inputs.surroundAacToAc3Allowed
     )
     return SurroundResolveResult(
         resolution = surroundResolution,
@@ -212,6 +214,7 @@ private fun PlayerRuntimeController.commitSurroundResolution(
     val routeKey = currentAudioOutputRoute?.key ?: inputs.routeKey
     val policy = surround.resolution.policy
     val policyChanged = playbackSpeedAwareAudioSink?.setPassthroughPolicy(policy) == true
+    playbackSpeedAwareAudioSink?.setAc3TranscodeMimes(surround.deniedTranscodeMimes)
     currentAudioPassthroughPolicy = policy
     ffmpegAudioRenderer?.applyDownmixSettings(
         downmixEnabled = surround.downmixEnabled,

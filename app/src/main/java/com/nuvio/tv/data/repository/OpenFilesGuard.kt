@@ -62,6 +62,8 @@ internal object MemoryDetail {
             lines.firstOrNull { it.startsWith("VmSize:") }?.filter(Char::isDigit)?.toLongOrNull()?.div(1024)
         }
         "Memory detail: graphics ${mb("summary.graphics")} MB, native ${mb("summary.native-heap")} MB, code ${mb("summary.code")} MB, " +
-            "total ${mb("summary.total-pss")} MB, swapped ${mb("summary.total-swap")} MB, address space ${address ?: "?"} MB"
+            "total ${mb("summary.total-pss")} MB, swapped ${mb("summary.total-swap")} MB, address space ${address ?: "?"} MB" +
+            (if (android.os.Process.is64Bit()) "" else
+                " of ${runCatching { com.nuvio.tv.core.player.BufferSizing.addressSpaceLimit32BitMb }.getOrNull() ?: "?"} MB")
     }.getOrNull()
 }

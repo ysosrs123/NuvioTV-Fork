@@ -159,7 +159,7 @@ class PostPlayWatchedHistorySchedulingTest {
             mockk<LayoutPreferenceDataStore>(relaxed=true),sync,watched,watchedSync,
             mockk<AuthManager>(relaxed=true) { every { isAuthenticated } returns false },
             mockk<MetaRepository>(relaxed=true),mockk<com.nuvio.tv.core.tmdb.TmdbService>(relaxed=true),manager,
-            TrackingProgressProviderRegistry(emptySet()),TrackingHistoryWriterRegistry(emptySet()),mutations,mockk(relaxed=true))
+            TrackingProgressProviderRegistry(emptySet()),TrackingHistoryWriterRegistry(emptySet()),mutations,mockk(relaxed=true),mockk(relaxed=true))
         val gates=mutableListOf<CompletableDeferred<Unit>>()
         val scopes=mutableListOf<CoroutineScope>()
         fun gate()=CompletableDeferred<Unit>().also { gates+=it }

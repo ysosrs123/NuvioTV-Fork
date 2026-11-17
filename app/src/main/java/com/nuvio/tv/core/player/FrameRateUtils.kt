@@ -56,6 +56,10 @@ object FrameRateUtils {
 
     private var originalModeId: Int? = null
 
+    /** The mode Arc last asked for the film on screen; null when nothing was asked or the original mode is back. */
+    @Volatile var lastRequest: AfrRequest? = null
+        private set
+
     private const val FRAME_RATE_CACHE_SIZE = 64
     private val frameRateCache = object : LinkedHashMap<String, FrameRateDetection>(FRAME_RATE_CACHE_SIZE, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, FrameRateDetection>?): Boolean {
@@ -749,12 +753,22 @@ object FrameRateUtils {
                     ?: activeMode.takeIf { it.modeId == choice.mode.modeId }
             }
             if (modeBest == null) {
+                lastRequest = null
                 return@withContext Pair<Display.Mode?, DisplayModeSwitchResult?>(
                     null,
                     DisplayModeSwitchResult(activeMode)
                 )
             }
             recordOriginalMode(display)
+            lastRequest = AfrRequest(
+                modeId = modeBest.modeId,
+                refreshHz = modeBest.refreshRate,
+                width = modeBest.physicalWidth,
+                height = modeBest.physicalHeight,
+                videoFps = frameRate,
+                fromModeId = activeMode.modeId,
+                result = if (modeBest.modeId == activeMode.modeId) AfrRequest.KEPT else AfrRequest.ASKED
+            )
             if (modeBest.modeId == activeMode.modeId) {
                 // Not necessarily optimal: very often it is simply the only mode on offer,
                 // and calling 60Hz "optimal" for 25fps content is a plain untruth. Say
@@ -830,6 +844,7 @@ object FrameRateUtils {
                         "android_reports hz=${mode.refreshRate}"
                     )
                     DisplayRefreshMeter.measure(mode.refreshRate, seamless, fromHz = fromHz)
+                    markRequest(expectedMode.modeId, AfrRequest.REACHED)
                     return DisplayModeSwitchResult(mode)
                 }
             } else {
@@ -847,6 +862,7 @@ object FrameRateUtils {
             com.nuvio.tv.core.report.RecorderEvent.DISPLAY_MODE,
             "timed_out lastHz=${fallbackMode.refreshRate}"
         )
+        markRequest(expectedMode.modeId, AfrRequest.TIMED_OUT)
         return DisplayModeSwitchResult(fallbackMode)
     }
 
@@ -856,6 +872,12 @@ object FrameRateUtils {
 
     fun clearOriginalDisplayMode() {
         originalModeId = null
+        lastRequest = null
+    }
+
+    private fun markRequest(modeId: Int, result: String) {
+        val request = lastRequest ?: return
+        if (request.modeId == modeId) lastRequest = request.copy(result = result)
     }
 
     /** Elapsed-realtime of the last display mode request, for the settle wait. 0 before any. */
@@ -886,6 +908,7 @@ object FrameRateUtils {
     fun restoreOriginalDisplayMode(activity: Activity): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
         DisplayRefreshMeter.clear()
+        lastRequest = null
         val targetModeId = originalModeId ?: return false
 
         return try {
@@ -2135,6 +2158,24 @@ object FrameRateUtils {
             return decoded
         }
         return null
+    }
+}
+
+/** One frame rate request: the mode asked for, the one active before it, and how far the switch got. */
+data class AfrRequest(
+    val modeId: Int,
+    val refreshHz: Float,
+    val width: Int,
+    val height: Int,
+    val videoFps: Float,
+    val fromModeId: Int,
+    val result: String
+) {
+    companion object {
+        const val KEPT = "kept"
+        const val ASKED = "asked"
+        const val REACHED = "reached"
+        const val TIMED_OUT = "timed_out"
     }
 }
 

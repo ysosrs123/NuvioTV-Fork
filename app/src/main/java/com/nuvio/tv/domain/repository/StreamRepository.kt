@@ -15,6 +15,9 @@ interface StreamRepository {
     /** Suspends local plugin work while playback owns the device, then resumes the same search. */
     fun setLocalPluginSearchPaused(paused: Boolean)
 
+    /** Ends next-episode plugin searches, which run through a playback pause, once their episode has started or playback ends. */
+    fun stopNextEpisodePluginSearches() {}
+
     /** Every add-on and server of the running search has answered; only local plugins are still out (or paused). */
     fun sourcesAnsweredExceptPlugins(type: String, videoId: String, season: Int?, episode: Int?): Boolean = false
 

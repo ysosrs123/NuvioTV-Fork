@@ -39,4 +39,30 @@ class TrailerLifecycleBindingTest {
         assertEquals(1, starts)
         assertEquals(1, stops)
     }
+
+    @Test fun `leaving the screen uses the later stop, pausing the app still stops at once`() {
+        val owner = Owner()
+        val events = mutableListOf<String>()
+        val binding = TrailerLifecycleBinding(
+            owner.lifecycle, { events += "resume" }, { events += "stop" }, { events += "stop-when-idle" }
+        )
+        owner.lifecycle.currentState = Lifecycle.State.RESUMED
+        owner.lifecycle.currentState = Lifecycle.State.STARTED
+        owner.lifecycle.currentState = Lifecycle.State.RESUMED
+        binding.close()
+        binding.close()
+        assertEquals(listOf("resume", "stop", "resume", "stop-when-idle"), events)
+    }
+
+    @Test fun `closing after the app paused does not stop twice`() {
+        val owner = Owner()
+        val events = mutableListOf<String>()
+        val binding = TrailerLifecycleBinding(
+            owner.lifecycle, { events += "resume" }, { events += "stop" }, { events += "stop-when-idle" }
+        )
+        owner.lifecycle.currentState = Lifecycle.State.RESUMED
+        owner.lifecycle.currentState = Lifecycle.State.STARTED
+        binding.close()
+        assertEquals(listOf("resume", "stop"), events)
+    }
 }

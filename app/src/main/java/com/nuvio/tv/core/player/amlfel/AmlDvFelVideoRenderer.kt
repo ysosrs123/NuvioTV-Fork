@@ -123,6 +123,7 @@ internal class AmlDvFelVideoRenderer(
     private val inputBuffer = DecoderInputBuffer(DecoderInputBuffer.BUFFER_REPLACEMENT_MODE_DIRECT)
     private val counters = DecoderCounters()
     private val bufferStatus = IntArray(3)
+    private val holdDetector = FelPictureHoldDetector()
 
     private var inputFormat: Format? = null
     private var videoOutput: Any? = null
@@ -207,6 +208,8 @@ internal class AmlDvFelVideoRenderer(
         onSelectionChanged(true)
         resetLeadingCheck()
         eventDispatcher.enabled(counters)
+        AmlFelPresentationStats.reset()
+        resetPictureWatch()
         elProbeDone = false
         elProbeSamples = 0
         elProbeUnknownLogged = 0
@@ -251,6 +254,7 @@ internal class AmlDvFelVideoRenderer(
 
     override fun onStopped() {
         started = false
+        resetPictureWatch()
         // Before the first frame of a session is up, let it appear; render() pauses right after.
         if (handle != 0L && sessionFirstFrame && !pausedApplied) applyPause()
     }
@@ -631,6 +635,7 @@ internal class AmlDvFelVideoRenderer(
         if (handle == 0L) return
         AmlFelNative.close(handle) // also un-pauses tsync
         handle = 0L
+        resetPictureWatch()
         samplePending = false
         pausedApplied = false
         sessionFirstFrame = false
@@ -771,6 +776,7 @@ internal class AmlDvFelVideoRenderer(
             if (current > 0) {
                 val drift = current.toInt() - target // u32 wrap-safe signed difference
                 if (drift > -PCR_RESYNC_THRESHOLD_90K && drift < PCR_RESYNC_THRESHOLD_90K) return
+                AmlFelPresentationStats.noteClockCorrection()
             }
         }
         val r = AmlFelNative.setPcrscr(handle, target)
@@ -798,9 +804,25 @@ internal class AmlDvFelVideoRenderer(
                 lastPolledVpts = vpts
                 lastProgressRealtimeMs = now
             }
+            notePicture(vpts)
         }
         if (now - lastProgressRealtimeMs < STALL_TIMEOUT_MS) return
         throw fallback("no decoder/presentation progress for ${now - lastProgressRealtimeMs} ms")
+    }
+
+    private fun notePicture(vpts: Long) {
+        val showing = sessionFirstFrame && prerollDone && !pausedApplied
+        if (holdDetector.poll(vpts, showing)) AmlFelPresentationStats.noteHold()
+        if (showing && vpts >= 0L) {
+            AmlFelPresentationStats.notePictureOffset(AmlFelPresentationStats.offsetMs(vpts, toPts90k(lastPositionUs)))
+        } else {
+            AmlFelPresentationStats.clearPictureOffset()
+        }
+    }
+
+    private fun resetPictureWatch() {
+        holdDetector.reset()
+        AmlFelPresentationStats.clearPictureOffset()
     }
 
     // --- errors ---

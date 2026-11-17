@@ -564,9 +564,11 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
 
     fun onVideoDisabled(eventTime: AnalyticsListener.EventTime, counters: DecoderCounters) {
         counters.ensureUpdated()
-        videoRenderedOutputBuffers = counters.renderedOutputBufferCount
-        videoDroppedBuffers = counters.droppedBufferCount
-        videoMaxConsecutiveDroppedBuffers = counters.maxConsecutiveDroppedBufferCount
+        // The native FEL renderer never counts output frames, so its zeros are not a measurement.
+        val counted = !isNativeFelDecoder(videoDecoderName)
+        videoRenderedOutputBuffers = counters.renderedOutputBufferCount.takeIf { counted }
+        videoDroppedBuffers = counters.droppedBufferCount.takeIf { counted }
+        videoMaxConsecutiveDroppedBuffers = counters.maxConsecutiveDroppedBufferCount.takeIf { counted }
         if (counters.videoFrameProcessingOffsetCount > 0) {
             videoFrameProcessingOffsetTotalUs = counters.totalVideoFrameProcessingOffsetUs
             videoFrameProcessingOffsetCount = counters.videoFrameProcessingOffsetCount

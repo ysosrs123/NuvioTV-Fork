@@ -35,13 +35,12 @@ internal fun PlayerRuntimeController.chaptersFor(tracks: Tracks?): List<PlayerCh
 }
 
 /** mpv lists the chapters itself; they come with the file, so once read for a stream they are kept. */
-internal fun PlayerRuntimeController.refreshMpvChapters(view: NuvioMpvSurfaceView) {
+internal fun PlayerRuntimeController.refreshMpvChapters(named: List<PlayerChapter>) {
     if (!chaptersEnabled && !skipIntroEnabled) return
     if (mpvChaptersStreamUrl == currentStreamUrl && skipDetectionChapters.isNotEmpty()) {
         if (mpvChapters.isNotEmpty() && _uiState.value.chapters.isEmpty()) refreshChapters()
         return
     }
-    val named = view.readChapters()
     if (named.isEmpty()) return
     updateSkipDetectionChapters(named)
     mpvChapters = PlayerChapters.fromMpv(named)

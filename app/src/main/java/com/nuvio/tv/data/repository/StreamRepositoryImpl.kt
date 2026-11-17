@@ -160,6 +160,12 @@ class StreamRepositoryImpl @Inject constructor(
         localPluginSearchPaused.value = paused
     }
 
+    private val searchControlScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    override fun stopNextEpisodePluginSearches() {
+        searchControlScope.launch { streamSearchSessions.cancelSearchMode(CONTINUE_PLUGIN_SEARCH_MODE) }
+    }
+
     private val sourcesAnsweredExceptPlugins: MutableSet<String> = java.util.concurrent.ConcurrentHashMap.newKeySet()
 
     override fun sourcesAnsweredExceptPlugins(type: String, videoId: String, season: Int?, episode: Int?): Boolean =
@@ -312,7 +318,7 @@ class StreamRepositoryImpl @Inject constructor(
             serverRevision = serverStreams.revision
         ),
         searchMode = when {
-            continuePluginOnly -> "continuePluginOnly"
+            continuePluginOnly -> CONTINUE_PLUGIN_SEARCH_MODE
             preferredPluginOnly -> "preferredPluginOnly"
             else -> ""
         },
@@ -1230,3 +1236,5 @@ internal const val MAX_STREAMS_PER_SOURCE = 300
 
 internal fun <T> capStreamsPerSource(streams: List<T>, limit: Int = MAX_STREAMS_PER_SOURCE): List<T> =
     if (streams.size > limit) streams.subList(0, limit).toList() else streams
+
+private const val CONTINUE_PLUGIN_SEARCH_MODE = "continuePluginOnly"

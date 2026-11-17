@@ -623,7 +623,8 @@ internal fun PlayerRuntimeController.scheduleOwnedPlaybackRecovery(
     val url = currentStreamUrl
     val headers = currentHeaders.toMap()
     val generation = playbackRecoveryGate.generation
-    var route = runCatching { AudioOutputRouteDetector.detect(context)?.key }.getOrNull()
+    val stableRoute = currentAudioOutputRoute?.key
+    val routeAtError = runCatching { AudioOutputRouteDetector.detect(context)?.key }.getOrNull()
     val paused = pausedByUser
     val position = _uiState.value.pendingSeekPosition ?: positionMs.coerceAtLeast(0L)
     // The track that plays is kept: a restored choice is cleared once it matched, so it is not always remembered.
@@ -650,15 +651,32 @@ internal fun PlayerRuntimeController.scheduleOwnedPlaybackRecovery(
         releasePlayer(flushPlaybackState = false, preserveRecovery = true)
         delay(delayMs)
         if (!playbackRecoveryGate.isCurrent(generation, url, headers) || currentStreamUrl != url || currentHeaders != headers) return@launch
-        if (awaitOutputFor != null) {
-            val waited = awaitAudioOutputForRetry(awaitOutputFor) {
+        val waited = if (awaitOutputFor != null) {
+            awaitAudioOutputForRetry(awaitOutputFor) {
                 playbackRecoveryGate.isCurrent(generation, url, headers)
             } ?: return@launch
-            if (waited) route = runCatching { AudioOutputRouteDetector.detect(context)?.key }.getOrNull()
+        } else {
+            false
         }
-        if (runCatching { AudioOutputRouteDetector.detect(context)?.key }.getOrNull() != route) {
-            _uiState.update { it.copy(error = "Audio output changed during recovery. Start playback again.", showLoadingOverlay = false) }
-            return@launch
+        val routeNow = runCatching { AudioOutputRouteDetector.detect(context)?.key }.getOrNull()
+        when (
+            RecoveryRouteCheck.decide(
+                stableRoute = stableRoute,
+                routeAtError = routeAtError,
+                routeNow = routeNow,
+                waitedForOutput = waited,
+                pcmFallbackAvailable = audioTrackPcmFallbackAvailable()
+            )
+        ) {
+            RecoveryRouteCheck.Action.RETRY -> Unit
+            RecoveryRouteCheck.Action.RETRY_PCM -> {
+                Log.w(PlayerRuntimeController.TAG, "RECOVERY output changed $stableRoute -> $routeNow, decoding to PCM")
+                markAudioPcmFallbackTried()
+            }
+            RecoveryRouteCheck.Action.STOP -> {
+                _uiState.update { it.copy(error = "Audio output changed during recovery. Start playback again.", showLoadingOverlay = false) }
+                return@launch
+            }
         }
         if (preference != null) pendingEngineSwitchTrackPreference = PlayerRuntimeController.PendingEngineSwitchTrackPreference(
             streamUrl = url, preference = preference, sourceEngine = InternalPlayerEngine.EXOPLAYER
@@ -881,10 +899,28 @@ internal fun PlayerRuntimeController.tryParsingErrorProbeFallback(
     errorRetryJob?.cancel()
     errorRetryJob = scope.launch {
         showRecoveryOverlay()
-        val probedMime = PlayerMediaSourceFactory.probeNetworkMimeType(
-            url = currentStreamUrl,
-            headers = currentHeaders
+        val probedUrl = currentStreamUrl
+        val probe = PlayerMediaSourceFactory.probeNetworkFormat(
+            url = probedUrl,
+            headers = currentHeaders,
+            checkBluray = mayBeBlurayTransportStream(error)
         )
+        if (probe.isBlurayTransportStream) {
+            if (currentStreamUrl != probedUrl) return@launch
+            if (isInBackground) {
+                // The rebuild on return meets the same refusal; let the probe run again then.
+                parsingErrorProbeAttempted = false
+                backgroundCrashSavedPositionMs = savedPosition.coerceAtLeast(0L)
+                pendingBackgroundCrashRecovery = true
+                releasePlayer(flushPlaybackState = false)
+                return@launch
+            }
+            if (mayBeBlurayTransportStream(error) && switchToMpvForUnsupportedFormat("bluray-transport-stream")) {
+                return@launch
+            }
+        }
+        // A Blu-ray file ExoPlayer cannot read gains nothing from a transport stream override; let it fail over.
+        val probedMime = probe.mimeType.takeUnless { probe.isBlurayTransportStream }
 
         if (probedMime != null && probedMime != previousMimeType) {
             Log.i(
@@ -937,6 +973,7 @@ internal fun PlayerRuntimeController.tryParsingErrorProbeFallback(
             }
             val card = errorCardFor(error)
             val userFacingError = card?.message ?: error.toDisplayMessage(context)
+            cancelStartupWatchdog()
             _uiState.update {
                 it.copy(
                     error = userFacingError,
@@ -950,6 +987,22 @@ internal fun PlayerRuntimeController.tryParsingErrorProbeFallback(
     }
     return true
 }
+
+/**
+ * A link ExoPlayer refused before the first frame that is named .m2ts / .mts, or has no name that says what it is,
+ * gets its first bytes checked for the Blu-ray layout during the probe; MPV reads those files. Checked again after
+ * the probe, since the viewer may have left or the stream changed meanwhile.
+ */
+private fun PlayerRuntimeController.mayBeBlurayTransportStream(error: PlaybackException): Boolean =
+    isExoPlayerActiveForFormatFallback &&
+        !hasRenderedFirstFrame &&
+        !isInBackground &&
+        error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED &&
+        currentStreamUrl !in mpvFormatFallbackStreamUrls &&
+        UnsupportedFormatMpvFallbackPolicy.shouldCheckForBlurayTransportStream(
+            fileName = currentFilename ?: currentStreamUrl,
+            streamMimeType = currentStreamMimeType
+        )
 
 /** @return true if a mimeType override was present and has been cleared. */
 private fun PlayerRuntimeController.clearMimeOverrideForParsingError(error: PlaybackException): Boolean {
@@ -1067,10 +1120,10 @@ internal fun PlayerRuntimeController.attemptDeadSourceFailover(
     }
 
     val refusal = error.findInvalidResponseCodeException()?.let { longRefusalMs(it) }
-    return advanceToNextLiveSource(
-        if (refusal == null) detailedError
+    val message = if (refusal == null) detailedError
         else context.getString(com.nuvio.tv.R.string.player_source_rate_limited, ((refusal + 59_999L) / 60_000L).toInt())
-    )
+    if (refusal != null) heldFailoverCard = heldFailoverCard?.shownAs(detailedError, message)
+    return advanceToNextLiveSource(message)
 }
 
 /**
@@ -1209,9 +1262,11 @@ private fun PlayerRuntimeController.failOverToSource(next: Stream, detailedError
 
 internal fun PlayerRuntimeController.surfaceSourceFailoverError(detailedError: String) {
     cancelNextEpisodeAutoPlayOnFatalError()
+    val card = takeHeldFailoverCard(detailedError)
     _uiState.update {
         it.copy(
-            error = detailedError,
+            error = card?.message ?: detailedError,
+            errorCard = card,
             isBuffering = false,
             showLoadingOverlay = false,
             showPauseOverlay = false

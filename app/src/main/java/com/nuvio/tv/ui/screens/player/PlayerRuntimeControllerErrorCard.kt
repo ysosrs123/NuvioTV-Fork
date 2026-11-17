@@ -6,8 +6,13 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import kotlinx.coroutines.flow.update
 
-internal fun PlayerRuntimeController.errorCardFor(error: PlaybackException): PlayerErrorCard? =
-    withSendRule(runCatching {
+internal fun PlayerRuntimeController.errorCardFor(error: PlaybackException): PlayerErrorCard? {
+    heldFailoverCard = null
+    return withSendRule(plainErrorCardFor(error))
+}
+
+private fun PlayerRuntimeController.plainErrorCardFor(error: PlaybackException): PlayerErrorCard? =
+    runCatching {
         error.errorCard(
             context = context,
             source = reportSourceLine(),
@@ -15,11 +20,25 @@ internal fun PlayerRuntimeController.errorCardFor(error: PlaybackException): Pla
             lastLoadErrorMs = playbackAnalyticsDiagnostics.lastLoadErrorDurationMs,
             bytesLoaded = playbackAnalyticsDiagnostics.bytesLoadedSoFar,
         )
-    }.getOrNull())
+    }.getOrNull()
 
-internal fun PlayerRuntimeController.withSendRule(card: PlayerErrorCard?): PlayerErrorCard? {
-    if (card == null || !OutsideFailureStreak.blocksSend(card.cause)) return card
-    return card.copy(sendAllowed = OutsideFailureStreak.shared.record(card.cause, currentStreamUrl))
+internal fun PlayerRuntimeController.withSendRule(card: PlayerErrorCard?): PlayerErrorCard? =
+    card?.applySendRule(currentStreamUrl, OutsideFailureStreak.shared)
+
+/** Keeps the card for this player error, for the error screen a search for another source may end on. */
+internal fun PlayerRuntimeController.holdFailoverCard(error: PlaybackException, detailedError: String) {
+    holdFailoverCard(plainErrorCardFor(error), detailedError)
+}
+
+internal fun PlayerRuntimeController.holdFailoverCard(card: PlayerErrorCard?, detailedError: String) {
+    heldFailoverCard = card?.let { HeldFailoverCard.hold(currentStreamUrl, detailedError, it, OutsideFailureStreak.shared) }
+}
+
+/** The held card, with the Send rule, when the search for another source ends on the same link and error. */
+internal fun PlayerRuntimeController.takeHeldFailoverCard(detailedError: String): PlayerErrorCard? {
+    val held = heldFailoverCard ?: return null
+    heldFailoverCard = null
+    return held.forEnd(currentStreamUrl, detailedError, OutsideFailureStreak.shared)
 }
 
 /** The card for a start-up watchdog reason, or null to keep the general text when Arc cannot prove the cause. */
@@ -52,10 +71,15 @@ internal fun PlayerRuntimeController.watchdogErrorCard(reason: String, elapsedMs
 
 /** The card for an MPV start that failed, from MPV's own answer: an HTTP status or a refused connection in its log. */
 internal fun PlayerRuntimeController.mpvStartErrorCard(httpCode: Int?, logLine: String?): PlayerErrorCard? {
+    heldFailoverCard = null
+    return withSendRule(plainMpvStartErrorCard(httpCode, logLine))
+}
+
+internal fun PlayerRuntimeController.plainMpvStartErrorCard(httpCode: Int?, logLine: String?): PlayerErrorCard? {
     val source = reportSourceLine()
-    if (httpCode != null) return withSendRule(httpErrorCard(context, httpCode, source))
+    if (httpCode != null) return httpErrorCard(context, httpCode, source)
     return when (PlayerErrorCauses.forMpvLoadFailure(logLine)) {
-        PlayerErrorCause.ServerUnreachable -> withSendRule(unreachableServerCard(context, source, fromWatchdog = false))
+        PlayerErrorCause.ServerUnreachable -> unreachableServerCard(context, source, fromWatchdog = false)
         else -> null
     }
 }
@@ -67,18 +91,33 @@ internal fun PlayerRuntimeController.openSourcesFromErrorCard() {
     if (_uiState.value.showReportPanel) closeReportPanel()
     val state = _uiState.value
     val card = state.errorCard.matching(state.error) ?: return
+    cancelStartupWatchdog()
     _uiState.update { it.copy(error = null, errorCard = null, errorCardBeforeSources = card) }
     showSourcesPanel()
 }
 
 /** Leaving the source list without picking one brings the card back, so the screen is never left empty. */
 internal fun PlayerRuntimeController.restoreErrorCardAfterSources() {
+    val watchdogMessages = startupWatchdogMessages(context)
     _uiState.update {
-        val held = it.errorCardBeforeSources
-        if (held != null && it.error == null) {
-            it.copy(error = held.message, errorCard = held, errorCardBeforeSources = null)
-        } else {
-            it.copy(errorCardBeforeSources = null)
-        }
+        val fromWatchdog = it.errorCard.matching(it.error)?.fromWatchdog == true || it.error in watchdogMessages
+        it.withHeldErrorCardRestored(errorFromWatchdog = fromWatchdog)
+    }
+}
+
+/** The start-up watchdog writes only over an empty screen, never while a card waits behind the source list. */
+internal fun PlayerUiState.startupWatchdogMayWrite(): Boolean = error == null && errorCardBeforeSources == null
+
+/** A new stream start ends the wait behind the source list: the held card belongs to the stream that failed. */
+internal fun PlayerUiState.withHeldErrorCardDropped(): PlayerUiState =
+    if (errorCardBeforeSources == null) this else copy(errorCardBeforeSources = null)
+
+/** The held card comes back over an empty screen or a start-up watchdog message; any other error stays. */
+internal fun PlayerUiState.withHeldErrorCardRestored(errorFromWatchdog: Boolean): PlayerUiState {
+    val held = errorCardBeforeSources ?: return this
+    return if (error == null || errorFromWatchdog) {
+        copy(error = held.message, errorCard = held, errorCardBeforeSources = null)
+    } else {
+        copy(errorCardBeforeSources = null)
     }
 }

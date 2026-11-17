@@ -114,6 +114,22 @@ internal class PlaybackSpeedAwareAudioSink(
 
     fun isBluetoothForcePcm(): Boolean = bluetoothForcePcm
 
+    @Volatile
+    private var ac3TranscodeMimes: Set<String> = emptySet()
+
+    fun setAc3TranscodeMimes(mimeTypes: Set<String>) {
+        ac3TranscodeMimes = mimeTypes
+    }
+
+    /** Surround AAC goes to the FFmpeg renderer, which sends it on as Dolby Digital 5.1. */
+    fun isSurroundAacTranscodedToAc3(format: Format): Boolean =
+        format.sampleMimeType == MimeTypes.AUDIO_AAC &&
+            format.channelCount > 2 &&
+            format.cryptoType == C.CRYPTO_TYPE_NONE &&
+            format.initializationData.isNotEmpty() &&
+            format.codecs?.contains("mp4a.40.42") != true &&
+            MimeTypes.AUDIO_AAC in ac3TranscodeMimes
+
     fun setPassthroughPolicy(policy: AudioPassthroughPolicy): Boolean {
         if (policy == passthroughPolicy) return false
         passthroughPolicy = policy
