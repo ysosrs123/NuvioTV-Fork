@@ -32,6 +32,13 @@ internal fun scoutFamilyLimit(limit: ScoutLimit?, gate: RatingLimitGate?): Scout
     else -> null
 }
 
+/** The check for one of Scout's own rows: the profile's limit, and on Family night the family rule on top. */
+internal suspend fun scoutRowLimit(gate: RatingLimitGate?, family: Boolean): ScoutLimit? {
+    gate ?: return null
+    val limit = withContext(Dispatchers.IO) { gate.activeLimit() }?.let { ScoutLimit(gate, it) }
+    return if (family) scoutFamilyLimit(limit, gate) else limit
+}
+
 /**
  * The items whose rating fits the limit, checked a batch at a time and stopping once [enough] fit, so a long list
  * does not ask TMDB about every title. Without a limit the list comes back as it is.

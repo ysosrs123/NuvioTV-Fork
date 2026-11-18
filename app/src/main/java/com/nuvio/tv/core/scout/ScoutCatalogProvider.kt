@@ -405,8 +405,8 @@ class ScoutCatalogProvider @Inject constructor(
             (result as? com.nuvio.tv.core.network.NetworkResult.Success)?.data?.items.orEmpty()
         }
         val all = interleavedOnce(lists) { it.id to it.apiType }
-        val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(appContext)
-        val mixed = ratingLimits?.activeLimit()?.let { limit -> ratingLimits.keepFitting(limit, all) { it.id to it.apiType } } ?: all
+        val check = scoutRowLimit(com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(appContext), ScoutSlices.isFamily(slice?.id.orEmpty()))
+        val mixed = scoutKeepFitting(check, all) { it.id to it.apiType }
         return CatalogRow(
             addonId = addonId,
             addonName = addonName,

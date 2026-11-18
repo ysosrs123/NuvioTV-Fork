@@ -137,7 +137,7 @@ class ScoutReadyMixesViewModel @Inject constructor(
     fun save(id: String) {
         if (id in _state.value.savedIds) return
         viewModelScope.launch {
-            val mix = builder.ensure(id, family) ?: return@launch
+            val mix = builder.ensure(id, family)?.takeIf { it.shows.isNotEmpty() } ?: return@launch
             store.saveCopy(mix)
             _state.update { it.copy(savedIds = it.savedIds + id) }
         }

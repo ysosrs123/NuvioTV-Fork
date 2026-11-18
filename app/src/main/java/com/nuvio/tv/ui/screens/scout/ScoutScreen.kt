@@ -298,6 +298,7 @@ fun ScoutScreen(
         Column(Modifier.fillMaxSize()) {
             ScoutTopWords(
                 answers = state.answers,
+                family = state.answers.family || state.kids,
                 others = state.others,
                 profiles = profiles,
                 pictures = pictures,
@@ -533,6 +534,7 @@ private fun scoutTabItems(state: ScoutScreenState): List<ScoutTabItem> {
 @Composable
 private fun ScoutTopWords(
     answers: ScoutAnswers,
+    family: Boolean,
     others: Set<Int>,
     profiles: List<UserProfile>,
     pictures: Map<Int, String>,
@@ -564,14 +566,15 @@ private fun ScoutTopWords(
         val joined = profiles.filter { it.id in others }
         val active = profiles.firstOrNull { it.id == activeId }
         ScoutWord(
-            label = when {
-                joined.isEmpty() -> stringResource(R.string.scout_just_me)
-                joined.size == 1 -> stringResource(R.string.scout_who_and, joined.first().name)
-                else -> stringResource(R.string.scout_who_count, joined.size + 1)
+            label = when (scoutWhoLabel(joined.size, family)) {
+                ScoutWhoLabel.JUST_ME -> stringResource(R.string.scout_just_me)
+                ScoutWhoLabel.FAMILY -> stringResource(R.string.scout_family_night)
+                ScoutWhoLabel.WITH_ONE -> stringResource(R.string.scout_who_and, joined.first().name)
+                ScoutWhoLabel.COUNT -> stringResource(R.string.scout_who_count, joined.size + 1)
             },
             onClick = onWho,
             modifier = focus("word_who").padding(end = FOCUS_ROOM - NuvioTheme.spacing.md),
-            on = joined.isNotEmpty() || answers.family,
+            on = joined.isNotEmpty() || family,
             leading = {
                 (listOfNotNull(active) + joined).take(AVATARS_SHOWN).forEach { profile ->
                     NuvioAvatar(AvatarModel(profile.id.toString(), profile.name, profile.avatarColorHex, pictures[profile.id]), NuvioTheme.spacing.xl)
@@ -579,6 +582,15 @@ private fun ScoutTopWords(
             }
         )
     }
+}
+
+internal enum class ScoutWhoLabel { JUST_ME, FAMILY, WITH_ONE, COUNT }
+
+/** With nobody else ticked, the chip names Family night when it is on rather than saying "Just me". */
+internal fun scoutWhoLabel(joined: Int, family: Boolean): ScoutWhoLabel = when {
+    joined == 0 -> if (family) ScoutWhoLabel.FAMILY else ScoutWhoLabel.JUST_ME
+    joined == 1 -> ScoutWhoLabel.WITH_ONE
+    else -> ScoutWhoLabel.COUNT
 }
 
 @Composable

@@ -24,6 +24,8 @@ import com.nuvio.tv.core.scout.ScoutTime
 import com.nuvio.tv.core.scout.ScoutTune
 import com.nuvio.tv.core.scout.ScoutWatch
 import com.nuvio.tv.core.scout.scoutOrderPicks
+import com.nuvio.tv.core.scout.scoutKeepFitting
+import com.nuvio.tv.core.scout.scoutRowLimit
 import com.nuvio.tv.core.scout.ask.AskFailure
 import com.nuvio.tv.core.scout.ask.AskItem
 import com.nuvio.tv.core.scout.ask.AskOutcome
@@ -388,10 +390,11 @@ class ScoutViewModel @Inject constructor(
                 s.surprise && unset -> finder.surprisePool()
                 unset -> finder.pool()?.picked.orEmpty()
                 else -> emptyList()
-            }
+            },
+            answers.family
         )
-        if (fresh.size < ROW_SIZE) fresh = (fresh + order(finder.fetch(answers, 1, relaxed = false))).distinctBy { it.key }
-        if (fresh.size < ROW_SIZE / 2) fresh = (fresh + order(finder.fetch(answers, 1, relaxed = true))).distinctBy { it.key }
+        if (fresh.size < ROW_SIZE) fresh = (fresh + order(finder.fetch(answers, 1, relaxed = false), answers.family)).distinctBy { it.key }
+        if (fresh.size < ROW_SIZE / 2) fresh = (fresh + order(finder.fetch(answers, 1, relaxed = true), answers.family)).distinctBy { it.key }
         if (answers.time != ScoutTime.QUICK_EPISODES && answers.time != ScoutTime.SHORT) return fresh.take(ROW_SIZE)
         val kept = ArrayList<ScoutPick>()
         var checks = 0
@@ -495,7 +498,8 @@ class ScoutViewModel @Inject constructor(
             when (val outcome = asker.ask(question)) {
                 is AskOutcome.Answer -> {
                     _state.update { it.copy(askBusy = false) }
-                    showRow(fitLimit(outcome.items.ifEmpty { outcome.held }.mapNotNull(::askedPick)))
+                    val family = _state.value.let { it.answers.family || it.kids }
+                    showRow(fitLimit(outcome.items.ifEmpty { outcome.held }.mapNotNull(::askedPick), family))
                 }
                 is AskOutcome.Failed -> _state.update { it.copy(askBusy = false, askFailure = outcome.failure, rowLoading = false) }
             }
@@ -540,16 +544,16 @@ class ScoutViewModel @Inject constructor(
     private suspend fun group(): List<ScoutGroupMember> =
         _state.value.others.map { id -> members.getOrPut(id) { finder.member(id) } }
 
-    private suspend fun order(list: List<ScoutPick>): List<ScoutPick> {
+    private suspend fun order(list: List<ScoutPick>, family: Boolean = false): List<ScoutPick> {
         val exclusions = finder.exclusions()
         val others = group()
         val ordered = withContext(Dispatchers.Default) { scoutOrderPicks(list, finder.pool(), exclusions, System.nanoTime(), others) }
-        return fitLimit(ordered.filterNot { it.key in shown })
+        return fitLimit(ordered.filterNot { it.key in shown }, family)
     }
 
-    private suspend fun fitLimit(list: List<ScoutPick>): List<ScoutPick> {
-        val ratingLimits = com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(context) ?: return list
-        val limit = withContext(Dispatchers.IO) { ratingLimits.activeLimit() } ?: return list
-        return ratingLimits.keepFitting(limit, list) { "tmdb:${it.tmdbId}" to if (it.tv) "series" else "movie" }
+    private suspend fun fitLimit(list: List<ScoutPick>, family: Boolean = false): List<ScoutPick> {
+        if (list.isEmpty()) return list
+        val check = scoutRowLimit(com.nuvio.tv.core.ratinglimit.ratingLimitGateOrNull(context), family)
+        return scoutKeepFitting(check, list) { "tmdb:${it.tmdbId}" to if (it.tv) "series" else "movie" }
     }
 }

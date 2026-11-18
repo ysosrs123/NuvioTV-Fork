@@ -6,12 +6,14 @@ import com.nuvio.tv.domain.model.ScoutMix
 import com.nuvio.tv.domain.model.ScoutMixShow
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ScoutLimitFitTest {
@@ -110,5 +112,32 @@ class ScoutLimitFitTest {
     @Test
     fun `family mixes leave out the moods the Moods tab leaves out on Family night`() {
         assertEquals(setOf(ScoutMixFeel.EDGE, ScoutMixFeel.WEIRD, ScoutMixFeel.DARK), SCOUT_NOT_FAMILY_FEELS)
+    }
+
+    @Test
+    fun `a Family night mood row leaves out a show rated PG here but TV-14 in the US`() = runBlocking {
+        every { gate.activeLimit() } returns null
+        gateRanks(mapOf("dragon-maid" to 3, "bluey" to 0))
+        val family = scoutRowLimit(gate, family = true)
+        assertEquals(listOf("bluey", "unrated"), scoutKeepFitting(family, listOf("dragon-maid", "bluey", "unrated")) { it to "series" })
+        assertNull(scoutRowLimit(gate, family = false))
+        assertNull(scoutRowLimit(null, family = true))
+    }
+
+    @Test
+    fun `a mood row on a limited profile keeps the limit, and Family night tightens a teen limit to PG`() = runBlocking {
+        every { gate.activeLimit() } returns RatingLimit.TEEN
+        assertEquals(RatingLimit.TEEN, scoutRowLimit(gate, family = false)!!.limit)
+        val family = scoutRowLimit(gate, family = true)!!
+        assertEquals(RatingLimit.PG, family.limit)
+        assertFalse(family.keepUnknown)
+    }
+
+    @Test
+    fun `Family night rows are known by their slice id`() {
+        assertTrue(ScoutSlices.isFamily("family_night"))
+        assertTrue(ScoutSlices.isFamily(ScoutAnswers(mood = ScoutMood.entries.first(), family = true).encode()))
+        assertFalse(ScoutSlices.isFamily(ScoutAnswers(mood = ScoutMood.entries.first()).encode()))
+        assertFalse(ScoutSlices.isFamily("theme_spy"))
     }
 }

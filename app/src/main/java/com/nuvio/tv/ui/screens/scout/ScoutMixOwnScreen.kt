@@ -62,6 +62,8 @@ import com.nuvio.tv.core.scout.ScoutWidened
 import com.nuvio.tv.ui.screens.detail.requestFocusAfterFrames
 import com.nuvio.tv.ui.theme.NuvioTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -96,10 +98,25 @@ class ScoutMixOwnViewModel @Inject constructor(
     private val _made = Channel<String>(Channel.CONFLATED)
     val made = _made.receiveAsFlow()
     private var previewJob: Job? = null
+    private val limitChecked = CompletableDeferred<Unit>()
 
     init {
-        findShows(settle = false)
-        viewModelScope.launch { if (builder.limited()) choose(_state.value.recipe.copy(family = true)) }
+        viewModelScope.launch {
+            val limited = try {
+                builder.limited()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                false
+            }
+            if (limited && !_state.value.recipe.family) {
+                _state.update { it.copy(recipe = scoutFamilyRecipe(it.recipe)) }
+                findShows(settle = false)
+            } else if (previewJob == null) {
+                findShows(settle = false)
+            }
+            limitChecked.complete(Unit)
+        }
     }
 
     fun choose(recipe: ScoutMixRecipe) {
@@ -116,6 +133,7 @@ class ScoutMixOwnViewModel @Inject constructor(
         if (_state.value.making) return
         _state.update { it.copy(making = true) }
         viewModelScope.launch {
+            limitChecked.await()
             val mix = builder.own(_state.value.recipe, name)
             _state.update { it.copy(making = false) }
             if (mix != null) _made.trySend(mix.id)
@@ -128,11 +146,21 @@ class ScoutMixOwnViewModel @Inject constructor(
         previewJob = viewModelScope.launch {
             if (settle) delay(SETTLE_MS)
             val recipe = _state.value.recipe
-            val found = runCatching { builder.preview(recipe) }.getOrNull()
+            val found = try {
+                builder.preview(recipe)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                null
+            }
             _state.update { if (it.recipe == recipe) it.copy(preview = found, finding = false) else it }
         }
     }
 }
+
+/** A family recipe keeps only the moods offered on Family night. */
+internal fun scoutFamilyRecipe(recipe: ScoutMixRecipe): ScoutMixRecipe =
+    recipe.copy(family = true, feel = if (recipe.feel in SCOUT_NOT_FAMILY_FEELS) ScoutMixFeel.ANY else recipe.feel)
 
 private data class OwnLine(val key: String, val label: Int, val options: List<Pair<String, Int>>, val chosen: String, val apply: (ScoutMixRecipe, String) -> ScoutMixRecipe)
 

@@ -35,6 +35,8 @@ const val SCOUT_PICKS_SHOWN = 3
 const val SCOUT_FROM_COUNTRY_MIN_TITLES = 20
 const val SCOUT_QUICK_EPISODE_LIMIT = 35
 private const val SCOUT_MOOD_ROW_TARGET = 12
+/** Raised when what a kept row may hold changes, so rows kept under the old rules are built again. */
+private const val ROW_RULES = 2
 private const val SURPRISE_FROM = 60
 private const val ANIMATION = 16
 private const val LAUGH_ANIMATION_SHARE = 5
@@ -235,7 +237,7 @@ class ScoutPicksFinder @Inject constructor(
         val profile = engine.activeProfile()
         val moodsChecked = withContext(Dispatchers.IO) { moodAi.read(profile).moods.values.sumOf { it.checkedAt } }
         val limit = scoutLimit(context)?.code.orEmpty()
-        return "$key|${tmdbSettings.settings.first().language}|${pool()?.builtAt}|$rated|$profile|$moodsChecked|$limit"
+        return "$key|${tmdbSettings.settings.first().language}|${pool()?.builtAt}|$rated|$profile|$moodsChecked|$limit|r$ROW_RULES"
     }
 
     /** A row built in the last day, without anything the profile has since seen or rated. */

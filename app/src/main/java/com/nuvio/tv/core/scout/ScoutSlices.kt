@@ -124,6 +124,7 @@ private const val MIND_WORDS = "362567|9887|33465|170351|334469|3972|10854"
 private const val DARK_WORDS = "259094|230747|286125|361070"
 private const val SCARY_WORDS = "315058|256183|3358|12339|295907|283085|385522"
 private const val DYSTOPIA = "4565"
+private const val FAMILY_NIGHT = "family_night"
 private const val ROMANTIC_WORDS = "324429|9840"
 private const val ROMANTIC_SERIES_WORDS = "324429|9840|386551|304976"
 private const val EPIC_WORDS = "377433|211227|161257|161176|192772|2035|14643|234213"
@@ -342,7 +343,7 @@ object ScoutSlices {
         slice("theme_spy", ScoutSliceGroup.THEME, R.string.scout_slice_spy, both("470")),
         slice("theme_miniseries", ScoutSliceGroup.THEME, R.string.scout_slice_miniseries, null to quality(keywords = "11162", average = 7.2, votes = 50)),
         slice("theme_sitcom", ScoutSliceGroup.THEME, R.string.scout_slice_sitcom, null to quality(keywords = "193171", average = 7.0, votes = 50)),
-        ScoutAnswers(family = true).slice().copy(id = "family_night", titleParts = listOf(R.string.scout_family_night)),
+        ScoutAnswers(family = true).slice().copy(id = FAMILY_NIGHT, titleParts = listOf(R.string.scout_family_night)),
         ScoutAnswers(time = ScoutTime.COMPLETE).slice().copy(id = "complete_series", group = ScoutSliceGroup.LENGTH, titleParts = listOf(R.string.scout_complete_series)),
         genre(28, R.string.scout_genre_action, "10759"),
         genre(12, R.string.scout_genre_adventure, "10759"),
@@ -393,6 +394,8 @@ object ScoutSlices {
     val homeTiles: List<String> = listOf("mood_feel_good", "mood_mind", "decade_1990", "country_KR", "length_90", "theme_true")
 
     fun byId(id: String): ScoutSlice? = all.firstOrNull { it.id == id } ?: ScoutAnswers.decode(id)?.slice()
+
+    fun isFamily(id: String): Boolean = id == FAMILY_NIGHT || ScoutAnswers.decode(id)?.family == true
 
     fun inGroup(group: ScoutSliceGroup): List<ScoutSlice> = all.filter { it.group == group }
 }

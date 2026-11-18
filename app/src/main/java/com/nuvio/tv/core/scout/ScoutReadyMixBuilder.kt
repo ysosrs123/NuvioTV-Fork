@@ -115,6 +115,7 @@ class ScoutReadyMixBuilder @Inject constructor(
     private val previews = HashMap<String, Pair<LocalDate, ScoutMixPreview>>()
     private val previewLock = Mutex()
     private val building = Mutex()
+    private val emptyBuilds = ScoutEmptyBuilds()
     private val requests = Semaphore(AT_ONCE)
     @Volatile private var occasions: Map<String, List<ScoutOccasionEpisode>>? = null
 
@@ -145,7 +146,7 @@ class ScoutReadyMixBuilder @Inject constructor(
             best = ScoutMixPreview(found, step, found.size < SCOUT_READY_TOO_FEW)
             if (found.size >= SCOUT_READY_FEWEST) break
         }
-        previewLock.withLock { previews[cacheKey] = today to best }
+        if (best.picks.isNotEmpty()) previewLock.withLock { previews[cacheKey] = today to best }
         return best
     }
 
@@ -213,17 +214,26 @@ class ScoutReadyMixBuilder @Inject constructor(
         val kept = stored?.fittingLimit(limit)
         val wantFamily = family ?: kept?.let { readyFamily(it) } ?: false
         if (kept != null && scoutReadyFresh(kept.builtAt) && kept.rules >= SCOUT_READY_RULES && readyFamily(kept) == wantFamily && kept.shows.isNotEmpty()) return@withLock kept
+        val emptyKey = listOf(profileId, id, wantFamily, limit?.code.orEmpty()).joinToString("|")
+        if (emptyBuilds.recent(emptyKey)) return@withLock kept
         val ready = ScoutReadyMixes.byId(id)
-        val built = withTimeoutOrNull(BUILD_TIMEOUT_MS) {
-            when {
-                ready?.occasion != null -> occasionMix(id, ready.occasion, wantFamily)
-                ready?.recipe != null -> recipeMix(id, local().getString(ready.nameRes), ready.recipe.copy(family = wantFamily), ready.years)
-                else -> ScoutMixRecipe.decode(kept?.recipe)?.let { recipeMix(id, name ?: kept?.name.orEmpty(), it.copy(family = wantFamily), null) }
-            }
+        val attempt = withTimeoutOrNull(BUILD_TIMEOUT_MS) {
+            listOfNotNull(
+                when {
+                    ready?.occasion != null -> occasionMix(id, ready.occasion, wantFamily)
+                    ready?.recipe != null -> recipeMix(id, local().getString(ready.nameRes), ready.recipe.copy(family = wantFamily), ready.years)
+                    else -> ScoutMixRecipe.decode(kept?.recipe)?.let { recipeMix(id, name ?: kept?.name.orEmpty(), it.copy(family = wantFamily), null) }
+                }
+            )
         } ?: return@withLock kept
+        val built = attempt.firstOrNull()
+        if (built == null) {
+            emptyBuilds.remember(emptyKey)
+            return@withLock kept
+        }
         val mix = kept?.let { built.copy(unwatchedOnly = it.unwatchedOnly, keepPlaying = it.keepPlaying) } ?: built
         store.putReady(mix)
-        mix.fittingLimit(limit)
+        mix.fittingLimit(limit).also { if (it.shows.isEmpty()) emptyBuilds.remember(emptyKey) }
     }
 
     /** A mix the viewer made from their own choices, kept in one slot that each new one replaces. */
@@ -333,5 +343,23 @@ internal fun parseScoutOccasions(text: String): Map<String, List<ScoutOccasionEp
                 backdrop = item.optString("bd").takeIf { it.isNotBlank() }?.let { "https://image.tmdb.org/t/p/w1280$it" }
             )
         }
+    }
+}
+
+/**
+ * Builds that came back with nothing, by profile, mix, family and rating limit. One is not tried again for a while,
+ * so opening it again does not rebuild it; the wait is short, as nothing may also mean the network was not up yet.
+ */
+internal class ScoutEmptyBuilds(private val now: () -> Long = System::currentTimeMillis) {
+    private val at = HashMap<String, Long>()
+
+    fun recent(key: String): Boolean = at[key]?.let { now() - it < WAIT_MS } == true
+
+    fun remember(key: String) {
+        at[key] = now()
+    }
+
+    companion object {
+        const val WAIT_MS = 30 * 60 * 1000L
     }
 }
