@@ -18,8 +18,8 @@ class CalendarFollowedTitlesTest {
     private fun show(origin: CalendarOrigin, ids: CalendarIds, at: Instant? = null, name: String? = null) =
         CalendarTitleCandidate(ids, CalendarTitleType.SERIES, origin, at, name)
 
-    private fun film(origin: CalendarOrigin, ids: CalendarIds, at: Instant? = null) =
-        CalendarTitleCandidate(ids, CalendarTitleType.MOVIE, origin, at, "Film")
+    private fun film(origin: CalendarOrigin, ids: CalendarIds, at: Instant? = null, year: Int? = null) =
+        CalendarTitleCandidate(ids, CalendarTitleType.MOVIE, origin, at, "Film", releaseYear = year)
 
     @Test fun sourcesSharingAnyIdBecomeOneTitleWithAllIdsAndOrigins() {
         val titles = follow(
@@ -144,6 +144,77 @@ class CalendarFollowedTitlesTest {
             show(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt60"), daysAgo(600))
         val titles = follow(candidates, CalendarFollowRules(cap = 3), now)
         assertEquals(listOf("series:imdb:tt50", "series:imdb:tt60", "series:imdb:tt1"), titles.map { it.key })
+    }
+
+    @Test fun filmsReleasedYearsAgoDoNotTakeASlot() {
+        val result = followCalendarTitles(
+            listOf(
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt1"), daysAgo(1), year = 2010),
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt2"), daysAgo(2), year = 2024),
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt3"), daysAgo(3), year = 2025),
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt4"), daysAgo(4), year = 2027),
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt5"), daysAgo(5)),
+                film(CalendarOrigin.TRAKT_WATCHLIST, CalendarIds(imdb = "tt6"), daysAgo(6), year = 1999),
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt7"), daysAgo(7), year = 2001),
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt8"), daysAgo(8), year = 0)
+            ),
+            CalendarFollowRules(bellOn = setOf("movie:imdb:tt7")),
+            now
+        )
+        assertEquals(
+            setOf("movie:imdb:tt3", "movie:imdb:tt4", "movie:imdb:tt5", "movie:imdb:tt7", "movie:imdb:tt8"),
+            result.titles.map { it.key }.toSet()
+        )
+        assertEquals(
+            mapOf(
+                "movie:imdb:tt1" to CalendarLeftOutReason.FILM_RELEASED,
+                "movie:imdb:tt2" to CalendarLeftOutReason.FILM_RELEASED,
+                "movie:imdb:tt6" to CalendarLeftOutReason.FILM_RELEASED
+            ),
+            result.leftOut.associate { it.key to it.reason }
+        )
+    }
+
+    @Test fun aFilmIsKeptWhenAnySourceGivesARecentYear() {
+        val titles = follow(
+            listOf(
+                film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt1"), year = 2012),
+                film(CalendarOrigin.SIMKL_PLAN_TO_WATCH, CalendarIds(imdb = "tt1"), year = 2026)
+            ),
+            CalendarFollowRules(),
+            now
+        )
+        assertEquals(listOf("movie:imdb:tt1"), titles.map { it.key })
+    }
+
+    @Test fun inTheLibraryShowsComeBeforeFilmsOverTheCap() {
+        val candidates = listOf(
+            film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt1"), daysAgo(1)),
+            film(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt2"), daysAgo(2)),
+            show(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt3"), daysAgo(50)),
+            show(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt4"), daysAgo(60)),
+            show(CalendarOrigin.TRAKT_WATCHED, CalendarIds(imdb = "tt5"), now)
+        )
+        val result = followCalendarTitles(candidates, CalendarFollowRules(cap = 3), now)
+        assertEquals(listOf("series:imdb:tt3", "series:imdb:tt4", "movie:imdb:tt1"), result.titles.map { it.key })
+        assertEquals(
+            setOf("movie:imdb:tt2", "series:imdb:tt5"),
+            result.leftOut.filter { it.reason == CalendarLeftOutReason.OVER_CAP }.map { it.key }.toSet()
+        )
+    }
+
+    @Test fun aHugeLibraryKeepsItsShowsWithinTheCap() {
+        val films = (1..1500).map { film(CalendarOrigin.LIBRARY, CalendarIds(tmdb = it.toLong()), daysAgo(it.toLong() % 30), year = 1990 + it % 30) }
+        val shows = (1..350).map { show(CalendarOrigin.LIBRARY, CalendarIds(tmdb = it.toLong()), daysAgo(100L + it)) }
+        val newFilms = (2001..2020).map { film(CalendarOrigin.LIBRARY, CalendarIds(tmdb = it.toLong()), daysAgo(1)) }
+        val result = followCalendarTitles(films + shows + newFilms, CalendarFollowRules(), now)
+        assertEquals(CALENDAR_MAX_TITLES, result.titles.size)
+        assertTrue(result.titles.all { it.type == CalendarTitleType.SERIES })
+        assertEquals("series:tmdb:1", result.titles.first().key)
+        assertEquals("series:tmdb:300", result.titles.last().key)
+        val counts = result.leftOut.groupingBy { it.reason }.eachCount()
+        assertEquals(1500, counts[CalendarLeftOutReason.FILM_RELEASED])
+        assertEquals(50 + 20, counts[CalendarLeftOutReason.OVER_CAP])
     }
 
     @Test fun titlesWithNoReadableIdAreNamedOnOneLogLine() {

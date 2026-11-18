@@ -5,6 +5,7 @@ import com.nuvio.tv.core.tracking.TrackingProviderId
 import com.nuvio.tv.core.tracking.TrackingProviderRegistry
 import com.nuvio.tv.core.tracking.effectiveLibrarySourceMode
 import com.nuvio.tv.core.tracking.effectiveWatchProgressSource
+import com.nuvio.tv.core.tracking.extractTrackingYear
 import com.nuvio.tv.core.tracking.providerId
 import com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache
 import com.nuvio.tv.data.local.LibraryPreferences
@@ -345,7 +346,8 @@ class CalendarFollowedSourceReader @Inject constructor(
                 }
                 candidates += CalendarTitleCandidate(
                     CalendarIds.fromContentId(item.id), type, CalendarOrigin.LIBRARY,
-                    item.addedAt.toInstantOrNull(), item.name, item.id, item.poster
+                    item.addedAt.toInstantOrNull(), item.name, item.id, item.poster,
+                    releaseYear = extractTrackingYear(item.releaseInfo)
                 )
             }
             if (otherTypes.isNotEmpty()) {
@@ -407,7 +409,8 @@ class CalendarFollowedSourceReader @Inject constructor(
                 }
                 origins.forEach { origin ->
                     candidates += CalendarTitleCandidate(
-                        ids, type, origin, entry.listedAt.toInstantOrNull(), entry.name, entry.id, entry.poster
+                        ids, type, origin, entry.listedAt.toInstantOrNull(), entry.name, entry.id, entry.poster,
+                        releaseYear = extractTrackingYear(entry.releaseInfo)
                     )
                 }
             }
@@ -427,7 +430,9 @@ class CalendarFollowedSourceReader @Inject constructor(
                 )
                 val type = if (entry.isMovieEntry()) CalendarTitleType.MOVIE else CalendarTitleType.SERIES
                 val activity = (entry.lastWatchedAt ?: entry.addedToWatchlistAt)?.toInstantOrNull()
-                candidates += CalendarTitleCandidate(ids, type, origin, activity, media.title, ids.imdb, entry.localPosterUrl)
+                candidates += CalendarTitleCandidate(
+                    ids, type, origin, activity, media.title, ids.imdb, entry.localPosterUrl, releaseYear = media.year
+                )
             }
             watched.addAll(simklSyncRepository.projection.value.watchedShowEpisodes)
         }
@@ -437,12 +442,15 @@ class CalendarFollowedSourceReader @Inject constructor(
         if (plan.reads(TrackingProviderId.MDBLIST)) unread.part("mdblist", *mdbListOrigins) {
             val snapshot = mdbListSyncRepository.currentSnapshot()
                 ?: return@part unread.notLoaded("mdblist", *mdbListOrigins)
-            fun add(ids: MdbListIds, type: MdbListItemType, origin: CalendarOrigin, at: Instant?, name: String?, poster: String? = null) {
+            fun add(
+                ids: MdbListIds, type: MdbListItemType, origin: CalendarOrigin, at: Instant?, name: String?,
+                poster: String? = null, year: Int? = null
+            ) {
                 val calendarIds = ids.toCalendarIds()
                 candidates += CalendarTitleCandidate(
                     calendarIds,
                     if (type == MdbListItemType.MOVIE) CalendarTitleType.MOVIE else CalendarTitleType.SERIES,
-                    origin, at, name, calendarIds.imdb ?: calendarIds.tmdb?.let { "tmdb:$it" }, poster
+                    origin, at, name, calendarIds.imdb ?: calendarIds.tmdb?.let { "tmdb:$it" }, poster, year
                 )
             }
             if (mdbListProgress) snapshot.watched.filter { it.type != MdbListItemType.MOVIE }
@@ -461,7 +469,7 @@ class CalendarFollowedSourceReader @Inject constructor(
                 val origin = if (listKey == MDBLIST_WATCHLIST_KEY) CalendarOrigin.MDBLIST_WATCHLIST else CalendarOrigin.MDBLIST_LIST
                 items.filter { it.type == MdbListItemType.MOVIE || it.type == MdbListItemType.SHOW }
                     .take(calendarMdbListItemLimit(listKey)).forEach { item ->
-                    add(item.media.ids, item.type, origin, item.listedAt.toInstantOrNull(), item.media.title, item.media.poster)
+                    add(item.media.ids, item.type, origin, item.listedAt.toInstantOrNull(), item.media.title, item.media.poster, item.media.year)
                 }
             }
             watched.addAll(mdbListSyncRepository.currentProjection().watchedShowEpisodes)
@@ -631,7 +639,12 @@ internal fun calendarWeTrakrCandidates(
         val ids = title.ids.toCalendarIds()
         if (ids.imdb == null && ids.tmdb == null && ids.tvdb == null) return
         val type = if (title.type == WeTrakrType.MOVIE) CalendarTitleType.MOVIE else CalendarTitleType.SERIES
-        add(CalendarTitleCandidate(ids, type, origin, at?.toInstantOrNull(), title.title, ids.imdb ?: ids.tmdb?.let { "tmdb:$it" }, title.poster))
+        add(
+            CalendarTitleCandidate(
+                ids, type, origin, at?.toInstantOrNull(), title.title, ids.imdb ?: ids.tmdb?.let { "tmdb:$it" }, title.poster,
+                releaseYear = title.year
+            )
+        )
     }
     if (progress) {
         (snapshot.list(WeTrakrList.WATCHING) + snapshot.list(WeTrakrList.WAITING) + snapshot.list(WeTrakrList.HOLD)).forEach {

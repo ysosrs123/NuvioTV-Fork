@@ -2,6 +2,7 @@ package com.nuvio.tv.core.calendar
 
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneOffset
 
 data class CalendarTitleCandidate(
     val ids: CalendarIds,
@@ -10,7 +11,8 @@ data class CalendarTitleCandidate(
     val lastActivity: Instant? = null,
     val name: String? = null,
     val contentId: String? = null,
-    val poster: String? = null
+    val poster: String? = null,
+    val releaseYear: Int? = null
 )
 
 data class CalendarFollowedTitle(
@@ -38,12 +40,17 @@ data class CalendarFollowRules(
 
 const val CALENDAR_MAX_TITLES = 300
 
+/** A film from this many years before the current one has no release left to show. */
+private const val CALENDAR_FILM_RELEASED_YEARS = 2
+private const val MIN_RELEASE_YEAR = 1880
+
 enum class CalendarLeftOutReason(val code: String) {
     HIDDEN("hidden"),
     DROPPED("dropped"),
     REMOVED_FROM_CONTINUE_WATCHING("removed-from-cw"),
     IDLE("idle"),
     FILM_NOT_SAVED("film-not-saved"),
+    FILM_RELEASED("film-released"),
     OVER_CAP("over-cap")
 }
 
@@ -62,8 +69,9 @@ data class CalendarFollowResult(
 /**
  * Hidden titles are always left out. Unless the bell is on, so are dropped titles, titles removed from Continue
  * Watching, started shows idle for [CalendarFollowRules.staleAfter] (or with no date and not saved anywhere) and films
- * that were only watched, not saved. A show in the Nuvio library is never idle, and over the cap titles with the bell
- * on go first, then the Nuvio library, then the most recently active.
+ * that were only watched, not saved, or came out [CALENDAR_FILM_RELEASED_YEARS] or more years ago. A show in the Nuvio
+ * library is never idle, and over the cap titles with the bell on go first, then the Nuvio library (shows before
+ * films), then the most recently active.
  */
 fun followCalendarTitles(
     candidates: List<CalendarTitleCandidate>,
@@ -78,6 +86,7 @@ fun followCalendarTitles(
     val groups = groupBySharedIds(usable + bellOnly)
     val removedAliases = rules.removedFromContinueWatching.flatMapTo(mutableSetOf()) { CalendarIds.fromContentId(it).aliases() }
     val staleBefore = now.minus(rules.staleAfter)
+    val releasedBy = now.atZone(ZoneOffset.UTC).year - CALENDAR_FILM_RELEASED_YEARS
     val leftOut = mutableListOf<CalendarLeftOut>()
 
     val titles = groups.mapNotNull { group ->
@@ -89,6 +98,7 @@ fun followCalendarTitles(
         val bell = rules.bellOn.any { calendarKeyMatches(it, type, ids) }
         val origins = group.mapTo(linkedSetOf()) { it.origin }.apply { if (bell) add(CalendarOrigin.BELL) }
         val lastActivity = group.mapNotNull { it.lastActivity }.maxOrNull()
+        val releaseYear = group.mapNotNull { it.releaseYear?.takeIf { year -> year >= MIN_RELEASE_YEAR } }.maxOrNull()
         val reason = when {
             rules.hiddenTitleKeys.any { calendarKeyMatches(it, type, ids) } -> CalendarLeftOutReason.HIDDEN
             bell -> null
@@ -99,6 +109,9 @@ fun followCalendarTitles(
                 (lastActivity?.isBefore(staleBefore) ?: origins.none { it.savesFilms }) &&
                 ids.aliases().none { it in rules.upcomingAliases } -> CalendarLeftOutReason.IDLE
             type == CalendarTitleType.MOVIE && origins.none { it.savesFilms } -> CalendarLeftOutReason.FILM_NOT_SAVED
+            type == CalendarTitleType.MOVIE && releaseYear != null && releaseYear <= releasedBy &&
+                ids.aliases().none { it in rules.upcomingAliases } ->
+                CalendarLeftOutReason.FILM_RELEASED
             else -> null
         }
         if (reason != null) {
@@ -122,6 +135,7 @@ fun followCalendarTitles(
     val ordered = titles.sortedWith(
         compareByDescending<CalendarFollowedTitle> { it.bellOn }
             .thenByDescending { CalendarOrigin.LIBRARY in it.origins }
+            .thenBy { CalendarOrigin.LIBRARY in it.origins && it.type == CalendarTitleType.MOVIE }
             .thenByDescending { it.lastActivity ?: Instant.EPOCH }
             .thenBy { it.name.orEmpty().lowercase() }
             .thenBy { it.key }
