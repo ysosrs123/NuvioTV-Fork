@@ -3,6 +3,7 @@ package com.nuvio.tv.data.local
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.domain.model.AppFont
@@ -10,6 +11,8 @@ import com.nuvio.tv.domain.model.AppTheme
 import com.nuvio.tv.domain.model.CustomThemeColors
 import com.nuvio.tv.domain.model.SettingsUiStyle
 import com.nuvio.tv.domain.model.ThemeSelection
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -31,6 +34,12 @@ class ThemeDataStore @Inject constructor(
     private fun store(profileId: Int = profileManager.activeProfileId.value) =
         factory.get(profileId, FEATURE)
 
+    @Volatile
+    internal var storeLookupDispatcher: CoroutineDispatcher = Dispatchers.IO
+
+    private fun profileData(profileId: Int): Flow<Preferences> =
+        factory.dataOffMain(profileId, FEATURE, storeLookupDispatcher)
+
     private val themeKey = stringPreferencesKey("selected_theme")
     private val customThemeColorsKey = stringPreferencesKey("custom_theme_colors")
     private val fontKey = stringPreferencesKey("selected_font")
@@ -42,7 +51,7 @@ class ThemeDataStore @Inject constructor(
     private val screensaverDimKey = intPreferencesKey("oled_screensaver_dim_percent")
 
     val themeSelection: Flow<ThemeSelection> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             ThemeSelection(
                 theme = prefs[themeKey]?.let { name -> AppTheme.entries.firstOrNull { it.name == name } },
                 customColors = CustomThemeColors.decode(prefs[customThemeColorsKey])
@@ -51,7 +60,7 @@ class ThemeDataStore @Inject constructor(
     }
 
     val selectedFont: Flow<AppFont> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             val fontName = prefs[fontKey] ?: AppFont.INTER.name
             try {
                 AppFont.valueOf(fontName)
@@ -62,37 +71,37 @@ class ThemeDataStore @Inject constructor(
     }
 
     val amoledMode: Flow<Boolean> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             prefs[amoledModeKey] ?: false
         }
     }
 
     val amoledSurfacesMode: Flow<Boolean> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             prefs[amoledSurfacesModeKey] ?: false
         }
     }
 
     val screensaverEnabled: Flow<Boolean> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             prefs[screensaverEnabledKey] ?: true
         }
     }
 
     val screensaverTimeoutMinutes: Flow<Int> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             prefs[screensaverTimeoutKey] ?: DEFAULT_SCREENSAVER_TIMEOUT_MINUTES
         }
     }
 
     val screensaverDimPercent: Flow<Int> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             prefs[screensaverDimKey] ?: DEFAULT_SCREENSAVER_DIM_PERCENT
         }
     }
 
     val settingsUiStyle: Flow<SettingsUiStyle> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        profileData(pid).map { prefs ->
             prefs[settingsUiStyleKey]
             SettingsUiStyle.CLASSIC
         }

@@ -39,6 +39,7 @@ class CatalogOrderViewModelTest {
         val factory = mockk<ProfileDataStoreFactory>()
         every { factory.get(any(), "layout_settings") } answers { stores.getValue(firstArg()) }
         val layout = LayoutPreferenceDataStore(factory, manager)
+        layout.storeLookupDispatcher = Dispatchers.Unconfined
         val addon = Addon("a", "Addon", version = "1", description = null, logo = null,
             baseUrl = "https://example.test", catalogs = listOf(
                 CatalogDescriptor(ContentType.MOVIE, id = "one", name = "One"),

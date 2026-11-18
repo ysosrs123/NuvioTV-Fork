@@ -1635,6 +1635,7 @@ open class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        com.nuvio.tv.core.player.MemoryPressure.inFront = true
         com.nuvio.tv.core.image.PosterUpdates.cameBack(System.currentTimeMillis(), android.os.SystemClock.elapsedRealtime())
         ambientIdleController.dismiss()
         qualityGovernor.resume(System.nanoTime())
@@ -1677,6 +1678,7 @@ open class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
+        com.nuvio.tv.core.player.MemoryPressure.inFront = false
         qualityGovernor.pause(System.nanoTime())
         if (::jankStats.isInitialized) jankStats.isTrackingEnabled = false
     }

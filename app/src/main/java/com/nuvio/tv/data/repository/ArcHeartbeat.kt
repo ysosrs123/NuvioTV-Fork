@@ -85,12 +85,27 @@ object ArcHeartbeat {
     data class Snapshot(val writtenAtMs: Long, val lines: List<String>)
 
     private fun noteTrim(level: Int) {
-        val line = "${SimpleDateFormat("HH:mm:ss", Locale.US).format(Date())} level=$level"
+        val isPlaying = runCatching(playing).getOrDefault(false)
+        val line = trimEntry(SimpleDateFormat("HH:mm:ss", Locale.US).format(Date()), level, isPlaying, MemoryPressure.inFront)
         synchronized(trims) {
             if (trims.size == TRIMS_KEPT) trims.removeFirst()
             trims.addLast(line)
         }
     }
+
+    /** The buffer limit a warning cut moved, added to the latest warning. */
+    fun noteWarningCut(beforeBytes: Long, afterBytes: Long) {
+        synchronized(trims) {
+            val last = trims.pollLast() ?: return
+            trims.addLast(withCut(last, beforeBytes shr 20, afterBytes shr 20))
+        }
+    }
+
+    internal fun trimEntry(time: String, level: Int, playing: Boolean, front: Boolean): String =
+        "$time level=$level ${if (playing) "playing" else "idle"} ${if (front) "front" else "back"}"
+
+    internal fun withCut(entry: String, beforeMb: Long, afterMb: Long): String =
+        if (entry.contains(" buffer ")) entry else "$entry buffer $beforeMb>$afterMb MB"
 
     /** Thread names without their running numbers, largest groups first. */
     internal fun pools(names: List<String>): String =

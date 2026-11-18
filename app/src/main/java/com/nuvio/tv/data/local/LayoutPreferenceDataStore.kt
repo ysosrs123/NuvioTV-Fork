@@ -37,6 +37,7 @@ import com.nuvio.tv.domain.model.DetailImdbRatingsVisibility
 import com.nuvio.tv.domain.model.HomeLayout
 import com.nuvio.tv.domain.model.HomeImdbRatingsVisibility
 import com.nuvio.tv.domain.model.WatchedTitlesMode
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -67,6 +68,12 @@ class LayoutPreferenceDataStore @Inject constructor(
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    @Volatile
+    internal var storeLookupDispatcher: CoroutineDispatcher = Dispatchers.IO
+
+    private fun profileData(profileId: Int): Flow<Preferences> =
+        factory.dataOffMain(profileId, FEATURE, storeLookupDispatcher)
 
     private fun store(profileId: Int = profileManager.activeProfileId.value) =
         factory.get(profileId, FEATURE)
@@ -150,7 +157,7 @@ class LayoutPreferenceDataStore @Inject constructor(
 
     private fun <T> profileFlow(extract: (prefs: androidx.datastore.preferences.core.Preferences) -> T): Flow<T> =
         profileManager.activeProfileId.flatMapLatest { pid ->
-            factory.get(pid, FEATURE).data.map { prefs -> extract(prefs) }
+            profileData(pid).map { prefs -> extract(prefs) }
         }
 
     private fun Preferences.getStringOrMigrateSet(key: Preferences.Key<String>): String? {
@@ -216,7 +223,7 @@ class LayoutPreferenceDataStore @Inject constructor(
         val profile = profileManager.profiles.value.find { it.id == pid }
         val usePrimary = profile != null && !profile.isPrimary && profile.usesPrimaryAddons
         val effectivePid = if (usePrimary) 1 else pid
-        factory.get(effectivePid, FEATURE).data.map { prefs ->
+        profileData(effectivePid).map { prefs ->
             parseCatalogKeys(prefs.getStringOrMigrateSet(homeCatalogOrderKeysKey))
         }
     }
@@ -225,7 +232,7 @@ class LayoutPreferenceDataStore @Inject constructor(
         val profile = profileManager.profiles.value.find { it.id == pid }
         val usePrimary = profile != null && !profile.isPrimary && profile.usesPrimaryAddons
         val effectivePid = if (usePrimary) 1 else pid
-        factory.get(effectivePid, FEATURE).data.map { prefs ->
+        profileData(effectivePid).map { prefs ->
             parseCatalogKeys(prefs.getStringOrMigrateSet(disabledHomeCatalogKeysKey))
         }
     }
@@ -234,7 +241,7 @@ class LayoutPreferenceDataStore @Inject constructor(
         val profile = profileManager.profiles.value.find { it.id == pid }
         val usePrimary = profile != null && !profile.isPrimary && profile.usesPrimaryAddons
         val effectivePid = if (usePrimary) 1 else pid
-        factory.get(effectivePid, FEATURE).data.map { prefs ->
+        profileData(effectivePid).map { prefs ->
             parseCustomTitles(prefs.getStringOrMigrateSet(customCatalogTitlesKey))
         }
     }
