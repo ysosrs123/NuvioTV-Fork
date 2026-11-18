@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="mpv_direct_decode_title">Directe decodering (alleen MPV)</string>
-    <string name="mpv_direct_decode_subtitle">Speelt video af zonder de extra kopieerstap als dit kastje dat toestaat. Vloeiender en gebruikt minder geheugen.</string>
+    <string name="mpv_direct_decode_subtitle">Speelt video af zonder de extra kopieerstap als dit apparaat dat toestaat. Vloeiender en gebruikt minder geheugen.</string>
     <string name="mpv_direct_decode_dialog_subtitle">Hoe MPV gedecodeerde video aan het scherm doorgeeft.</string>
     <string name="mpv_direct_decode_automatic">Automatisch</string>
-    <string name="mpv_direct_decode_automatic_desc">Stuurt video rechtstreeks naar de grafische chip als dit kastje dat toestaat, en controleert of dat werkte. Zo niet, dan gebruikt Arc Hardwaredecodering hierboven en onthoudt dat.</string>
+    <string name="mpv_direct_decode_automatic_desc">Stuurt video rechtstreeks naar de grafische chip als dit apparaat dat toestaat, en controleert of dat werkte. Zo niet, dan gebruikt Arc Hardwaredecodering hierboven en onthoudt dat.</string>
     <string name="mpv_direct_decode_always">Altijd</string>
-    <string name="mpv_direct_decode_always_desc">Stuurt video altijd rechtstreeks naar de grafische chip. Als dit kastje dat weigert, spelen video\'s mogelijk niet af in MPV.</string>
+    <string name="mpv_direct_decode_always_desc">Stuurt video altijd rechtstreeks naar de grafische chip. Als dit apparaat dat weigert, spelen video\'s mogelijk niet af in MPV.</string>
     <string name="mpv_direct_decode_off">Uit</string>
-    <string name="mpv_direct_decode_off_desc">Video volgt Hardwaredecodering hierboven, met de kopieerstap. Dat kan op sommige kastjes haperen.</string>
+    <string name="mpv_direct_decode_off_desc">Video volgt Hardwaredecodering hierboven, met de kopieerstap. Dat kan op sommige apparaten haperen.</string>
 </resources>

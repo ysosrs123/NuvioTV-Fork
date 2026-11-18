@@ -886,7 +886,7 @@
     <string name="dv7_libdovi_mode_4_sub" translatable="false">Convert to static profile 8.4.</string>
     <string name="audio_mpv_hi10p_gnext_sw_title">Giải mã phần mềm dự phòng Hi10P G-NEXT (chỉ MPV)</string>
     <string name="audio_mpv_hi10p_gnext_sw_subtitle">Dùng giải mã phần mềm G-NEXT khi thông tin luồng nhận diện là H.264 Hi10P. Tắt theo mặc định; chỉ bật nếu phát lại Hi10P bị treo hoặc gặp lỗi.</string>
-    <string name="audio_mpv_hwdec_title">Giải mã phần cứng (chỉ cho MPV))</string>
+    <string name="audio_mpv_hwdec_title">Giải mã phần cứng (chỉ cho MPV)</string>
     <string name="audio_mpv_hwdec_dialog_subtitle">Chọn cách libmpv sử dụng bộ giải mã phần cứng.</string>
     <string name="audio_mpv_hwdec_legacy_direct_copy">Tương thích cũ (trực tiếp -&gt; sao chép)</string>
     <string name="audio_mpv_hwdec_legacy_direct_copy_desc">Hành vi mặc định trước đây: thử dùng giải mã phần cứng trực tiếp trước, sau đó mới sao chép khung hình đã giải mã về bộ nhớ hệ thống để tiếp tục xử lý.</string>
