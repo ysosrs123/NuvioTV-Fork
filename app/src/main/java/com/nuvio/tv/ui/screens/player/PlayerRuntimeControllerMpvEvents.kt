@@ -277,9 +277,15 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
         )
         lastPlaybackDiagnosticsForReport =
             lastPlaybackDiagnosticsForReport.copy(result = "Error: $detailedError")
+        val (cardHttpCode, cardLogLine) = mpvStartCardEvidence(
+            httpCode,
+            isMpvHttpErrorFresh(mpvLastHttpErrorAtMs, SystemClock.elapsedRealtime()),
+            mpvLastErrorLogLine,
+            source
+        )
         holdFailoverCard(
             if (hasRenderedFirstFrame) null
-            else runCatching { plainMpvStartErrorCard(httpCode, mpvLastErrorLogLine) }.getOrNull(),
+            else runCatching { plainMpvStartErrorCard(cardHttpCode, cardLogLine) }.getOrNull(),
             detailedError
         )
 
@@ -318,7 +324,7 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
 
         finishLoadingDiagnostics("mpv_error")
         cancelNextEpisodeAutoPlayOnFatalError()
-        val card = if (startupFailed) runCatching { mpvStartErrorCard(httpCode, mpvLastErrorLogLine) }.getOrNull() else null
+        val card = if (startupFailed) runCatching { mpvStartErrorCard(cardHttpCode, cardLogLine) }.getOrNull() else null
         cancelStartupWatchdog()
         _uiState.update {
             it.copy(

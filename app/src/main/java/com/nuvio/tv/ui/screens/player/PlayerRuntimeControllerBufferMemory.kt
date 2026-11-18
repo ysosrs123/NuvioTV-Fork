@@ -51,6 +51,9 @@ internal fun PlayerRuntimeController.attachBufferMemoryKeeper(
                 )
             },
             onCritical = { ParallelRangeDataSource.onMemoryCritical(it) },
+            onMemoryWarning = { PictureMemoryRelease.releaseOnWarning(appContext) },
+            onWarningCut = { before, after -> com.nuvio.tv.data.repository.ArcHeartbeat.noteWarningCut(before, after) },
+            fireOs = android.os.Build.MANUFACTURER.orEmpty().trim().equals("Amazon", ignoreCase = true),
         ).also { it.attach() }
     }
     PlaybackMemoryFacts.onKeeper(bufferMemoryKeeper)

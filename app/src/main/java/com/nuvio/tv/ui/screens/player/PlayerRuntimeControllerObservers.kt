@@ -1122,7 +1122,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                 )
                 if (switchToMpvForUnsupportedFormat("startup-no-picture")) return@launch
             }
-            val fireCard = withSendRule(watchdogErrorCard(fireReason, elapsedMs, livePlayer))
+            val fireCard = withSendRule(watchdogErrorCard(fireReason, elapsedMs, livePlayer, bufferedAheadMs))
             val fireMessage = fireCard?.message ?: when (fireReason) {
                 "video_track_unsupported", "video_never_decoded" ->
                     context.getString(com.nuvio.tv.R.string.player_error_startup_video_track_unsupported)
@@ -1144,6 +1144,7 @@ internal fun PlayerRuntimeController.scheduleStartupWatchdog() {
                     "surfacing error"
             )
             com.nuvio.tv.core.util.TtffTrace.mark("startup_watchdog_fired")
+            if (_uiState.value.startupWatchdogMayWrite()) startupWatchdogCardUrl = currentStreamUrl
             _uiState.update {
                 if (it.startupWatchdogMayWrite()) {
                     it.copy(

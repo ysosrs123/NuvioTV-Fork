@@ -228,10 +228,12 @@ internal class ParallelRangeDataSource(
         internal fun heldForReport(): LongArray = playbackResources.heldForReport()
 
         private const val WORKER_STACK_BYTES = 512L * 1024
-        private const val PLAYBACK_WORKER_KEEP_ALIVE_S = 15L
 
         /** Playback download threads: room for the most downloads a stream may run (16) on a 32-bit process. */
         internal fun playbackWorkerCount(is64Bit: Boolean): Int = if (is64Bit) 24 else 16
+
+        /** Idle threads wait out the gaps between buffer top-ups, so playback reuses them instead of starting new ones. */
+        internal fun playbackWorkerKeepAliveSeconds(is64Bit: Boolean): Long = if (is64Bit) 180L else 90L
 
         /** Downloads at once, the reader's piece included, while Android says memory is critical. */
         internal const val CRITICAL_MEMORY_DEPTH = 2
@@ -273,7 +275,35 @@ internal class ParallelRangeDataSource(
             val at = userSeekAtMs
             if (at == 0L || SystemClock.uptimeMillis() - at > USER_SEEK_OPEN_MS) return false
             userSeekAtMs = 0L
+            resumeStartAtMs = 0L
             return true
+        }
+
+        @Volatile private var resumeStartAtMs = 0L
+        private const val RESUME_START_OPEN_MS = 30_000L
+
+        /** A player starts: at a resume point the read-ahead begun at the file's start is not needed once it jumps there. */
+        internal fun noteResumeStart(resuming: Boolean) {
+            resumeStartAtMs = if (resuming) SystemClock.uptimeMillis() else 0L
+        }
+
+        private fun resumeStartArmed(): Boolean {
+            val at = resumeStartAtMs
+            if (at == 0L) return false
+            if (SystemClock.uptimeMillis() - at > RESUME_START_OPEN_MS) {
+                resumeStartAtMs = 0L
+                return false
+            }
+            return true
+        }
+
+        /**
+         * The pieces of [held] read ahead from the file's start (0..[window]) once a resuming player opens [target]
+         * in the body of the file; null while it still reads the start, the index at the end, or the length is unknown.
+         */
+        internal fun leftByResumeStart(held: Collection<Long>, target: Long, window: Int, totalChunks: Long): List<Long>? {
+            if (totalChunks <= 0L || target <= window + 1L || target >= totalChunks - window - 1L) return null
+            return held.filter { it <= window }
         }
 
         /**
@@ -332,10 +362,11 @@ internal class ParallelRangeDataSource(
                     isDaemon = true
                 }
             }
-            val playbackWorkers = playbackWorkerCount(android.os.Process.is64Bit())
+            val is64Bit = android.os.Process.is64Bit()
+            val playbackWorkers = playbackWorkerCount(is64Bit)
             ThreadPoolExecutor(
                 if (isolated) workerCount else playbackWorkers, if (isolated) workerCount else playbackWorkers,
-                if (isolated) 60L else PLAYBACK_WORKER_KEEP_ALIVE_S, TimeUnit.SECONDS,
+                if (isolated) 60L else playbackWorkerKeepAliveSeconds(is64Bit), TimeUnit.SECONDS,
                 java.util.concurrent.LinkedBlockingQueue<Runnable>(if (isolated) 64 else Int.MAX_VALUE),
                 threadFactory,
                 if (isolated) ThreadPoolExecutor.AbortPolicy() else ThreadPoolExecutor.DiscardPolicy()
@@ -1412,7 +1443,10 @@ internal class ParallelRangeDataSource(
         // session teardown on TTL.
         val attachedSession = resources.obtainSession(dataSpec.uri, dataSpec.httpRequestHeaders, chunkSize, sessionChunkCap, maxPoolSize, effectivePrefetchDepth)
         session = attachedSession
-        if (!isolateSession && takeUserSeek()) dropLeftBySeek(attachedSession, dataSpec.position / chunkSize)
+        if (!isolateSession) {
+            if (takeUserSeek()) dropLeftBySeek(attachedSession, dataSpec.position / chunkSize)
+            else if (resumeStartArmed()) dropLeftByResumeStart(attachedSession, dataSpec.position / chunkSize)
+        }
         val warmLength = attachedSession.totalLength
         if (warmLength > 0L && dataSpec.position in 0 until warmLength) {
             resolvedUri = attachedSession.requestTarget()
@@ -2097,6 +2131,23 @@ internal class ParallelRangeDataSource(
             victims.forEach { resources.evictFuture(activeSession, it, maxPoolSize) }
             Log.i(TAG, "SEEK: dropped ${victims.size} pieces left behind (running=$running) " +
                 "from=${activeSession.lastReadChunkIndex} to=$target")
+        }
+        resources.drainIdleBuffers(activeSession.chunkSize)
+    }
+
+    /** The jump to the resume point: the read-ahead from the file's start stops downloading and frees its connections. */
+    private fun dropLeftByResumeStart(activeSession: Resources.ChunkSession, target: Long) {
+        val length = activeSession.totalLength
+        if (length <= 0L) return
+        val totalChunks = (length + activeSession.chunkSize - 1) / activeSession.chunkSize
+        synchronized(activeSession) {
+            val victims = leftByResumeStart(activeSession.futures.keys.toList(), target, activeSession.prefetchWindow,
+                totalChunks) ?: return
+            resumeStartAtMs = 0L
+            if (victims.isEmpty()) return
+            val running = victims.count { activeSession.futures[it]?.isDone == false }
+            victims.forEach { resources.evictFuture(activeSession, it, maxPoolSize) }
+            Log.i(TAG, "RESUME: dropped ${victims.size} start pieces (running=$running) to=$target")
         }
         resources.drainIdleBuffers(activeSession.chunkSize)
     }

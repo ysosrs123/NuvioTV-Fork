@@ -443,8 +443,8 @@ class MpvPlaybackErrorPolicyTest {
 
     @Test
     fun permanentHttpStatus_skipsRetryOnlyForDeterministicClientErrors() {
-        listOf(400, 401, 403, 404, 410).forEach { assertTrue("$it", isPermanentHttpStatus(it)) }
-        listOf(408, 425, 429, 500, 502, 503, 504).forEach { assertFalse("$it", isPermanentHttpStatus(it)) }
+        listOf(400, 401, 403, 404, 405, 410, 428, 451).forEach { assertTrue("$it", isPermanentHttpStatus(it)) }
+        listOf(200, 206, 302, 408, 416, 421, 425, 429, 500, 502, 503, 504).forEach { assertFalse("$it", isPermanentHttpStatus(it)) }
     }
 
     @Test

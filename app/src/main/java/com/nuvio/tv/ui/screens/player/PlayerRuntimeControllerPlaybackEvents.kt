@@ -622,6 +622,11 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                             Log.i(PlayerRuntimeController.TAG, bufferLine + PlaybackRuntimeCounters.logFields())
                             com.nuvio.tv.core.player.AllocationRecorder.sample(context.applicationContext, pos / 1000)
                         }
+                        bufferMemoryKeeper?.setStreamBitrate(
+                            AutoSpeedup.fileBitrate(
+                                PlaybackByteCounter.contentLengthFor(currentStreamUrl), currentVideoSize, player.duration
+                            )
+                        )
                         bufferMemoryKeeper?.onTick()
                         
                         if (NuvioExoPlayerPerformanceHelper.shouldLogMemoryFootprint()) {

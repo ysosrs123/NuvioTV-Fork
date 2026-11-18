@@ -45,6 +45,17 @@ class PlayerMediaInfoHdrTest {
     }
 
     @Test
+    fun `hevc without colour data is not called sdr`() {
+        assertEquals(false, hevc().dynamicRangeKnown())
+        assertEquals(true, hevc(C.COLOR_TRANSFER_SDR).dynamicRangeKnown())
+        assertEquals(true, hevc(initData = hdr10Sps).dynamicRangeKnown())
+        val avc = Format.Builder().setSampleMimeType(MimeTypes.VIDEO_H264).build()
+        assertEquals(true, avc.dynamicRangeKnown())
+        val dv = Format.Builder().setSampleMimeType(MimeTypes.VIDEO_DOLBY_VISION).build()
+        assertEquals(true, dv.dynamicRangeKnown())
+    }
+
+    @Test
     fun `bit depth from the codecs string`() {
         assertEquals(10, codecsBitDepth("hvc1.2.4.L150.B0"))
         assertEquals(null, codecsBitDepth("hev1.1.6.L93.B0"))

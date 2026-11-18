@@ -48,6 +48,7 @@ import com.nuvio.tv.core.network.NoDelaySocketFactory
 import com.nuvio.tv.core.player.VodCacheSizing
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.VodCacheSizeMode
+import com.nuvio.tv.ui.screens.player.RedirectHeaders.keepHeadersOnRedirect
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -397,7 +398,9 @@ internal class PlayerMediaSourceFactory(
             )
             if (isHls) HlsParameterSetInitDataSource.Factory(adaptiveFactory) else adaptiveFactory
         } else {
-            PlayerPlaybackNetworking.createDataSourceFactory(context, sanitizedHeaders, slowStart = slowStart)
+            RangeContinuationDataSource.Factory(
+                PlayerPlaybackNetworking.createDataSourceFactory(context, sanitizedHeaders, slowStart = slowStart)
+            )
         }
 
         val mediaItemBuilder = MediaItem.Builder().setUri(url)
@@ -1407,14 +1410,9 @@ internal class PlayerMediaSourceFactory(
             return buffer.copyOf(filled)
         }
 
-        /** OkHttp drops Authorization on a redirect to another host; this sends it on, as the playback client does. */
         private fun OkHttpClient.withHeadersKeptOnRedirect(headers: Map<String, String>): OkHttpClient {
             if (headers.isEmpty()) return this
-            return newBuilder().addNetworkInterceptor { chain ->
-                val next = chain.request().newBuilder()
-                headers.forEach { (key, value) -> next.header(key, value) }
-                chain.proceed(next.build())
-            }.build()
+            return newBuilder().keepHeadersOnRedirect(headers).build()
         }
 
         private const val BLURAY_PROBE_TIMEOUT_SECONDS = 6L
@@ -1696,7 +1694,7 @@ private class PlayerLoadErrorHandlingPolicy : DefaultLoadErrorHandlingPolicy(6) 
         val httpException = loadErrorInfo.exception.findCause<androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException>()
         if (httpException != null) {
             val code = httpException.responseCode
-            if (code == 400 || code == 401 || code == 403 || code == 404 || code == 410) {
+            if (isPermanentHttpStatus(code)) {
                 return androidx.media3.common.C.TIME_UNSET
             }
         }

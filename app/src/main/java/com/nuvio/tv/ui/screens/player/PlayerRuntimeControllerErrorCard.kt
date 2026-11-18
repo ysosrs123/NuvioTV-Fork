@@ -42,12 +42,18 @@ internal fun PlayerRuntimeController.takeHeldFailoverCard(detailedError: String)
 }
 
 /** The card for a start-up watchdog reason, or null to keep the general text when Arc cannot prove the cause. */
-internal fun PlayerRuntimeController.watchdogErrorCard(reason: String, elapsedMs: Long, player: Player?): PlayerErrorCard? {
+internal fun PlayerRuntimeController.watchdogErrorCard(
+    reason: String,
+    elapsedMs: Long,
+    player: Player?,
+    bufferedAheadMs: Long = 0L
+): PlayerErrorCard? {
     val source = reportSourceLine()
-    return when (reason) {
-        "video_track_unsupported", "video_never_decoded" -> boxCannotDecodeCard(context, player?.firstVideoTrackFormat(), source, fromWatchdog = true)
-        "video_track_unreadable" -> pictureUnreadableCard(context, source)
-        "tracks_not_read", "no_video_track", "no_data_buffered" -> {
+    return when {
+        reason == "video_track_unsupported" || reason == "video_never_decoded" ->
+            boxCannotDecodeCard(context, player?.firstVideoTrackFormat(), source, fromWatchdog = true)
+        reason == "video_track_unreadable" -> pictureUnreadableCard(context, source)
+        watchdogChecksLoad(reason, bufferedAheadMs) -> {
             val status = playbackAnalyticsDiagnostics.lastLoadErrorHttpStatus
             if (status != null) return httpErrorCard(context, status, source, fromWatchdog = true)
             if (reason == "no_video_track") return null
@@ -68,6 +74,20 @@ internal fun PlayerRuntimeController.watchdogErrorCard(reason: String, elapsedMs
         else -> null
     }
 }
+
+/**
+ * Whether a watchdog reason is looked at as a loading problem (no answer, silent, slow). A decoder that never
+ * answered with little buffered usually means the source is slow, not the decoder.
+ */
+internal fun watchdogChecksLoad(reason: String, bufferedAheadMs: Long): Boolean = when (reason) {
+    "tracks_not_read", "no_video_track", "no_data_buffered" -> true
+    "decoder_unresponsive" -> bufferedAheadMs < StartupWatchdogDecision.WELL_AHEAD_MS
+    else -> false
+}
+
+/** What an MPV start card may use: only a fresh HTTP status, and no log line when the start simply stalled. */
+internal fun mpvStartCardEvidence(httpCode: Int?, httpFresh: Boolean, logLine: String?, source: String): Pair<Int?, String?> =
+    httpCode?.takeIf { httpFresh } to logLine?.takeIf { source != "startup_stall" && source != "startup_absolute" }
 
 /** The card for an MPV start that failed, from MPV's own answer: an HTTP status or a refused connection in its log. */
 internal fun PlayerRuntimeController.mpvStartErrorCard(httpCode: Int?, logLine: String?): PlayerErrorCard? {
@@ -104,6 +124,10 @@ internal fun PlayerRuntimeController.restoreErrorCardAfterSources() {
         it.withHeldErrorCardRestored(errorFromWatchdog = fromWatchdog)
     }
 }
+
+/** A player error that comes after the start-up watchdog's card for the same link must not replace or retry it. */
+internal fun PlayerUiState.showsStartupWatchdogCard(watchdogCardUrl: String?, streamUrl: String): Boolean =
+    watchdogCardUrl != null && watchdogCardUrl == streamUrl && error != null
 
 /** The start-up watchdog writes only over an empty screen, never while a card waits behind the source list. */
 internal fun PlayerUiState.startupWatchdogMayWrite(): Boolean = error == null && errorCardBeforeSources == null

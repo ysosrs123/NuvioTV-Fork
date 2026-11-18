@@ -36,6 +36,13 @@ class BufferMemoryKeeper(
     private val onLastWarning: () -> Unit = {},
     /** True when the level reaches critical, false when it leaves it or the keeper is detached. Runs on the worker. */
     private val onCritical: (Boolean) -> Unit = {},
+    /** Android warned at [ComponentCallbacks2.TRIM_MEMORY_BACKGROUND] or above. Runs on the worker. */
+    private val onMemoryWarning: () -> Unit = {},
+    /** The buffer limit before and after a warning cut. Runs on the worker. */
+    private val onWarningCut: (Long, Long) -> Unit = { _, _ -> },
+    private val inFront: () -> Boolean = { MemoryPressure.inFront },
+    /** Fire OS sends RUNNING_CRITICAL to every app with hundreds of MB free; there only the box's numbers count. */
+    private val fireOs: Boolean = false,
 ) {
     interface Worker {
         fun run(task: () -> Unit)
@@ -73,6 +80,15 @@ class BufferMemoryKeeper(
     @Volatile var pausedCapBytes: Long = -1L
         private set
     @Volatile var floorBytes: Long = floorBytes.coerceAtLeast(0L)
+        private set
+    /** Lowered a quarter by each background-level warning; -1 while none applies. */
+    @Volatile var warningCapBytes: Long = -1L
+        private set
+    @Volatile private var lastWarningAtMs = Long.MIN_VALUE / 2
+    /** Seconds of film at the stream's bitrate that warnings alone never cut below; [warningFloorBytes]. */
+    @Volatile var warningFloorBytes: Long = MIN_WARNING_FLOOR_BYTES
+        private set
+    @Volatile var playing: Boolean = false
         private set
     /** 32-bit only: what is held plus the address space left under the ceiling; -1 while there is room for the budget. */
     @Volatile var roomCapBytes: Long = -1L
@@ -116,16 +132,86 @@ class BufferMemoryKeeper(
                 runCatching(onLastWarning)
                 return@run
             }
+            val background = countsAsWarning(level)
+            val warning = cutsOnWarning(level, fireOs)
+            val cuts = warning && playing && runCatching(inFront).getOrDefault(false)
+            if (background || cuts) runCatching(onMemoryWarning)
+            if (cuts) stepDownForWarning(level)
             val free = freeMemory()
             val swap = swapFreeMb()
             if (free == null || warningStands(free, swap)) {
                 raise(wanted, "trim:$level")
                 return@run
             }
+            if (cuts && budgetManaged) return@run
             val freed = trimIdle(null)
             Log.i(TAG, "BUFFER_MEMORY: trim:$level set aside availMb=${free.availMb} thresholdMb=${free.thresholdMb} " +
                 "swapFreeMb=$swap freedMb=${freed / MB}")
         }
+    }
+
+    /**
+     * A warning while a film plays in front counts whatever the free memory reads: the buffer gives a quarter back
+     * (one cut per burst, never below the warning floor) and stays smaller for [WARNING_COOL_DOWN_MS].
+     */
+    private fun stepDownForWarning(level: Int) {
+        val now = clock()
+        val inBurst = warningInBurst(now, lastWarningAtMs)
+        lastWarningAtMs = now
+        lastPressureAtMs = now
+        if (grownBytes > 0L) {
+            grownBytes = 0L
+            control.setGrowthBytes(0L)
+        }
+        if (!budgetManaged) return
+        if (inBurst) {
+            trimIdle(null)
+            return
+        }
+        val budget = control.uncappedBudgetBytes
+        val before = effectiveCapBytes().takeIf { it >= 0L } ?: budget
+        warningCapBytes = warningStepDown(warningCapBytes, budget, maxOf(floorBytes, warningFloorBytes))
+        applyTarget()
+        val after = effectiveCapBytes().takeIf { it >= 0L } ?: budget
+        runCatching { onWarningCut(before, after) }
+        val freed = trimIdle(null)
+        Log.i(TAG, "BUFFER_MEMORY: warning trim:$level capMb=${capOrBudgetMb()} budgetMb=${budget / MB} " +
+            "floorMb=${warningFloorBytes / MB} freedMb=${freed / MB}")
+    }
+
+    /** Playing or paused, as the player last said. */
+    fun onPlayingChanged(isPlaying: Boolean) {
+        playing = isPlaying
+    }
+
+    /** The warning floor for the stream's bitrate; 50 MB while it is unknown (0). */
+    fun setStreamBitrate(bitrateBps: Long) {
+        if (detached) return
+        val floor = warningFloorBytes(bitrateBps)
+        worker.run {
+            if (floor == warningFloorBytes) return@run
+            warningFloorBytes = floor
+            if (warningCapBytes < 0L) return@run
+            val raised = warningCapBytes.coerceAtLeast(minOf(floor, control.uncappedBudgetBytes))
+            if (raised != warningCapBytes) {
+                warningCapBytes = raised
+                applyTarget()
+            }
+        }
+    }
+
+    /** After the cool-down the warning cap lifts a quarter of the budget per check while the box has room for it. */
+    private fun tendWarningCap(now: Long, free: BufferSizing.FreeMemory?): Boolean {
+        if (warningCapBytes < 0L || !warningCoolDownOver(now, lastWarningAtMs)) return false
+        val budget = control.uncappedBudgetBytes
+        val next = warningStepUp(warningCapBytes, budget)
+        val addedMb = ((if (next < 0L) budget else next) - warningCapBytes).coerceAtLeast(0L) / MB
+        val roomMb = free?.let { it.availMb - it.thresholdMb - BufferSizing.SYSTEM_MARGIN_MB } ?: return false
+        if (roomMb < addedMb) return false
+        warningCapBytes = next
+        applyTarget()
+        Log.i(TAG, "BUFFER_MEMORY: warning cap eased capMb=${capOrBudgetMb()} availMb=${free.availMb}")
+        return true
     }
 
     fun setFloorBytes(bytes: Long) {
@@ -134,7 +220,8 @@ class BufferMemoryKeeper(
         worker.run {
             if (floor == floorBytes) return@run
             floorBytes = floor
-            if (pressureLevel != LEVEL_NONE || lentBytes > 0L) applyTarget()
+            if (warningCapBytes >= 0L) warningCapBytes = warningCapBytes.coerceAtLeast(minOf(floor, control.uncappedBudgetBytes))
+            if (pressureLevel != LEVEL_NONE || lentBytes > 0L || warningCapBytes >= 0L) applyTarget()
         }
     }
 
@@ -142,6 +229,10 @@ class BufferMemoryKeeper(
         if (detached || enabled == budgetManaged) return
         budgetManaged = enabled
         worker.run {
+            if (!budgetManaged && warningCapBytes >= 0L) {
+                warningCapBytes = -1L
+                applyTarget()
+            }
             if (!budgetManaged && pressureLevel == LEVEL_LOW) {
                 pressureLevel = LEVEL_NONE
                 applyTarget()
@@ -222,6 +313,7 @@ class BufferMemoryKeeper(
     /** About every 10 s, playing or paused: Android 14 and later no longer sends RUNNING_LOW to visible apps. */
     fun onTick(playing: Boolean = true) {
         if (detached) return
+        this.playing = playing
         worker.run { check(playing) }
     }
 
@@ -254,8 +346,11 @@ class BufferMemoryKeeper(
             raise(level, "swap availMb=${free.availMb} thresholdMb=${free.thresholdMb} swapFreeMb=$swap")
             return
         }
+        val warningEased = tendWarningCap(now, free)
         if (pressureLevel == LEVEL_NONE) {
-            if (playing && now - lastPressureAtMs >= RESTORE_QUIET_MS) tendGrowth(free)
+            if (playing && now - lastPressureAtMs >= RESTORE_QUIET_MS && warningCoolDownOver(now, lastWarningAtMs) &&
+                warningCapBytes < 0L && !warningEased
+            ) tendGrowth(free)
             return
         }
         if (now - lastPressureAtMs < RESTORE_QUIET_MS) {
@@ -397,7 +492,12 @@ class BufferMemoryKeeper(
 
     /** The pressure cap, lowered further by the paused cap and what the extra downloads hold; -1 when none applies. */
     internal fun effectiveCapBytes(): Long {
-        val level = if (pressureLevel == LEVEL_NONE) -1L else capBytes(pressureLevel)
+        val pressureCap = if (pressureLevel == LEVEL_NONE) -1L else capBytes(pressureLevel)
+        val level = when {
+            warningCapBytes < 0L -> pressureCap
+            pressureCap < 0L -> warningCapBytes
+            else -> minOf(pressureCap, warningCapBytes)
+        }
         val paused = when {
             pausedCapBytes < 0L -> level
             level < 0L -> pausedCapBytes
@@ -483,6 +583,49 @@ class BufferMemoryKeeper(
         /** onLowMemory (level 80) on a 1 GB box: Android is about to close the app, whatever the free memory reads. */
         fun oneGbLastWarning(level: Int, oneGbBox: Boolean): Boolean =
             oneGbBox && level >= ComponentCallbacks2.TRIM_MEMORY_COMPLETE
+
+        /** Background and above: Android has put the app on the list it closes first. UI hidden alone does not count. */
+        fun countsAsWarning(level: Int): Boolean = level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
+
+        /** A quarter off the current cap (the budget when none), never below the floor or above the budget. */
+        fun warningStepDown(currentCapBytes: Long, budgetBytes: Long, floorBytes: Long): Long {
+            val budget = budgetBytes.coerceAtLeast(0L)
+            val base = if (currentCapBytes < 0L) budget else minOf(currentCapBytes, budget)
+            return (base - base / 4).coerceAtLeast(minOf(budget, floorBytes.coerceAtLeast(0L)))
+        }
+
+        /** A quarter of the budget back; -1 once the whole budget is back. */
+        fun warningStepUp(currentCapBytes: Long, budgetBytes: Long): Long {
+            if (currentCapBytes < 0L) return -1L
+            val next = currentCapBytes + budgetBytes.coerceAtLeast(0L) / 4
+            return if (next >= budgetBytes) -1L else next
+        }
+
+        fun warningCoolDownOver(nowMs: Long, lastWarningAtMs: Long): Boolean =
+            nowMs - lastWarningAtMs >= WARNING_COOL_DOWN_MS
+
+        /**
+         * Warnings that cut while a film plays in front: background and above, and RUNNING_CRITICAL, which is what a
+         * foreground app gets. RUNNING_LOW stays with the box's numbers, and so does RUNNING_CRITICAL on Fire OS.
+         */
+        fun cutsOnWarning(level: Int, fireOs: Boolean): Boolean =
+            countsAsWarning(level) ||
+                (!fireOs && level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL &&
+                    level < ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+
+        /** Android often sends 40, 60 and 80 within seconds of each other; a warning within 5 s of the last one counts as the same cut. */
+        fun warningInBurst(nowMs: Long, lastWarningAtMs: Long): Boolean = nowMs - lastWarningAtMs < WARNING_BURST_MS
+
+        /** [WARNING_FLOOR_SECONDS] of film at [bitrateBps], at least [MIN_WARNING_FLOOR_BYTES]. */
+        fun warningFloorBytes(bitrateBps: Long): Long =
+            maxOf(MIN_WARNING_FLOOR_BYTES, bitrateBps.coerceAtLeast(0L) / 8L * WARNING_FLOOR_SECONDS)
+
+        const val WARNING_BURST_MS = 5_000L
+        const val WARNING_FLOOR_SECONDS = 20L
+        const val MIN_WARNING_FLOOR_BYTES = BufferSizing.MIN_SIZED_BUFFER_MB * 1024L * 1024L
+
+        /** No growth and no lift of the warning cap this long after a background-level warning. */
+        const val WARNING_COOL_DOWN_MS = 10 * 60_000L
 
         /** The same line as the extra downloads' swap rule. */
         const val WARNING_SWAP_MB = 50L

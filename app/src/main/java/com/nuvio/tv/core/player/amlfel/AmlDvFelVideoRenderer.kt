@@ -124,6 +124,7 @@ internal class AmlDvFelVideoRenderer(
     private val counters = DecoderCounters()
     private val bufferStatus = IntArray(3)
     private val holdDetector = FelPictureHoldDetector()
+    private val frameRateHint = FelFrameRateHint.forSurfaces()
 
     private var inputFormat: Format? = null
     private var videoOutput: Any? = null
@@ -194,11 +195,14 @@ internal class AmlDvFelVideoRenderer(
                 detachSideband()
                 sidebandRefreshAtMs = 0L // a new output is attached fresh; a pending refresh would detach it
                 videoOutput = message
+                frameRateHint.onOutput(message as? Surface)
                 firstFrameReported = false
                 // Output readiness is independent of decoder progress; never consume a null-output event.
                 if (message == null && handle != 0L && !pausedApplied) applyPause()
                 if (handle != 0L) attachSideband()
             }
+        } else if (messageType == Renderer.MSG_SET_CHANGE_FRAME_RATE_STRATEGY) {
+            frameRateHint.onStrategy(message as Int)
         } else {
             super.handleMessage(messageType, message)
         }
@@ -250,10 +254,12 @@ internal class AmlDvFelVideoRenderer(
             pausedApplied = false
         }
         lastPcrSyncRealtimeMs = 0L // re-slave the clock on the next render call
+        frameRateHint.onStarted()
     }
 
     override fun onStopped() {
         started = false
+        frameRateHint.onStopped()
         resetPictureWatch()
         // Before the first frame of a session is up, let it appear; render() pauses right after.
         if (handle != 0L && sessionFirstFrame && !pausedApplied) applyPause()
@@ -265,6 +271,7 @@ internal class AmlDvFelVideoRenderer(
             detachSideband()
             sidebandRefreshAtMs = 0L
             inputFormat = null
+            frameRateHint.onFrameRate(0f)
             streamSeen = false
             eventDispatcher.disabled(counters)
         } finally {
@@ -284,6 +291,7 @@ internal class AmlDvFelVideoRenderer(
 
     override fun onRelease() {
         try {
+            frameRateHint.onOutput(null)
             closeSession()
             detachSideband()
             sidebandRefreshAtMs = 0L
@@ -404,6 +412,7 @@ internal class AmlDvFelVideoRenderer(
     private fun onInputFormatChanged(format: Format) {
         val previous = inputFormat
         inputFormat = format
+        frameRateHint.onFrameRate(format.frameRate)
         eventDispatcher.inputFormatChanged(format, null)
         if (format.width > 0 && format.height > 0) {
             eventDispatcher.videoSizeChanged(VideoSize(format.width, format.height, format.pixelWidthHeightRatio))

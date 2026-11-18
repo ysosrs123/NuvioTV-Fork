@@ -141,7 +141,9 @@ internal fun isRetryablePlaybackError(error: PlaybackException): Boolean {
 
 /** HTTP statuses a retry of the same request gets again, so retrying only delays the error. */
 internal fun isPermanentHttpStatus(code: Int): Boolean =
-    code == 400 || code == 401 || code == 403 || code == 404 || code == 410
+    code in 400..499 && code !in RETRYABLE_CLIENT_STATUSES
+
+private val RETRYABLE_CLIENT_STATUSES = setOf(408, 416, 421, 425, 429)
 
 /**
  * Audio-track failures that the safe-audio → audio-disabled fallback ladder can recover from.

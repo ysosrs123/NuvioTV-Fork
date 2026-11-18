@@ -36,6 +36,7 @@ object PlaybackMemoryFacts {
         val grownMb: Long,
         val lentMb: Long,
         val roomCapMb: Long = -1L,
+        val warningCapMb: Long = -1L,
     )
 
     private val state = AtomicReference<Player?>(null)
@@ -99,6 +100,7 @@ object PlaybackMemoryFacts {
                 grownMb = (keeper?.grownBytes ?: 0L) / MB,
                 lentMb = (keeper?.lentBytes ?: 0L) / MB,
                 roomCapMb = (keeper?.roomCapBytes ?: -1L).let { if (it < 0L) -1L else it / MB },
+                warningCapMb = (keeper?.warningCapBytes ?: -1L).let { if (it < 0L) -1L else it / MB },
             )
         }.getOrNull()
         return format(player, buffer)
@@ -119,6 +121,7 @@ object PlaybackMemoryFacts {
                 add("held ${b.heldMb} of ${b.footprintMb} MB")
                 if (b.lentMb > 0L) add("lent ${b.lentMb} MB")
                 if (b.roomCapMb >= 0L) add("address space cap ${b.roomCapMb} MB")
+                if (b.warningCapMb >= 0L) add("warning cap ${b.warningCapMb} MB")
                 if (b.pressure >= 0) add("pressure ${pressureName(b.pressure)}" +
                     if (b.pressureForS >= 0L) " for ${b.pressureForS} s" else "")
             }.joinToString(", ")

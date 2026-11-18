@@ -1865,6 +1865,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                 TtffTrace.mirror(playerInitLine)
                 noteSpeedupHint(url)
                 armStartCushion(url)
+                ParallelRangeDataSource.noteResumeStart(initialResumePosition > 0L)
                 mediaSourceFactory.prepareVodCache(
                     url = url,
                     cacheKey = currentStreamCacheKey,
@@ -2234,6 +2235,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         // Gate the audio-clock jitter sensor on actual playback -
                         // paused/rebuffering time must not count as clock jitter.
                         playbackSpeedAwareAudioSink?.setPlaybackActive(isPlaying)
+                        bufferMemoryKeeper?.onPlayingChanged(isPlaying)
                         if (!isPlaying) lateVideoLastNotPlayingMs = SystemClock.elapsedRealtime()
                         logScrobbleDiagnostic(
                             "exo_is_playing_changed",
@@ -2316,6 +2318,9 @@ internal fun PlayerRuntimeController.initializePlayer(
                             DrawingMemory.releaseForFilm(
                                 context, NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context), "first_frame"
                             )
+                            com.nuvio.tv.core.image.PictureMemoryRelease.releaseDuringFilm(
+                                context, NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context)
+                            )
                         }
                         cancelStartupWatchdog()
                         retractStartupTimeoutErrorAfterFirstFrame()
@@ -2364,6 +2369,13 @@ internal fun PlayerRuntimeController.initializePlayer(
                         if (isReleasingPlayer && error.errorCode == PlaybackException.ERROR_CODE_TIMEOUT) return
                         cancelFirstFrameWatchdog()
                         cancelTunnelAvSyncWatchdog()
+                        if (_uiState.value.showsStartupWatchdogCard(startupWatchdogCardUrl, currentStreamUrl)) {
+                            Log.w(
+                                PlayerRuntimeController.TAG,
+                                "STARTUP_WATCHDOG: late player error ${error.errorCodeName} after the watchdog card; card kept"
+                            )
+                            return
+                        }
                         val detailedError = error.toDisplayMessage(context)
                         cancelStableProgressReset()
                         if (finishOnSourceErrorAtEnd(this@apply, error)) return
@@ -3399,6 +3411,7 @@ internal fun PlayerRuntimeController.resetLoadingOverlayForNewStream() {
     cancelTunnelAvSyncWatchdog()
     cancelStallWatchdog()
     cancelStartupWatchdog()
+    startupWatchdogCardUrl = null
     _uiState.update { it.withHeldErrorCardDropped() }
     val preparingMessage = context.getString(R.string.player_loading_preparing)
     resetLoadingDiagnostics(

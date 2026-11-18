@@ -62,7 +62,7 @@ the previous class. Replace the class in `classes.jar` and put `classes.jar` bac
 ## Fork modification: lib-exoplayer-release.aar (playback engine)
 
 `lib-exoplayer-release.aar` SHA-256:
-`4c3047e76a9cb64f03c95762a696ad2aba0e200431fefe4d8c5b3803ac409cca`.
+`82e9ca76a9c1d7881b53103ad29ef21e0324b61488a9d2148b6d8b6fafb44bdd`.
 
 Base: the engine AAR built from halibiram/media 4dd1d98b9f (calloc sample chunks), with `DefaultAudioSink`
 from halibiram/media #2 (TrueHD resync after a dropped chunk), SHA-256
@@ -81,6 +81,12 @@ written frames during an underrun and restarts from a fresh timestamp), 8ca4ef9d
 timestamp is read when the output latency changes, latency limit 10 s). The playback head wrap check
 stays as in 1.8.0.
 `DefaultAudioSink` changes by one call; its inner classes are unchanged.
+
+Codec reuse: `MediaCodecVideoRenderer` (with its inner classes, which change only in line numbers) and
+`DecoderReuseEvaluation` are rebuilt with 65088aafd8 and 070291b7ec (media3 1.9.1 and 1.10.1, #2941,
+#3120): below API 30, and on MiTV boxes on API 30, the video codec is replaced when the frame rate changes
+to one that is not a whole multiple of the old one, unless the frame-rate strategy is off. Unlike upstream,
+secure codecs are always kept, so `MediaCodecRenderer.canReuseCodec` keeps its 1.8.0 signature.
 
 All other AAR entries, including every `libmedia3_exoplayer_jni.so`, and every other class are
 byte-identical to the base AAR.
@@ -119,3 +125,26 @@ into the AAR, keeping entry order and timestamps.
 
 The native library is media3's JNI wrapper (Apache 2.0), dav1d (BSD 2-Clause) and cpu_features
 (Apache 2.0). It needs no other shared library and its arm64 LOAD segments are 16 KB aligned.
+
+## Fork modification: lib-extractor-release.aar
+
+`lib-extractor-release.aar` SHA-256:
+`6294942881a22669f9508085da0c6e1b94d8218d9f5e71fd64c466fba23a6d4a`.
+
+Base: the extractor AAR built by halibiram from halibiram/media (with the MP4 subtitle seek fix 359711b60), SHA-256
+`d611a11f7bc6cef11f789c1cae4fe75ab9332a9e393405e98cfa8e147d698316`.
+
+`DefaultExtractorInput`, `Id3Peeker`, `ts/Ac3Extractor`, `ts/Ac4Extractor` and `ts/AdtsExtractor` are rebuilt
+with 545659dc42 (media3 1.12.0, #3502): the peek buffer grows as bytes arrive instead of to the requested
+length, an ID3 header with an invalid minor version or size is not treated as a tag, the tag is only read
+into memory when its frames are wanted, and the three audio sniffers skip ID3 tags through `Id3Peeker`.
+A file that starts with `ID3` followed by garbage no longer allocates up to 256 MB while sniffing.
+Unlike upstream, `advancePeekPosition` grows by up to 1 MB before data arrives and then doubles with the
+bytes already read, so large peeks (the Matroska early audio scan, HEVC SEI checks) cost what they did in
+1.8.0 instead of copying the buffer once per 512 KB.
+
+All other AAR entries and classes are byte-identical to the base AAR.
+
+Rebuild recipe: as for `lib-exoplayer-release.aar` above, with the extractor's own `classes.jar` first on
+the class path; no typedef removal is needed. The unchanged sources compile to the base classes apart from
+the constant pool order of the three extractors.

@@ -348,6 +348,7 @@ class PlayerRuntimeController(
     fun getCurrentHeaders(): Map<String, String> = currentHeaders
 
     fun stopAndRelease() {
+        com.nuvio.tv.core.image.PictureMemoryRelease.cancelDuringFilm()
         PlayerPlaybackNetworking.cancelSelectedPlaybackPrewarm(currentStreamUrl, currentHeaders)
         streamRepository.stopNextEpisodePluginSearches()
         // The diagnostics record persists at FIRST FRAME, and on a mid-episode
@@ -558,6 +559,7 @@ class PlayerRuntimeController(
     internal var lateVideoResyncFailed: Boolean = false
     internal var stallWatchdogJob: Job? = null
     internal var startupWatchdogJob: Job? = null
+    internal var startupWatchdogCardUrl: String? = null
     internal var seekSourceLogJob: Job? = null
     internal var hideControlsJob: Job? = null
     internal var hideSeekOverlayJob: Job? = null
@@ -1192,6 +1194,7 @@ class PlayerRuntimeController(
     }
 
     fun onCleared() {
+        com.nuvio.tv.core.image.PictureMemoryRelease.cancelDuringFilm()
         scrubGlideJob?.cancel()
         seekSettleJob?.cancel()
         ScrubGlide.stop()

@@ -89,15 +89,17 @@ class PlayerMediaSourceProbeTest {
     }
 
     @Test
-    fun headersSurviveARedirectToAnotherHost() {
+    fun aRedirectToAnotherPortKeepsTheHeadersButNotTheLogin() {
         val other = MockWebServer().apply { start() }
         try {
             other.enqueue(body(bdav(1024)))
             server.enqueue(MockResponse().setResponseCode(302).setHeader("Location", other.url("/file").toString()))
-            val result = probe(headers = mapOf("Authorization" to "Bearer abc"))
+            val result = probe(headers = mapOf("Authorization" to "Bearer abc", "Referer" to "https://addon.example/"))
             assertTrue(result.isBlurayTransportStream)
-            server.takeRequest()
-            assertEquals("Bearer abc", other.takeRequest().getHeader("Authorization"))
+            assertEquals("Bearer abc", server.takeRequest().getHeader("Authorization"))
+            val hop = other.takeRequest()
+            assertNull(hop.getHeader("Authorization"))
+            assertEquals("https://addon.example/", hop.getHeader("Referer"))
         } finally {
             other.shutdown()
         }

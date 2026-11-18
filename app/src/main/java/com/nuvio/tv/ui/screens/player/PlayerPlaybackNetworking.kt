@@ -8,6 +8,7 @@ import com.nuvio.tv.core.network.IPv4FirstDns
 import com.nuvio.tv.core.network.PlaybackSocketFactory
 import com.nuvio.tv.core.network.ServerTrust
 import com.nuvio.tv.core.network.withServerTrust
+import com.nuvio.tv.ui.screens.player.RedirectHeaders.keepHeadersOnRedirect
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import java.net.HttpURLConnection
@@ -260,21 +261,7 @@ internal object PlayerPlaybackNetworking {
         } else if (slowStart) {
             builder.readTimeout(SlowStartServer.FIRST_DATA_WAIT_MS, TimeUnit.MILLISECONDS)
         }
-        // OkHttp drops request headers on cross-host redirects, which proxies and WebDAV servers
-        // commonly do; a network interceptor puts every proxy header back on every outgoing request.
-        val proxyHeaders = defaultHeaders.filterKeys { key ->
-            !key.equals("Range", ignoreCase = true)
-        }
-        if (proxyHeaders.isNotEmpty()) {
-            builder.addNetworkInterceptor { chain ->
-                val request = chain.request()
-                val next = request.newBuilder()
-                for ((key, value) in proxyHeaders) {
-                    next.header(key, value)
-                }
-                chain.proceed(next.build())
-            }
-        }
+        builder.keepHeadersOnRedirect(defaultHeaders.filterKeys { key -> !key.equals("Range", ignoreCase = true) })
         return builder
             .let { NuvioExoPlayerPerformanceHelper.applyNetworkOptimizations(it) }
             .build()

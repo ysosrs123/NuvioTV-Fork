@@ -11,6 +11,8 @@ object MemoryPressure {
 
     private val entries = CopyOnWriteArrayList<Entry>()
     @Volatile private var registered = false
+    /** The app's screen is resumed in front. */
+    @Volatile var inFront: Boolean = false
 
     fun register(context: Context) {
         if (registered) return

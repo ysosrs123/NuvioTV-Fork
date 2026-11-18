@@ -174,6 +174,7 @@ class ParallelRangeProductionWorkloadTest {
             assertEquals(36,f.workerOpens.size)
             assertEquals(workers,f.pool.largestPoolSize)
             assertEquals(workers,f.pool.corePoolSize);assertEquals(workers,f.pool.maximumPoolSize)
+            assertTrue(f.pool.getKeepAliveTime(TimeUnit.SECONDS)>=ParallelRangeDataSource.playbackWorkerKeepAliveSeconds(false))
             assertTrue(f.pool.queue.isEmpty())
             val live=Thread.getAllStackTraces().keys.count { it.isAlive && it.name=="parallel-ds-worker" }
             assertEquals(workers,live)
@@ -367,6 +368,13 @@ class ParallelRangeProductionWorkloadTest {
             assertFalse(gate.blocking)
             ds.close()
         }
+    }
+    @Test fun `idle playback workers outlive the gap between buffer top-ups`() {
+        for(is64Bit in listOf(false,true)) {
+            val gapSeconds=60L
+            assertTrue(ParallelRangeDataSource.playbackWorkerKeepAliveSeconds(is64Bit)>gapSeconds)
+        }
+        assertTrue(ParallelRangeDataSource.playbackWorkerKeepAliveSeconds(false)<=ParallelRangeDataSource.playbackWorkerKeepAliveSeconds(true))
     }
     companion object { private const val CHUNK=262144L }
 }

@@ -15,6 +15,11 @@ class VodCacheShortLengthTest {
     @Test
     fun `a matching, missing or unknown length is left alone`() {
         assertFalse(VodCacheShortLength.storedLengthIsShort(8_005_045_536L, 8_005_045_536L))
+        // The server's real length below a wrong add-on size stays.
+        assertFalse(VodCacheShortLength.storedLengthIsShort(42_154_263_936L, 50_123_388_878L))
+        assertFalse(VodCacheShortLength.storedLengthIsShort(150_000_000L, 1_000_000_000L))
+        assertFalse(VodCacheShortLength.storedLengthIsShort(67_108_864L, 200_000_000L))
+        assertTrue(VodCacheShortLength.storedLengthIsShort(16_777_216L, 5_000_000_000L))
         assertFalse(VodCacheShortLength.storedLengthIsShort(-1L, 8_005_045_536L))
         assertFalse(VodCacheShortLength.storedLengthIsShort(67_108_864L, 0L))
         assertFalse(VodCacheShortLength.storedLengthIsShort(67_108_864L, -1L))

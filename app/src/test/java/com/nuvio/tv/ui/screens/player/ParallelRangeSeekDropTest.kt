@@ -22,6 +22,24 @@ class ParallelRangeSeekDropTest {
     }
 
     @Test
+    fun `the jump to a resume point leaves the read-ahead from the start behind`() {
+        val head = listOf(0L, 1L, 2L, 3L, 4L)
+        val tail = 10_487L
+        // Body of an 88 GB file in 8 MB pieces: the start pieces go, the index piece at the end stays.
+        assertEquals(head, ParallelRangeDataSource.leftByResumeStart(head + tail, target = 1010L, window = 4, totalChunks = 10_488L))
+        // The pieces at the resume point stay.
+        assertEquals(head, ParallelRangeDataSource.leftByResumeStart(head + 1010L + 1011L, 1010L, window = 4, totalChunks = 10_488L))
+        // Still reading the start, or the index at the end: nothing dropped yet.
+        assertNull(ParallelRangeDataSource.leftByResumeStart(head, target = 0L, window = 4, totalChunks = 10_488L))
+        assertNull(ParallelRangeDataSource.leftByResumeStart(head, target = 5L, window = 4, totalChunks = 10_488L))
+        assertNull(ParallelRangeDataSource.leftByResumeStart(head, target = tail, window = 4, totalChunks = 10_488L))
+        // A resume point inside the first pieces uses them.
+        assertNull(ParallelRangeDataSource.leftByResumeStart(head, target = 3L, window = 4, totalChunks = 10_488L))
+        // Length not known yet.
+        assertNull(ParallelRangeDataSource.leftByResumeStart(head, target = 1010L, window = 4, totalChunks = -1L))
+    }
+
+    @Test
     fun `a long idle is spotted once before the next piece`() {
         var t = 0L
         val m = RequestMeter { t }

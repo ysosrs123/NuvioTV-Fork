@@ -49,6 +49,28 @@ class StartupWatchdogDecisionTest {
     }
 
     @Test
+    fun soundPlayingAfterTheVideoRestartWithAFedDecoderMovesOnToTheOtherPlayer() {
+        // Shield, DV 8.6 on an HDR10 TV: the sound plays, 42 s buffered, decoder open, the restart did not help.
+        assertEquals(Step.Fire("video_never_decoded"), step(elapsedMs = 40_000L, bufferedAheadMs = 42_000L,
+            lastBufferedAheadMs = 42_000L, ready = true, playing = true, positionMs = 30_000L, lastPositionMs = 10_000L,
+            videoRestarted = true, videoDecoderOpened = true))
+        // Before the restart it restarts first.
+        assertEquals(Step.RestartVideo, step(elapsedMs = 20_000L, bufferedAheadMs = 42_000L,
+            lastBufferedAheadMs = 42_000L, ready = true, playing = true, positionMs = 10_000L, lastPositionMs = 0L,
+            videoDecoderOpened = true))
+        // Paused, little buffered, or no decoder open: still the decoder message.
+        assertEquals(Step.Fire("decoder_unresponsive"), step(elapsedMs = 40_000L, bufferedAheadMs = 42_000L,
+            lastBufferedAheadMs = 42_000L, ready = true, playing = true, positionMs = 10_000L, lastPositionMs = 10_000L,
+            videoRestarted = true, videoDecoderOpened = true))
+        assertEquals(Step.Fire("decoder_unresponsive"), step(elapsedMs = 40_000L, bufferedAheadMs = 4_000L,
+            lastBufferedAheadMs = 4_000L, ready = true, playing = true, positionMs = 30_000L, lastPositionMs = 10_000L,
+            videoRestarted = true, videoDecoderOpened = true))
+        assertEquals(Step.Fire("decoder_unresponsive"), step(elapsedMs = 40_000L, bufferedAheadMs = 42_000L,
+            lastBufferedAheadMs = 42_000L, ready = true, playing = true, positionMs = 30_000L, lastPositionMs = 10_000L,
+            videoRestarted = true))
+    }
+
+    @Test
     fun aRequestStillInsideItsReadWaitGetsOneMoreInterval() {
         // Resume point answered 12 s ago, nothing buffered yet, no load error.
         assertEquals(Step.WaitForRead, step(openRequestAgeMs = 12_000L, videoDecoderOpened = true))

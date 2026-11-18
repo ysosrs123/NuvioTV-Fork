@@ -460,7 +460,8 @@ class PlayerViewModel @Inject constructor(
                 "DV" in hdrFormats -> "Dolby Vision"
                 "HDR10" in hdrFormats -> "HDR10 / PQ"
                 "HLG" in hdrFormats -> "HLG"
-                else -> "SDR"
+                format.dynamicRangeKnown() -> "SDR"
+                else -> "Unknown"
             }
             rows += StatsRow("HDR", hdr)
 

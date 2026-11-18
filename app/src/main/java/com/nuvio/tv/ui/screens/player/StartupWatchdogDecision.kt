@@ -63,6 +63,9 @@ internal object StartupWatchdogDecision {
                 bufferedAheadMs == 0L && !ready && playbackThreadAnswers -> "no_data_buffered"
                 videoDecoderOpened && playbackThreadAnswers && !ready && bufferedAheadMs >= WELL_AHEAD_MS ->
                     "video_never_decoded"
+                videoDecoderOpened && playbackThreadAnswers && ready && playing && videoRestarted &&
+                    bufferedAheadMs >= WELL_AHEAD_MS && positionMs - lastPositionMs >= PLAYING_WITHOUT_PICTURE_MS ->
+                    "video_never_decoded"
                 else -> "decoder_unresponsive"
             }
         )

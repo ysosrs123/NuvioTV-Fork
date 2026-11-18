@@ -103,7 +103,7 @@ private fun exoMediaInfo(video: Format?, audio: Format?): PlayerMediaInfo =
         audioTrackId = audio?.id,
         audioLanguage = audio?.language,
         hdr = video?.hdrFormats().orEmpty(),
-        hdrKnown = video != null,
+        hdrKnown = video?.dynamicRangeKnown() == true,
         bitDepth = video?.colorInfo?.lumaBitdepth?.takeIf { it > 0 } ?: video?.codecs?.let(::codecsBitDepth)
     )
 
@@ -175,6 +175,17 @@ internal fun Format.hdrFormats(): List<String> = buildList {
         C.COLOR_TRANSFER_HLG -> add("HLG")
     }
 }
+
+/**
+ * False when an HEVC, AV1 or VP9 track names no colour transfer anywhere: the TV may still be sent HDR, so the
+ * missing data must not read as SDR. AVC with no colour data is SDR.
+ */
+internal fun Format.dynamicRangeKnown(): Boolean =
+    sampleMimeType == MimeTypes.VIDEO_DOLBY_VISION ||
+        PlaybackVideoColorTransfer.of(this) != Format.NO_VALUE ||
+        sampleMimeType !in HDR_CAPABLE_VIDEO
+
+private val HDR_CAPABLE_VIDEO = setOf(MimeTypes.VIDEO_H265, MimeTypes.VIDEO_AV1, MimeTypes.VIDEO_VP9)
 
 private fun mpvBitDepth(pixelFormat: String): Int? = when {
     pixelFormat.contains("12") -> 12

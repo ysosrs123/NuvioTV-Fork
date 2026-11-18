@@ -94,7 +94,17 @@ class BufferMemoryKeeperTest {
         oneGbBox = oneGbBox,
         onLastWarning = { lastWarnings++ },
         onCritical = { criticalTold += it },
-    )
+        onMemoryWarning = { memoryWarnings++ },
+        onWarningCut = { before, after -> warningCuts += before to after },
+        inFront = { front },
+        fireOs = fireOs,
+    ).also { it.onPlayingChanged(playingNow) }
+
+    private var memoryWarnings = 0
+    private val warningCuts = mutableListOf<Pair<Long, Long>>()
+    private var front = true
+    private var fireOs = false
+    private var playingNow = true
 
     private var addressSpaceMb: Long? = null
     private var ceilingMb32 = 3_300L
@@ -412,6 +422,7 @@ class BufferMemoryKeeperTest {
 
     @Test
     fun `the budget comes back once the box has room again`() {
+        front = false
         val lc = customControl(budgetMb = 100)
         val k = keeper(lc)
         warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
@@ -785,6 +796,7 @@ class BufferMemoryKeeperTest {
     }
     @Test
     fun `a warning the box's own numbers do not confirm only gives idle memory back`() {
+        fireOs = true
         val lc = customControl(budgetMb = 100)
         val k = keeper(lc, ceilingMb = 200)
         k.check()
@@ -875,7 +887,7 @@ class BufferMemoryKeeperTest {
     }
 
     @Test
-    fun `2 GB and 4 GB boxes set the same warning aside as before`() {
+    fun `2 GB and 4 GB boxes skip the 1 GB rule and take only the warning quarter when the numbers disagree`() {
         for ((totalMem, budgetMb) in listOf((1.9 * 1024 * mb).toLong() to 200L, (3.8 * 1024 * mb).toLong() to 1000L)) {
             val oneGb = BufferSizing.isOneGbBox(totalMem, lowRamDevice = true)
             assertFalse(oneGb)
@@ -887,7 +899,7 @@ class BufferMemoryKeeperTest {
             val k = keeper(lc, floorMb = floorMb, oneGbBox = oneGb)
             k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE)
             assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
-            assertEquals(-1L, k.effectiveCapBytes())
+            assertEquals(budgetMb * mb * 3 / 4, k.effectiveCapBytes())
             assertEquals(budgetMb * mb, lc.uncappedBudgetBytes)
             assertEquals(0, lastWarnings)
             // A warning the numbers confirm cuts to the same caps as before.
@@ -1036,5 +1048,274 @@ class BufferMemoryKeeperTest {
         assertEquals(0, allocator.totalBytesAllocated)
         assertEquals(0L, allocator.memoryFootprint.toLong())
         assertTrue(waits in 2..3)
+    }
+
+    @Test
+    fun `background and above count as warnings, ui hidden and the running levels do not`() {
+        assertFalse(BufferMemoryKeeper.countsAsWarning(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW))
+        assertFalse(BufferMemoryKeeper.countsAsWarning(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL))
+        assertFalse(BufferMemoryKeeper.countsAsWarning(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN))
+        assertTrue(BufferMemoryKeeper.countsAsWarning(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND))
+        assertTrue(BufferMemoryKeeper.countsAsWarning(ComponentCallbacks2.TRIM_MEMORY_MODERATE))
+        assertTrue(BufferMemoryKeeper.countsAsWarning(ComponentCallbacks2.TRIM_MEMORY_COMPLETE))
+    }
+
+    @Test
+    fun `each warning takes a quarter off and never goes below the floor`() {
+        val budget = 500 * mb
+        val floor = 50 * mb
+        var cap = BufferMemoryKeeper.warningStepDown(-1L, budget, floor)
+        assertEquals(375 * mb, cap)
+        cap = BufferMemoryKeeper.warningStepDown(cap, budget, floor)
+        assertEquals(budget * 9 / 16, cap)
+        repeat(20) { cap = BufferMemoryKeeper.warningStepDown(cap, budget, floor) }
+        assertEquals(floor, cap)
+        assertEquals(30 * mb, BufferMemoryKeeper.warningStepDown(-1L, 30 * mb, floor))
+    }
+
+    @Test
+    fun `the warning cap comes back a quarter of the budget at a time`() {
+        val budget = 400 * mb
+        assertEquals(300 * mb, BufferMemoryKeeper.warningStepUp(200 * mb, budget))
+        assertEquals(-1L, BufferMemoryKeeper.warningStepUp(300 * mb, budget))
+        assertEquals(-1L, BufferMemoryKeeper.warningStepUp(-1L, budget))
+    }
+
+    @Test
+    fun `the cool-down lasts ten minutes`() {
+        val warnedAt = 5_000_000L
+        assertFalse(BufferMemoryKeeper.warningCoolDownOver(warnedAt + 9 * 60_000L, warnedAt))
+        assertTrue(BufferMemoryKeeper.warningCoolDownOver(warnedAt + 10 * 60_000L, warnedAt))
+    }
+
+    @Test
+    fun `a background warning with plenty free still gives a quarter back while playing`() {
+        // The onn 4K Pro numbers: 474 MB free against a 144 MB line, swap 312 MB free.
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        swapFree = 312
+        val lc = customControl(budgetMb = 400)
+        val k = keeper(lc)
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
+        assertEquals(300 * mb, k.warningCapBytes)
+        assertEquals(300 * mb, k.effectiveCapBytes())
+        assertEquals(400 * mb, lc.uncappedBudgetBytes)
+        assertEquals(1, memoryWarnings)
+        now += 60_000L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(225 * mb, k.effectiveCapBytes())
+        assertEquals(2, memoryWarnings)
+    }
+
+    @Test
+    fun `ui hidden alone neither cuts nor counts as a warning`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 400))
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+        assertEquals(-1L, k.warningCapBytes)
+        assertEquals(-1L, k.effectiveCapBytes())
+        assertEquals(0, memoryWarnings)
+    }
+
+    @Test
+    fun `with the managed budget off a warning does not shrink the buffer`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val lc = customControl(budgetMb = 400)
+        val k = keeper(lc, budgetManaged = false)
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(-1L, k.warningCapBytes)
+        assertEquals(-1L, k.effectiveCapBytes())
+        assertEquals(1, memoryWarnings)
+    }
+
+    @Test
+    fun `no growth and no lift for ten minutes after a warning, then a quarter back per check`() {
+        free = BufferSizing.FreeMemory(1_200 * mb, 144 * mb, false)
+        swapFree = -1
+        val lc = performanceControl(budgetMb = 200)
+        val k = keeper(lc, ceilingMb = 400)
+        take(200)
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(150 * mb, k.effectiveCapBytes())
+        now += 9 * 60_000L
+        k.check()
+        assertEquals(150 * mb, k.effectiveCapBytes())
+        assertEquals(0L, k.grownBytes)
+        now += 60_000L
+        k.check()
+        assertEquals(-1L, k.warningCapBytes)
+        assertEquals(-1L, k.effectiveCapBytes())
+        assertEquals(0L, k.grownBytes)
+        now += 10_000L
+        k.check()
+        assertEquals(32 * mb, k.grownBytes)
+    }
+
+    @Test
+    fun `without warnings the budget and its growth are as before`() {
+        free = BufferSizing.FreeMemory(1_200 * mb, 144 * mb, false)
+        swapFree = -1
+        val lc = performanceControl(budgetMb = 200)
+        val k = keeper(lc, ceilingMb = 400)
+        take(200)
+        k.check()
+        assertEquals(-1L, k.warningCapBytes)
+        assertEquals(32 * mb, k.grownBytes)
+        assertEquals(232 * mb, lc.uncappedBudgetBytes)
+    }
+
+    @Test
+    fun `a burst of warnings within five seconds is one cut`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 400))
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        now += 2_000L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE)
+        now += 2_000L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE)
+        assertEquals(300 * mb, k.effectiveCapBytes())
+        assertEquals(listOf(400 * mb to 300 * mb), warningCuts)
+        now += 5_000L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(225 * mb, k.effectiveCapBytes())
+        assertEquals(2, warningCuts.size)
+    }
+
+    @Test
+    fun `frequent warnings settle at twenty seconds of a 4K film, not at 50 MB`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 500))
+        val remux = 80_000_000L
+        k.setStreamBitrate(remux)
+        val floor = remux / 8 * 20
+        assertEquals(floor, k.warningFloorBytes)
+        repeat(12) {
+            k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+            now += 6 * 60_000L
+        }
+        assertEquals(floor, k.effectiveCapBytes())
+    }
+
+    @Test
+    fun `the warning floor is 50 MB while the bitrate is unknown and never above the budget`() {
+        assertEquals(50 * mb, BufferMemoryKeeper.warningFloorBytes(0L))
+        assertEquals(50 * mb, BufferMemoryKeeper.warningFloorBytes(8_000_000L))
+        assertEquals(200_000_000L, BufferMemoryKeeper.warningFloorBytes(80_000_000L))
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 150))
+        k.setStreamBitrate(80_000_000L)
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(150 * mb, k.effectiveCapBytes())
+    }
+
+    @Test
+    fun `a warning in the background or while paused leaves the buffer, pictures still go`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        front = false
+        val back = keeper(customControl(budgetMb = 400))
+        back.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(-1L, back.warningCapBytes)
+        assertEquals(-1L, back.effectiveCapBytes())
+        front = true
+        playingNow = false
+        val paused = keeper(customControl(budgetMb = 400))
+        paused.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(-1L, paused.effectiveCapBytes())
+        assertEquals(2, memoryWarnings)
+        assertTrue(warningCuts.isEmpty())
+        paused.onPlayingChanged(true)
+        paused.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(300 * mb, paused.effectiveCapBytes())
+    }
+
+    @Test
+    fun `running critical while playing in front cuts once per burst, running low and Fire OS keep the old rule`() {
+        assertTrue(BufferMemoryKeeper.cutsOnWarning(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL, fireOs = false))
+        assertFalse(BufferMemoryKeeper.cutsOnWarning(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL, fireOs = true))
+        assertFalse(BufferMemoryKeeper.cutsOnWarning(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW, fireOs = false))
+        assertFalse(BufferMemoryKeeper.cutsOnWarning(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN, fireOs = false))
+        assertTrue(BufferMemoryKeeper.cutsOnWarning(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND, fireOs = true))
+
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 400))
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        now += 1_000L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
+        assertEquals(300 * mb, k.effectiveCapBytes())
+        assertEquals(1, warningCuts.size)
+
+        val low = keeper(customControl(budgetMb = 400))
+        low.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        assertEquals(-1L, low.effectiveCapBytes())
+
+        fireOs = true
+        val fire = keeper(customControl(budgetMb = 400))
+        fire.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        assertEquals(-1L, fire.effectiveCapBytes())
+        assertEquals(1, warningCuts.size)
+    }
+
+    @Test
+    fun `a warning inside a burst still gives idle memory back`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 400))
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        giveBack(take(40))
+        now += 1_000L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE)
+        assertTrue(allocator.availableBytes <= BufferMemoryKeeper.KEEP_IDLE_BYTES)
+        assertEquals(1, warningCuts.size)
+    }
+
+    @Test
+    fun `a paused film with real low memory goes to the critical cap at once`() {
+        playingNow = false
+        free = BufferSizing.FreeMemory(150 * mb, 144 * mb, true)
+        val k = keeper(customControl(budgetMb = 400))
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(-1L, k.warningCapBytes)
+        assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, k.pressureLevel)
+        assertTrue(k.effectiveCapBytes() in 0 until 400 * mb)
+    }
+
+    @Test
+    fun `warnings that keep coming within 5 s of each other stay one cut`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 400))
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        now += 4_900L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE)
+        now += 4_900L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_COMPLETE)
+        assertEquals(1, warningCuts.size)
+        now += BufferMemoryKeeper.WARNING_BURST_MS
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(2, warningCuts.size)
+    }
+
+    @Test
+    fun `a warning while a film plays behind another app does not cut`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        front = false
+        val k = keeper(customControl(budgetMb = 400))
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(0, warningCuts.size)
+        assertEquals(-1L, k.warningCapBytes)
+        assertEquals(1, memoryWarnings)
+    }
+
+    @Test
+    fun `a bitrate learnt mid-film raises a warning cap that sits below its floor`() {
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        val k = keeper(customControl(budgetMb = 400))
+        repeat(12) {
+            k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+            now += 6 * 60_000L
+        }
+        assertEquals(50 * mb, k.effectiveCapBytes())
+        k.setStreamBitrate(80_000_000L)
+        assertEquals(200_000_000L, k.warningCapBytes)
+        assertEquals(200_000_000L, k.effectiveCapBytes())
     }
 }
