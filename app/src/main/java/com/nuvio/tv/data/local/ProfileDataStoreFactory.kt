@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.nuvio.tv.domain.model.DiscoverLocation
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
@@ -19,7 +20,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
@@ -49,6 +53,15 @@ internal fun isProfileScopedDataStoreFile(fileName: String): Boolean {
 }
 
 private const val SHADOW_PART_SUFFIX = ".part"
+
+/** Store data whose lookup runs on [lookupDispatcher], so a collector on the main thread never waits on store creation. */
+internal fun ProfileDataStoreFactory.dataOffMain(
+    profileId: Int,
+    featureName: String,
+    lookupDispatcher: CoroutineDispatcher
+): Flow<Preferences> = flow {
+    emitAll(withContext(lookupDispatcher) { get(profileId, featureName) }.data)
+}
 
 private class ScopedDataStore(
     val store: DataStore<Preferences>,
@@ -106,17 +119,42 @@ class ProfileDataStoreFactory @Inject constructor(
 
     fun get(profileId: Int, featureName: String): DataStore<Preferences> {
         val fileName = if (profileId == 1) featureName else "${featureName}_p$profileId"
+        synchronized(lock) { cachedStore(profileId, fileName)?.let { return it } }
+        // File system work stays outside the lock: slow storage must not hold up lookups of other stores.
+        val dataStoreDir = prepareStoreFile(fileName)
         synchronized(lock) {
-            if (profileId in deletedProfileIds || profileId in retiringProfiles) {
-                throw CancellationException("Profile store unavailable during retirement")
-            }
-            cache[fileName]?.let {
-                if (resetting && it.store is ProfileStoreLifetime) throw CancellationException("Profile store reset in progress")
-                return it.store
-            }
-            if (resetting) throw CancellationException("Profile store reset in progress")
-            return createAndCache(fileName).store
+            cachedStore(profileId, fileName)?.let { return it }
+            return createAndCache(fileName, dataStoreDir).store
         }
+    }
+
+    private fun cachedStore(profileId: Int, fileName: String): DataStore<Preferences>? {
+        if (profileId in deletedProfileIds || profileId in retiringProfiles) {
+            throw CancellationException("Profile store unavailable during retirement")
+        }
+        cache[fileName]?.let {
+            if (resetting && it.store is ProfileStoreLifetime) throw CancellationException("Profile store reset in progress")
+            return it.store
+        }
+        if (resetting) throw CancellationException("Profile store reset in progress")
+        return null
+    }
+
+    private fun prepareStoreFile(fileName: String): File {
+        // Ensure the datastore directory exists — prevents ENOENT on first read
+        // when a profile-scoped file hasn't been created yet.
+        val dataStoreDir = File(context.filesDir, "datastore")
+        if (!dataStoreDir.exists()) {
+            dataStoreDir.mkdirs()
+        }
+        // DataStore 1.1.x (okio-based) can throw FileNotFoundException if the file
+        // doesn't exist yet and a race condition occurs. Pre-create an empty file
+        // to avoid this edge case (DataStore will overwrite on first write).
+        val targetFile = File(dataStoreDir, "$fileName.preferences_pb")
+        if (!targetFile.exists()) {
+            try { targetFile.createNewFile() } catch (_: Exception) { }
+        }
+        return dataStoreDir
     }
 
     suspend fun clearProfile(profileId: Int) {
@@ -199,26 +237,13 @@ class ProfileDataStoreFactory @Inject constructor(
         Unit
     }
 
-    private fun createAndCache(fileName: String): ScopedDataStore {
+    private fun createAndCache(fileName: String, dataStoreDir: File): ScopedDataStore {
         val job = SupervisorJob()
         val scope = CoroutineScope(Dispatchers.IO + job)
         val migrations = if (fileName == "layout_settings" || fileName.startsWith("layout_settings_p")) {
             listOf(discoverLocationMigration)
         } else {
             emptyList()
-        }
-        // Ensure the datastore directory exists — prevents ENOENT on first read
-        // when a profile-scoped file hasn't been created yet.
-        val dataStoreDir = File(context.filesDir, "datastore")
-        if (!dataStoreDir.exists()) {
-            dataStoreDir.mkdirs()
-        }
-        // DataStore 1.1.x (okio-based) can throw FileNotFoundException if the file
-        // doesn't exist yet and a race condition occurs. Pre-create an empty file
-        // to avoid this edge case (DataStore will overwrite on first write).
-        val targetFile = File(dataStoreDir, "$fileName.preferences_pb")
-        if (!targetFile.exists()) {
-            try { targetFile.createNewFile() } catch (_: Exception) { }
         }
         val store = PreferenceDataStoreFactory.create(
             corruptionHandler = androidx.datastore.core.handlers.ReplaceFileCorruptionHandler { ex ->

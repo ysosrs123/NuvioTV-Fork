@@ -1,7 +1,6 @@
 package com.nuvio.tv.ui.components.posteroptions
 
 import android.util.Log
-import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.tracking.TrackingMembershipRemovalConfirmation
 import com.nuvio.tv.core.tracking.mergeTrackingMembershipWithTabs
 import com.nuvio.tv.core.tracking.toggleTrackingMembershipSelection
@@ -533,14 +532,15 @@ class PosterOptionsController @Inject constructor(
         val type = if (item.apiType.equals("tv", ignoreCase = true) ||
             item.apiType.equals("anime", ignoreCase = true)
         ) "series" else item.apiType
-        var episodes: List<Video> = emptyList()
-        metaRepository.getMetaFromPrimaryAddon(type, item.id)
-            .collect { networkResult ->
-                if (networkResult is NetworkResult.Success) {
-                    episodes = networkResult.data.videos
-                }
-            }
-        return episodes
+        val addonBaseUrl = _state.value.addonBaseUrl.takeIf { it.isNotBlank() }
+        return lookUpSeriesEpisodes(
+            metaRepository = metaRepository,
+            item = item,
+            type = type,
+            addonBaseUrl = addonBaseUrl,
+            resolve = { titleIdentity.resolve(it, addonBaseUrl) },
+            pick = { it.videos }
+        )
     }
 
     private var activeListPickerInput: LibraryEntryInput? = null

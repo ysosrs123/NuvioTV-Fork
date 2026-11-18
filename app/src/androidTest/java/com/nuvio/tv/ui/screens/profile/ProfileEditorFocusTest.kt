@@ -2,12 +2,14 @@ package com.nuvio.tv.ui.screens.profile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isFocused
@@ -18,14 +20,18 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.nuvio.tv.R
 import com.nuvio.tv.data.remote.supabase.AvatarCatalogItem
 import com.nuvio.tv.domain.model.UserProfile
+import com.nuvio.tv.domain.model.V2AppearancePreferences
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import org.junit.Rule
 import org.junit.Test
 import org.junit.Assert.assertNotEquals
@@ -124,6 +130,76 @@ class ProfileEditorFocusTest {
         cancel.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
             .assertIsFocused().performKeyInput { pressKey(Key.DirectionRight) }
         avatar.assertIsFocused().performKeyInput { pressKey(Key.DirectionLeft) }
+        cancel.assertIsFocused()
+    }
+
+    @Test
+    fun editEditorInNuvioV2MovesRightFromCancelIntoTheAvatars() {
+        composeRule.setContent {
+            NuvioTheme {
+                CompositionLocalProvider(LocalV2Appearance provides V2AppearancePreferences()) {
+                    EditProfileOverlay(
+                        profile = profile,
+                        localAvatarId = null,
+                        avatarCatalog = avatars,
+                        profileBackgroundCatalog = emptyList(),
+                        hasProfileBackgroundAccess = false,
+                        isSaving = false,
+                        avatarUrlResolver = { null },
+                        onDismiss = {},
+                        ratingLimit = null,
+                        ratingLimitOwner = null,
+                        onSaveProfile = { _, _ -> }
+                    )
+                }
+            }
+        }
+
+        val name = composeRule.onNode(hasSetTextAction())
+        val cancel = composeRule.onNodeWithText(context.getString(R.string.profile_cancel))
+        name.assertIsFocused().performKeyInput { pressKey(Key.DirectionRight) }
+        composeRule.onNode(isFocused()).assertExists()
+        name.assertIsNotFocused()
+        cancel.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
+            .assertIsFocused().performKeyInput { pressKey(Key.DirectionRight) }
+        cancel.assertIsNotFocused()
+        name.assertIsNotFocused()
+        composeRule.onNode(isFocused()).performKeyInput { pressKey(Key.DirectionLeft) }
+        cancel.assertIsFocused()
+    }
+
+    @Test
+    fun editEditorRightToLeftMovesLeftFromCancelIntoTheAvatarsAndBack() {
+        composeRule.setContent {
+            NuvioTheme {
+                CompositionLocalProvider(
+                    LocalV2Appearance provides V2AppearancePreferences(),
+                    LocalLayoutDirection provides LayoutDirection.Rtl
+                ) {
+                    EditProfileOverlay(
+                        profile = profile,
+                        localAvatarId = null,
+                        avatarCatalog = avatars,
+                        profileBackgroundCatalog = emptyList(),
+                        hasProfileBackgroundAccess = false,
+                        isSaving = false,
+                        avatarUrlResolver = { null },
+                        onDismiss = {},
+                        ratingLimit = null,
+                        ratingLimitOwner = null,
+                        onSaveProfile = { _, _ -> }
+                    )
+                }
+            }
+        }
+
+        val name = composeRule.onNode(hasSetTextAction())
+        val cancel = composeRule.onNodeWithText(context.getString(R.string.profile_cancel))
+        cancel.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
+            .assertIsFocused().performKeyInput { pressKey(Key.DirectionLeft) }
+        cancel.assertIsNotFocused()
+        name.assertIsNotFocused()
+        composeRule.onNode(isFocused()).performKeyInput { pressKey(Key.DirectionRight) }
         cancel.assertIsFocused()
     }
 

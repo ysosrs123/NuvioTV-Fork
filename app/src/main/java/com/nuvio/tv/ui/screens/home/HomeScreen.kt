@@ -563,7 +563,7 @@ fun HomeScreen(
             },
             onToggleWatched = {
                 if (isSeries) {
-                    viewModel.togglePosterSeriesWatched(item)
+                    viewModel.togglePosterSeriesWatched(item, selectedPoster.addonBaseUrl)
                 } else {
                     viewModel.togglePosterMovieWatched(item)
                 }

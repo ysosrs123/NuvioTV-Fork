@@ -168,7 +168,7 @@ fun AvatarPickerGrid(
         ) {
             val minCellWidth = 88.dp
             val horizontalSpacing = NuvioTheme.spacing.md
-            val horizontalPadding = NuvioTheme.spacing.lg
+            val horizontalPadding = NuvioTheme.spacing.sm * 2
             val availableWidth = maxWidth - horizontalPadding
             val columnCount = max(
                 1,
@@ -264,7 +264,7 @@ private fun CategoryTab(
             .focusRequester(focusRequester)
             .focusProperties {
                 if (downFocusRequester != null) down = downFocusRequester
-                if (leftFocusRequester != null) left = leftFocusRequester
+                if (leftFocusRequester != null) start = leftFocusRequester
             }
             .clip(RoundedCornerShape(20.dp))
             .background(bgColor)
@@ -315,7 +315,11 @@ private fun AvatarGridItem(
             avatar = com.nuvio.tv.ui.v2.components.AvatarModel(avatar.id, avatar.displayName, "#24465C", avatar.imageUrl),
             size = 80.dp, focused = focused, selected = isSelected,
             modifier = Modifier.focusRequester(focusRequester)
-                .focusProperties { upFocusRequester?.let { up = it } }
+                .then(if (entryFocusRequester != null) Modifier.focusRequester(entryFocusRequester) else Modifier)
+                .focusProperties {
+                    upFocusRequester?.let { up = it }
+                    leftFocusRequester?.let { start = it }
+                }
                 .onFocusChanged { focused = it.isFocused; onFocused(it.isFocused) }
                 .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onClick)
         )
@@ -349,7 +353,7 @@ private fun AvatarGridItem(
             .then(if (entryFocusRequester != null) Modifier.focusRequester(entryFocusRequester) else Modifier)
             .focusProperties {
                 if (upFocusRequester != null) up = upFocusRequester
-                if (leftFocusRequester != null) left = leftFocusRequester
+                if (leftFocusRequester != null) start = leftFocusRequester
             }
             .onFocusChanged {
                 isFocused = it.isFocused

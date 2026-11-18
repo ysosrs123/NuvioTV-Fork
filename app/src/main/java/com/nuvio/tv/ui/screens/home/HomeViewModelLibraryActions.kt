@@ -374,7 +374,7 @@ private fun buildCompletedMovieProgress(item: MetaPreview): WatchProgress {
     )
 }
 
-fun HomeViewModel.togglePosterSeriesWatched(item: MetaPreview) {
+fun HomeViewModel.togglePosterSeriesWatched(item: MetaPreview, addonBaseUrl: String? = null) {
     val isSeries = item.apiType.equals("series", ignoreCase = true) ||
         item.apiType.equals("tv", ignoreCase = true) ||
         item.apiType.equals("anime", ignoreCase = true)
@@ -395,9 +395,9 @@ fun HomeViewModel.togglePosterSeriesWatched(item: MetaPreview) {
     viewModelScope.launch {
         runCatching {
             if (currentlyWatched) {
-                unmarkSeriesWatched(item)
+                unmarkSeriesWatched(item, addonBaseUrl)
             } else {
-                markSeriesWatched(item)
+                markSeriesWatched(item, addonBaseUrl)
             }
         }.onFailure { error ->
             Log.w(HomeViewModel.TAG, "Failed to toggle series watched for ${item.id}: ${error.message}")
@@ -414,8 +414,8 @@ fun HomeViewModel.togglePosterSeriesWatched(item: MetaPreview) {
     }
 }
 
-private suspend fun HomeViewModel.markSeriesWatched(item: MetaPreview) {
-    val episodes = fetchSeriesEpisodes(item)
+private suspend fun HomeViewModel.markSeriesWatched(item: MetaPreview, addonBaseUrl: String?) {
+    val episodes = fetchSeriesEpisodes(item, addonBaseUrl)
     // Without episodes the only mark left is a show-level one, which trackers answer by marking
     // every episode watched. Fail instead so the optimistic badge is reverted.
     check(episodes.isNotEmpty()) { "No episodes found for ${item.id}" }
@@ -445,8 +445,8 @@ private suspend fun HomeViewModel.markSeriesWatched(item: MetaPreview) {
     )
 }
 
-private suspend fun HomeViewModel.unmarkSeriesWatched(item: MetaPreview) {
-    val episodes = fetchSeriesEpisodes(item)
+private suspend fun HomeViewModel.unmarkSeriesWatched(item: MetaPreview, addonBaseUrl: String?) {
+    val episodes = fetchSeriesEpisodes(item, addonBaseUrl)
     if (episodes.isEmpty()) {
         watchProgressRepository.removeFromHistory(item.id, videoId = item.imdbId, wholeSeries = true)
         return
@@ -463,16 +463,19 @@ private suspend fun HomeViewModel.unmarkSeriesWatched(item: MetaPreview) {
     )
 }
 
-private suspend fun HomeViewModel.fetchSeriesEpisodes(item: MetaPreview): List<com.nuvio.tv.domain.model.Video> {
+private suspend fun HomeViewModel.fetchSeriesEpisodes(
+    item: MetaPreview,
+    addonBaseUrl: String?
+): List<com.nuvio.tv.domain.model.Video> {
     val type = if (item.apiType.equals("tv", ignoreCase = true)) "series" else item.apiType
-    var episodes: List<com.nuvio.tv.domain.model.Video> = emptyList()
-    metaRepository.getMetaFromPrimaryAddon(type, item.id)
-        .collect { networkResult ->
-            if (networkResult is com.nuvio.tv.core.network.NetworkResult.Success) {
-                episodes = networkResult.data.watchableEpisodes()
-            }
-        }
-    return episodes
+    return com.nuvio.tv.ui.components.posteroptions.lookUpSeriesEpisodes(
+        metaRepository = metaRepository,
+        item = item,
+        type = type,
+        addonBaseUrl = addonBaseUrl,
+        resolve = { posterTitleIdentity.resolve(it, addonBaseUrl) },
+        pick = { it.watchableEpisodes() }
+    )
 }
 
 private fun MetaPreview.toLibraryEntryInput(addonBaseUrl: String?): LibraryEntryInput {

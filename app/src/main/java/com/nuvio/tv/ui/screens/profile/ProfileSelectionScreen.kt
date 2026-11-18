@@ -220,7 +220,6 @@ fun ProfileSelectionScreen(
     var v2Management by remember { mutableStateOf(false) }
     val profiles by viewModel.profiles.collectAsState()
     val localAvatarIds by viewModel.localAvatarIds.collectAsState()
-    val posterPreviewPinStates by viewModel.posterPreviewPinStates.collectAsState()
     val activeProfileId by viewModel.activeProfileId.collectAsState()
     val avatarCatalog by viewModel.avatarCatalog.collectAsState()
     val profileBackgroundCatalog by viewModel.profileBackgroundCatalog.collectAsState()
@@ -337,8 +336,8 @@ fun ProfileSelectionScreen(
         ProfileSelectionBackground(
             focusedAvatarColor = overlayProfileColor ?: focusedAvatarColor,
             profileBackground = profileBackground,
-            posterProfileId = backgroundProfile?.id?.takeIf { posterPreviewPinStates != null && posterPreviewPinStates?.get(it) != true },
-            posterSnapshotVersion = profiles.hashCode() * 31 + posterPreviewPinStates.hashCode()
+            posterProfileId = backgroundProfile?.id,
+            posterSnapshotVersion = profiles.hashCode()
         )
 
         val mainContentInteractive = !showCreateProfile && profileToEdit == null && longPressedProfile == null &&
@@ -1752,7 +1751,7 @@ internal fun CreateProfileOverlay(
                             .fillMaxWidth()
                             .focusRequester(settingsFocusRequester)
                             .focusProperties {
-                                if (avatarCatalog.isNotEmpty()) right = avatarFocusRequester
+                                if (avatarCatalog.isNotEmpty()) end = avatarFocusRequester
                             }
                             .onFocusChanged {
                                 if (it.isFocused) leftPanelFocusRequester = settingsFocusRequester
@@ -2120,7 +2119,7 @@ internal fun EditProfileOverlay(
                             .focusRequester(cancelFocusRequester)
                             .focusProperties {
                                 if (selectedEditorTab == ProfileEditorTab.Avatar && avatarCatalog.isNotEmpty()) {
-                                    right = avatarFocusRequester
+                                    end = avatarFocusRequester
                                 }
                             }
                             .onFocusChanged {
@@ -2767,7 +2766,7 @@ private fun ProfileNameField(
                     }
                 }
                 .focusProperties {
-                    if (rightFocusRequester != null) right = rightFocusRequester
+                    if (rightFocusRequester != null) end = rightFocusRequester
                 }
                 .onFocusChanged {
                     isFocused = it.isFocused

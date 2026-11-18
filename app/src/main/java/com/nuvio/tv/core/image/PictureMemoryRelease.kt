@@ -8,8 +8,10 @@ import com.nuvio.tv.ui.brand.ArcBrandArt
 import com.nuvio.tv.ui.components.releaseBadgeImageMemory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -22,6 +24,10 @@ object PictureMemoryRelease {
     private const val MB = 1024L * 1024L
     /** The longest the player build waits for the release, so the buffer is sized with the pictures gone; it carries on in the background after that. */
     private const val WAIT_MS = 500L
+    /** Home's pictures go a little after the first frame, once the start of the film has settled. */
+    private const val DURING_FILM_DELAY_MS = 5_000L
+    /** Boxes sold as 3 GB or less; 4 GB boxes report well above this. */
+    private const val THREE_GB_BOX_RAM_BYTES = 3_072L * MB
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -32,6 +38,48 @@ object PictureMemoryRelease {
         val app = context.applicationContext
         val work = scope.async { release(app) }
         withTimeoutOrNull(WAIT_MS) { work.await() }
+    }
+
+    /** Once a film plays, boxes of 3 GB or less, and any box Android has warned, keep none of Home's pictures in memory. */
+    fun releasesDuringFilm(totalRamBytes: Long, warned: Boolean): Boolean =
+        warned || totalRamBytes <= THREE_GB_BOX_RAM_BYTES
+
+    @Volatile private var duringFilm: Job? = null
+
+    fun releaseDuringFilm(context: Context, totalRamBytes: Long) {
+        if (!releasesDuringFilm(totalRamBytes, warned = false)) return
+        val app = context.applicationContext
+        scheduleDuringFilm(scope) { release(app, "during film") }
+    }
+
+    internal fun scheduleDuringFilm(scope: CoroutineScope, action: () -> Unit) {
+        duringFilm?.cancel()
+        duringFilm = scope.launch {
+            delay(DURING_FILM_DELAY_MS)
+            action()
+        }
+    }
+
+    /** The player closed before the release ran: Home is back on screen and keeps its pictures. */
+    fun cancelDuringFilm() {
+        duringFilm?.cancel()
+        duringFilm = null
+    }
+
+    /** Android sends warnings in bursts; one release covers every warning within this of the first. */
+    private const val WARNING_RELEASE_GAP_MS = 5_000L
+    @Volatile private var lastWarningReleaseMs = Long.MIN_VALUE / 2
+
+    internal fun warningReleaseDue(nowMs: Long, lastReleaseMs: Long): Boolean =
+        nowMs - lastReleaseMs >= WARNING_RELEASE_GAP_MS
+
+    /** A background-level memory warning while a film is open: the same release on any box, once per burst. */
+    fun releaseOnWarning(context: Context) {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (!warningReleaseDue(now, lastWarningReleaseMs)) return
+        lastWarningReleaseMs = now
+        val app = context.applicationContext
+        scope.launch { release(app, "on memory warning") }
     }
 
     /** Android's last memory warning while a film plays: the same release, in the background. */

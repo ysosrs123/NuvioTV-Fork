@@ -111,11 +111,6 @@ class ProfileSelectionViewModel @Inject constructor(
     val profilePinEnabled: StateFlow<Map<Int, Boolean>> = profileLockStateDataStore.pinEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
-    // The poster preview must distinguish an unloaded lock cache from an unlocked profile.
-    val posterPreviewPinStates: StateFlow<Map<Int, Boolean>?> = profileLockStateDataStore.pinEnabled
-        .map<Map<Int, Boolean>, Map<Int, Boolean>?> { it }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
     private val _isPinOperationInProgress = MutableStateFlow(false)
     val isPinOperationInProgress: StateFlow<Boolean> = _isPinOperationInProgress.asStateFlow()
 

@@ -33,8 +33,7 @@ fun V2ProfileBackdrop(focusedColor: Color, profileId: Int?, snapshotVersion: Int
         val previousProfile = value.first
         value = Triple(profileId, snapshotVersion, emptyList())
         if (profileId != null) {
-            // First open and cached returns need no focus debounce. The caller
-            // still withholds profileId until the PIN state permits a preview.
+            // First open and cached returns need no focus debounce.
             if (previousProfile != null && previousProfile != profileId && profileId !in snapshots) {
                 delay(V2Motion.BackdropDebounceMs)
             }
