@@ -40,12 +40,22 @@ object BufferSizing {
     const val FOUR_K_BITRATE_BPS = 50_000_000L
     /** About 5 s of a 4K remux at 80 Mbit/s. */
     const val MIN_SIZED_BUFFER_MB = 50
-    /** What a 32-bit process keeps spare under its address-space limit: 3300 MB of 4 GB, 2276 MB of 3 GB. */
-    const val ADDRESS_SPACE_SPARE_32BIT_MB = 796L
+    /**
+     * MB a 32-bit process keeps free under its address-space limit for everything but the buffer, per 4096 MB of limit.
+     * It comes from the old rule of thumb of a 3300 MB ceiling on 4096 MB and is scaled to the limit the box reports.
+     */
+    const val ADDRESS_SPACE_SPARE_MB_PER_4GB = 796L
     const val ADDRESS_SPACE_4GB_MB = 4_096L
 
+    /** The spare under a limit of [limitMb]: [ADDRESS_SPACE_SPARE_MB_PER_4GB] per 4096 MB, rounded to whole MB. */
+    fun addressSpaceSpareMb(limitMb: Long): Long =
+        (limitMb * ADDRESS_SPACE_SPARE_MB_PER_4GB + ADDRESS_SPACE_4GB_MB / 2) / ADDRESS_SPACE_4GB_MB
+
+    /** The buffer stops growing once the process uses this much of a [limitMb] limit. */
+    fun addressSpaceCeilingMb(limitMb: Long): Long = limitMb - addressSpaceSpareMb(limitMb)
+
     /** 32-bit process: the buffer stops growing once the process uses this much of its address space. */
-    val addressSpaceCeiling32BitMb: Long get() = addressSpaceLimit32BitMb - ADDRESS_SPACE_SPARE_32BIT_MB
+    val addressSpaceCeiling32BitMb: Long get() = addressSpaceCeilingMb(addressSpaceLimit32BitMb)
     val addressSpaceLimit32BitMb: Long by lazy { addressSpaceLimitMb() }
 
     /**
@@ -83,7 +93,11 @@ object BufferSizing {
         }.getOrNull()
     }
 
-    /** 4 GB on a 64-bit kernel, 3 GB (or 2) on a 32-bit one; read once from where the main stack ends. */
+    /**
+     * The top of user space the kernel gives this process: where the main stack ends, rounded up to 16 MB. The kernel
+     * starts the stack at most 8 MB under that top, and the top sits on a 16 MB boundary. On 32-bit ARM it is 16 MB
+     * under the kernel's PAGE_OFFSET. Read from /proc/self/maps; 4096 when there is no stack line.
+     */
     fun addressSpaceLimitMb(): Long = runCatching {
         java.io.File("/proc/self/maps").useLines { limitFromMaps(it) }
     }.getOrNull() ?: ADDRESS_SPACE_4GB_MB
@@ -91,8 +105,9 @@ object BufferSizing {
     internal fun limitFromMaps(lines: Sequence<String>): Long? {
         val stack = lines.firstOrNull { it.trimEnd().endsWith("[stack]") } ?: return null
         val end = stack.substringBefore(' ').substringAfter('-').toLongOrNull(16) ?: return null
-        val gbs = (end + GB - 1) / GB
-        return (gbs * 1024).coerceIn(1024L, ADDRESS_SPACE_4GB_MB)
+        val step = 16L * 1024 * 1024
+        val rounded = ((end + step - 1) / step) * step
+        return (rounded / (1024L * 1024L)).coerceIn(1024L, ADDRESS_SPACE_4GB_MB)
     }
 
     fun isSmallBox(totalMem: Long): Boolean = totalMem <= 0L || totalMem < SMALL_BOX_RAM_BYTES

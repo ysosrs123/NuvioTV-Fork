@@ -89,6 +89,7 @@ class BufferMemoryKeeperTest {
         swapFreeMb = { swapFree },
         addressSpaceUsedMb = { addressSpaceMb },
         addressSpaceCeilingMb = { ceilingMb32 },
+        addressSpaceLimitMb = { limitMb32 },
         addressMemo = AddressSpaceMemo(),
         floorBytes = floorMb * mb,
         oneGbBox = oneGbBox,
@@ -108,6 +109,7 @@ class BufferMemoryKeeperTest {
 
     private var addressSpaceMb: Long? = null
     private var ceilingMb32 = 3_300L
+    private var limitMb32 = 4_096L
 
     private fun take(megabytes: Long): List<Allocation> =
         List((megabytes * mb / segment).toInt()) { allocator.allocate() }
@@ -222,14 +224,15 @@ class BufferMemoryKeeperTest {
         giveBack(held.drop(held.size / 10))
         addressSpaceMb = 2_700L
         k.tendAddressSpace()
-        val limitMb = 3_300L + BufferSizing.ADDRESS_SPACE_SPARE_32BIT_MB
+        val limitMb = limitMb32
         val growthMb = k.roomCapBytes / mb - 100L
         assertTrue(2_700L + growthMb <= limitMb - BufferMemoryKeeper.ADDRESS_SPACE_HARD_SPARE_MB)
     }
 
     @Test
     fun `a box with 3 GB of address space keeps its spare below 3 GB`() {
-        ceilingMb32 = BufferSizing.ADDRESS_SPACE_4GB_MB - 1_024L - BufferSizing.ADDRESS_SPACE_SPARE_32BIT_MB
+        ceilingMb32 = BufferSizing.addressSpaceCeilingMb(3_072L)
+        limitMb32 = 3_072L
         addressSpaceMb = 2_914L
         val k = keeper(customControl(budgetMb = 1_000))
         k.attach()
@@ -794,6 +797,7 @@ class BufferMemoryKeeperTest {
         g.check()
         assertEquals(70 * mb, lc.uncappedBudgetBytes)
     }
+
     @Test
     fun `a warning the box's own numbers do not confirm only gives idle memory back`() {
         fireOs = true
@@ -1126,6 +1130,103 @@ class BufferMemoryKeeperTest {
         assertEquals(-1L, k.warningCapBytes)
         assertEquals(-1L, k.effectiveCapBytes())
         assertEquals(1, memoryWarnings)
+    }
+
+    @Test
+    fun `a hand-set size gets no address-space room cap while it is far from the limit`() {
+        addressSpaceMb = 3_500L
+        val lc = customControl(budgetMb = 400)
+        val k = keeper(lc, budgetManaged = false)
+        take(60)
+        k.tendAddressSpace()
+        assertEquals(-1L, k.roomCapBytes)
+        assertEquals(-1L, k.effectiveCapBytes())
+        assertEquals((400 * mb).toInt(), lc.allocatorTargetBytes())
+    }
+
+    @Test
+    fun `a hand-set size gets no paused cap`() {
+        val lc = customControl(budgetMb = 400)
+        val k = keeper(lc, budgetManaged = false)
+        playingNow = false
+        k.onPlayingChanged(false)
+        free = BufferSizing.FreeMemory(170 * mb, 130 * mb, false)
+        take(50)
+        k.check(playing = false)
+        assertEquals(-1L, k.pausedCapBytes)
+        assertEquals(-1L, k.effectiveCapBytes())
+        assertEquals(0, memoryWarnings)
+    }
+
+    @Test
+    fun `a hand-set size still lends memory to speed-up downloads`() {
+        val k = keeper(customControl(budgetMb = 400), budgetManaged = false)
+        take(60)
+        k.setLendFloorBytes(150 * mb)
+        k.setLentBytes(48 * mb)
+        assertEquals(352 * mb, k.effectiveCapBytes())
+    }
+
+    @Test
+    fun `a hand-set size is trimmed at the failsafe spare above the real limit`() {
+        addressSpaceMb = 4_046L
+        val lc = customControl(budgetMb = 200)
+        val k = keeper(lc, budgetManaged = false, floorMb = 50)
+        take(80)
+        k.tendAddressSpace()
+        assertEquals(50 * mb, k.roomCapBytes)
+        assertTrue(allocator.availableBytes <= BufferMemoryKeeper.KEEP_IDLE_BYTES)
+    }
+
+    @Test
+    fun `a hand-set size far under the failsafe spare is capped where the limit allows`() {
+        addressSpaceMb = 3_950L
+        val lc = customControl(budgetMb = 200)
+        val k = keeper(lc, budgetManaged = false, floorMb = 50)
+        take(80)
+        k.tendAddressSpace()
+        assertEquals(126 * mb, k.roomCapBytes)
+    }
+
+    @Test
+    fun `a hand-set size with room under the failsafe keeps no room cap`() {
+        addressSpaceMb = 3_000L
+        val lc = customControl(budgetMb = 200)
+        val k = keeper(lc, budgetManaged = false)
+        take(80)
+        k.tendAddressSpace()
+        assertEquals(-1L, k.roomCapBytes)
+    }
+
+    @Test
+    fun `a warning on a hand-set size does not reset the critical-cut restore timer`() {
+        addressSpaceMb = 3_000L
+        val lc = customControl(budgetMb = 100)
+        val k = keeper(lc, budgetManaged = false)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, k.pressureLevel)
+        free = BufferSizing.FreeMemory(474 * mb, 144 * mb, false)
+        now += 50_000L
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, k.pressureLevel)
+        free = BufferSizing.FreeMemory(200 * mb, 130 * mb, false)
+        now += BufferMemoryKeeper.RESTORE_QUIET_MS - 49_000L
+        k.check()
+        assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
+        assertEquals((100 * mb).toInt(), lc.allocatorTargetBytes())
+    }
+
+    @Test
+    fun `turning Managed off lifts an address-space cap at once`() {
+        addressSpaceMb = 3_500L
+        val lc = customControl(budgetMb = 300)
+        val k = keeper(lc)
+        take(60)
+        k.tendAddressSpace()
+        assertEquals(50 * mb, k.roomCapBytes)
+        k.setBudgetManaged(false)
+        assertEquals(-1L, k.roomCapBytes)
+        assertEquals(-1L, k.effectiveCapBytes())
     }
 
     @Test
