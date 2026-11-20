@@ -214,7 +214,7 @@ class BufferMemoryKeeperTest {
     }
 
     @Test
-    fun `the buffer never grows into the last 300 MB under the limit`() {
+    fun `the buffer never grows into the hard spare under the limit`() {
         ceilingMb32 = 3_300L
         addressSpaceMb = 3_000L
         val lc = customControl(budgetMb = 1_200)
@@ -1134,7 +1134,7 @@ class BufferMemoryKeeperTest {
 
     @Test
     fun `a hand-set size gets no address-space room cap while it is far from the limit`() {
-        addressSpaceMb = 3_500L
+        addressSpaceMb = 3_400L
         val lc = customControl(budgetMb = 400)
         val k = keeper(lc, budgetManaged = false)
         take(60)
@@ -1180,7 +1180,7 @@ class BufferMemoryKeeperTest {
 
     @Test
     fun `a hand-set size far under the failsafe spare is capped where the limit allows`() {
-        addressSpaceMb = 3_950L
+        addressSpaceMb = 3_762L
         val lc = customControl(budgetMb = 200)
         val k = keeper(lc, budgetManaged = false, floorMb = 50)
         take(80)

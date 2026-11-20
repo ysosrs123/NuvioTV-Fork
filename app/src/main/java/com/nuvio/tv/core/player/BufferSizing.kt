@@ -46,10 +46,16 @@ object BufferSizing {
      */
     const val ADDRESS_SPACE_SPARE_MB_PER_4GB = 796L
     const val ADDRESS_SPACE_4GB_MB = 4_096L
+    /** The least spare on any limit: a 2 GB split scales to about 400 MB, too little to start threads reliably. */
+    const val ADDRESS_SPACE_MIN_SPARE_MB = 512L
 
-    /** The spare under a limit of [limitMb]: [ADDRESS_SPACE_SPARE_MB_PER_4GB] per 4096 MB, rounded to whole MB. */
+    /**
+     * The spare under a limit of [limitMb]: [ADDRESS_SPACE_SPARE_MB_PER_4GB] per 4096 MB, rounded to whole MB, and
+     * never under [ADDRESS_SPACE_MIN_SPARE_MB].
+     */
     fun addressSpaceSpareMb(limitMb: Long): Long =
-        (limitMb * ADDRESS_SPACE_SPARE_MB_PER_4GB + ADDRESS_SPACE_4GB_MB / 2) / ADDRESS_SPACE_4GB_MB
+        ((limitMb * ADDRESS_SPACE_SPARE_MB_PER_4GB + ADDRESS_SPACE_4GB_MB / 2) / ADDRESS_SPACE_4GB_MB)
+            .coerceAtLeast(ADDRESS_SPACE_MIN_SPARE_MB)
 
     /** The buffer stops growing once the process uses this much of a [limitMb] limit. */
     fun addressSpaceCeilingMb(limitMb: Long): Long = limitMb - addressSpaceSpareMb(limitMb)

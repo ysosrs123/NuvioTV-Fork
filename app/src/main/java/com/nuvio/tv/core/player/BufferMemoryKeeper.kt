@@ -410,7 +410,7 @@ class BufferMemoryKeeper(
     /**
      * A 32-bit process has 3 or 4 GB of address space for everything; the buffer may only take what is left under
      * [BufferSizing.addressSpaceCeiling32BitMb], whatever the box's RAM, plus what it gave back and can fill again.
-     * A size set by hand is only trimmed when the process comes within [ADDRESS_SPACE_FAILSAFE_SPARE_MB] of the limit.
+     * A size set by hand is only trimmed when the process comes within [ADDRESS_SPACE_HARD_SPARE_MB] of the limit.
      */
     internal fun tendAddressSpace() {
         if (detached) return
@@ -420,7 +420,7 @@ class BufferMemoryKeeper(
         val held = control.bufferAllocator.totalBytesAllocated.toLong()
         if (!budgetManaged) {
             val limitMb = addressSpaceLimitMb()
-            val cap = (held + (limitMb - ADDRESS_SPACE_FAILSAFE_SPARE_MB - usedMb) * MB)
+            val cap = (held + (limitMb - ADDRESS_SPACE_HARD_SPARE_MB - usedMb) * MB)
                 .coerceIn(minOf(budget, floorBytes), budget)
             val next = if (cap >= budget) -1L else cap
             if (next == roomCapBytes) return
@@ -691,10 +691,11 @@ class BufferMemoryKeeper(
         /** 256 allocations of 64 KB per step. */
         const val TRIM_STEP_BYTES = 16 * 1024 * 1024
         private const val MAX_TRIM_STEPS = 256
-        /** Thread stacks and decoders always keep this much under the real limit, whatever the buffer gave back. */
-        internal const val ADDRESS_SPACE_HARD_SPARE_MB = 300L
-        /** A hand-set size is only trimmed when the process comes this close to the real address-space limit. */
-        internal const val ADDRESS_SPACE_FAILSAFE_SPARE_MB = 100L
+        /**
+         * Thread stacks and decoders always keep this much under the real limit, whatever the buffer gave back. A
+         * hand-set size is trimmed only once the process comes this close to the limit.
+         */
+        internal const val ADDRESS_SPACE_HARD_SPARE_MB = 288L
     }
 }
 

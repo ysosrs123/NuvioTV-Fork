@@ -328,4 +328,14 @@ class BufferSizingTest {
         assertEquals(3_300L, BufferSizing.addressSpaceCeilingMb(4_096L))
         assertEquals(2_256L, BufferSizing.addressSpaceCeilingMb(2_800L))
     }
+
+    @Test
+    fun `the address-space spare never drops under 512 MB`() {
+        assertEquals(512L, BufferSizing.addressSpaceSpareMb(2_032L))
+        assertEquals(1_520L, BufferSizing.addressSpaceCeilingMb(2_032L))
+        assertEquals(512L, BufferSizing.addressSpaceSpareMb(1_024L))
+        assertEquals(512L, BufferSizing.addressSpaceCeilingMb(1_024L))
+        assertEquals(512L, BufferSizing.addressSpaceSpareMb(2_634L))
+        assertEquals(513L, BufferSizing.addressSpaceSpareMb(2_640L))
+    }
 }
