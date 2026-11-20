@@ -312,9 +312,30 @@ class BufferSizingTest {
             stack,
             "ffff0000-ffff1000 r-xp 00000000 00:00 0                                  [vectors]",
         ))
-        assertEquals(3_072L, limit("be8d2000-be8f3000 rw-p 00000000 00:00 0                                  [stack]"))
+        assertEquals(2_800L, limit("be8d2000-af000000 rw-p 00000000 00:00 0                                  [stack]"))
+        assertEquals(2_800L, limit("be8d2000-aef2c000 rw-p 00000000 00:00 0                                  [stack]"))
+        assertEquals(3_056L, limit("be8d2000-be8f3000 rw-p 00000000 00:00 0                                  [stack]"))
+        assertEquals(2_032L, limit("7e9f0000-7ea11000 rw-p 00000000 00:00 0                                  [stack]"))
         assertEquals(4_096L, limit("ff8cf000-ff8f0000 rw-p 00000000 00:00 0                                  [stack]"))
-        assertEquals(2_048L, limit("7e9f0000-7ea11000 rw-p 00000000 00:00 0                                  [stack]"))
         assertEquals(null, BufferSizing.limitFromMaps(sequenceOf("ffff0000-ffff1000 r-xp 00000000 00:00 0 [vectors]")))
+    }
+
+    @Test
+    fun `the address-space spare is scaled from the 3300 MB of 4096 MB rule`() {
+        assertEquals(796L, BufferSizing.addressSpaceSpareMb(4_096L))
+        assertEquals(544L, BufferSizing.addressSpaceSpareMb(2_800L))
+        assertEquals(594L, BufferSizing.addressSpaceSpareMb(3_056L))
+        assertEquals(3_300L, BufferSizing.addressSpaceCeilingMb(4_096L))
+        assertEquals(2_256L, BufferSizing.addressSpaceCeilingMb(2_800L))
+    }
+
+    @Test
+    fun `the address-space spare never drops under 512 MB`() {
+        assertEquals(512L, BufferSizing.addressSpaceSpareMb(2_032L))
+        assertEquals(1_520L, BufferSizing.addressSpaceCeilingMb(2_032L))
+        assertEquals(512L, BufferSizing.addressSpaceSpareMb(1_024L))
+        assertEquals(512L, BufferSizing.addressSpaceCeilingMb(1_024L))
+        assertEquals(512L, BufferSizing.addressSpaceSpareMb(2_634L))
+        assertEquals(513L, BufferSizing.addressSpaceSpareMb(2_640L))
     }
 }

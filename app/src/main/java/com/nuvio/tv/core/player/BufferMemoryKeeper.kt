@@ -27,7 +27,7 @@ class BufferMemoryKeeper(
     /** MB of address space the process uses on a 32-bit box ([BufferSizing.addressSpaceUsedMbOn32Bit]); null on 64-bit. */
     private val addressSpaceUsedMb: () -> Long? = { null },
     private val addressSpaceCeilingMb: () -> Long = { BufferSizing.addressSpaceCeiling32BitMb },
-    private val addressSpaceLimitMb: () -> Long = { addressSpaceCeilingMb() + BufferSizing.ADDRESS_SPACE_SPARE_32BIT_MB },
+    private val addressSpaceLimitMb: () -> Long = { BufferSizing.addressSpaceLimit32BitMb },
     private val addressMemo: AddressSpaceMemo = AddressSpaceMemo(),
     /** The least a pressure cut or the lending leaves; [BufferSizing.sizedFloorMb]. */
     floorBytes: Long = BufferSizing.MIN_SIZED_BUFFER_MB * MB,
@@ -155,6 +155,7 @@ class BufferMemoryKeeper(
      * (one cut per burst, never below the warning floor) and stays smaller for [WARNING_COOL_DOWN_MS].
      */
     private fun stepDownForWarning(level: Int) {
+        if (!budgetManaged) return
         val now = clock()
         val inBurst = warningInBurst(now, lastWarningAtMs)
         lastWarningAtMs = now
@@ -163,7 +164,6 @@ class BufferMemoryKeeper(
             grownBytes = 0L
             control.setGrowthBytes(0L)
         }
-        if (!budgetManaged) return
         if (inBurst) {
             trimIdle(null)
             return
@@ -229,6 +229,10 @@ class BufferMemoryKeeper(
         if (detached || enabled == budgetManaged) return
         budgetManaged = enabled
         worker.run {
+            if (!budgetManaged && pausedCapBytes >= 0L) {
+                pausedCapBytes = -1L
+                applyTarget()
+            }
             if (!budgetManaged && warningCapBytes >= 0L) {
                 warningCapBytes = -1L
                 applyTarget()
@@ -238,6 +242,7 @@ class BufferMemoryKeeper(
                 applyTarget()
                 Log.i(TAG, "BUFFER_MEMORY: pressure lifted level=0 capMb=${capOrBudgetMb()} managed=false")
             }
+            tendAddressSpace()
         }
     }
 
@@ -405,6 +410,7 @@ class BufferMemoryKeeper(
     /**
      * A 32-bit process has 3 or 4 GB of address space for everything; the buffer may only take what is left under
      * [BufferSizing.addressSpaceCeiling32BitMb], whatever the box's RAM, plus what it gave back and can fill again.
+     * A size set by hand is only trimmed when the process comes within [ADDRESS_SPACE_HARD_SPARE_MB] of the limit.
      */
     internal fun tendAddressSpace() {
         if (detached) return
@@ -412,6 +418,21 @@ class BufferMemoryKeeper(
         val ceilingMb = addressSpaceCeilingMb()
         val budget = control.uncappedBudgetBytes.coerceAtLeast(0L)
         val held = control.bufferAllocator.totalBytesAllocated.toLong()
+        if (!budgetManaged) {
+            val limitMb = addressSpaceLimitMb()
+            val cap = (held + (limitMb - ADDRESS_SPACE_HARD_SPARE_MB - usedMb) * MB)
+                .coerceIn(minOf(budget, floorBytes), budget)
+            val next = if (cap >= budget) -1L else cap
+            if (next == roomCapBytes) return
+            if (next >= 0L && roomCapBytes >= 0L && kotlin.math.abs(next - roomCapBytes) < ROOM_STEP_BYTES) return
+            roomCapBytes = next
+            applyTarget()
+            val freed = if (next >= 0L && held > next) trimIdle(null) else 0L
+            Log.i(TAG, "BUFFER_MEMORY: address space usedMb=$usedMb ceilingMb=$ceilingMb reusableMb=0 " +
+                "roomCapMb=${if (next < 0L) "none" else (next / MB).toString()} budgetMb=${budget / MB} freedMb=${freed / MB} " +
+                "managed=false limitMb=$limitMb")
+            return
+        }
         val reusable = addressMemo.reusableBytes(held, usedMb)
         val roomMb = ceilingMb - usedMb
         val hardRoomMb = addressSpaceLimitMb() - ADDRESS_SPACE_HARD_SPARE_MB - usedMb
@@ -441,6 +462,7 @@ class BufferMemoryKeeper(
             }
             return
         }
+        if (!budgetManaged) return
         if (pausedCapBytes >= 0L || free == null) return
         val roomMb = free.availMb - free.thresholdMb - BufferSizing.SYSTEM_MARGIN_MB
         if (roomMb >= PAUSED_ROOM_MB) return
@@ -669,7 +691,10 @@ class BufferMemoryKeeper(
         /** 256 allocations of 64 KB per step. */
         const val TRIM_STEP_BYTES = 16 * 1024 * 1024
         private const val MAX_TRIM_STEPS = 256
-        /** Thread stacks and decoders always keep this much under the real limit, whatever the buffer gave back. */
+        /**
+         * Thread stacks and decoders always keep this much under the real limit, whatever the buffer gave back. A
+         * hand-set size is trimmed only once the process comes this close to the limit.
+         */
         internal const val ADDRESS_SPACE_HARD_SPARE_MB = 300L
     }
 }
