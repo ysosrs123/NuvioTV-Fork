@@ -695,7 +695,7 @@ class BufferMemoryKeeper(
          * Thread stacks and decoders always keep this much under the real limit, whatever the buffer gave back. A
          * hand-set size is trimmed only once the process comes this close to the limit.
          */
-        internal const val ADDRESS_SPACE_HARD_SPARE_MB = 288L
+        internal const val ADDRESS_SPACE_HARD_SPARE_MB = 300L
     }
 }
 
