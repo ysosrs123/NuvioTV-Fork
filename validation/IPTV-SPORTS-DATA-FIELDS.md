@@ -2319,3 +2319,15 @@ the label, as on 9 October). Trimmed copy (the first six players) in
 | Golf final round suspended before it starts | As above; the event stays `STATUS_IN_PROGRESS`. | None: the event stays live, the golf card says `Round 4`, the leaders show their tee times and the bug `T. Crowe -14` with `Round 4 - Suspended` |
 
 Still unconfirmed: as in the fifty-seventh pass.
+
+## Sixtieth pass (22 November 10:28)
+
+One scheduled capture. The UFC Fight Night (12 bouts) had finished before the run; every bout had
+its `Unofficial Winner` row (three KO/TKO, one submission, eight decisions), so whether any method
+arrived late cannot be told. It was the last UFC card before 30 November. The RSM Classic was
+suspended in its third round (`Round 3 - Suspended`, as at Bermuda and Austin); the CME Group Tour
+Championship was `Round 3 - Play Complete`. MLS playoffs and NHL as before. No parser change.
+
+Still unconfirmed: AFL/NRL live clock (off season); a golf playoff in progress. Dropped: the UFC
+finish method arriving later for a bout first posted without one (on 18 October three never got
+one within four hours; every bout since had its method at once; no card left before 30 November).

@@ -162,6 +162,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 106 (16 November 12:28): Austin moved to `Round 4 - Suspended` before anyone teed
     off; the app shows the round-4 tee times under the suspended status (fixture and a test only).
   - Capture 107 (16 November 14:28): nothing new.
+  - Capture 108 (22 November 10:28): nothing new. The UFC Fight Night (the last card before 30
+    November) had finished with every method posted; the UFC item was dropped and the runs cut to
+    Monday 10:27.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -459,13 +462,17 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; the US slots moved an hour later on 1 November and the European ones
   on 25 October.
-  - A UFC method posted later (cards end on Sunday mornings Brisbane; none in four full cards, the
-    last UFC 334 on 15 November; one more before 30 November, a Fight Night on the 22nd):
-    Sundays 10:27, 12:27, 14:27 (`IPTV capture – daily US evening`, cut to Sundays and Mondays on
-    10 November; daily from 1 November; 09:27, 11:27, 13:27 before).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
-    on 27 October): US final rounds end about 09:00 to 11:00 Brisbane on Monday, so the daily
-    10:27 slot (the Monday 12:27 and 14:27 runs come with the Sunday hours in one schedule).
+    on 27 October): US final rounds end about 09:00 to 11:00 Brisbane on Monday, so Monday 10:27
+    (`IPTV capture – daily US evening`, cut to Monday 10:27 on 22 November; Sundays and Mondays
+    10:27, 12:27, 14:27 from 10 November; daily from 1 November). The last US events before 30
+    November (RSM Classic, CME Group Tour Championship) end on Monday 23 November; none the week
+    after.
+  - Dropped: a UFC method posted after the result (on 18 October three finishes never got one
+    within four hours; every bout on the cards since had its method at once; the last card
+    before 30 November, Fight Night on 22 November, had finished with every method before the
+    10:28 run).
+    The Sunday runs and the Monday 12:27 and 14:27 runs were dropped on 22 November.
   - Done: an NHL shootout in progress on the scoreboard (10 November 15:51, San Jose–Islanders,
     `In SO`; the shootout in the summary on 3 November). The daily runs were cut to Sundays and
     Mondays: nothing left needs Tuesday to Saturday.
