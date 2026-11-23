@@ -2331,3 +2331,14 @@ Championship was `Round 3 - Play Complete`. MLS playoffs and NHL as before. No p
 Still unconfirmed: AFL/NRL live clock (off season); a golf playoff in progress. Dropped: the UFC
 finish method arriving later for a bout first posted without one (on 18 October three never got
 one within four hours; every bout since had its method at once; no card left before 30 November).
+
+## Sixty-first pass (23 November 10:28)
+
+One scheduled capture, the last. The CME Group Tour Championship finished without a playoff
+(Thitikul by two). The RSM Classic was `Round 3 - Play Complete` with its final round on the US
+Monday, overnight Brisbane. NFL, NBA, NHL, MLS playoffs and women's college basketball as before.
+No parser change.
+
+Still unconfirmed: AFL/NRL live clock (off season until March); a golf playoff in progress (no
+US event left that ends in a capture slot before 30 November). Neither can be captured before 30
+November, so the scheduled captures stop here.

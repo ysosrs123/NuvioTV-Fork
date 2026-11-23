@@ -165,6 +165,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 108 (22 November 10:28): nothing new. The UFC Fight Night (the last card before 30
     November) had finished with every method posted; the UFC item was dropped and the runs cut to
     Monday 10:27.
+  - Capture 109 (23 November 10:28): nothing new; the CME ended without a playoff and the RSM
+    Classic finishes overnight Brisbane. Captures stopped (stop rule).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -441,6 +443,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
   capture as below and push fixes. The user relaxed the key rule for this only: the key lives
   in the environment as `THESPORTSDB_KEY` (set by the user); it must still never be written to
   the repository, docs, fixtures, logs or chat, and every saved file is scrubbed.
+  Stopped on 23 November (stop rule: nothing left on the "Still unconfirmed" list that a capture
+  could show before 30 November): `IPTV capture – daily US evening` disabled, not deleted; every
+  other `IPTV capture` task was already disabled. Open batch 7ae (eight app changes) was never
+  closed by a run, since none fell after 18:00: close it from the main session.
 - The capture script (revised 18 October, user request: capture everything) reads every
   league the app offers from `SportsFixtures.kt`, adds every other league ESPN lists for 17
   sports (`/leagues/dropdown`, about 350 leagues in all; `sports.core.api.espn.com` is not
@@ -462,12 +468,11 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; the US slots moved an hour later on 1 November and the European ones
   on 25 October.
-  - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
-    on 27 October): US final rounds end about 09:00 to 11:00 Brisbane on Monday, so Monday 10:27
-    (`IPTV capture – daily US evening`, cut to Monday 10:27 on 22 November; Sundays and Mondays
-    10:27, 12:27, 14:27 from 10 November; daily from 1 November). The last US events before 30
-    November (RSM Classic, CME Group Tour Championship) end on Monday 23 November; none the week
-    after.
+  - Dropped: a golf playoff in progress (a finished playoff was seen on 27 October). The CME
+    Group Tour Championship ended on 23 November without one; the RSM Classic, delayed by weather,
+    plays its final round on the US Monday (overnight Brisbane, outside every slot); no US event
+    the week after. `IPTV capture – daily US evening` (Monday 10:27 since 22 November) disabled on
+    23 November: nothing left in the plan.
   - Dropped: a UFC method posted after the result (on 18 October three finishes never got one
     within four hours; every bout on the cards since had its method at once; the last card
     before 30 November, Fight Night on 22 November, had finished with every method before the
