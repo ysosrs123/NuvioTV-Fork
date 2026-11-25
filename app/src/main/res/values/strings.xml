@@ -4172,7 +4172,7 @@
     <string name="debrid_cached_playback_links">Reuse cached playback links</string>
     <string name="debrid_cached_playback_links_description">Reuse links already resolved during playback. New links are resolved only after choosing a source, or shortly before an episode ends when seek thumbnails prepare the next one.</string>
     <string name="dv7_mode_native_fel">Native DV7 FEL/MEL (Amlogic)</string>
-    <string name="dv7_mode_native_fel_desc">Needs a Ugoos AM9 Pro running a custom FEL kernel, which is not available yet. On any other device it behaves like Auto.</string>
+    <string name="dv7_mode_native_fel_desc">Needs a Ugoos AM9 Pro running a custom FEL kernel, or a rooted Fire TV Cube 3 with the Fire TV AV Magisk module. On any other device it behaves like Auto.</string>
     <string name="stream_test_parallel_scope">%1$.1f MiB / %2$.2f s measured · %3$.1f MiB total payload</string>
     <string name="stream_test_parallel_scope_detail">Warm-up excluded. Response payload only; total network traffic can be higher. Maximum 72 MiB or 20 seconds per cell. Very short samples are unavailable.</string>
     <string name="diagnostic_run_timed_out">The comparison hit its two-minute limit, so the results are incomplete and there\'s no recommendation.</string>

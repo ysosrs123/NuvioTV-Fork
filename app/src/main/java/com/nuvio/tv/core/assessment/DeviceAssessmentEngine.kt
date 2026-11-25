@@ -847,7 +847,8 @@ object DeviceAssessmentEngine {
      * "corrected" to Auto either: the saved choice is what enables the native path once a FEL-capable kernel boots.
      */
     private fun nativeFelChosenAndUsable(mode: Dv7HandlingMode): Boolean =
-        mode == Dv7HandlingMode.NATIVE_FEL && com.nuvio.tv.core.player.amlfel.AmlFelSupport.isDeviceUsable()
+        mode == Dv7HandlingMode.NATIVE_FEL && (com.nuvio.tv.core.player.amlfel.AmlFelSupport.isDeviceUsable() ||
+            com.nuvio.tv.core.player.firetvfel.FireTvFel.availableOnce())
 
     private fun dv7ModeLabel(context: Context, mode: Dv7HandlingMode): String = when (mode) {
         Dv7HandlingMode.AUTO -> context.getString(R.string.assessment_value_auto)

@@ -1,0 +1,12 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
+/* the dvfel kernel module for Amlogic SC2 (S905X4), embedded (dvfp_module_install) */
+	.section .rodata.dvfp_ko_sc2, "a"
+	.balign 16
+	.global dvfp_ko_sc2_start
+	.hidden dvfp_ko_sc2_start
+dvfp_ko_sc2_start:
+	.incbin "@DVFEL_KO_SC2@"
+	.global dvfp_ko_sc2_end
+	.hidden dvfp_ko_sc2_end
+dvfp_ko_sc2_end:
+	.section .note.GNU-stack, "", %progbits
