@@ -121,3 +121,27 @@ target_compile_features(nuviothumb PRIVATE cxx_std_17)
 target_compile_options(nuviothumb PRIVATE -O2 -Wall -Wextra -Wno-deprecated-declarations -Wno-unused-parameter)
 target_link_options(nuviothumb PRIVATE "-Wl,-z,max-page-size=16384")
 target_link_libraries(nuviothumb ${log-lib} ${jnigraphics-lib} dl m)
+
+# Fire TV Cube 3 (AFTGAZL) native Dolby Vision Profile 7 FEL through the Fire TV AV Magisk module's
+# /dev/dvfel interface (core/player/firetvfel). Ported from Wholphin FEL (signde/Wholphin) and
+# libdvfelplay (signde/vlc-fel-android), both GPL-2.0-or-later. Cube 3 runs a 32-bit userspace, so only
+# armeabi-v7a gets these libraries; every other ABI skips them and the Kotlin side stays inactive.
+option(FIRETV_FEL_NATIVE_ENABLED "Build the Fire TV Cube 3 FEL bridge" ON)
+if(FIRETV_FEL_NATIVE_ENABLED AND ANDROID_ABI STREQUAL "armeabi-v7a")
+    get_filename_component(_firetvfel_repo_root "${CMAKE_CURRENT_LIST_DIR}/../../../.." ABSOLUTE)
+    set(LIBDOVI_DIR "${_firetvfel_repo_root}/DV7/libdovi/android-armeabi-v7a" CACHE PATH "" FORCE)
+    set(DVFP_BUILD_TEST OFF CACHE BOOL "" FORCE)
+    add_subdirectory(firetvfel/dvfelplay)
+    # The app's minSdk is 24; libdvfelplay calls a few API 26 NDK functions. They are only ever
+    # reached on the Cube 3 (Fire OS 7, API 28), so declare them weak instead of raising minSdk.
+    if(ANDROID_PLATFORM_LEVEL LESS 26)
+        target_compile_definitions(dvfelplay PRIVATE __ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__)
+        target_compile_options(dvfelplay PRIVATE -Wno-unguarded-availability)
+    endif()
+    add_library(nuviofiretvfel SHARED firetvfel/nuvio_firetv_fel.cpp)
+    target_include_directories(nuviofiretvfel PRIVATE "${CMAKE_CURRENT_LIST_DIR}/firetvfel")
+    target_compile_features(nuviofiretvfel PRIVATE cxx_std_17)
+    target_link_libraries(nuviofiretvfel PRIVATE dvfelplay ${log-lib})
+    target_link_options(nuviofiretvfel PRIVATE "-Wl,-z,max-page-size=16384")
+    message(STATUS "Fire TV Cube 3 FEL bridge enabled for ABI=${ANDROID_ABI}")
+endif()

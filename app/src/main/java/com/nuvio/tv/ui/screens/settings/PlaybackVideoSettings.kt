@@ -244,7 +244,7 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 
-/** Native FEL only works on the AM9 FEL kernel. Elsewhere a saved choice plays as Auto, so it shows as Auto and stays saved. */
+/** Native FEL only works on the AM9 FEL kernel or a Fire TV Cube 3 with the Fire TV AV module. Elsewhere a saved choice plays as Auto, so it shows as Auto and stays saved. */
 internal fun dv7ModeShown(saved: Dv7HandlingMode, nativeFelUsable: Boolean?): Dv7HandlingMode =
     if (saved == Dv7HandlingMode.NATIVE_FEL && nativeFelUsable == false) Dv7HandlingMode.AUTO else saved
 
@@ -266,7 +266,10 @@ private fun rememberDvOutputRowShown(): Boolean {
 @Composable
 private fun rememberNativeFelUsable(): Boolean? {
     val usable by produceState(initialValue = AmlFelSupport.nativeFelUsableCached()) {
-        if (value == null) value = withContext(Dispatchers.IO) { AmlFelSupport.nativeFelUsableOnce() }
+        if (value == null) value = withContext(Dispatchers.IO) {
+            // Fire TV Cube 3 with the Fire TV AV module, or the AM9 FEL kernel.
+            com.nuvio.tv.core.player.firetvfel.FireTvFel.availableOnce() || AmlFelSupport.nativeFelUsableOnce()
+        }
     }
     return usable
 }

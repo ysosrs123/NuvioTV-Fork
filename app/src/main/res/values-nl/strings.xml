@@ -3929,7 +3929,7 @@
     <string name="debrid_cached_playback_links">Opgeslagen afspeellinks hergebruiken</string>
     <string name="debrid_cached_playback_links_description">Hergebruik links die tijdens het afspelen al zijn opgehaald. Nieuwe links worden pas opgehaald na het kiezen van een bron, of vlak voor het einde van een aflevering, wanneer de miniaturen bij spoelen de volgende voorbereiden.</string>
     <string name="dv7_mode_native_fel">Native DV7 FEL/MEL (Amlogic)</string>
-    <string name="dv7_mode_native_fel_desc">Vereist een Ugoos AM9 Pro met een aangepaste FEL-kernel, die nog niet beschikbaar is. Op elk ander apparaat werkt het als Automatisch.</string>
+    <string name="dv7_mode_native_fel_desc">Vereist een Ugoos AM9 Pro met een aangepaste FEL-kernel, of een geroote Fire TV Cube 3 met de Magisk-module Fire TV AV. Op elk ander apparaat werkt het als Automatisch.</string>
     <string name="stream_test_parallel_scope">%1$.1f MiB / %2$.2f s gemeten · %3$.1f MiB payload in totaal</string>
     <string name="stream_test_parallel_scope_detail">Zonder opwarmen. Alleen de payload van de respons; het totale netwerkverkeer kan hoger zijn. Maximaal 72 MiB of 20 seconden per cel. Zeer korte steekproeven zijn niet beschikbaar.</string>
     <string name="diagnostic_run_timed_out">De vergelijking heeft de limiet van twee minuten bereikt, dus de resultaten zijn onvolledig en er is geen advies.</string>
